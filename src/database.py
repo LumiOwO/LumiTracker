@@ -1,5 +1,6 @@
 from annoy import AnnoyIndex
 from PIL import Image
+import numpy as np
 import imagehash
 
 import time
@@ -8,7 +9,7 @@ import os
 from pathlib import Path
 
 class cfg:
-    DEBUG               = True
+    DEBUG               = False
     debug_dir           = "temp"
 
     # file paths
@@ -21,18 +22,25 @@ class cfg:
 
     # feature extraction
     hash_size           = 8
-    threshold           = 10
+    threshold           = 18
     ann_metric          = "hamming"   # ["angular", "euclidean", "manhattan", "hamming", "dot"]
     ann_n_trees         = 10
+    ann_index_len       = hash_size * hash_size * 2
 
-    # card info
-    event_card_size     = (420, 720)
 
 # Only accept PIL Image with RGB format
 def ExtractFeature(image: Image):
-    feature = imagehash.dhash(image, hash_size=cfg.hash_size)
-    feature = feature.hash.flatten()
-    # print(feature)
+    # use dhash + ahash for better robustness
+    feature1 = imagehash.dhash(image, hash_size=cfg.hash_size)
+    feature1 = feature1.hash.flatten()
+
+    feature2 = imagehash.average_hash(image, hash_size=cfg.hash_size)
+    feature2 = feature2.hash.flatten()
+
+    feature = np.append(feature1, feature2)
+    # feature = np.append(feature1, np.zeros_like(feature1))
+    # feature = feature2
+    # print(feature.shape)
 
     return feature
 
@@ -87,10 +95,13 @@ class Database:
         self.data["events"] = events
 
         if cfg.DEBUG:
+            image_file = events[211]["filename"]
+            image = Image.open(os.path.join(event_cards_dir, image_file))
+            image = Image.alpha_composite(image, border)
             image.save(os.path.join(cfg.debug_dir, image_file))
             print(f"save {image_file} at {cfg.debug_dir}")
 
-        ann = AnnoyIndex(cfg.hash_size * cfg.hash_size, cfg.ann_metric)
+        ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         for i in range(len(features)):
             ann.add_item(i, features[i])
         ann.build(cfg.ann_n_trees)
@@ -104,10 +115,14 @@ class Database:
             image_files = sorted(image_files)
             for file in image_files:
                 image = Image.open(os.path.join(test_dir, file)).convert("RGBA")
+                begin_time = time.time()
 
                 my_feature = ExtractFeature(image.convert("RGB"))
                 my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=10, include_distances=True)
-                print(my_ids)
+
+                dt = time.time() - begin_time
+                print(dt)
+                # print(my_ids)
                 print(my_dists)
                 found_name = events[my_ids[0]]['name_CN'] if my_dists[0] <= cfg.threshold else "None"
                 print(f"{file}: {found_name}")
@@ -115,7 +130,7 @@ class Database:
             # save last one
             for i, card_id in enumerate(my_ids):
                 image = Image.open(os.path.join(event_cards_dir, events[card_id]["filename"]))
-                image.save(f"temp/found{i}.png")
+                image.save(os.path.join(cfg.debug_dir, f"found{i}.png"))
 
 
     def Update(self):
@@ -125,7 +140,7 @@ class Database:
             json.dump(self.data, f, indent=2, ensure_ascii=False)
     
     def Load(self):
-        self.events_ann = AnnoyIndex(cfg.hash_size * cfg.hash_size, cfg.ann_metric)
+        self.events_ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         self.events_ann.load(os.path.join(cfg.database_dir, cfg.events_ann_filename))
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), encoding='utf-8') as f:

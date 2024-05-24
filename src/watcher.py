@@ -1,4 +1,5 @@
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
+import os
 import time
 import psutil
 import win32gui
@@ -8,12 +9,11 @@ from PIL import Image
 
 from .database import cfg, ExtractFeature, Database
 
-def ExtractFrameFeature(frame: Frame, size=None):
+def ExtractFrameFeature(frame: Frame):
     buffer = frame.frame_buffer[:, :, 2::-1] # bgr to rgb
     image  = Image.fromarray(buffer)
-    if size is not None:
-        image = image.resize(size)
-    
+
+    # Note: no resize here, currently good result
     return ExtractFeature(image)
 
 
@@ -29,9 +29,9 @@ class WindowWatcher:
 
         # (y, x), same as screen coordinate
         # namely (width, height)
-        self.event_screen_size = (0.1367, 0.4236)
-        self.my_event_pos      = (0.1230, 0.1736)
-        self.op_event_pos      = (0.7382, 0.1736)
+        self.event_screen_size = (0.1400, 0.4270)
+        self.my_event_pos      = (0.1225, 0.1755)
+        self.op_event_pos      = (0.7380, 0.1755)
 
     def Start(self, title):
         self.db.Load()
@@ -72,26 +72,29 @@ class WindowWatcher:
         my_start_h = int(height * self.my_event_pos[1])
         my_event_frame = frame.crop(my_start_w, my_start_h, my_start_w + event_w, my_start_h + event_h)
 
-        my_feature = ExtractFrameFeature(my_event_frame, size=cfg.event_card_size)
+        my_feature = ExtractFrameFeature(my_event_frame)
         my_id, my_dist = self.db.SearchByFeature(my_feature, card_type="event")
         
         if my_dist <= cfg.threshold:
             print(f"my event: {self.db['events'][my_id].get('name_CN', 'None')}")
             print(my_dist)
-        # my_event_image.save(f"temp/save/image{self._frame_count}.png")
-        # print(f"my event: {self.db["events"][my_ids[0]]['name_CN']}")
+        
 
         # op event
         op_start_w = int(width  * self.op_event_pos[0])
         op_start_h = int(height * self.op_event_pos[1])
         op_event_frame = frame.crop(op_start_w, op_start_h, op_start_w + event_w, op_start_h + event_h)
 
-        op_feature = ExtractFrameFeature(op_event_frame, size=cfg.event_card_size)
+        op_feature = ExtractFrameFeature(op_event_frame)
         op_id, op_dist = self.db.SearchByFeature(op_feature, card_type="event")
         if op_dist <= cfg.threshold:
             print(f"op event: {self.db['events'][op_id].get('name_CN', 'None')}")
         # print(ids)
         # print(distances)
+
+        if cfg.DEBUG:
+            my_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"my_image{self._frame_count}.png"))
+            op_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"op_image{self._frame_count}.png"))
 
         # # Save The Frame As An Image To The Specified Path
         # my_event_frame.save_as_image("image.png")
