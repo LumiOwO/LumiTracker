@@ -3,37 +3,13 @@ from PIL import Image
 import numpy as np
 import imagehash
 
+import logging
 import time
 import json
 import os
 from pathlib import Path
 
-class cfg:
-    DEBUG               = False
-    debug_dir           = "temp"
-
-    # file paths
-    database_dir        = "assets/database"
-    events_ann_filename = "events.ann"
-    db_filename         = "db.json"
-
-    cards_dir           = "cards"
-
-    # feature extraction
-    hash_size           = 8
-    threshold           = 18
-    threshold_strict    = 8
-    ann_metric          = "hamming"   # ["angular", "euclidean", "manhattan", "hamming", "dot"]
-    ann_n_trees         = 10
-    ann_index_len       = hash_size * hash_size * 2
-
-    # (y, x), same as screen coordinate
-    # namely (width, height)
-    start_screen_size = (0.1445, 0.2847) # centered
-    event_screen_size = (0.1400, 0.4270)
-    my_event_pos      = (0.1225, 0.1755)
-    op_event_pos      = (0.7380, 0.1755)
-
+from .config import cfg
 
 # Only accept PIL Image with RGB format
 def ExtractFeature(image: Image):
@@ -114,9 +90,9 @@ class Database:
                     "name_CN"   : infos[2].removesuffix('.png')
                 }
             else:
-                print(f"Failed to load image: {image_path}")
+                logging.error(f"Failed to load image: {image_path}")
 
-        print(f"Loaded {len(features)} images from {event_cards_dir}")
+        logging.info(f"Loaded {len(features)} images from {event_cards_dir}")
         self.data["events"] = events
 
         if cfg.DEBUG:
@@ -124,7 +100,7 @@ class Database:
             image = Image.open(os.path.join(event_cards_dir, image_file))
             image = Image.alpha_composite(image, border)
             image.save(os.path.join(cfg.debug_dir, image_file))
-            print(f"save {image_file} at {cfg.debug_dir}")
+            logging.debug(f"save {image_file} at {cfg.debug_dir}")
 
         ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         for i in range(len(features)):
@@ -146,11 +122,11 @@ class Database:
                 my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=10, include_distances=True)
 
                 dt = time.time() - begin_time
-                print(dt)
-                # print(my_ids)
-                print(my_dists)
+                logging.debug(dt)
+                # logging.debug(my_ids)
+                logging.debug(my_dists)
                 found_name = events[my_ids[0]]['name_CN'] if my_dists[0] <= cfg.threshold else "None"
-                print(f"{file}: {found_name}")
+                logging.debug(f"{file}: {found_name}")
 
             # save last one
             for i, card_id in enumerate(my_ids):

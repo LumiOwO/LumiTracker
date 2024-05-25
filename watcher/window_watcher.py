@@ -1,18 +1,19 @@
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 import os
+import sys
 import time
-import psutil
 import win32api
 import win32con
 import win32print
 import win32gui
-import win32process
+import logging
 
 from types import SimpleNamespace
 
 from PIL import Image
 
-from .database import cfg, Database
+from .config import cfg
+from .database import Database
 from .database import ExtractFeature, FeatureDistance, HashToFeature
 
 def ExtractFrameFeature(frame: Frame):
@@ -40,7 +41,7 @@ class StreamFilter:
             self.value = value
             self.count = 1
 
-        # print(self.count, self.value)
+        # logging.debug(self.count, self.value)
 
         # read
         if self.value != self.null_val and self.count == self.valid_count:
@@ -48,24 +49,18 @@ class StreamFilter:
         else:
             return self.null_val
 
-class WindowInfo:
-    def __init__(self):
-        self.hwnd  = None
-        self.title = ""
-
 class WindowWatcher:
     def __init__(self):
-        self.capture       = None
         self.db            = Database()
-        self.start_feature = None
+        self.db.Load()
+        self.start_feature = HashToFeature(self.db["controls"]["start_hash"])
 
-        self.hwnd          = None
+        self.capture       = None
+        self.hwnd          = 0
         self.border_size   = (0, 0)
         self.window_size   = (0, 0) # border included
         self.client_size   = (0, 0)
 
-        self.SKIP_FRAMES   = 0
-        self.LOG_INTERVAL  = 1
         self.prev_log_time = time.time()
         self.frame_count   = 0
         self.skip_count    = 0
@@ -76,10 +71,9 @@ class WindowWatcher:
         self.filters.game_start = StreamFilter(null_val=False)
 
     def Start(self, hwnd, title):
-        self.hwnd = hwnd
+        logging.info("WindowWatcher start")
 
-        self.db.Load()
-        self.start_feature = HashToFeature(self.db["controls"]["start_hash"])
+        self.hwnd = hwnd
 
         # Every Error From on_closed and on_frame_arrived Will End Up Here
         self.capture = WindowsCapture(
@@ -87,7 +81,6 @@ class WindowWatcher:
             draw_border=False,
             window_name=title,
         )
-
         self.capture.event(self.on_frame_arrived)
         self.capture.event(self.on_closed)
 
@@ -104,7 +97,7 @@ class WindowWatcher:
         # real_h   = win32print.GetDeviceCaps(hDC, win32con.DESKTOPVERTRES)
         # screen_h = win32api.GetSystemMetrics(1)
         scale    = real_w / screen_w
-        # print(scale)
+        # logging.debug(scale)
 
         # Get the client rect (excludes borders and title bar)
         client_rect = win32gui.GetClientRect(self.hwnd)
@@ -116,9 +109,9 @@ class WindowWatcher:
         title_height =  self.window_size[1] - self.client_size[1]
         self.border_size = (left_border, title_height)
 
-        # print(self.window_size)
-        # print(self.client_size)
-        # print(self.border_size)
+        # logging.debug(self.window_size)
+        # logging.debug(self.client_size)
+        # logging.debug(self.border_size)
 
     def DetectGameStart(self, frame):
         start_w = int(self.client_size[0] * cfg.start_screen_size[0])
@@ -132,11 +125,11 @@ class WindowWatcher:
 
         start_feature = ExtractFrameFeature(start_event_frame)
         dist = FeatureDistance(start_feature, self.start_feature)
-        start = (dist <= cfg.threshold_strict)
+        start = (dist <= cfg.threshold)
         start = self.filters.game_start.Filter(start)
         if start:
-            print(f"Game start")
-            print(dist)
+            logging.info(f"Game start")
+            logging.debug(dist)
 
     def DetectEvent(self, frame):
         event_w = int(self.client_size[0] * cfg.event_screen_size[0])
@@ -155,8 +148,8 @@ class WindowWatcher:
         my_id = self.filters.my_event.Filter(my_id)
 
         if my_id >= 0:
-            print(f"my event: {self.db['events'][my_id].get('name_CN', 'None')}")
-            print(my_dist)
+            logging.info(f"my event: {self.db['events'][my_id].get('name_CN', 'None')}")
+            logging.debug(my_dist)
 
         # op event
         op_left = int(self.client_size[0] * cfg.op_event_pos[0]) + self.border_size[0]
@@ -171,8 +164,8 @@ class WindowWatcher:
         op_id = self.filters.op_event.Filter(op_id)
 
         if op_id >= 0:
-            print(f"op event: {self.db['events'][op_id].get('name_CN', 'None')}")
-            print(op_dist)
+            logging.info(f"op event: {self.db['events'][op_id].get('name_CN', 'None')}")
+            logging.debug(op_dist)
 
         if cfg.DEBUG:
             my_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"my_image{self.frame_count}.png"))
@@ -181,14 +174,14 @@ class WindowWatcher:
     # Called Every Time A New Frame Is Available
     def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):
         self.skip_count += 1
-        if self.skip_count <= self.SKIP_FRAMES:
+        if self.skip_count <= cfg.SKIP_FRAMES:
             return
         self.skip_count = 0
 
         self.frame_count += 1
         cur_time = time.time()
-        if cur_time - self.prev_log_time >= self.LOG_INTERVAL:
-            print(f"FPS: {self.frame_count / (cur_time - self.prev_log_time)}")
+        if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
+            logging.info(f"FPS: {self.frame_count / (cur_time - self.prev_log_time)}")
             self.frame_count   = 0
             self.prev_log_time = cur_time
 
@@ -207,64 +200,12 @@ class WindowWatcher:
     # Called When The Capture Item Closes Usually When The Window Closes, Capture
     # Session Will End After This Function Ends
     def on_closed(self):
-        print("Capture Session Closed")
-
-class ProcessWatcher:
-    def __init__(self):
-        self.window_watcher = WindowWatcher()
-        self.process_name   = "YuanShen.exe"
-        self.INTERVAL       = 1
-    
-    def Start(self):
-        while True:
-            info = self.FindProcessWindow()
-            if info.hwnd is not None:
-                self.window_watcher.Start(info.hwnd, info.title)
-            time.sleep(self.INTERVAL)
-    
-    def FindProcessWindow(self):
-        info = WindowInfo()
-        processes = self.GetProcessByName(self.process_name)
-        if not processes:
-            print(f"No process found with name: {self.process_name}")
-        else:
-            for proc in processes:
-                infos = self.GetWindowsByPID(proc.info['pid'])
-                if infos:
-                    info = infos[0]
-                    print(f"Window titles for process '{self.process_name}' (PID: {proc.info['pid']}):")
-                    for i in infos:
-                        print(f"  - {i.title}")
-                else:
-                    print(f"No windows found for process '{self.process_name}' (PID: {proc.info['pid']})")
-        
-        return info
-
-    def GetProcessByName(self, process_name):
-        """Returns a list of processes matching the given process name."""
-        processes = []
-        for proc in psutil.process_iter(['pid', 'name']):
-            if proc.info['name'].lower() == process_name.lower():
-                processes.append(proc)
-        return processes
-
-    def GetWindowsByPID(self, pid):
-        """Returns the window handles (HWNDs) for the given process ID."""
-        def callback(hwnd, titles):
-            _, found_pid = win32process.GetWindowThreadProcessId(hwnd)
-            if found_pid == pid and win32gui.IsWindowVisible(hwnd):
-                info = WindowInfo()
-                info.hwnd  = hwnd
-                info.title = win32gui.GetWindowText(hwnd)
-
-                infos.append(info)
-            return True
-        
-        infos = []
-        win32gui.EnumWindows(callback, infos)
-        return infos
-
+        logging.info("Window Capture Session Closed")
 
 if __name__ == '__main__':
-    watcher = ProcessWatcher()
-    watcher.Start()
+    assert len(sys.argv) == 3, "Wrong number of arguments"
+    hwnd  = int(sys.argv[1])
+    title = sys.argv[2]
+
+    window_watcher = WindowWatcher()
+    window_watcher.Start(hwnd, title)
