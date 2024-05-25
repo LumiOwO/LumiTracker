@@ -2,6 +2,9 @@ from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 import os
 import time
 import psutil
+import win32api
+import win32con
+import win32print
 import win32gui
 import win32process
 
@@ -17,15 +20,26 @@ def ExtractFrameFeature(frame: Frame):
     return ExtractFeature(image)
 
 
+class WindowInfo:
+    def __init__(self):
+        self.hwnd  = None
+        self.title = ""
+
 class WindowWatcher:
     def __init__(self):
-        self.capture      = None
-        self.db           = Database()
+        self.capture         = None
+        self.db              = Database()
 
-        self.prev_time    = time.time()
-        self.SKIP_FRAMES  = 0
-        self.LOG_FRAMES   = 200
-        self._frame_count = 0
+        self.hwnd            = None
+        self.border_size     = (0, 0)
+        self.window_size     = (0, 0) # border included
+        self.client_size     = (0, 0)
+
+        self.prev_frame_time = time.time()
+        self.prev_log_time   = self.prev_frame_time
+        self.FPS_LIMIT       = 30
+        self.LOG_FRAMES      = 200
+        self._frame_count    = 0
 
         # (y, x), same as screen coordinate
         # namely (width, height)
@@ -33,7 +47,9 @@ class WindowWatcher:
         self.my_event_pos      = (0.1225, 0.1755)
         self.op_event_pos      = (0.7380, 0.1755)
 
-    def Start(self, title):
+    def Start(self, hwnd, title):
+        self.hwnd = hwnd
+
         self.db.Load()
 
         # Every Error From on_closed and on_frame_arrived Will End Up Here
@@ -47,29 +63,57 @@ class WindowWatcher:
         self.capture.event(self.on_closed)
 
         self.capture.start()
+    
+    def UpdateWindowBorderSize(self, window_width, window_height):
+        self.window_size = (window_width, window_height)
+
+        # !!! Must consider DPI scale !!!
+        # https://blog.csdn.net/frostime/article/details/104798061
+        hDC      = win32gui.GetDC(0)
+        real_w   = win32print.GetDeviceCaps(hDC, win32con.DESKTOPHORZRES)
+        screen_w = win32api.GetSystemMetrics(0)
+        # real_h   = win32print.GetDeviceCaps(hDC, win32con.DESKTOPVERTRES)
+        # screen_h = win32api.GetSystemMetrics(1)
+        scale    = real_w / screen_w
+        # print(scale)
+
+        # Get the client rect (excludes borders and title bar)
+        client_rect = win32gui.GetClientRect(self.hwnd)
+        client_rect = tuple(int(i * scale) for i in client_rect)
+        client_left, client_top, client_right, client_bottom = client_rect
+        self.client_size = (client_right - client_left, client_bottom - client_top)
+
+        left_border  = (self.window_size[0] - self.client_size[0]) // 2
+        title_height =  self.window_size[1] - self.client_size[1]
+        self.border_size = (left_border, title_height)
+
+        # print(self.window_size)
+        # print(self.client_size)
+        # print(self.border_size)
 
     # Called Every Time A New Frame Is Available
     def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):
-        self._frame_count += 1
-        if self._frame_count % (self.SKIP_FRAMES + 1) != 0:
+        cur_time = time.time()
+        dt = cur_time - self.prev_frame_time
+        if dt < (1 / self.FPS_LIMIT):
             return
-        
-        if self._frame_count >= self.LOG_FRAMES:
-            cur_time = time.time()
-            dt = cur_time - self.prev_time
-            frames = self._frame_count // (self.SKIP_FRAMES + 1)
-            print(f"FPS: {frames / dt}")
-            self.prev_time = cur_time
-            self._frame_count = 0
+        self.prev_frame_time = cur_time
 
-        width      = frame.width
-        height     = frame.height
-        event_w    = int(width  * self.event_screen_size[0])
-        event_h    = int(height * self.event_screen_size[1])
+        self._frame_count += 1
+        if self._frame_count >= self.LOG_FRAMES:
+            print(f"FPS: {self._frame_count / (cur_time - self.prev_log_time)}")
+            self._frame_count  = 0
+            self.prev_log_time = cur_time
+
+        if frame.width != self.window_size[0] or frame.height != self.window_size[1]:
+            self.UpdateWindowBorderSize(frame.width, frame.height)
+
+        event_w    = int(self.client_size[0] * self.event_screen_size[0])
+        event_h    = int(self.client_size[1] * self.event_screen_size[1])
         
         # my event
-        my_start_w = int(width  * self.my_event_pos[0])
-        my_start_h = int(height * self.my_event_pos[1])
+        my_start_w = int(self.client_size[0] * self.my_event_pos[0]) + self.border_size[0]
+        my_start_h = int(self.client_size[1] * self.my_event_pos[1]) + self.border_size[1]
         my_event_frame = frame.crop(my_start_w, my_start_h, my_start_w + event_w, my_start_h + event_h)
 
         my_feature = ExtractFrameFeature(my_event_frame)
@@ -81,8 +125,8 @@ class WindowWatcher:
         
 
         # op event
-        op_start_w = int(width  * self.op_event_pos[0])
-        op_start_h = int(height * self.op_event_pos[1])
+        op_start_w = int(self.client_size[0] * self.op_event_pos[0]) + self.border_size[0]
+        op_start_h = int(self.client_size[1] * self.op_event_pos[1]) + self.border_size[1]
         op_event_frame = frame.crop(op_start_w, op_start_h, op_start_w + event_w, op_start_h + event_h)
 
         op_feature = ExtractFrameFeature(op_event_frame)
@@ -108,6 +152,7 @@ class WindowWatcher:
         print("Capture Session Closed")
 
 class ProcessWatcher:
+
     def __init__(self):
         self.window_watcher = WindowWatcher()
         self.process_name   = "YuanShen.exe"
@@ -115,30 +160,30 @@ class ProcessWatcher:
     
     def Start(self):
         while True:
-            title = self.FindProcessWindow()
-            if title:
-                self.window_watcher.Start(title)
+            info = self.FindProcessWindow()
+            if info.hwnd is not None:
+                self.window_watcher.Start(info.hwnd, info.title)
             time.sleep(self.INTERVAL)
     
     def FindProcessWindow(self):
-        title = ""
+        info = WindowInfo()
         processes = self.GetProcessByName(self.process_name)
         if not processes:
             print(f"No process found with name: {self.process_name}")
-            return title
+            return info
         else:
             for proc in processes:
-                titles = self.GetTitlesByPID(proc.info['pid'])
-                if titles:
-                    title = titles[0]
+                infos = self.GetWindowsByPID(proc.info['pid'])
+                if infos:
+                    info = infos[0]
                     print(f"Window titles for process '{self.process_name}' (PID: {proc.info['pid']}):")
-                    for t in titles:
-                        print(f"  - {t}")
+                    for i in infos:
+                        print(f"  - {i.title}")
                 else:
                     print(f"No windows found for process '{self.process_name}' (PID: {proc.info['pid']})")
-                    return title
+                    return infos
         
-        return title
+        return info
 
     def GetProcessByName(self, process_name):
         """Returns a list of processes matching the given process name."""
@@ -148,17 +193,21 @@ class ProcessWatcher:
                 processes.append(proc)
         return processes
 
-    def GetTitlesByPID(self, pid):
+    def GetWindowsByPID(self, pid):
         """Returns the window handles (HWNDs) for the given process ID."""
         def callback(hwnd, titles):
             _, found_pid = win32process.GetWindowThreadProcessId(hwnd)
             if found_pid == pid and win32gui.IsWindowVisible(hwnd):
-                titles.append(win32gui.GetWindowText(hwnd))
+                info = WindowInfo()
+                info.hwnd  = hwnd
+                info.title = win32gui.GetWindowText(hwnd)
+
+                infos.append(info)
             return True
         
-        titles = []
-        win32gui.EnumWindows(callback, titles)
-        return titles
+        infos = []
+        win32gui.EnumWindows(callback, infos)
+        return infos
 
 
 if __name__ == '__main__':
