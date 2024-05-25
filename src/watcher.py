@@ -19,6 +19,31 @@ def ExtractFrameFeature(frame: Frame):
     # Note: no resize here, currently good result
     return ExtractFeature(image)
 
+class StreamFilter:
+    def __init__(self, null_val=0, valid_count=3):
+        self.value        = null_val
+        self.count        = 0
+        self.valid_count  = valid_count
+        self.null_val     = null_val
+    
+    def Filter(self, value):
+        # push
+        if value == self.null_val:
+            self.value = value
+            self.count = 0
+        elif self.value == value:
+            self.count += 1
+        else:
+            self.value = value
+            self.count = 1
+
+        # print(self.count, self.value)
+
+        # read
+        if self.value != self.null_val and self.count == self.valid_count:
+            return self.value
+        else:
+            return self.null_val
 
 class WindowInfo:
     def __init__(self):
@@ -35,17 +60,19 @@ class WindowWatcher:
         self.window_size     = (0, 0) # border included
         self.client_size     = (0, 0)
 
-        self.prev_frame_time = time.time()
-        self.prev_log_time   = self.prev_frame_time
-        self.FPS_LIMIT       = 30
-        self.LOG_FRAMES      = 200
-        self._frame_count    = 0
+        self.SKIP_FRAMES     = 3
+        self.LOG_INTERVAL    = 1
+        self.prev_log_time   = time.time()
+        self.frame_count     = 0
+        self.skip_count      = 0
 
         # (y, x), same as screen coordinate
         # namely (width, height)
         self.event_screen_size = (0.1400, 0.4270)
         self.my_event_pos      = (0.1225, 0.1755)
         self.op_event_pos      = (0.7380, 0.1755)
+        self.my_event_filter   = StreamFilter(null_val=-1)
+        self.op_event_filter   = StreamFilter(null_val=-1)
 
     def Start(self, hwnd, title):
         self.hwnd = hwnd
@@ -90,24 +117,8 @@ class WindowWatcher:
         # print(self.window_size)
         # print(self.client_size)
         # print(self.border_size)
-
-    # Called Every Time A New Frame Is Available
-    def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):
-        cur_time = time.time()
-        dt = cur_time - self.prev_frame_time
-        if dt < (1 / self.FPS_LIMIT):
-            return
-        self.prev_frame_time = cur_time
-
-        self._frame_count += 1
-        if self._frame_count >= self.LOG_FRAMES:
-            print(f"FPS: {self._frame_count / (cur_time - self.prev_log_time)}")
-            self._frame_count  = 0
-            self.prev_log_time = cur_time
-
-        if frame.width != self.window_size[0] or frame.height != self.window_size[1]:
-            self.UpdateWindowBorderSize(frame.width, frame.height)
-
+    
+    def DetectEvent(self, frame):
         event_w    = int(self.client_size[0] * self.event_screen_size[0])
         event_h    = int(self.client_size[1] * self.event_screen_size[1])
         
@@ -119,10 +130,13 @@ class WindowWatcher:
         my_feature = ExtractFrameFeature(my_event_frame)
         my_id, my_dist = self.db.SearchByFeature(my_feature, card_type="event")
         
-        if my_dist <= cfg.threshold:
+        if my_dist > cfg.threshold:
+            my_id = -1
+        my_id = self.my_event_filter.Filter(my_id)
+
+        if my_id >= 0:
             print(f"my event: {self.db['events'][my_id].get('name_CN', 'None')}")
             print(my_dist)
-        
 
         # op event
         op_start_w = int(self.client_size[0] * self.op_event_pos[0]) + self.border_size[0]
@@ -131,17 +145,40 @@ class WindowWatcher:
 
         op_feature = ExtractFrameFeature(op_event_frame)
         op_id, op_dist = self.db.SearchByFeature(op_feature, card_type="event")
-        if op_dist <= cfg.threshold:
+        
+        if op_dist > cfg.threshold:
+            op_id = -1
+        # op_id = self.op_event_filter.Filter(op_id)
+
+        if op_id >= 0:
             print(f"op event: {self.db['events'][op_id].get('name_CN', 'None')}")
-        # print(ids)
-        # print(distances)
+            print(op_dist)
 
         if cfg.DEBUG:
-            my_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"my_image{self._frame_count}.png"))
-            op_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"op_image{self._frame_count}.png"))
+            my_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"my_image{self.frame_count}.png"))
+            op_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"op_image{self.frame_count}.png"))
+
+    # Called Every Time A New Frame Is Available
+    def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):
+        self.skip_count += 1
+        if self.skip_count <= self.SKIP_FRAMES:
+            return
+        self.skip_count = 0
+
+        self.frame_count += 1
+        cur_time = time.time()
+        if cur_time - self.prev_log_time >= self.LOG_INTERVAL:
+            print(f"FPS: {self.frame_count / (cur_time - self.prev_log_time)}")
+            self.frame_count   = 0
+            self.prev_log_time = cur_time
+
+        if frame.width != self.window_size[0] or frame.height != self.window_size[1]:
+            self.UpdateWindowBorderSize(frame.width, frame.height)
+
+        self.DetectEvent(frame)
 
         # # Save The Frame As An Image To The Specified Path
-        # my_event_frame.save_as_image("image.png")
+        # frame.save_as_image("image.png")
 
         # # Gracefully Stop The Capture Thread
         # capture_control.stop()
@@ -152,7 +189,6 @@ class WindowWatcher:
         print("Capture Session Closed")
 
 class ProcessWatcher:
-
     def __init__(self):
         self.window_watcher = WindowWatcher()
         self.process_name   = "YuanShen.exe"
@@ -170,7 +206,6 @@ class ProcessWatcher:
         processes = self.GetProcessByName(self.process_name)
         if not processes:
             print(f"No process found with name: {self.process_name}")
-            return info
         else:
             for proc in processes:
                 infos = self.GetWindowsByPID(proc.info['pid'])
@@ -181,7 +216,6 @@ class ProcessWatcher:
                         print(f"  - {i.title}")
                 else:
                     print(f"No windows found for process '{self.process_name}' (PID: {proc.info['pid']})")
-                    return infos
         
         return info
 
