@@ -18,14 +18,21 @@ class cfg:
     db_filename         = "db.json"
 
     cards_dir           = "cards"
-    border_filename     = "tcg_border_bg.png"
 
     # feature extraction
     hash_size           = 8
     threshold           = 18
+    threshold_strict    = 8
     ann_metric          = "hamming"   # ["angular", "euclidean", "manhattan", "hamming", "dot"]
     ann_n_trees         = 10
     ann_index_len       = hash_size * hash_size * 2
+
+    # (y, x), same as screen coordinate
+    # namely (width, height)
+    start_screen_size = (0.1445, 0.2847) # centered
+    event_screen_size = (0.1400, 0.4270)
+    my_event_pos      = (0.1225, 0.1755)
+    op_event_pos      = (0.7380, 0.1755)
 
 
 # Only accept PIL Image with RGB format
@@ -38,10 +45,16 @@ def ExtractFeature(image: Image):
     feature2 = feature2.hash.flatten()
 
     feature = np.append(feature1, feature2)
-    # feature = np.append(feature1, np.zeros_like(feature1))
-    # feature = feature2
-    # print(feature.shape)
 
+    return feature
+
+def FeatureDistance(feature1, feature2):
+    return imagehash.ImageHash(feature1) - imagehash.ImageHash(feature2)
+
+def HashToFeature(hash_str):
+    binary_string = bin(int(hash_str, 16))[2:]
+    bool_list = [bit == '1' for bit in binary_string]
+    feature = np.array(bool_list, dtype=bool)
     return feature
 
 class Database:
@@ -58,13 +71,25 @@ class Database:
 
     def __setitem__(self, key, value):
         self.data[key] = value
+    
+    def UpdateControls(self):
+        controls = {}
+
+        start_filename = "start.png"
+        start = Image.open(os.path.join(cfg.cards_dir, start_filename)).convert("RGBA")
+        feature = ExtractFeature(start.convert("RGB"))
+        hash_str = str(imagehash.ImageHash(feature))
+        controls["start_hash"] = hash_str
+
+        self.data["controls"] = controls
 
     def UpdateEventCards(self):
         event_cards_dir = os.path.join(cfg.cards_dir, "events")
         files = os.listdir(event_cards_dir)
         image_files = [file for file in files if file.lower().endswith(".png")]
 
-        border = Image.open(os.path.join(cfg.cards_dir, cfg.border_filename)).convert("RGBA")
+        border_filename = "tcg_border_bg.png"
+        border = Image.open(os.path.join(cfg.cards_dir, border_filename)).convert("RGBA")
 
         n_images = len(image_files)
         events   = [None] * n_images
@@ -134,6 +159,7 @@ class Database:
 
 
     def Update(self):
+        self.UpdateControls()
         self.UpdateEventCards()
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:

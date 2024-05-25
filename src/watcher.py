@@ -8,9 +8,12 @@ import win32print
 import win32gui
 import win32process
 
+from types import SimpleNamespace
+
 from PIL import Image
 
-from .database import cfg, ExtractFeature, Database
+from .database import cfg, Database
+from .database import ExtractFeature, FeatureDistance, HashToFeature
 
 def ExtractFrameFeature(frame: Frame):
     buffer = frame.frame_buffer[:, :, 2::-1] # bgr to rgb
@@ -20,7 +23,7 @@ def ExtractFrameFeature(frame: Frame):
     return ExtractFeature(image)
 
 class StreamFilter:
-    def __init__(self, null_val=0, valid_count=3):
+    def __init__(self, null_val, valid_count=5):
         self.value        = null_val
         self.count        = 0
         self.valid_count  = valid_count
@@ -52,32 +55,31 @@ class WindowInfo:
 
 class WindowWatcher:
     def __init__(self):
-        self.capture         = None
-        self.db              = Database()
+        self.capture       = None
+        self.db            = Database()
+        self.start_feature = None
 
-        self.hwnd            = None
-        self.border_size     = (0, 0)
-        self.window_size     = (0, 0) # border included
-        self.client_size     = (0, 0)
+        self.hwnd          = None
+        self.border_size   = (0, 0)
+        self.window_size   = (0, 0) # border included
+        self.client_size   = (0, 0)
 
-        self.SKIP_FRAMES     = 3
-        self.LOG_INTERVAL    = 1
-        self.prev_log_time   = time.time()
-        self.frame_count     = 0
-        self.skip_count      = 0
+        self.SKIP_FRAMES   = 0
+        self.LOG_INTERVAL  = 1
+        self.prev_log_time = time.time()
+        self.frame_count   = 0
+        self.skip_count    = 0
 
-        # (y, x), same as screen coordinate
-        # namely (width, height)
-        self.event_screen_size = (0.1400, 0.4270)
-        self.my_event_pos      = (0.1225, 0.1755)
-        self.op_event_pos      = (0.7380, 0.1755)
-        self.my_event_filter   = StreamFilter(null_val=-1)
-        self.op_event_filter   = StreamFilter(null_val=-1)
+        self.filters            = SimpleNamespace()
+        self.filters.my_event   = StreamFilter(null_val=-1)
+        self.filters.op_event   = StreamFilter(null_val=-1)
+        self.filters.game_start = StreamFilter(null_val=False)
 
     def Start(self, hwnd, title):
         self.hwnd = hwnd
 
         self.db.Load()
+        self.start_feature = HashToFeature(self.db["controls"]["start_hash"])
 
         # Every Error From on_closed and on_frame_arrived Will End Up Here
         self.capture = WindowsCapture(
@@ -117,38 +119,56 @@ class WindowWatcher:
         # print(self.window_size)
         # print(self.client_size)
         # print(self.border_size)
-    
+
+    def DetectGameStart(self, frame):
+        start_w = int(self.client_size[0] * cfg.start_screen_size[0])
+        start_h = int(self.client_size[1] * cfg.start_screen_size[1])
+
+        start_left = (1.0 - cfg.start_screen_size[0]) / 2
+        start_left = int(self.client_size[0] * start_left) + self.border_size[0]
+        start_top  = (1.0 - cfg.start_screen_size[1]) / 2
+        start_top  = int(self.client_size[1] * start_top ) + self.border_size[1]
+        start_event_frame = frame.crop(start_left, start_top, start_left + start_w, start_top + start_h)
+
+        start_feature = ExtractFrameFeature(start_event_frame)
+        dist = FeatureDistance(start_feature, self.start_feature)
+        start = (dist <= cfg.threshold_strict)
+        start = self.filters.game_start.Filter(start)
+        if start:
+            print(f"Game start")
+            print(dist)
+
     def DetectEvent(self, frame):
-        event_w    = int(self.client_size[0] * self.event_screen_size[0])
-        event_h    = int(self.client_size[1] * self.event_screen_size[1])
+        event_w = int(self.client_size[0] * cfg.event_screen_size[0])
+        event_h = int(self.client_size[1] * cfg.event_screen_size[1])
         
         # my event
-        my_start_w = int(self.client_size[0] * self.my_event_pos[0]) + self.border_size[0]
-        my_start_h = int(self.client_size[1] * self.my_event_pos[1]) + self.border_size[1]
-        my_event_frame = frame.crop(my_start_w, my_start_h, my_start_w + event_w, my_start_h + event_h)
+        my_left = int(self.client_size[0] * cfg.my_event_pos[0]) + self.border_size[0]
+        my_top  = int(self.client_size[1] * cfg.my_event_pos[1]) + self.border_size[1]
+        my_event_frame = frame.crop(my_left, my_top, my_left + event_w, my_top + event_h)
 
         my_feature = ExtractFrameFeature(my_event_frame)
         my_id, my_dist = self.db.SearchByFeature(my_feature, card_type="event")
         
         if my_dist > cfg.threshold:
             my_id = -1
-        my_id = self.my_event_filter.Filter(my_id)
+        my_id = self.filters.my_event.Filter(my_id)
 
         if my_id >= 0:
             print(f"my event: {self.db['events'][my_id].get('name_CN', 'None')}")
             print(my_dist)
 
         # op event
-        op_start_w = int(self.client_size[0] * self.op_event_pos[0]) + self.border_size[0]
-        op_start_h = int(self.client_size[1] * self.op_event_pos[1]) + self.border_size[1]
-        op_event_frame = frame.crop(op_start_w, op_start_h, op_start_w + event_w, op_start_h + event_h)
+        op_left = int(self.client_size[0] * cfg.op_event_pos[0]) + self.border_size[0]
+        op_top  = int(self.client_size[1] * cfg.op_event_pos[1]) + self.border_size[1]
+        op_event_frame = frame.crop(op_left, op_top, op_left + event_w, op_top + event_h)
 
         op_feature = ExtractFrameFeature(op_event_frame)
         op_id, op_dist = self.db.SearchByFeature(op_feature, card_type="event")
         
         if op_dist > cfg.threshold:
             op_id = -1
-        # op_id = self.op_event_filter.Filter(op_id)
+        op_id = self.filters.op_event.Filter(op_id)
 
         if op_id >= 0:
             print(f"op event: {self.db['events'][op_id].get('name_CN', 'None')}")
@@ -175,6 +195,7 @@ class WindowWatcher:
         if frame.width != self.window_size[0] or frame.height != self.window_size[1]:
             self.UpdateWindowBorderSize(frame.width, frame.height)
 
+        self.DetectGameStart(frame)
         self.DetectEvent(frame)
 
         # # Save The Frame As An Image To The Specified Path
