@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:LumiTracker.Views.Windows"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:tb="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Wpf"
     Title="{Binding ViewModel.ApplicationTitle, Mode=OneWay}"
     Width="1100"
     Height="650"
@@ -20,20 +21,30 @@
     WindowBackdropType="Mica"
     WindowCornerPreference="Round"
     WindowStartupLocation="CenterScreen"
-    mc:Ignorable="d">
-    <ui:FluentWindow.InputBindings>
+    mc:Ignorable="d"
+    >
+    <!--<ui:FluentWindow.InputBindings>
         <KeyBinding
             Key="F"
             Command="{Binding ElementName=AutoSuggestBox, Path=FocusCommand}"
             Modifiers="Control" />
-    </ui:FluentWindow.InputBindings>
+    </ui:FluentWindow.InputBindings>-->
+
+    
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
         <ui:TitleBar
             x:Name="TitleBar"
             Title="{Binding ViewModel.ApplicationTitle}"
             Grid.Row="0"
-            CloseWindowByDoubleClickOnIcon="True">
+            Margin="0"
+            CloseWindowByDoubleClickOnIcon="False"
+            >
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="pack://application:,,,/Assets/wpfui-icon-256.png" />
             </ui:TitleBar.Icon>
@@ -41,20 +52,25 @@
 
         <ui:NavigationView
             x:Name="RootNavigation"
-            Padding="42,0,42,0"
-            BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
+            Grid.Row="1"
+            Padding="30,30,30,0"
             FooterMenuItemsSource="{Binding ViewModel.FooterMenuItems, Mode=OneWay}"
-            FrameMargin="0"
-            IsBackButtonVisible="Visible"
-            IsPaneToggleVisible="True"
+            FrameMargin="10, 0, 15, 15"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleVisible="False"
             MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
-            OpenPaneLength="310"
+            OpenPaneLength="180"
             PaneDisplayMode="Left"
-            TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}">
-            <ui:NavigationView.Header>
-                <ui:BreadcrumbBar x:Name="BreadcrumbBar" Margin="42,32,42,20" />
-            </ui:NavigationView.Header>
-            <ui:NavigationView.AutoSuggestBox>
+            d:BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
+            d:TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
+            >
+            <!--<ui:NavigationView.Header>
+                <ui:BreadcrumbBar 
+                    x:Name="BreadcrumbBar" 
+                    Margin="35,20,42,20"
+                    />
+            </ui:NavigationView.Header>-->
+            <!--<ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox x:Name="AutoSuggestBox" PlaceholderText="Search">
                     <ui:AutoSuggestBox.Icon>
                         <ui:IconSourceElement>
@@ -62,14 +78,19 @@
                         </ui:IconSourceElement>
                     </ui:AutoSuggestBox.Icon>
                 </ui:AutoSuggestBox>
-            </ui:NavigationView.AutoSuggestBox>
-            <ui:NavigationView.ContentOverlay>
+            </ui:NavigationView.AutoSuggestBox>-->
+            <!--<ui:NavigationView.ContentOverlay>
                 <Grid>
                     <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
                 </Grid>
-            </ui:NavigationView.ContentOverlay>
+            </ui:NavigationView.ContentOverlay>-->
         </ui:NavigationView>
 
-        <ContentPresenter x:Name="RootContentDialog" Grid.Row="0" />
+        <ContentPresenter x:Name="RootContentDialog" Grid.Row="1" />
+
+        <tb:TaskbarIcon
+            ToolTipText="ToolTip"
+            IconSource="pack://application:,,,/wpfui-icon.ico"
+        />
     </Grid>
 </ui:FluentWindow>

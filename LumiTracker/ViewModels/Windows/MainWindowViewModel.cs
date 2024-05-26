@@ -6,7 +6,7 @@ namespace LumiTracker.ViewModels.Windows
     public partial class MainWindowViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string _applicationTitle = "WPF UI - LumiTracker";
+        private string _applicationTitle = "LumiTracker - 七圣召唤记牌器";
 
         [ObservableProperty]
         private ObservableCollection<object> _menuItems = new()
