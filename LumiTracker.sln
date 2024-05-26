@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34916.146
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LumiTracker", "LumiTracker\LumiTracker.csproj", "{DE5AD6A4-002A-4587-8955-A810D9C77078}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LumiTracker", "src\LumiTracker\LumiTracker.csproj", "{DE5AD6A4-002A-4587-8955-A810D9C77078}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE} = {4B0496BC-EDD4-41BE-B53D-CC25024658CE}
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305} = {E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LumiTracker.Watcher", "src\LumiTracker.Watcher\LumiTracker.Watcher.csproj", "{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LumiTracker.Localization", "src\LumiTracker.Localization\LumiTracker.Localization.csproj", "{4B0496BC-EDD4-41BE-B53D-CC25024658CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +21,30 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Debug|Any CPU.Build.0 = Debug|x64
 		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Debug|x64.ActiveCfg = Debug|x64
 		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Debug|x64.Build.0 = Debug|x64
 		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Release|x64.ActiveCfg = Release|x64
 		{DE5AD6A4-002A-4587-8955-A810D9C77078}.Release|x64.Build.0 = Release|x64
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}.Debug|x64.ActiveCfg = Debug|x64
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}.Debug|x64.Build.0 = Debug|x64
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}.Release|x64.ActiveCfg = Release|x64
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}.Release|x64.Build.0 = Release|x64
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE}.Debug|x64.ActiveCfg = Debug|x64
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE}.Debug|x64.Build.0 = Debug|x64
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE}.Release|x64.ActiveCfg = Release|x64
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

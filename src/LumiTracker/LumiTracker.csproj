@@ -29,8 +29,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LumiTracker.Localization\LumiTracker.Localization.csproj" />
+    <ProjectReference Include="..\LumiTracker.Watcher\LumiTracker.Watcher.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assets\wpfui-icon-256.png" />
     <Resource Include="Assets\wpfui-icon-1024.png" />
   </ItemGroup>
+
+  <Target Name="CopyTestDirectory" AfterTargets="Publish">
+    <RemoveDir Directories="$(PublishDir)watcher" Condition="Exists('$(PublishDir)watcher')" />
+    <Exec Command="xcopy /E /I /Y $(TargetDir)watcher $(PublishDir)watcher &gt; nul" />
+    <Message Text="Copy of 'watcher' directory to publish folder completed successfully." Importance="high" />
+
+    <RemoveDir Directories="$(PublishDir)python" Condition="Exists('$(PublishDir)python')" />
+    <Exec Command="xcopy /E /I /Y $(TargetDir)python $(PublishDir)python &gt; nul" />
+    <Message Text="Copy of 'python' directory to publish folder completed successfully." Importance="high" />
+    
+  </Target>
 
 </Project>

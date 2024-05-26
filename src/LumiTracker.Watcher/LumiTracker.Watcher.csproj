@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
+    <BaseOutputPath>$(SolutionDir)\bin</BaseOutputPath>
+    <Version>$(OutputPath)</Version>
+    <PackageId>$(OutputPath)</PackageId>
+    <Title></Title>
+    <Description></Description>
+    <PackageOutputPath>$(TargetDir)</PackageOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="watcher\__pycache__\**" />
+    <EmbeddedResource Remove="watcher\__pycache__\**" />
+    <None Remove="watcher\__pycache__\**" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="if exist &quot;$(TargetDir)watcher&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)watcher&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(ProjectDir)watcher&quot; &quot;$(TargetDir)watcher&quot; &gt; nul&#xD;&#xA;echo Copy for watcher completed successfully&#xD;&#xA;&#xD;&#xA;if exist &quot;$(TargetDir)python&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)python&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(SolutionDir)python&quot; &quot;$(TargetDir)python&quot; &gt; nul&#xD;&#xA;echo Copy for python  completed successfully" />
+  </Target>
+
+</Project>

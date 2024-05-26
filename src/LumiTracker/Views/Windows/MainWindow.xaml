@@ -88,9 +88,9 @@
 
         <ContentPresenter x:Name="RootContentDialog" Grid.Row="1" />
 
-        <tb:TaskbarIcon
+        <!--<tb:TaskbarIcon
             ToolTipText="ToolTip"
             IconSource="pack://application:,,,/wpfui-icon.ico"
-        />
+        />-->
     </Grid>
 </ui:FluentWindow>
