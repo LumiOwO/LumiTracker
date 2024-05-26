@@ -11,6 +11,7 @@
     <Title></Title>
     <Description></Description>
     <PackageOutputPath>$(TargetDir)</PackageOutputPath>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,8 +20,18 @@
     <None Remove="watcher\__pycache__\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LumiTracker.Config\LumiTracker.Config.csproj" />
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="if exist &quot;$(TargetDir)watcher&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)watcher&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(ProjectDir)watcher&quot; &quot;$(TargetDir)watcher&quot; &gt; nul&#xD;&#xA;echo Copy for watcher completed successfully&#xD;&#xA;&#xD;&#xA;if exist &quot;$(TargetDir)python&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)python&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(SolutionDir)python&quot; &quot;$(TargetDir)python&quot; &gt; nul&#xD;&#xA;echo Copy for python  completed successfully" />
+    <Exec Command="if exist &quot;$(TargetDir)watcher&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)watcher&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(ProjectDir)watcher&quot; &quot;$(TargetDir)watcher&quot; &gt; nul&#xD;&#xA;echo Copy of 'watcher' directory to target folder completed successfully.&#xD;&#xA;&#xD;&#xA;if exist &quot;$(TargetDir)python&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)python&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(SolutionDir)python&quot; &quot;$(TargetDir)python&quot; &gt; nul&#xD;&#xA;echo Copy of 'python' directory to target folder completed successfully." />
   </Target>
 
 </Project>

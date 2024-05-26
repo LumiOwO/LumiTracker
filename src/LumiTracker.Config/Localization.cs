@@ -1,4 +1,4 @@
-﻿namespace LumiTracker.Localization
+﻿namespace LumiTracker.Config
 {
     public class Localization
     {

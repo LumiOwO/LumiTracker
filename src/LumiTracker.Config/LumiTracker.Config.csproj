@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
+    <BaseOutputPath>$(SolutionDir)\bin</BaseOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\assets\config.json" Link="config.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="if exist &quot;$(TargetDir)assets&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)assets&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(SolutionDir)assets&quot; &quot;$(TargetDir)assets&quot; &gt; nul&#xD;&#xA;echo Copy of 'assets' directory to target folder completed successfully." />
+  </Target>
+
+</Project>

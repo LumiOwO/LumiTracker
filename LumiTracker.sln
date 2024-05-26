@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LumiTracker", "src\LumiTrac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LumiTracker.Watcher", "src\LumiTracker.Watcher\LumiTracker.Watcher.csproj", "{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LumiTracker.Localization", "src\LumiTracker.Localization\LumiTracker.Localization.csproj", "{4B0496BC-EDD4-41BE-B53D-CC25024658CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LumiTracker.Config", "src\LumiTracker.Config\LumiTracker.Config.csproj", "{4B0496BC-EDD4-41BE-B53D-CC25024658CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

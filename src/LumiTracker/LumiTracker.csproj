@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.0.131" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="WPF-UI" Version="3.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0 " />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2 " />
@@ -29,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LumiTracker.Localization\LumiTracker.Localization.csproj" />
+    <ProjectReference Include="..\LumiTracker.Config\LumiTracker.Config.csproj" />
     <ProjectReference Include="..\LumiTracker.Watcher\LumiTracker.Watcher.csproj" />
   </ItemGroup>
 
@@ -46,6 +47,10 @@
     <RemoveDir Directories="$(PublishDir)python" Condition="Exists('$(PublishDir)python')" />
     <Exec Command="xcopy /E /I /Y $(TargetDir)python $(PublishDir)python &gt; nul" />
     <Message Text="Copy of 'python' directory to publish folder completed successfully." Importance="high" />
+
+    <RemoveDir Directories="$(PublishDir)assets" Condition="Exists('$(PublishDir)assets')" />
+    <Exec Command="xcopy /E /I /Y $(TargetDir)assets $(PublishDir)assets &gt; nul" />
+    <Message Text="Copy of 'assets' directory to publish folder completed successfully." Importance="high" />
     
   </Target>
 
