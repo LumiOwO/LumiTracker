@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="if exist &quot;$(TargetDir)assets&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)assets&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(SolutionDir)assets&quot; &quot;$(TargetDir)assets&quot; &gt; nul&#xD;&#xA;echo Copy of 'assets' directory to target folder completed successfully." />
+    <Exec Command="if not exist &quot;$(TargetDir)assets&quot; (&#xD;&#xA;    mklink /j $(TargetDir)assets $(SolutionDir)assets&#xD;&#xA;)" />
   </Target>
 
 </Project>

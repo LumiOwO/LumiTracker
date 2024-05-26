@@ -20,30 +20,6 @@ with open("assets/config.json", 'r') as f:
     _data = json5.load(f)
 cfg = dict_to_simplenamespace(_data)
 
-import sys
 import logging
-
-_root_logger = logging.getLogger()
-_root_logger.setLevel(logging.DEBUG if cfg.DEBUG else logging.INFO)
-
-# Create a formatter
-formatter = logging.Formatter("%(asctime)s - [%(levelname)s] - %(message)s")
-
-class StdOutFilter:
-    def __call__(self, log):
-        return log.levelno < logging.WARNING
-
-# Create a handler for stdout
-stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setLevel(logging.DEBUG if cfg.DEBUG else logging.INFO) 
-stdout_handler.setFormatter(formatter)
-stdout_handler.addFilter(StdOutFilter())
-
-# Create a handler for stderr
-stderr_handler = logging.StreamHandler(sys.stderr)
-stderr_handler.setLevel(logging.WARNING) 
-stderr_handler.setFormatter(formatter)
-
-# Add the handlers to the logger
-_root_logger.addHandler(stdout_handler)
-_root_logger.addHandler(stderr_handler)
+logging.basicConfig(level=logging.DEBUG if cfg.DEBUG else logging.INFO,
+                    format='%(asctime)s - [%(levelname)s] - %(message)s')

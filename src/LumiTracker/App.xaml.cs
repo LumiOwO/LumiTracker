@@ -11,6 +11,8 @@ using System.Reflection;
 using System.Windows.Threading;
 using Wpf.Ui;
 
+using LumiTracker.Watcher;
+
 namespace LumiTracker
 {
     /// <summary>
@@ -72,6 +74,7 @@ namespace LumiTracker
         {
             _host.Start();
             // TODO: dotnet
+            Task task = Program.Main(new string[] { });
         }
 
         /// <summary>

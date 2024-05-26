@@ -28,7 +28,7 @@
             _cfg = cfg;
         }
 
-        public async Task StartWindowWatcher(WindowInfo info)
+        public async Task StartWindowWatcher(WindowInfo info, int interval)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -42,18 +42,20 @@
 
             var process = new Process();
             process.StartInfo = startInfo;
-            process.OutputDataReceived += (sender, e) => Console.WriteLine("Output: " + e.Data);
-            process.ErrorDataReceived += (sender, e) => Console.WriteLine("Error: " + e.Data);
+            process.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
             
             if (!process.Start())
             {
                 _logger.LogError("Failed to start subprocess.");
                 return;
             }
-            process.BeginOutputReadLine();
+            ChildProcessTracker.AddProcess(process);
             process.BeginErrorReadLine();
 
-            await Task.Run(() => process.WaitForExit());
+            while (!process.HasExited)
+            {
+                await Task.Delay(interval);
+            }
             _logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
         }
 
@@ -65,7 +67,7 @@
                 var info = FindProcessWindow();
                 if (info.hwnd != IntPtr.Zero)
                 {
-                    await StartWindowWatcher(info);
+                    await StartWindowWatcher(info, interval);
                 }
 
                 await Task.Delay(interval);

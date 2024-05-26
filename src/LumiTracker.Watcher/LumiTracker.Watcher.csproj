@@ -11,7 +11,7 @@
     <Title></Title>
     <Description></Description>
     <PackageOutputPath>$(TargetDir)</PackageOutputPath>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="if exist &quot;$(TargetDir)watcher&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)watcher&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(ProjectDir)watcher&quot; &quot;$(TargetDir)watcher&quot; &gt; nul&#xD;&#xA;echo Copy of 'watcher' directory to target folder completed successfully.&#xD;&#xA;&#xD;&#xA;if exist &quot;$(TargetDir)python&quot; (&#xD;&#xA;    rmdir /S /Q &quot;$(TargetDir)python&quot;&#xD;&#xA;)&#xD;&#xA;xcopy /E /I /Y &quot;$(SolutionDir)python&quot; &quot;$(TargetDir)python&quot; &gt; nul&#xD;&#xA;echo Copy of 'python' directory to target folder completed successfully." />
+    <Exec Command="if not exist &quot;$(TargetDir)watcher&quot; (&#xD;&#xA;    mklink /j $(TargetDir)watcher $(ProjectDir)watcher&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;if not exist &quot;$(TargetDir)python&quot; (&#xD;&#xA;    mklink /j $(TargetDir)python $(SolutionDir)python&#xD;&#xA;)" />
   </Target>
 
 </Project>
