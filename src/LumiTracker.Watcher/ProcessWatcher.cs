@@ -19,13 +19,13 @@
 
     public class ProcessWatcher
     {
-        private readonly ILogger<ProcessWatcher> _logger;
-        private readonly Config _cfg;
+        private readonly ILogger<ProcessWatcher> logger;
+        private ConfigData cfg;
 
-        public ProcessWatcher(ILogger<ProcessWatcher> logger, Config cfg)
+        public ProcessWatcher(ILogger<ProcessWatcher> logger, ConfigData cfg)
         {
-            _logger = logger;
-            _cfg = cfg;
+            this.logger = logger;
+            this.cfg    = cfg;
         }
 
         public async Task StartWindowWatcher(WindowInfo info, int interval)
@@ -35,7 +35,6 @@
                 FileName = "python/python.exe",
                 Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {info.title}",
                 UseShellExecute = false,
-                RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
             };
@@ -46,7 +45,7 @@
             
             if (!process.Start())
             {
-                _logger.LogError("Failed to start subprocess.");
+                logger.LogError("Failed to start subprocess.");
                 return;
             }
             ChildProcessTracker.AddProcess(process);
@@ -56,12 +55,12 @@
             {
                 await Task.Delay(interval);
             }
-            _logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
+            logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
         }
 
         public async Task Start()
         {
-            int interval = _cfg.proc_watch_interval * 1000;
+            int interval = cfg.proc_watch_interval * 1000;
             while (true)
             {
                 var info = FindProcessWindow();
@@ -76,19 +75,19 @@
 
         public WindowInfo FindProcessWindow()
         {
-            var processName = _cfg.proc_name;
+            var processName = cfg.proc_name;
             var info = new WindowInfo();
 
             var processes = GetProcessByName(processName);
             if (processes.Count == 0)
             {
-                _logger.LogInformation($"No process found with name: {processName}");
+                logger.LogInformation($"No process found with name: {processName}");
                 return info;
             }
 
             if (processes.Count > 1)
             {
-                _logger.LogWarning($"Found multiple processes with name: {processName}, using the first one");
+                logger.LogWarning($"Found multiple processes with name: {processName}, using the first one");
             }
 
             var proc = processes[0];
@@ -96,22 +95,22 @@
 
             if (infos.Count == 0)
             {
-                _logger.LogInformation($"No windows found for process '{processName}' (PID: {proc.Id})");
+                logger.LogInformation($"No windows found for process '{processName}' (PID: {proc.Id})");
                 return info;
             }
 
             var foregroundHwnd = GetForegroundWindow();
             if (infos[0].hwnd != foregroundHwnd)
             {
-                _logger.LogInformation($"Window for process '{processName}' (PID: {proc.Id}) is not foreground");
+                logger.LogInformation($"Window for process '{processName}' (PID: {proc.Id}) is not foreground");
                 return info;
             }
 
             info = infos[0];
-            _logger.LogInformation($"Window titles for process '{processName}' (PID: {proc.Id}):");
+            logger.LogInformation($"Window titles for process '{processName}' (PID: {proc.Id}):");
             foreach (var i in infos)
             {
-                _logger.LogInformation($"  - {i.title}");
+                logger.LogInformation($"  - {i.title}");
             }
 
             return info;
@@ -184,7 +183,7 @@
             using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
             var logger = loggerFactory.CreateLogger<ProcessWatcher>();
 
-            var cfg = Config.Instance;
+            var cfg = Configuration.Data;
 
             var processWatcher = new ProcessWatcher(logger, cfg);
             await processWatcher.Start();

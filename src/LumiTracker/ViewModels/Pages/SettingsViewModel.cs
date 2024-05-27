@@ -1,4 +1,6 @@
-﻿using Wpf.Ui.Appearance;
+﻿using LumiTracker.Config;
+using System.Globalization;
+using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
 namespace LumiTracker.ViewModels.Pages
@@ -13,6 +15,9 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private ApplicationTheme _currentTheme = ApplicationTheme.Unknown;
 
+        [ObservableProperty]
+        private ELanguage _currentLanguage = ELanguage.zh_HANS;
+
         public void OnNavigatedTo()
         {
             if (!_isInitialized)
@@ -23,8 +28,11 @@ namespace LumiTracker.ViewModels.Pages
 
         private void InitializeViewModel()
         {
-            CurrentTheme = ApplicationThemeManager.GetAppTheme();
-            AppVersion = $"UiDesktopApp1 - {GetAssemblyVersion()}";
+            AppVersion      = $"UiDesktopApp1 - {GetAssemblyVersion()}";
+            Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
+            CurrentTheme    = curTheme;
+            Enum.TryParse(Configuration.Data.lang, out ELanguage curLang);
+            CurrentLanguage = curLang;
 
             _isInitialized = true;
         }
@@ -58,6 +66,17 @@ namespace LumiTracker.ViewModels.Pages
 
                     break;
             }
+        }
+
+        [RelayCommand]
+        private void OnChangeLanguage(string lang)
+        {
+            string ELangStr = lang.Replace('-', '_');
+            Enum.TryParse(ELangStr, out ELanguage curLang);
+            CurrentLanguage = curLang;
+
+            Configuration.Data.lang = lang;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
         }
     }
 }

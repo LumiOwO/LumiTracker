@@ -11,31 +11,9 @@ using Newtonsoft.Json.Linq;
 
 namespace LumiTracker.Config
 {
-
-    public class Config
+    #region ConfigData
+    public class ConfigData
     {
-        private static Config LoadConfig() {
-            string filePath = "assets/config.json";
-            string jsonString = File.ReadAllText(filePath);
-            var settings = new JsonLoadSettings
-            {
-                CommentHandling = CommentHandling.Ignore,
-                LineInfoHandling = LineInfoHandling.Load
-            };
-
-            var jObject = JObject.Parse(jsonString, settings);
-            return jObject.ToObject<Config>()!;
-        }
-
-        private static readonly Lazy<Config> _lazyInstance = new Lazy<Config>(() => LoadConfig());
-        public static Config Instance
-        {
-            get
-            {
-                return _lazyInstance.Value;
-            }
-        }
-
         public bool DEBUG { get; set; }
         public string debug_dir { get; set; }
         public int SKIP_FRAMES { get; set; }
@@ -55,6 +33,43 @@ namespace LumiTracker.Config
         public float[] event_screen_size { get; set; }
         public float[] my_event_pos { get; set; }
         public float[] op_event_pos { get; set; }
+        public string lang { get; set; }
+        public string theme { get; set; }
+    }
+
+
+    #endregion ConfigData
+
+    public enum ELanguage
+    {
+        zh_HANS,
+        en_US,
+    }
+
+    public class Configuration
+    {
+        private static ConfigData LoadConfig()
+        {
+            string filePath = "assets/config.json";
+            string jsonString = File.ReadAllText(filePath);
+            var settings = new JsonLoadSettings
+            {
+                CommentHandling = CommentHandling.Ignore,
+                LineInfoHandling = LineInfoHandling.Load
+            };
+
+            var jObject = JObject.Parse(jsonString, settings);
+            return jObject.ToObject<ConfigData>()!;
+        }
+
+        private static readonly Lazy<ConfigData> _lazyInstance = new Lazy<ConfigData>(() => LoadConfig());
+        public static ConfigData Data
+        {
+            get
+            {
+                return _lazyInstance.Value;
+            }
+        }
     }
 
 }

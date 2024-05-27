@@ -1,12 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 using Wpf.Ui.Controls;
 
+using LumiTracker.Config;
+
 namespace LumiTracker.ViewModels.Windows
 {
     public partial class MainWindowViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string _applicationTitle = "LumiTracker - 七圣召唤记牌器";
+        private string _applicationTitle = Lang.AppName;
 
         [ObservableProperty]
         private ObservableCollection<object> _menuItems = new()

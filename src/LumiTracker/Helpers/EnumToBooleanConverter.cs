@@ -13,12 +13,12 @@ namespace LumiTracker.Helpers
                 throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
             }
 
-            if (!Enum.IsDefined(typeof(ApplicationTheme), value))
+            if (!Enum.IsDefined(value.GetType(), value))
             {
                 throw new ArgumentException("ExceptionEnumToBooleanConverterValueMustBeAnEnum");
             }
 
-            var enumValue = Enum.Parse(typeof(ApplicationTheme), enumString);
+            var enumValue = Enum.Parse(value.GetType(), enumString);
 
             return enumValue.Equals(value);
         }
@@ -30,7 +30,7 @@ namespace LumiTracker.Helpers
                 throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
             }
 
-            return Enum.Parse(typeof(ApplicationTheme), enumString);
+            return Enum.Parse(targetType, enumString);
         }
     }
 }

@@ -11,7 +11,10 @@ using System.Reflection;
 using System.Windows.Threading;
 using Wpf.Ui;
 
+using LumiTracker.Config;
 using LumiTracker.Watcher;
+using System.Globalization;
+using Wpf.Ui.Appearance;
 
 namespace LumiTracker
 {
@@ -72,9 +75,9 @@ namespace LumiTracker
         /// </summary>
         private void OnStartup(object sender, StartupEventArgs e)
         {
+            Initialize();
+
             _host.Start();
-            // TODO: dotnet
-            Task task = Program.Main(new string[] { });
         }
 
         /// <summary>
@@ -93,6 +96,17 @@ namespace LumiTracker
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
+        }
+
+        private void Initialize()
+        {
+            var cfg = Configuration.Data;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(cfg.lang);
+
+            Enum.TryParse(cfg.theme, out ApplicationTheme curTheme);
+            ApplicationThemeManager.Apply(curTheme);
+
+            Task task = Program.Main(new string[] { });
         }
     }
 }

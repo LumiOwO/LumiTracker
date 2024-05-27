@@ -7,6 +7,8 @@
     xmlns:local="clr-namespace:LumiTracker.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:cfg="clr-namespace:LumiTracker.Config;assembly=LumiTracker.Config"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     Title="SettingsPage"
     d:DataContext="{d:DesignInstance local:SettingsPage,
                                      IsDesignTimeCreatable=False}"
@@ -24,22 +26,81 @@
         <TextBlock
             FontSize="20"
             FontWeight="Medium"
-            Text="Personalization" />
-        <TextBlock Margin="0,12,0,0" Text="Theme" />
-        <RadioButton
-            Margin="0,12,0,0"
-            Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
-            CommandParameter="theme_light"
-            Content="Light"
-            GroupName="themeSelect"
-            IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
-        <RadioButton
-            Margin="0,8,0,0"
-            Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
-            CommandParameter="theme_dark"
-            Content="Dark"
-            GroupName="themeSelect"
-            IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
+            Text="{x:Static cfg:Lang.AppName}" />
+
+        <Grid Margin="20,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock 
+                Margin="0,0,0,0" 
+                Text="Theme" 
+                FontSize="15"
+                FontWeight="Bold"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Column="0" />
+            <RadioButton
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="0,0,0,0"
+                Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
+                CommandParameter="theme_light"
+                Content="Light"
+                GroupName="themeSelect"
+                IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
+            <RadioButton
+                Grid.Column="2"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
+                CommandParameter="theme_dark"
+                Content="Dark"
+                GroupName="themeSelect"
+                IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
+        </Grid>
+
+        <Grid Margin="20,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock 
+                Margin="0,0,0,0" 
+                Text="Language" 
+                FontSize="15"
+                FontWeight="Bold"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Column="0" />
+            <RadioButton
+                Grid.Column="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,0,0,0"
+                Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
+                CommandParameter="zh-HANS"
+                Content="简体中文"
+                GroupName="languageSelect"
+                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=zh_HANS, Mode=OneWay}" />
+            <RadioButton
+                Grid.Column="2"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
+                CommandParameter="en-US"
+                Content="English"
+                GroupName="languageSelect"
+                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=en_US, Mode=OneWay}" />
+        </Grid>
 
         <TextBlock
             Margin="0,24,0,0"
@@ -47,5 +108,6 @@
             FontWeight="Medium"
             Text="About LumiTracker" />
         <TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
+        
     </StackPanel>
 </Page>
