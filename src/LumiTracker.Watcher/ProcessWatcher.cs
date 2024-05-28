@@ -19,10 +19,10 @@
 
     public class ProcessWatcher
     {
-        private readonly ILogger<ProcessWatcher> logger;
+        private readonly ILogger logger;
         private ConfigData cfg;
 
-        public ProcessWatcher(ILogger<ProcessWatcher> logger, ConfigData cfg)
+        public ProcessWatcher(ILogger logger, ConfigData cfg)
         {
             this.logger = logger;
             this.cfg    = cfg;
@@ -180,9 +180,7 @@
     {
         public static async Task Main(string[] args)
         {
-            using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-            var logger = loggerFactory.CreateLogger<ProcessWatcher>();
-
+            var logger = Configuration.Logger;
             var cfg = Configuration.Data;
 
             var processWatcher = new ProcessWatcher(logger, cfg);

@@ -15,6 +15,7 @@ using LumiTracker.Config;
 using LumiTracker.Watcher;
 using System.Globalization;
 using Wpf.Ui.Appearance;
+using Microsoft.Extensions.Logging;
 
 namespace LumiTracker
 {
@@ -47,9 +48,16 @@ namespace LumiTracker
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
 
+                // Localization
+                services.AddSingleton<ILocalizationService, LocalizationService>();
+
                 // Main window with navigation
                 services.AddSingleton<INavigationWindow, MainWindow>();
                 services.AddSingleton<MainWindowViewModel>();
+
+                // Deck window
+                services.AddSingleton<Window, DeckWindow>();
+                services.AddSingleton<DeckWindowViewModel>();
 
                 services.AddSingleton<DashboardPage>();
                 services.AddSingleton<DashboardViewModel>();
@@ -57,6 +65,7 @@ namespace LumiTracker
                 services.AddSingleton<DataViewModel>();
                 services.AddSingleton<SettingsPage>();
                 services.AddSingleton<SettingsViewModel>();
+
             }).Build();
 
         /// <summary>
@@ -75,8 +84,6 @@ namespace LumiTracker
         /// </summary>
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            Initialize();
-
             _host.Start();
         }
 
@@ -98,15 +105,5 @@ namespace LumiTracker
             // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
         }
 
-        private void Initialize()
-        {
-            var cfg = Configuration.Data;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(cfg.lang);
-
-            Enum.TryParse(cfg.theme, out ApplicationTheme curTheme);
-            ApplicationThemeManager.Apply(curTheme);
-
-            Task task = Program.Main(new string[] { });
-        }
     }
 }

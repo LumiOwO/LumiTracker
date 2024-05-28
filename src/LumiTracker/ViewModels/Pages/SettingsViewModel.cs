@@ -1,5 +1,8 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Services;
+using LumiTracker.ViewModels.Windows;
 using System.Globalization;
+using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
@@ -17,6 +20,13 @@ namespace LumiTracker.ViewModels.Pages
 
         [ObservableProperty]
         private ELanguage _currentLanguage = ELanguage.zh_HANS;
+
+        private readonly ILocalizationService _localizationService;
+
+        public SettingsViewModel(ILocalizationService localizationService)
+        {
+            _localizationService = localizationService;
+        }
 
         public void OnNavigatedTo()
         {
@@ -46,6 +56,7 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         private void OnChangeTheme(string parameter)
         {
+            var cfg = Configuration.Data;
             switch (parameter)
             {
                 case "theme_light":
@@ -54,6 +65,7 @@ namespace LumiTracker.ViewModels.Pages
 
                     ApplicationThemeManager.Apply(ApplicationTheme.Light);
                     CurrentTheme = ApplicationTheme.Light;
+                    cfg.theme = "Light";
 
                     break;
 
@@ -63,20 +75,24 @@ namespace LumiTracker.ViewModels.Pages
 
                     ApplicationThemeManager.Apply(ApplicationTheme.Dark);
                     CurrentTheme = ApplicationTheme.Dark;
+                    cfg.theme = "Dark";
 
                     break;
             }
+            Configuration.Save();
         }
 
         [RelayCommand]
         private void OnChangeLanguage(string lang)
         {
+            _localizationService.ChangeLanguage(lang);
+
             string ELangStr = lang.Replace('-', '_');
             Enum.TryParse(ELangStr, out ELanguage curLang);
             CurrentLanguage = curLang;
 
             Configuration.Data.lang = lang;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            Configuration.Save();
         }
     }
 }
