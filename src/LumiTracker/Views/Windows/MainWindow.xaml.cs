@@ -12,6 +12,11 @@ using LumiTracker.Services;
 using LumiTracker.Views.Pages;
 using System.Windows.Navigation;
 using LumiTracker.ViewModels.Pages;
+using System.Windows.Controls;
+using System.Windows;
+using Windows.System;
+using Wpf.Ui.Tray.Controls;
+using System.Drawing;
 
 namespace LumiTracker.Views.Windows
 {
@@ -29,6 +34,7 @@ namespace LumiTracker.Views.Windows
             Activated         += MainWindow_Activated;
             Loaded            += MainWindow_Loaded;
             ContentRendered   += MainWindow_ContentRendered;
+            Closing           += MainWindow_Closing;
 
             ShowActivated        = false;
             ViewModel            = viewModel;
@@ -40,6 +46,12 @@ namespace LumiTracker.Views.Windows
             SetPageService(pageService);
 
             navigationService.SetNavigationControl(RootNavigation);
+
+            TrayIcon.Menu!.DataContext = this;
+
+            int n = ViewModel.TrayMenuItems.Count;
+            ViewModel.TrayMenuItems[0].Command     = ShowMainWindowCommand;
+            ViewModel.TrayMenuItems[n - 1].Command = ExitCommand;
         }
 
         #region INavigationWindow methods
@@ -77,7 +89,22 @@ namespace LumiTracker.Views.Windows
 
         private void MainWindow_Activated(object? sender, EventArgs e)
         {
-            
+            ShowInTaskbar = true;
+        }
+
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            string behavior = Configuration.Data.closing_behavior;
+            if (behavior == "Minimize")
+            {
+                e.Cancel      = true; // Cancel the default close operation
+                WindowState   = WindowState.Minimized;
+                ShowInTaskbar = false;
+            }
+            else if (behavior == "Quit")
+            {
+                e.Cancel      = false;
+            }
         }
 
         protected override void OnClosed(EventArgs e)
@@ -85,6 +112,7 @@ namespace LumiTracker.Views.Windows
             base.OnClosed(e);
 
             // Make sure that closing this window will begin the process of closing the application.
+            // TODO: config
             Application.Current.Shutdown();
         }
 
@@ -96,6 +124,26 @@ namespace LumiTracker.Views.Windows
         public void SetServiceProvider(IServiceProvider serviceProvider)
         {
             throw new NotImplementedException();
+        }
+
+        [RelayCommand]
+        public void ShowMainWindow()
+        {
+            Configuration.Logger.LogDebug("Tray clicked");
+
+            Show();
+            if (WindowState == WindowState.Minimized)
+            {
+                WindowState = WindowState.Normal;
+            }
+            Focus();
+        }
+
+        [RelayCommand]
+        public void Exit()
+        {
+            Closing -= MainWindow_Closing;
+            Close();
         }
     }
 }

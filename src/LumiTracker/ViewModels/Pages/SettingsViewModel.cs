@@ -16,10 +16,13 @@ namespace LumiTracker.ViewModels.Pages
         private string _appVersion = String.Empty;
 
         [ObservableProperty]
-        private ApplicationTheme _currentTheme = ApplicationTheme.Unknown;
+        private ELanguage _currentLanguage = ELanguage.zh_HANS;
 
         [ObservableProperty]
-        private ELanguage _currentLanguage = ELanguage.zh_HANS;
+        private EClosingBehavior _currentClosingBehavior = EClosingBehavior.Minimize;
+
+        [ObservableProperty]
+        private ApplicationTheme _currentTheme = ApplicationTheme.Unknown;
 
         private readonly ILocalizationService _localizationService;
 
@@ -54,6 +57,29 @@ namespace LumiTracker.ViewModels.Pages
         }
 
         [RelayCommand]
+        private void OnChangeLanguage(string lang)
+        {
+            _localizationService.ChangeLanguage(lang);
+
+            string ELangStr = lang.Replace('-', '_');
+            Enum.TryParse(ELangStr, out ELanguage curLang);
+            CurrentLanguage = curLang;
+
+            Configuration.Data.lang = lang;
+            Configuration.Save();
+        }
+
+        [RelayCommand]
+        private void OnChangeClosingBehavior(string closing_behavior)
+        {
+            Enum.TryParse(closing_behavior, out EClosingBehavior curBehavior);
+            CurrentClosingBehavior = curBehavior;
+
+            Configuration.Data.closing_behavior = closing_behavior;
+            Configuration.Save();
+        }
+
+        [RelayCommand]
         private void OnChangeTheme(string parameter)
         {
             var cfg = Configuration.Data;
@@ -82,17 +108,6 @@ namespace LumiTracker.ViewModels.Pages
             Configuration.Save();
         }
 
-        [RelayCommand]
-        private void OnChangeLanguage(string lang)
-        {
-            _localizationService.ChangeLanguage(lang);
-
-            string ELangStr = lang.Replace('-', '_');
-            Enum.TryParse(ELangStr, out ELanguage curLang);
-            CurrentLanguage = curLang;
-
-            Configuration.Data.lang = lang;
-            Configuration.Save();
-        }
+        
     }
 }

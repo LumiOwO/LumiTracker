@@ -13,9 +13,11 @@ using Microsoft.Extensions.Logging;
 namespace LumiTracker.Config
 {
     #region ConfigData
+
     public class ConfigData
     {
         public bool DEBUG { get; set; }
+        public bool DEBUG_SAVE { get; set; }
         public string debug_dir { get; set; }
         public int SKIP_FRAMES { get; set; }
         public int LOG_INTERVAL { get; set; }
@@ -35,8 +37,10 @@ namespace LumiTracker.Config
         public float[] my_event_pos { get; set; }
         public float[] op_event_pos { get; set; }
         public string lang { get; set; }
+        public string closing_behavior { get; set; }
         public string theme { get; set; }
     }
+
 
 
     #endregion ConfigData
@@ -45,6 +49,12 @@ namespace LumiTracker.Config
     {
         zh_HANS,
         en_US,
+    }
+
+    public enum EClosingBehavior
+    {
+        Quit,
+        Minimize,
     }
 
     public class Configuration
@@ -57,11 +67,11 @@ namespace LumiTracker.Config
 
         private static readonly string configFilePath = "assets/config.json";
 
-        private Configuration() 
+        private Configuration()
         {
             _data = LoadConfig();
-            using var loggerFactory = LoggerFactory.Create(builder => 
-            { 
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
                 builder
                     .AddConsole()
                     .SetMinimumLevel(_data.DEBUG ? LogLevel.Debug : LogLevel.Information);

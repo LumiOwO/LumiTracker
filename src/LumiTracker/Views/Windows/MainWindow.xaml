@@ -6,7 +6,8 @@
     xmlns:local="clr-namespace:LumiTracker.Views.Windows"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:tb="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Wpf"
+    xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
+    
     Title="{Binding ViewModel.ApplicationTitle, Mode=OneWay}"
     Width="1100"
     Height="650"
@@ -89,8 +90,36 @@
         <ContentPresenter x:Name="RootContentDialog" Grid.Row="1" />
 
         <!--<tb:TaskbarIcon
-            ToolTipText="ToolTip"
+            ToolTipText="{Binding ViewModel.ApplicationTitle, Mode=OneWay}"
             IconSource="pack://application:,,,/wpfui-icon.ico"
         />-->
+        <!--<tb:TaskbarIcon 
+            x:Name="TaskbarIcon"
+            NoLeftClickDelay="True"
+            LeftClickCommand="{Binding ShowMainWindowCommand}"
+            RightClickCommand="{Binding ShowMenuCommand}"
+            ToolTipText="{Binding ViewModel.ApplicationTitle, Mode=OneWay}" />-->
+
+        <tray:NotifyIcon
+            x:Name="TrayIcon"
+            Grid.Row="0"
+            Icon="pack://application:,,,/Assets/wpfui-icon-256.png"
+            FocusOnLeftClick="True"
+            MenuOnRightClick="True"
+            TooltipText="{Binding ViewModel.ApplicationTitle, Mode=OneWay}">
+            <tray:NotifyIcon.Menu>
+                <ContextMenu ItemsSource = "{Binding ViewModel.TrayMenuItems, Mode=OneWay}" />
+            </tray:NotifyIcon.Menu>
+
+            <!--<tray:NotifyIcon.Menu>
+                <ContextMenu>
+                    --><!--<ui:MenuItem Header="Main" Tag="A" ></ui:MenuItem>--><!--
+                </ContextMenu>
+            </tray:NotifyIcon.Menu>-->
+        </tray:NotifyIcon>
     </Grid>
+
+
+    
+    
 </ui:FluentWindow>

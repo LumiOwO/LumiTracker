@@ -28,6 +28,81 @@
             FontWeight="Medium"
             Text="{x:Static cfg:Lang.AppName}" />
 
+        <Grid Margin="20,20,0,0" IsEnabled="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock 
+                Margin="0,0,0,2" 
+                Text="语言" 
+                FontSize="15"
+                FontWeight="Bold"
+                Foreground="DarkGray"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Column="0" />
+            <RadioButton
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="0,0,0,0"
+                Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
+                CommandParameter="zh-HANS"
+                Content="简体中文"
+                GroupName="languageSelect"
+                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=zh_HANS, Mode=OneWay}" />
+            <RadioButton
+                Grid.Column="2"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
+                CommandParameter="en-US"
+                Content="English  （暂不支持切换）"
+                GroupName="languageSelect"
+                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=en_US, Mode=OneWay}" />
+        </Grid>
+
+        <Grid Margin="20,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock 
+                Margin="0,0,0,2" 
+                Text="关闭窗口时" 
+                FontSize="15"
+                FontWeight="Bold"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Column="0" />
+            <RadioButton
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="0,0,0,0"
+                Command="{Binding ViewModel.ChangeClosingBehaviorCommand, Mode=OneWay}"
+                CommandParameter="Quit"
+                Content="退出程序"
+                GroupName="closingBehaviorSelect"
+                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=zh_HANS, Mode=OneWay}" />
+            <RadioButton
+                Grid.Column="2"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Command="{Binding ViewModel.ChangeClosingBehaviorCommand, Mode=OneWay}"
+                CommandParameter="Minimize"
+                Content="最小化到系统托盘"
+                GroupName="closingBehaviorSelect"
+                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=en_US, Mode=OneWay}" />
+        </Grid>
+
         <Grid Margin="20,20,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120" />
@@ -36,7 +111,7 @@
             </Grid.ColumnDefinitions>
             
             <TextBlock 
-                Margin="0,0,0,0" 
+                Margin="0,0,0,2" 
                 Text="Theme" 
                 FontSize="15"
                 FontWeight="Bold"
@@ -65,42 +140,7 @@
                 IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
         </Grid>
 
-        <Grid Margin="20,20,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <TextBlock 
-                Margin="0,0,0,0" 
-                Text="Language" 
-                FontSize="15"
-                FontWeight="Bold"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Grid.Column="0" />
-            <RadioButton
-                Grid.Column="1"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Margin="0,0,0,0"
-                Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
-                CommandParameter="zh-HANS"
-                Content="简体中文"
-                GroupName="languageSelect"
-                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=zh_HANS, Mode=OneWay}" />
-            <RadioButton
-                Grid.Column="2"
-                Margin="0,0,0,0"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
-                CommandParameter="en-US"
-                Content="English"
-                GroupName="languageSelect"
-                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=en_US, Mode=OneWay}" />
-        </Grid>
+        
 
         <TextBlock
             Margin="0,24,0,0"

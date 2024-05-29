@@ -6,6 +6,7 @@ using LumiTracker.Services;
 using LumiTracker.ViewModels.Pages;
 using LumiTracker.Views.Pages;
 using Wpf.Ui.Appearance;
+using Wpf.Ui;
 
 namespace LumiTracker.ViewModels.Windows
 {
@@ -45,7 +46,8 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private ObservableCollection<MenuItem> _trayMenuItems = new()
         {
-            new MenuItem { Header = "Home", Tag = "tray_home" }
+            new MenuItem { Header = "Home", Tag = "A" },
+            new MenuItem { Header = "Quit", Tag = "B" },
         };
 
         private readonly IServiceProvider _serviceProvider;
