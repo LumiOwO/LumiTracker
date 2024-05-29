@@ -167,9 +167,9 @@ class WindowWatcher:
             logging.info(f"op event: {self.db['events'][op_id].get('name_CN', 'None')}")
             logging.debug(op_dist)
 
-        if cfg.DEBUG:
-            my_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"my_image{self.frame_count}.png"))
-            op_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"op_image{self.frame_count}.png"))
+        # if cfg.DEBUG:
+        #     my_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"my_image{self.frame_count}.png"))
+        #     op_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"op_image{self.frame_count}.png"))
 
     # Called Every Time A New Frame Is Available
     def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):

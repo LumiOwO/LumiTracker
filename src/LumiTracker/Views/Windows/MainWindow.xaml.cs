@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using LumiTracker.Services;
 using LumiTracker.Views.Pages;
+using System.Windows.Navigation;
+using LumiTracker.ViewModels.Pages;
 
 namespace LumiTracker.Views.Windows
 {
@@ -17,16 +19,10 @@ namespace LumiTracker.Views.Windows
     {
         public MainWindowViewModel ViewModel { get; }
 
-        private readonly IServiceProvider _serviceProvider;
-
-        private readonly ILocalizationService _localizationService;
-
         public MainWindow(
             MainWindowViewModel  viewModel,
             IPageService         pageService,
-            INavigationService   navigationService,
-            IServiceProvider     serviceProvider,
-            ILocalizationService localizationService
+            INavigationService   navigationService
         )
         {
             SourceInitialized += MainWindow_SourceInitialized;
@@ -37,8 +33,6 @@ namespace LumiTracker.Views.Windows
             ShowActivated        = false;
             ViewModel            = viewModel;
             DataContext          = this;
-            _serviceProvider     = serviceProvider;
-            _localizationService = localizationService;
 
             SystemThemeWatcher.Watch(this);
 
@@ -72,19 +66,9 @@ namespace LumiTracker.Views.Windows
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            var cfg = Configuration.Data;
-            _localizationService.ChangeLanguage(cfg.lang);
+            ViewModel.Init();
 
-            Enum.TryParse(cfg.theme, out ApplicationTheme curTheme);
-            ApplicationThemeManager.Apply(curTheme);
-
-            // TODO
-            Task task = Program.Main(new string[] { });
-
-            Window window = (_serviceProvider.GetService(typeof(Window)) as Window)!;
-            window.Show();
-
-            RootNavigation.Navigate(typeof(DashboardPage));
+            RootNavigation.Navigate(typeof(StartPage));
         }
 
         private void MainWindow_ContentRendered(object? sender, EventArgs e)

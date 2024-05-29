@@ -2,6 +2,10 @@
 using Wpf.Ui.Controls;
 
 using LumiTracker.Config;
+using LumiTracker.Services;
+using LumiTracker.ViewModels.Pages;
+using LumiTracker.Views.Pages;
+using Wpf.Ui.Appearance;
 
 namespace LumiTracker.ViewModels.Windows
 {
@@ -17,13 +21,13 @@ namespace LumiTracker.ViewModels.Windows
             {
                 Content = "Home",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Home24 },
-                TargetPageType = typeof(Views.Pages.DashboardPage)
+                TargetPageType = typeof(Views.Pages.StartPage)
             },
             new NavigationViewItem()
             {
                 Content = "Data",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.DataHistogram24 },
-                TargetPageType = typeof(Views.Pages.DataPage)
+                TargetPageType = typeof(Views.Pages.AboutPage)
             }
         };
 
@@ -43,5 +47,30 @@ namespace LumiTracker.ViewModels.Windows
         {
             new MenuItem { Header = "Home", Tag = "tray_home" }
         };
+
+        private readonly IServiceProvider _serviceProvider;
+
+        public MainWindowViewModel(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
+        public void Init()
+        {
+            var cfg = Configuration.Data;
+            ILocalizationService localizationService = (
+                _serviceProvider.GetService(typeof(ILocalizationService)) as ILocalizationService
+            )!;
+            localizationService.ChangeLanguage(cfg.lang);
+
+            Enum.TryParse(cfg.theme, out ApplicationTheme curTheme);
+            ApplicationThemeManager.Apply(curTheme);
+
+
+            StartViewModel startViewModel = (
+                _serviceProvider.GetService(typeof(StartViewModel)) as StartViewModel
+            )!;
+            startViewModel.Init();
+        }
     }
 }

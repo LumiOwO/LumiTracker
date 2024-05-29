@@ -16,6 +16,7 @@ using LumiTracker.Watcher;
 using System.Globalization;
 using Wpf.Ui.Appearance;
 using Microsoft.Extensions.Logging;
+using LumiTracker.Models;
 
 namespace LumiTracker
 {
@@ -56,15 +57,17 @@ namespace LumiTracker
                 services.AddSingleton<MainWindowViewModel>();
 
                 // Deck window
-                services.AddSingleton<Window, DeckWindow>();
+                services.AddSingleton<IDeckWindow, DeckWindow>();
                 services.AddSingleton<DeckWindowViewModel>();
 
-                services.AddSingleton<DashboardPage>();
-                services.AddSingleton<DashboardViewModel>();
-                services.AddSingleton<DataPage>();
-                services.AddSingleton<DataViewModel>();
+                services.AddSingleton<StartPage>();
+                services.AddSingleton<StartViewModel>();
+                services.AddSingleton<AboutPage>();
+                services.AddSingleton<AboutViewModel>();
                 services.AddSingleton<SettingsPage>();
                 services.AddSingleton<SettingsViewModel>();
+
+                services.AddSingleton<GameWatcher>();
 
             }).Build();
 

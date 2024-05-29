@@ -1,10 +1,14 @@
-﻿using LumiTracker.Models;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using Wpf.Ui.Controls;
 
 namespace LumiTracker.ViewModels.Pages
 {
-    public partial class DataViewModel : ObservableObject, INavigationAware
+    public struct DataColor
+    {
+        public Brush Color { get; set; }
+    }
+
+    public partial class AboutViewModel : ObservableObject, INavigationAware
     {
         private bool _isInitialized = false;
 

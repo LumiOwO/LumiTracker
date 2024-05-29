@@ -1,5 +1,5 @@
 {
-  "DEBUG": false,
+  "DEBUG": true,
   "debug_dir": "temp",
   "SKIP_FRAMES": 0,
   "LOG_INTERVAL": 3,

@@ -60,7 +60,12 @@ namespace LumiTracker.Config
         private Configuration() 
         {
             _data = LoadConfig();
-            using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            using var loggerFactory = LoggerFactory.Create(builder => 
+            { 
+                builder
+                    .AddConsole()
+                    .SetMinimumLevel(_data.DEBUG ? LogLevel.Debug : LogLevel.Information);
+            });
             _logger = loggerFactory.CreateLogger<Configuration>();
         }
 

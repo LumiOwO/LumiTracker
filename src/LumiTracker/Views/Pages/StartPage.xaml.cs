@@ -3,13 +3,13 @@ using Wpf.Ui.Controls;
 
 namespace LumiTracker.Views.Pages
 {
-    public partial class DataPage : INavigableView<DataViewModel>
+    public partial class StartPage : INavigableView<StartViewModel>
     {
-        public DataViewModel ViewModel { get; }
+        public StartViewModel ViewModel { get; }
 
-        public DataPage(DataViewModel viewModel)
+        public StartPage(StartViewModel viewModel)
         {
-            ViewModel = viewModel;
+            ViewModel   = viewModel;
             DataContext = this;
 
             InitializeComponent();

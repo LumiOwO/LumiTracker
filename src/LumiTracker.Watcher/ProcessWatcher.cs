@@ -17,45 +17,31 @@
         public string title { get; set; } = "";
     }
 
+    public delegate void OnGenshinWindowFoundCallback();
+
+    public delegate void OnWindowWatcherExitCallback();
+
+    public delegate void OnGameStartedCallback();
+
+    public delegate void OnMyEventCardCallback();
+
+    public delegate void OnOpEventCardCallback();
+
     public class ProcessWatcher
     {
         private readonly ILogger logger;
         private ConfigData cfg;
 
+        public event OnGenshinWindowFoundCallback? GenshinWindowFound;
+        public event OnWindowWatcherExitCallback?  WindowWatcherExit;
+        public event OnGameStartedCallback? GameStarted;
+        public event OnMyEventCardCallback? MyEventCard;
+        public event OnOpEventCardCallback? OpEventCard;
+
         public ProcessWatcher(ILogger logger, ConfigData cfg)
         {
             this.logger = logger;
             this.cfg    = cfg;
-        }
-
-        public async Task StartWindowWatcher(WindowInfo info, int interval)
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "python/python.exe",
-                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {info.title}",
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-            };
-
-            var process = new Process();
-            process.StartInfo = startInfo;
-            process.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
-            
-            if (!process.Start())
-            {
-                logger.LogError("Failed to start subprocess.");
-                return;
-            }
-            ChildProcessTracker.AddProcess(process);
-            process.BeginErrorReadLine();
-
-            while (!process.HasExited)
-            {
-                await Task.Delay(interval);
-            }
-            logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
         }
 
         public async Task Start()
@@ -173,6 +159,45 @@
         }
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        public async Task StartWindowWatcher(WindowInfo info, int interval)
+        {
+            logger.LogInformation($"Begin to start window watcher");
+            
+            GenshinWindowFound?.Invoke();
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "python/python.exe",
+                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {info.title}",
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+            };
+
+            var process = new Process();
+            process.StartInfo = startInfo;
+            process.ErrorDataReceived += WindowWatcherEventHandler;
+
+            if (!process.Start())
+            {
+                logger.LogError("Failed to start subprocess.");
+                return;
+            }
+            ChildProcessTracker.AddProcess(process);
+            process.BeginErrorReadLine();
+
+            while (!process.HasExited)
+            {
+                await Task.Delay(interval);
+            }
+            logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
+            WindowWatcherExit?.Invoke();
+        }
+
+        private void WindowWatcherEventHandler(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+        }
     }
 
     // Main method to start the process watcher

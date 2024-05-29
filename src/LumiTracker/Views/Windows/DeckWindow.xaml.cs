@@ -1,42 +1,41 @@
-﻿using LumiTracker.ViewModels.Windows;
+﻿using LumiTracker.Models;
+using LumiTracker.Services;
+using LumiTracker.ViewModels.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Navigation;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
 namespace LumiTracker.Views.Windows
 {
-    /// <summary>
-    /// Interaction logic for DeckWindow.xaml
-    /// </summary>
-    public partial class DeckWindow : Window
+    public interface IDeckWindow
     {
-        public DeckWindow()
-        {
-            InitializeComponent();
+        void ShowWindow();
+        void HideWindow();
+        void CloseWindow();
+    }
 
+
+    public partial class DeckWindow : IDeckWindow
+    {
+        public DeckWindowViewModel ViewModel { get; }
+
+        private GameWatcher _gameWatcher;
+
+        public DeckWindow(DeckWindowViewModel viewModel, GameWatcher gameWatcher)
+        {
             ShowActivated = false;
+            ViewModel     = viewModel;
+            DataContext   = this;
+            _gameWatcher  = gameWatcher;
+
+            InitializeComponent();
         }
 
-        //#region INavigationWindow methods
+        public void ShowWindow() => Show();
+        public void HideWindow() => Hide();
 
-        //public INavigationView GetNavigation() => RootNavigation;
-
-        //public bool Navigate(Type pageType) => RootNavigation.Navigate(pageType);
-
-        //public void SetPageService(IPageService pageService) => RootNavigation.SetPageService(pageService);
-
-        //public void ShowWindow() => Show();
-
-        //public void CloseWindow() => Close();
-
-        //#endregion INavigationWindow methods
-
-        //protected override void OnClosed(EventArgs e)
-        //{
-        //    base.OnClosed(e);
-
-        //    // Make sure that closing this window will begin the process of closing the application.
-        //    Application.Current.Shutdown();
-        //}
+        public void CloseWindow() => Close();
     }
 }
