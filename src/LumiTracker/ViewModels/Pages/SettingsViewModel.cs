@@ -16,19 +16,28 @@ namespace LumiTracker.ViewModels.Pages
         private string _appVersion = String.Empty;
 
         [ObservableProperty]
-        private ELanguage _currentLanguage = ELanguage.zh_HANS;
+        private ELanguage _currentLanguage;
 
         [ObservableProperty]
-        private EClosingBehavior _currentClosingBehavior = EClosingBehavior.Minimize;
+        private EClosingBehavior _currentClosingBehavior;
 
         [ObservableProperty]
-        private ApplicationTheme _currentTheme = ApplicationTheme.Unknown;
+        private ApplicationTheme _currentTheme;
 
         private readonly ILocalizationService _localizationService;
 
         public SettingsViewModel(ILocalizationService localizationService)
         {
             _localizationService = localizationService;
+
+            AppVersion = $"UiDesktopApp1 - {GetAssemblyVersion()}";
+
+            Enum.TryParse(Configuration.Data.lang, out ELanguage curLang);
+            CurrentLanguage = curLang;
+            Enum.TryParse(Configuration.Data.lang, out EClosingBehavior curBehavior);
+            CurrentClosingBehavior = curBehavior;
+            Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
+            CurrentTheme = curTheme;
         }
 
         public void OnNavigatedTo()
@@ -41,11 +50,6 @@ namespace LumiTracker.ViewModels.Pages
 
         private void InitializeViewModel()
         {
-            AppVersion      = $"UiDesktopApp1 - {GetAssemblyVersion()}";
-            Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
-            CurrentTheme    = curTheme;
-            Enum.TryParse(Configuration.Data.lang, out ELanguage curLang);
-            CurrentLanguage = curLang;
 
             _isInitialized = true;
         }

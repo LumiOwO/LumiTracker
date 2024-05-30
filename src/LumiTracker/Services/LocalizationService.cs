@@ -5,9 +5,19 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace LumiTracker.Services
-{
+{ 
+    public class LocalizationExtension : Binding
+    {
+        public LocalizationExtension(string name) : base("[" + name + "]")
+        {
+            Mode   = BindingMode.OneWay;
+            Source = LocalizationSource.Instance;
+        }
+    }
+
     public interface ILocalizationService
     {
         void ChangeLanguage(string lang);
@@ -17,9 +27,8 @@ namespace LumiTracker.Services
     {
         public void ChangeLanguage(string lang)
         {
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
-
-            // TODO: refresh resources
+            if (string.IsNullOrEmpty(lang)) lang = "en-US";
+            LocalizationSource.Instance.CurrentCulture = new CultureInfo(lang);
         }
     }
 }

@@ -7,8 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
+    xmlns:svs="clr-namespace:LumiTracker.Services"
     
-    Title="{Binding ViewModel.ApplicationTitle, Mode=OneWay}"
+    Title="{svs:Localization AppTitle}"
     Width="1100"
     Height="650"
     d:DataContext="{d:DesignInstance local:MainWindow,
@@ -41,7 +42,7 @@
 
         <ui:TitleBar
             x:Name="TitleBar"
-            Title="{Binding ViewModel.ApplicationTitle}"
+            Title="{svs:Localization AppTitle}"
             Grid.Row="0"
             Margin="0"
             CloseWindowByDoubleClickOnIcon="False"
@@ -106,7 +107,7 @@
             Icon="pack://application:,,,/Assets/wpfui-icon-256.png"
             FocusOnLeftClick="True"
             MenuOnRightClick="True"
-            TooltipText="{Binding ViewModel.ApplicationTitle, Mode=OneWay}">
+            TooltipText="{svs:Localization AppTitle}">
             <tray:NotifyIcon.Menu>
                 <ContextMenu ItemsSource = "{Binding ViewModel.TrayMenuItems, Mode=OneWay}" />
             </tray:NotifyIcon.Menu>
