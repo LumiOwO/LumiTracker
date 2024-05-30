@@ -17,12 +17,16 @@ using System.Windows;
 using Windows.System;
 using Wpf.Ui.Tray.Controls;
 using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace LumiTracker.Views.Windows
 {
     public partial class MainWindow : INavigationWindow
     {
         public MainWindowViewModel ViewModel { get; }
+
+        private IntPtr hwnd = 0;
 
         public MainWindow(
             MainWindowViewModel  viewModel,
@@ -78,6 +82,8 @@ namespace LumiTracker.Views.Windows
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            hwnd = new WindowInteropHelper(this).Handle;
+
             ViewModel.Init();
 
             RootNavigation.Navigate(typeof(StartPage));
@@ -92,14 +98,21 @@ namespace LumiTracker.Views.Windows
             ShowInTaskbar = true;
         }
 
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
             string behavior = Configuration.Data.closing_behavior;
             if (behavior == "Minimize")
             {
                 e.Cancel      = true; // Cancel the default close operation
-                WindowState   = WindowState.Minimized;
                 ShowInTaskbar = false;
+                //WindowState   = WindowState.Minimized;
+
+                const int WM_SYSCOMMAND = 0x0112;
+                const int SC_MINIMIZE   = 0xF020;
+                SendMessage(hwnd, WM_SYSCOMMAND, (IntPtr)SC_MINIMIZE, IntPtr.Zero);
             }
             else if (behavior == "Quit")
             {

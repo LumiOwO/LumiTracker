@@ -34,7 +34,7 @@ namespace LumiTracker.ViewModels.Pages
 
             Enum.TryParse(Configuration.Data.lang, out ELanguage curLang);
             CurrentLanguage = curLang;
-            Enum.TryParse(Configuration.Data.lang, out EClosingBehavior curBehavior);
+            Enum.TryParse(Configuration.Data.closing_behavior, out EClosingBehavior curBehavior);
             CurrentClosingBehavior = curBehavior;
             Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
             CurrentTheme = curTheme;
