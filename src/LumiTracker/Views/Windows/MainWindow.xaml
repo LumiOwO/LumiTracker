@@ -46,7 +46,10 @@
             CloseWindowByDoubleClickOnIcon="False"
             >
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/Assets/wpfui-icon-256.png" />
+                <ui:SymbolIcon 
+                    Symbol="PlayingCards20"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                              />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
@@ -71,7 +74,7 @@
         <tray:NotifyIcon
             x:Name="TrayIcon"
             Grid.Row="0"
-            Icon="pack://application:,,,/Assets/wpfui-icon-256.png"
+            Icon="pack://application:,,,/LumiTracker.png"
             FocusOnLeftClick="True"
             MenuOnRightClick="True"
             TooltipText="{svs:Localization AppTitle}">
