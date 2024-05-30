@@ -52,10 +52,6 @@ namespace LumiTracker.Views.Windows
             navigationService.SetNavigationControl(RootNavigation);
 
             TrayIcon.Menu!.DataContext = this;
-
-            int n = ViewModel.TrayMenuItems.Count;
-            ViewModel.TrayMenuItems[0].Command     = ShowMainWindowCommand;
-            ViewModel.TrayMenuItems[n - 1].Command = ExitCommand;
         }
 
         #region INavigationWindow methods
@@ -84,7 +80,7 @@ namespace LumiTracker.Views.Windows
         {
             hwnd = new WindowInteropHelper(this).Handle;
 
-            ViewModel.Init();
+            ViewModel.Init(TrayMenuItemClickedCommand);
 
             RootNavigation.Navigate(typeof(StartPage));
         }
@@ -125,7 +121,6 @@ namespace LumiTracker.Views.Windows
             base.OnClosed(e);
 
             // Make sure that closing this window will begin the process of closing the application.
-            // TODO: config
             Application.Current.Shutdown();
         }
 
@@ -140,7 +135,19 @@ namespace LumiTracker.Views.Windows
         }
 
         [RelayCommand]
-        public void ShowMainWindow()
+        public void TrayMenuItemClicked(string parameter)
+        {
+            if (parameter == "tray_home")
+            {
+                TrayShowMainWindow();
+            }
+            else if (parameter == "tray_quit")
+            {
+                TrayExit();
+            }
+        }
+
+        public void TrayShowMainWindow()
         {
             Configuration.Logger.LogDebug("Tray clicked");
 
@@ -152,8 +159,7 @@ namespace LumiTracker.Views.Windows
             Focus();
         }
 
-        [RelayCommand]
-        public void Exit()
+        public void TrayExit()
         {
             Closing -= MainWindow_Closing;
             Close();

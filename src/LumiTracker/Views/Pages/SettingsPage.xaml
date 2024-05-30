@@ -9,7 +9,8 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:cfg="clr-namespace:LumiTracker.Config;assembly=LumiTracker.Config"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    Title="SettingsPage"
+    xmlns:svs="clr-namespace:LumiTracker.Services"
+    Title="{svs:Localization Settings}"
     d:DataContext="{d:DesignInstance local:SettingsPage,
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="450"
@@ -26,21 +27,20 @@
         <TextBlock
             FontSize="20"
             FontWeight="Medium"
-            Text="{x:Static cfg:Lang.AppName}" />
+            Text="{svs:Localization Settings}" />
 
-        <Grid Margin="20,20,0,0" IsEnabled="False">
+        <Grid Margin="10,20,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBlock 
                 Margin="0,0,0,2" 
-                Text="语言" 
+                Text="{svs:Localization Language}" 
                 FontSize="15"
                 FontWeight="Bold"
-                Foreground="DarkGray"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Grid.Column="0" />
@@ -61,21 +61,21 @@
                 VerticalAlignment="Center"
                 Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
                 CommandParameter="en-US"
-                Content="English  （暂不支持切换）"
+                Content="English"
                 GroupName="languageSelect"
                 IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=en_US, Mode=OneWay}" />
         </Grid>
 
-        <Grid Margin="20,20,0,0">
+        <Grid Margin="10,20,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBlock 
                 Margin="0,0,0,2" 
-                Text="关闭窗口时" 
+                Text="{svs:Localization ClosingBehavior}" 
                 FontSize="15"
                 FontWeight="Bold"
                 HorizontalAlignment="Left"
@@ -88,7 +88,7 @@
                 Margin="0,0,0,0"
                 Command="{Binding ViewModel.ChangeClosingBehaviorCommand, Mode=OneWay}"
                 CommandParameter="Quit"
-                Content="退出程序"
+                Content="{svs:Localization ClosingBehavior_Quit}"
                 GroupName="closingBehaviorSelect"
                 IsChecked="{Binding ViewModel.CurrentClosingBehavior, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Quit, Mode=OneWay}" />
             <RadioButton
@@ -98,21 +98,21 @@
                 VerticalAlignment="Center"
                 Command="{Binding ViewModel.ChangeClosingBehaviorCommand, Mode=OneWay}"
                 CommandParameter="Minimize"
-                Content="最小化到系统托盘"
+                Content="{svs:Localization ClosingBehavior_Minimize}"
                 GroupName="closingBehaviorSelect"
                 IsChecked="{Binding ViewModel.CurrentClosingBehavior, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Minimize, Mode=OneWay}" />
         </Grid>
 
-        <Grid Margin="20,20,0,0">
+        <Grid Margin="10,20,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
             <TextBlock 
                 Margin="0,0,0,2" 
-                Text="Theme" 
+                Text="{svs:Localization Theme}" 
                 FontSize="15"
                 FontWeight="Bold"
                 HorizontalAlignment="Left"
@@ -125,7 +125,7 @@
                 Margin="0,0,0,0"
                 Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
                 CommandParameter="theme_light"
-                Content="Light"
+                Content="{svs:Localization Theme_Light}"
                 GroupName="themeSelect"
                 IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
             <RadioButton
@@ -135,7 +135,7 @@
                 VerticalAlignment="Center"
                 Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
                 CommandParameter="theme_dark"
-                Content="Dark"
+                Content="{svs:Localization Theme_Dark}"
                 GroupName="themeSelect"
                 IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
         </Grid>

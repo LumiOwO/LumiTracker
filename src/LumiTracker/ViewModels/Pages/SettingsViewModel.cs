@@ -32,7 +32,7 @@ namespace LumiTracker.ViewModels.Pages
 
             AppVersion = $"UiDesktopApp1 - {GetAssemblyVersion()}";
 
-            Enum.TryParse(Configuration.Data.lang, out ELanguage curLang);
+            Enum.TryParse(Configuration.Data.lang.Replace('-', '_'), out ELanguage curLang);
             CurrentLanguage = curLang;
             Enum.TryParse(Configuration.Data.closing_behavior, out EClosingBehavior curBehavior);
             CurrentClosingBehavior = curBehavior;
@@ -63,11 +63,10 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         private void OnChangeLanguage(string lang)
         {
-            _localizationService.ChangeLanguage(lang);
-
-            string ELangStr = lang.Replace('-', '_');
-            Enum.TryParse(ELangStr, out ELanguage curLang);
+            Enum.TryParse(lang.Replace('-', '_'), out ELanguage curLang);
             CurrentLanguage = curLang;
+            
+            _localizationService.ChangeLanguage(lang);
 
             Configuration.Data.lang = lang;
             Configuration.Save();
