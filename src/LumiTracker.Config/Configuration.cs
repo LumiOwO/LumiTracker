@@ -14,6 +14,7 @@ namespace LumiTracker.Config
 {
     #region ConfigData
 
+    // Created by Visual Studio "Paste Special > Paste JSON As Classes"
     public class ConfigData
     {
         public bool DEBUG { get; set; }
@@ -21,7 +22,6 @@ namespace LumiTracker.Config
         public string debug_dir { get; set; }
         public int SKIP_FRAMES { get; set; }
         public int LOG_INTERVAL { get; set; }
-        public string proc_name { get; set; }
         public int proc_watch_interval { get; set; }
         public string database_dir { get; set; }
         public string events_ann_filename { get; set; }
@@ -39,6 +39,7 @@ namespace LumiTracker.Config
         public string lang { get; set; }
         public string closing_behavior { get; set; }
         public string theme { get; set; }
+        public string client_type { get; set; }
     }
 
 
@@ -55,6 +56,13 @@ namespace LumiTracker.Config
     {
         Quit,
         Minimize,
+    }
+
+    public enum EClientType
+    {
+        YuanShen,
+        Global,
+        Cloud,
     }
 
     public class Configuration

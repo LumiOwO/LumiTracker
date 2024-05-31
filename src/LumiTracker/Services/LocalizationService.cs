@@ -11,7 +11,8 @@ using LumiTracker.ViewModels;
 using LumiTracker.ViewModels.Windows;
 using LumiTracker.Views.Windows;
 using LumiTracker.Views.Pages;
-using Wpf.Ui;
+using LumiTracker.ViewModels.Pages;
+using LumiTracker.Helpers;
 
 namespace LumiTracker.Services
 { 
@@ -32,10 +33,14 @@ namespace LumiTracker.Services
     public class LocalizationService : ILocalizationService
     {
         private MainWindowViewModel _mainWindowViewModel;
+        private StartViewModel      _startViewModel;
+        private StartPage           _startPage;
 
-        public LocalizationService(MainWindowViewModel mainWindowViewModel, INavigationWindow mainWindow)
+        public LocalizationService(MainWindowViewModel mainWindowViewModel, StartViewModel startViewModel, StartPage startPage)
         {
             _mainWindowViewModel = mainWindowViewModel;
+            _startViewModel      = startViewModel;
+            _startPage           = startPage;
         }
 
         public void ChangeLanguage(string lang)
@@ -51,6 +56,12 @@ namespace LumiTracker.Services
 
             _mainWindowViewModel.HomeTrayMenuItem!.Header  = LocalizationSource.Instance["Tray_Home"];
             _mainWindowViewModel.QuitTrayMenuItem!.Header  = LocalizationSource.Instance["Tray_Quit"];
+
+            // Refresh start page
+            _startViewModel.ClientTypes = Enum.GetValues(typeof(EClientType)).Cast<EClientType>();
+            int prev_idx = _startPage.ClientTypeComboBox.SelectedIndex;
+            _startPage.ClientTypeComboBox.SelectedIndex = prev_idx == 0 ? 1 : 0;
+            _startPage.ClientTypeComboBox.SelectedIndex = prev_idx;
         }
     }
 }

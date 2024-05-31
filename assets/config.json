@@ -4,7 +4,6 @@
   "debug_dir": "temp",
   "SKIP_FRAMES": 0,
   "LOG_INTERVAL": 3,
-  "proc_name": "YuanShen.exe",
   "proc_watch_interval": 1,
   "database_dir": "assets/database",
   "events_ann_filename": "events.ann",
@@ -33,5 +32,6 @@
   ],
   "lang": "zh-HANS",
   "closing_behavior": "Minimize",
-  "theme": "Dark"
+  "theme": "Dark",
+  "client_type": "YuanShen"
 }

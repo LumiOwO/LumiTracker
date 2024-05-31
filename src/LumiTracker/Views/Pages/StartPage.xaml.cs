@@ -14,5 +14,12 @@ namespace LumiTracker.Views.Pages
 
             InitializeComponent();
         }
+
+        public void Init()
+        {
+            ViewModel.Init();
+
+            ClientTypeComboBox.SelectedValue = ViewModel.CurrentClientType;
+        }
     }
 }

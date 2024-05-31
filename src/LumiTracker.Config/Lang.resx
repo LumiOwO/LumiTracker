@@ -173,4 +173,20 @@
     <value>Home</value>
     <comment/>
   </data>
+  <data name="ClientType" xml:space="preserve">
+    <value>Client Type</value>
+    <comment/>
+  </data>
+  <data name="ClientType_YuanShen" xml:space="preserve">
+    <value>Chinese</value>
+    <comment/>
+  </data>
+  <data name="ClientType_Global" xml:space="preserve">
+    <value>Global</value>
+    <comment/>
+  </data>
+  <data name="ClientType_Cloud" xml:space="preserve">
+    <value>Cloud</value>
+    <comment/>
+  </data>
 </root>

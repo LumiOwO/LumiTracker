@@ -13,9 +13,6 @@ namespace LumiTracker.ViewModels.Pages
         private bool _isInitialized = false;
 
         [ObservableProperty]
-        private string _appVersion = String.Empty;
-
-        [ObservableProperty]
         private ELanguage _currentLanguage;
 
         [ObservableProperty]
@@ -29,15 +26,6 @@ namespace LumiTracker.ViewModels.Pages
         public SettingsViewModel(ILocalizationService localizationService)
         {
             _localizationService = localizationService;
-
-            AppVersion = $"UiDesktopApp1 - {GetAssemblyVersion()}";
-
-            Enum.TryParse(Configuration.Data.lang.Replace('-', '_'), out ELanguage curLang);
-            CurrentLanguage = curLang;
-            Enum.TryParse(Configuration.Data.closing_behavior, out EClosingBehavior curBehavior);
-            CurrentClosingBehavior = curBehavior;
-            Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
-            CurrentTheme = curTheme;
         }
 
         public void OnNavigatedTo()
@@ -50,14 +38,14 @@ namespace LumiTracker.ViewModels.Pages
 
         private void InitializeViewModel()
         {
+            Enum.TryParse(Configuration.Data.lang.Replace('-', '_'), out ELanguage curLang);
+            CurrentLanguage = curLang;
+            Enum.TryParse(Configuration.Data.closing_behavior, out EClosingBehavior curBehavior);
+            CurrentClosingBehavior = curBehavior;
+            Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
+            CurrentTheme = curTheme;
 
             _isInitialized = true;
-        }
-
-        private string GetAssemblyVersion()
-        {
-            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString()
-                ?? String.Empty;
         }
 
         [RelayCommand]

@@ -6,6 +6,9 @@
     xmlns:local="clr-namespace:LumiTracker.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:svs="clr-namespace:LumiTracker.Services"
+    xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:helpers="clr-namespace:LumiTracker.Helpers"
     Title="StartPage"
     d:DataContext="{d:DesignInstance local:StartPage,
                                      IsDesignTimeCreatable=False}"
@@ -16,21 +19,53 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <Grid VerticalAlignment="Top">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+    <Page.Resources>
+        <helpers:EnumToLocalizationConverter x:Key="EnumToLocalizationConverter" />
+    </Page.Resources>
 
-        <ui:Button
-            Grid.Column="0"
-            Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}"
-            Content="Click me!"
-            Icon="Fluent24" />
-        <TextBlock
-            Grid.Column="1"
-            Margin="12,0,0,0"
-            VerticalAlignment="Center"
-            Text="{Binding ViewModel.Counter, Mode=OneWay}" />
-    </Grid>
+    <StackPanel>
+        <Grid VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="140" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock 
+                Margin="0,0,0,2" 
+                Text="{svs:Localization ClientType}" 
+                FontSize="15"
+                FontWeight="Bold"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Column="0" />
+
+            <ComboBox
+                Grid.Column="1"
+                x:Name="ClientTypeComboBox"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{Binding ViewModel.ClientTypes, Mode=TwoWay}"
+                SelectedItem="{Binding ViewModel.CurrentClientType, Mode=TwoWay, Converter={StaticResource EnumToLocalizationConverter}}"
+                >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <ContentPresenter
+                            Content="{Binding Converter={StaticResource EnumToLocalizationConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectionChanged">
+                        <b:InvokeCommandAction Command="{Binding ViewModel.SelectedClientChangedCommand}"  />
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </ComboBox>
+
+            <TextBlock
+                Grid.Column="2"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center"
+                Text="1" />
+        </Grid>
+
+    </StackPanel>
 </Page>

@@ -173,4 +173,20 @@
     <value>主界面</value>
     <comment/>
   </data>
+  <data name="ClientType" xml:space="preserve">
+    <value>客户端类型</value>
+    <comment/>
+  </data>
+  <data name="ClientType_YuanShen" xml:space="preserve">
+    <value>原神</value>
+    <comment/>
+  </data>
+  <data name="ClientType_Global" xml:space="preserve">
+    <value>原神国际服</value>
+    <comment/>
+  </data>
+  <data name="ClientType_Cloud" xml:space="preserve">
+    <value>云·原神</value>
+    <comment/>
+  </data>
 </root>

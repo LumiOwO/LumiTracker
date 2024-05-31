@@ -28,6 +28,8 @@ namespace LumiTracker.Views.Windows
 
         private IntPtr hwnd = 0;
 
+        private readonly IPageService _pageService;
+
         public MainWindow(
             MainWindowViewModel  viewModel,
             IPageService         pageService,
@@ -48,6 +50,7 @@ namespace LumiTracker.Views.Windows
 
             InitializeComponent();
             SetPageService(pageService);
+            _pageService = pageService;
 
             navigationService.SetNavigationControl(RootNavigation);
 
@@ -81,6 +84,11 @@ namespace LumiTracker.Views.Windows
             hwnd = new WindowInteropHelper(this).Handle;
 
             ViewModel.Init(TrayMenuItemClickedCommand);
+
+            StartPage startPage = (
+                _pageService.GetPage<StartPage>()
+            )!;
+            startPage.Init();
 
             RootNavigation.Navigate(typeof(StartPage));
         }

@@ -95,12 +95,6 @@ namespace LumiTracker.ViewModels.Windows
             // refresh theme
             Enum.TryParse(cfg.theme, out ApplicationTheme curTheme);
             ApplicationThemeManager.Apply(curTheme);
-
-            // init start page 
-            StartViewModel startViewModel = (
-                _serviceProvider.GetService(typeof(StartViewModel)) as StartViewModel
-            )!;
-            startViewModel.Init();
         }
     }
 }

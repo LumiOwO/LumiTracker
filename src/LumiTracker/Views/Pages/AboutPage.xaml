@@ -7,7 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:LumiTracker.ViewModels.Pages"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    Title="AboutPage"
+    xmlns:svs="clr-namespace:LumiTracker.Services"
+    Title="{svs:Localization About}"
     d:DataContext="{d:DesignInstance local:AboutPage,
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="450"
@@ -18,7 +19,32 @@
     ScrollViewer.CanContentScroll="False"
     mc:Ignorable="d">
 
-    <Grid>
+    <StackPanel>
+        <TextBlock
+            FontSize="20"
+            FontWeight="Medium"
+            Text="{svs:Localization About}" />
+
+        <Grid Margin="10,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                FontSize="15"
+                FontWeight="Medium"
+                Text="{svs:Localization About}" />
+        </Grid>
+
+    <TextBlock 
+        Margin="0,12,0,0" 
+        FontSize="10"
+        Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
+    </StackPanel>
+   
+    <!--<Grid>
         <ui:VirtualizingItemsControl
             Foreground="{DynamicResource TextFillColorSecondaryBrush}"
             ItemsSource="{Binding ViewModel.Colors, Mode=OneWay}"
@@ -39,5 +65,5 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ui:VirtualizingItemsControl>
-    </Grid>
+    </Grid>-->
 </Page>

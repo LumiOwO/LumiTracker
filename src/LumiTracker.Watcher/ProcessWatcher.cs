@@ -27,7 +27,7 @@
 
     public delegate void OnOpEventCardCallback();
 
-    public class ProcessWatcher
+    public class ProcessWatcher : IAsyncDisposable
     {
         private readonly ILogger logger;
         private ConfigData cfg;
@@ -44,24 +44,8 @@
             this.cfg    = cfg;
         }
 
-        public async Task Start()
+        public WindowInfo FindProcessWindow(string processName)
         {
-            int interval = cfg.proc_watch_interval * 1000;
-            while (true)
-            {
-                var info = FindProcessWindow();
-                if (info.hwnd != IntPtr.Zero)
-                {
-                    await StartWindowWatcher(info, interval);
-                }
-
-                await Task.Delay(interval);
-            }
-        }
-
-        public WindowInfo FindProcessWindow()
-        {
-            var processName = cfg.proc_name;
             var info = new WindowInfo();
 
             var processes = GetProcessByName(processName);
@@ -160,11 +144,49 @@
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
+        private SpinLockedValue<bool> ShouldCancel = new (false);
+
+        private Task? _processWatcherTask;
+        private Task? _windowWatcherTask;
+
+        public async ValueTask DisposeAsync()
+        {
+            ShouldCancel.Value = true;
+            if (_windowWatcherTask != null)
+            {
+                await _windowWatcherTask;
+            }
+            if (_processWatcherTask != null)
+            {
+                await _processWatcherTask;
+            }
+        }
+
+        public void Start(string processName)
+        {
+            _processWatcherTask = StartProcessWatcher(processName);
+        }
+
+        public async Task StartProcessWatcher(string processName)
+        {
+            int interval = cfg.proc_watch_interval * 1000;
+            while (!ShouldCancel.Value)
+            {
+                var info = FindProcessWindow(processName);
+                if (info.hwnd != IntPtr.Zero)
+                {
+                    _windowWatcherTask = StartWindowWatcher(info, interval);
+                    await _windowWatcherTask;
+                }
+
+                await Task.Delay(interval);
+            }
+        }
+
         public async Task StartWindowWatcher(WindowInfo info, int interval)
         {
             logger.LogInformation($"Begin to start window watcher");
             
-            GenshinWindowFound?.Invoke();
             var startInfo = new ProcessStartInfo
             {
                 FileName = "python/python.exe",
@@ -186,10 +208,16 @@
             ChildProcessTracker.AddProcess(process);
             process.BeginErrorReadLine();
 
+            GenshinWindowFound?.Invoke();
             while (!process.HasExited)
             {
+                if (ShouldCancel.Value)
+                {
+                    process.Kill();
+                }
                 await Task.Delay(interval);
             }
+
             logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
             WindowWatcherExit?.Invoke();
         }
@@ -203,13 +231,13 @@
     // Main method to start the process watcher
     public static class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var logger = Configuration.Logger;
             var cfg = Configuration.Data;
 
             var processWatcher = new ProcessWatcher(logger, cfg);
-            await processWatcher.Start();
+            processWatcher.Start("YuanShen.exe");
         }
     }
 

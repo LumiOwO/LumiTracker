@@ -12,24 +12,65 @@ namespace LumiTracker.Models
 {
     public class GameWatcher
     {
-        private ProcessWatcher? processWatcher;
+        private SpinLockedValue<string> processName = new ("");
 
-        private Task? watcherTask;
+        private SpinLockedValue<ProcessWatcher> processWatcher = new (null);
+
+        private SpinLockedValue<Task> stopProcessWatcherTask = new (null);
 
         public event OnGenshinWindowFoundCallback? GenshinWindowFound;
 
         public event OnWindowWatcherExitCallback?  WindowWatcherExit;
 
-        public void Start()
+        public void Start(string name)
+        {
+            processName.Value = name;
+            Task mainLoop = MainLoop();
+        }
+
+        public void ChangeProcessName(string name)
+        {
+            processName.Value = name;
+            StopCurrentProcessWatcher();
+        }
+
+        private async Task MainLoop()
         {
             var logger = Configuration.Logger;
-            var cfg = Configuration.Data;
+            var cfg    = Configuration.Data;
 
-            processWatcher = new ProcessWatcher(logger, cfg);
-            processWatcher.GenshinWindowFound += OnGenshinWindowFound;
-            processWatcher.WindowWatcherExit  += OnWindowWatcherExit;
+            int interval = cfg.proc_watch_interval * 1000;
+            while (true)
+            {
+                while (processWatcher.Value != null)
+                {
+                    await Task.Delay(interval);
+                }
 
-            watcherTask = processWatcher.Start();
+                ProcessWatcher watcher = new(logger, cfg);
+                watcher.GenshinWindowFound += OnGenshinWindowFound;
+                watcher.WindowWatcherExit  += OnWindowWatcherExit;
+                processWatcher.Value = watcher;
+
+                watcher.Start(processName.Value!);
+            }
+        }
+
+        private void StopCurrentProcessWatcher()
+        {
+            if (stopProcessWatcherTask.Value == null)
+            {
+                stopProcessWatcherTask.Value = Task.Run(async () =>
+                {
+                    ProcessWatcher? watcher = processWatcher.Value;
+                    if (watcher != null)
+                    {
+                        await watcher.DisposeAsync();
+                        processWatcher.Value = null;
+                    }
+                    stopProcessWatcherTask.Value = null;
+                });
+            }
         }
 
         private void OnGenshinWindowFound()

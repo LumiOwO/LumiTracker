@@ -1,5 +1,6 @@
 ﻿using System.Windows.Media;
 using Wpf.Ui.Controls;
+using LumiTracker.Config;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -15,6 +16,11 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private IEnumerable<DataColor> _colors = new List<DataColor>();
 
+
+        [ObservableProperty]
+        private string _appVersion = "";
+
+
         public void OnNavigatedTo()
         {
             if (!_isInitialized)
@@ -23,8 +29,16 @@ namespace LumiTracker.ViewModels.Pages
 
         public void OnNavigatedFrom() { }
 
+        private string GetAssemblyVersion()
+        {
+            Version? version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            return version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "";
+        }
+
         private void InitializeViewModel()
         {
+            AppVersion = $"{LocalizationSource.Instance["AppName"]} - {GetAssemblyVersion()}";
+
             var random = new Random();
             var colorCollection = new List<DataColor>();
 
