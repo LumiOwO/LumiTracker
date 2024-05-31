@@ -66,6 +66,8 @@ namespace LumiTracker.ViewModels.Pages
 
             Configuration.Data.client_type = CurrentClientType.ToString();
             Configuration.Save();
+
+            _gameWatcher.ChangeGameClient(processName);
         }
     }
 }

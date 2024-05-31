@@ -28,7 +28,7 @@ namespace LumiTracker.Models
             Task mainLoop = MainLoop();
         }
 
-        public void ChangeProcessName(string name)
+        public void ChangeGameClient(string name)
         {
             processName.Value = name;
             StopCurrentProcessWatcher();
