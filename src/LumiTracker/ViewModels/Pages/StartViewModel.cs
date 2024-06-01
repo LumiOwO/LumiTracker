@@ -82,8 +82,6 @@ namespace LumiTracker.ViewModels.Pages
 
         private void OnWindowWatcherExit()
         {
-            GameWatcherState = EGameWatcherState.NoWindowFound;
-            GameWatcherStateBrush = Brushes.DarkGray;
             _deckWindow.HideWindow();
         }
 
@@ -103,6 +101,9 @@ namespace LumiTracker.ViewModels.Pages
                 return; 
             }
             CurrentClientType = SelectedClientType;
+
+            GameWatcherState = EGameWatcherState.NoWindowFound;
+            GameWatcherStateBrush = Brushes.DarkGray;
 
             string processName = GetProcessName(CurrentClientType);
             Configuration.Logger.LogDebug(processName);

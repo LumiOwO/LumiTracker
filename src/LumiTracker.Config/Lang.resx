@@ -178,15 +178,15 @@
     <comment/>
   </data>
   <data name="ClientType_YuanShen" xml:space="preserve">
-    <value>YuanShen (Chinese)</value>
+    <value>[CN] YuanShen</value>
     <comment/>
   </data>
   <data name="ClientType_Global" xml:space="preserve">
-    <value>Genshin (Global)</value>
+    <value>[Global] Genshin</value>
     <comment/>
   </data>
   <data name="ClientType_Cloud" xml:space="preserve">
-    <value>Cloud (Chinese)</value>
+    <value>[CN] Cloud</value>
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">

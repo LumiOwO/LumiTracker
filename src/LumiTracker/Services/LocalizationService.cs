@@ -60,12 +60,17 @@ namespace LumiTracker.Services
 
             // Refresh start page
             _startViewModel.ClientTypes = Enum.GetValues(typeof(EClientType)).Cast<EClientType>();
-            
+
             int index = _startPage.ClientTypeComboBox.SelectedIndex;
             _startPage.ClientTypeComboBox.SelectedIndex = -1;
             _startPage.ClientTypeComboBox.SelectedIndex = index;
 
-            _startPage.GameWatcherStateText.Text = EnumToLocalizationConverter.EnumToLocalization(_startViewModel.GameWatcherState);
+            {
+                Binding binding = new Binding("ViewModel.GameWatcherState");
+                binding.Mode = BindingMode.OneWay;
+                binding.Converter = (IValueConverter)_startPage.Resources["EnumToLocalizationConverter"];
+                _startPage.GameWatcherStateText.SetBinding(TextBlock.TextProperty, binding);
+            }
         }
     }
 }
