@@ -10,12 +10,15 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Windows.Media;
 using System.Reflection.Metadata;
+using LumiTracker.Helpers;
 
 namespace LumiTracker.ViewModels.Pages
 {
     public partial class StartViewModel : ObservableObject
     {
         private IDeckWindow _deckWindow;
+        private WindowSnapper? _snapper;
+
 
         private GameWatcher _gameWatcher;
 
@@ -73,16 +76,21 @@ namespace LumiTracker.ViewModels.Pages
             GameWatcherStateBrush = Brushes.DarkOrange;
         }
 
-        private void OnWindowWatcherStart()
+        private void OnWindowWatcherStart(IntPtr hwnd)
         {
             GameWatcherState = EGameWatcherState.WindowWatcherStarted;
             GameWatcherStateBrush = Brushes.LimeGreen;
+
+            _snapper = new WindowSnapper((Window)_deckWindow, hwnd);
+            _snapper.Attach();
             _deckWindow.ShowWindow();
         }
 
         private void OnWindowWatcherExit()
         {
             _deckWindow.HideWindow();
+            _snapper?.Detach();
+            _snapper = null;
         }
 
         [RelayCommand]

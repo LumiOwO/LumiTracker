@@ -89,10 +89,10 @@ namespace LumiTracker.Models
             GenshinWindowFound?.Invoke();
         }
 
-        private void OnWindowWatcherStart()
+        private void OnWindowWatcherStart(IntPtr hwnd)
         {
             Configuration.Logger.LogDebug("OnWindowWatcherStart");
-            WindowWatcherStart?.Invoke();
+            WindowWatcherStart?.Invoke(hwnd);
         }
 
         private void OnWindowWatcherExit()

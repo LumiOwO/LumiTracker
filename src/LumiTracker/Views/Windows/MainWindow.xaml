@@ -74,7 +74,7 @@
         <tray:NotifyIcon
             x:Name="TrayIcon"
             Grid.Row="0"
-            Icon="pack://application:,,,/LumiTracker.png"
+            Icon="pack://application:,,,/Assets/LumiTracker.png"
             FocusOnLeftClick="True"
             MenuOnRightClick="True"
             TooltipText="{svs:Localization AppTitle}">

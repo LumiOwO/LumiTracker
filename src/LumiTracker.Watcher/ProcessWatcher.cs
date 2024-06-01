@@ -19,7 +19,7 @@
 
     public delegate void OnGenshinWindowFoundCallback();
 
-    public delegate void OnWindowWatcherStartCallback();
+    public delegate void OnWindowWatcherStartCallback(IntPtr hwnd);
 
     public delegate void OnWindowWatcherExitCallback();
 
@@ -212,7 +212,7 @@
             ChildProcessTracker.AddProcess(process);
             process.BeginErrorReadLine();
 
-            WindowWatcherStart?.Invoke();
+            WindowWatcherStart?.Invoke(info.hwnd);
             while (!process.HasExited)
             {
                 if (ShouldCancel.Value)

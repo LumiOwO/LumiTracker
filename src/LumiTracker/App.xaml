@@ -12,6 +12,20 @@
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
             </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="15" />
+            </Style>
+            <Style TargetType="TextBox">
+                <Setter Property="FontSize" Value="15" />
+            </Style>
+            <Style TargetType="Label">
+                <Setter Property="FontSize" Value="15" />
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="FontSize" Value="15" />
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

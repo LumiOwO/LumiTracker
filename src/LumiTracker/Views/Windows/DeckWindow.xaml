@@ -5,17 +5,19 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:LumiTracker.Views.Windows"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     mc:Ignorable="d"
     Title="DeckWindow" 
     Topmost="True" 
     ShowInTaskbar="False"
     WindowStyle="None"
+    AllowsTransparency="True"
     ResizeMode="NoResize"
     Height="600" Width="400">
 
     <Window.Template>
         <ControlTemplate TargetType="{x:Type Window}">
-            <Border Background="DarkGray" CornerRadius="7">
+            <Border Background="Transparent" CornerRadius="7">
                 <AdornerDecorator>
                     <ContentPresenter/>
                 </AdornerDecorator>
@@ -23,8 +25,71 @@
         </ControlTemplate>
     </Window.Template>
 
-
     <Grid>
-        <TextBlock>testtest</TextBlock>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ToggleButton 
+            x:Name="toggle" 
+            Content="This must stay fixed" 
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+             />
+        <Popup 
+            Placement="Top" 
+            AllowsTransparency="True"
+            PlacementTarget="{Binding ElementName=toggle}"
+            IsOpen="{Binding ElementName=toggle, Path=IsChecked}">
+            <TabControl 
+                Margin="0,8,0,0"
+                Background="#20aaaaaa" >
+                <TabItem Background="#20aaaaaa">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="XboxConsole24" />
+                            <TextBlock Text="Hello" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid>
+                        <TextBlock Margin="12" Text="World" />
+                    </Grid>
+                </TabItem>
+                <TabItem 
+                    Background="#20aaaaaa" 
+                    IsSelected="True"
+                    >
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="StoreMicrosoft16" />
+                            <TextBlock Text="The cake" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid>
+                        <TextBlock Margin="12" Text="Is a lie." />
+                    </Grid>
+                </TabItem>
+            </TabControl>
+            <!--<Grid 
+                Background="#20aaaaaa" 
+                Width="400">
+                <Grid.BitmapEffect>
+                    <DropShadowBitmapEffect />
+                </Grid.BitmapEffect>
+
+                <TextBlock 
+                    Foreground="White"
+                    TextWrapping="Wrap" 
+                    Margin="5">
+            This must expand upwards, not downwards.
+            The header must remain exactly where it is.
+            This TextBlock must appear above the header
+            and overlay the top radio buttons instead.
+                </TextBlock>
+            </Grid>-->
+        </Popup>
+
+        
     </Grid>
 </Window>

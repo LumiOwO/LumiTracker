@@ -3,10 +3,9 @@ import os
 import sys
 import time
 import win32api
-import win32con
-import win32print
 import win32gui
 import logging
+import ctypes
 
 from types import SimpleNamespace
 
@@ -73,6 +72,12 @@ class WindowWatcher:
     def Start(self, hwnd, title):
         logging.info("WindowWatcher start")
 
+        PROCESS_PER_MONITOR_DPI_AWARE = 2
+        try:
+            ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
+        except Exception as e:
+            logging.error("Error setting DPI awareness:", e)
+
         self.hwnd = hwnd
 
         # Every Error From on_closed and on_frame_arrived Will End Up Here
@@ -86,22 +91,39 @@ class WindowWatcher:
 
         self.capture.start()
     
+    def GetMonitorScale(self):
+        MONITOR_DEFAULTTONEAREST = 0x00000002
+        MDT_EFFECTIVE_DPI = 0
+
+        hMonitor = win32api.MonitorFromWindow(self.hwnd, MONITOR_DEFAULTTONEAREST)
+        monitorInfo = win32api.GetMonitorInfo(hMonitor)
+        physicalHeight = monitorInfo['Monitor'][3] - monitorInfo['Monitor'][1]
+
+        dpiX = ctypes.c_uint()
+        dpiY = ctypes.c_uint()
+        ctypes.windll.shcore.GetDpiForMonitor(
+            hMonitor.handle,
+            MDT_EFFECTIVE_DPI,
+            ctypes.byref(dpiX),
+            ctypes.byref(dpiY)
+        )
+        logicalHeight = float(physicalHeight) * 96 / dpiY.value
+
+        # Calculate scale factor
+        scale = float(physicalHeight) / logicalHeight
+        # logging.debug(f"{physicalHeight=}, {logicalHeight=}, {scale=}, {hMonitor.handle=}")
+        return scale
+    
     def UpdateWindowBorderSize(self, window_width, window_height):
         self.window_size = (window_width, window_height)
 
         # !!! Must consider DPI scale !!!
         # https://blog.csdn.net/frostime/article/details/104798061
-        hDC      = win32gui.GetDC(0)
-        real_w   = win32print.GetDeviceCaps(hDC, win32con.DESKTOPHORZRES)
-        screen_w = win32api.GetSystemMetrics(0)
-        # real_h   = win32print.GetDeviceCaps(hDC, win32con.DESKTOPVERTRES)
-        # screen_h = win32api.GetSystemMetrics(1)
-        scale    = real_w / screen_w
-        # logging.debug(scale)
+        # Now DpiAwareness enabled, so no need to scale
+        # scale = self.GetMonitorScale()
 
         # Get the client rect (excludes borders and title bar)
         client_rect = win32gui.GetClientRect(self.hwnd)
-        client_rect = tuple(int(i * scale) for i in client_rect)
         client_left, client_top, client_right, client_bottom = client_rect
         self.client_size = (client_right - client_left, client_bottom - client_top)
 
@@ -130,6 +152,10 @@ class WindowWatcher:
         if start:
             logging.info(f"Game start")
             logging.debug(dist)
+            if cfg.DEBUG_SAVE:
+                buffer = start_event_frame.frame_buffer[:, :, 2::-1] # bgr to rgb
+                image  = Image.fromarray(buffer)
+                image.save(os.path.join(cfg.debug_dir, "save", f"start_event_frame.png"))
 
     def DetectEvent(self, frame):
         event_w = int(self.client_size[0] * cfg.event_screen_size[0])
@@ -168,8 +194,13 @@ class WindowWatcher:
             logging.debug(op_dist)
 
         if cfg.DEBUG_SAVE:
-            my_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"my_image{self.frame_count}.png"))
-            op_event_frame.save_as_image(os.path.join(cfg.debug_dir, "save", f"op_image{self.frame_count}.png"))
+            buffer = my_event_frame.frame_buffer[:, :, 2::-1] # bgr to rgb
+            image  = Image.fromarray(buffer)
+            image.save(os.path.join(cfg.debug_dir, "save", f"my_image{self.frame_count}.png"))
+
+            buffer = op_event_frame.frame_buffer[:, :, 2::-1] # bgr to rgb
+            image  = Image.fromarray(buffer)
+            image.save(os.path.join(cfg.debug_dir, "save", f"op_image{self.frame_count}.png"))
 
     # Called Every Time A New Frame Is Available
     def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):

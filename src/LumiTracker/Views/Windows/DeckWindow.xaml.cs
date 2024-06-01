@@ -1,4 +1,4 @@
-﻿using LumiTracker.Models;
+﻿using LumiTracker.Helpers;
 using LumiTracker.Services;
 using LumiTracker.ViewModels.Windows;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,21 +21,17 @@ namespace LumiTracker.Views.Windows
     {
         public DeckWindowViewModel ViewModel { get; }
 
-        private GameWatcher _gameWatcher;
-
-        public DeckWindow(DeckWindowViewModel viewModel, GameWatcher gameWatcher)
+        public DeckWindow(DeckWindowViewModel viewModel)
         {
             ShowActivated = false;
             ViewModel     = viewModel;
             DataContext   = this;
-            _gameWatcher  = gameWatcher;
 
             InitializeComponent();
         }
 
         public void ShowWindow() => Show();
         public void HideWindow() => Hide();
-
         public void CloseWindow() => Close();
     }
 }

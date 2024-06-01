@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>LumiTracker.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\LumiTracker.ico</ApplicationIcon>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,8 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="LumiTracker.ico" />
-    <None Remove="LumiTracker.png" />
+    <None Remove="Assets\LumiTracker.ico" />
+    <None Remove="Assets\LumiTracker.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,8 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="LumiTracker.ico" />
-    <Resource Include="LumiTracker.png" />
+    <Resource Include="Assets\LumiTracker.ico" />
+    <Resource Include="Assets\LumiTracker.png" />
   </ItemGroup>
 
   <Target Name="CopyTestDirectory" AfterTargets="Publish">
