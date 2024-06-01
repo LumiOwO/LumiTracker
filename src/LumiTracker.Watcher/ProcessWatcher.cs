@@ -19,6 +19,8 @@
 
     public delegate void OnGenshinWindowFoundCallback();
 
+    public delegate void OnWindowWatcherStartCallback();
+
     public delegate void OnWindowWatcherExitCallback();
 
     public delegate void OnGameStartedCallback();
@@ -33,6 +35,7 @@
         private ConfigData cfg;
 
         public event OnGenshinWindowFoundCallback? GenshinWindowFound;
+        public event OnWindowWatcherStartCallback? WindowWatcherStart;
         public event OnWindowWatcherExitCallback?  WindowWatcherExit;
         public event OnGameStartedCallback? GameStarted;
         public event OnMyEventCardCallback? MyEventCard;
@@ -68,6 +71,7 @@
                 logger.LogInformation($"No windows found for process '{processName}' (PID: {proc.Id})");
                 return info;
             }
+            GenshinWindowFound?.Invoke();
 
             var foregroundHwnd = GetForegroundWindow();
             if (infos[0].hwnd != foregroundHwnd)
@@ -208,7 +212,7 @@
             ChildProcessTracker.AddProcess(process);
             process.BeginErrorReadLine();
 
-            GenshinWindowFound?.Invoke();
+            WindowWatcherStart?.Invoke();
             while (!process.HasExited)
             {
                 if (ShouldCancel.Value)

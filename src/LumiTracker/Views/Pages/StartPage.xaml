@@ -26,8 +26,9 @@
     <StackPanel>
         <Grid VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="130" />
-                <ColumnDefinition Width="140" />
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
@@ -44,8 +45,8 @@
                 Grid.Column="1"
                 x:Name="ClientTypeComboBox"
                 HorizontalAlignment="Stretch"
-                ItemsSource="{Binding ViewModel.ClientTypes, Mode=TwoWay}"
-                SelectedItem="{Binding ViewModel.CurrentClientType, Mode=TwoWay, Converter={StaticResource EnumToLocalizationConverter}}"
+                ItemsSource="{Binding ViewModel.ClientTypes, Mode=OneWay}"
+                SelectedItem="{Binding ViewModel.CurrentClientType, Mode=OneWay}"
                 >
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -55,16 +56,31 @@
                 </ComboBox.ItemTemplate>
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="SelectionChanged">
-                        <b:InvokeCommandAction Command="{Binding ViewModel.SelectedClientChangedCommand}"  />
+                        <b:InvokeCommandAction 
+                            Command="{Binding ViewModel.SelectedClientChangedCommand}"
+                            CommandParameter="{Binding ElementName=ClientTypeComboBox}"
+                            />
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
             </ComboBox>
 
-            <TextBlock
-                Grid.Column="2"
-                Margin="12,0,0,0"
+
+            <Ellipse 
+                Margin="18,0,0,0" 
+                Width="9" Height="9" 
+                Fill="{Binding ViewModel.GameWatcherStateBrush, Mode=OneWay}" 
+                HorizontalAlignment="Left" 
                 VerticalAlignment="Center"
-                Text="1" />
+                Grid.Column="2"
+                />
+            
+            <TextBlock
+                Grid.Column="3"
+                x:Name="GameWatcherStateText"
+                Margin="8,0,0,0"
+                VerticalAlignment="Center"
+                Foreground="{Binding ViewModel.GameWatcherStateBrush, Mode=OneWay}"
+                Text="{Binding ViewModel.GameWatcherState, Mode=OneWay, Converter={StaticResource EnumToLocalizationConverter}}" />
         </Grid>
 
     </StackPanel>

@@ -18,6 +18,11 @@ namespace LumiTracker.Helpers
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (!value.GetType().IsEnum)
+            {
+                return "";
+            }
+
             if (!Enum.IsDefined(value.GetType(), value))
             {
                 throw new ArgumentException("EnumToLocalizationConverterValueMustBeAnEnum");
@@ -28,7 +33,7 @@ namespace LumiTracker.Helpers
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value;
+            throw new NotImplementedException();
         }
     }
 }

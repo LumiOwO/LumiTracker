@@ -10,6 +10,13 @@ using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.Models
 {
+    public enum EGameWatcherState
+    {
+        NoWindowFound,
+        WindowNotForeground,
+        WindowWatcherStarted
+    }
+
     public class GameWatcher
     {
         private SpinLockedValue<string> processName = new ("");
@@ -19,6 +26,8 @@ namespace LumiTracker.Models
         private SpinLockedValue<Task> stopProcessWatcherTask = new (null);
 
         public event OnGenshinWindowFoundCallback? GenshinWindowFound;
+
+        public event OnWindowWatcherStartCallback? WindowWatcherStart;
 
         public event OnWindowWatcherExitCallback?  WindowWatcherExit;
 
@@ -49,6 +58,7 @@ namespace LumiTracker.Models
 
                 ProcessWatcher watcher = new(logger, cfg);
                 watcher.GenshinWindowFound += OnGenshinWindowFound;
+                watcher.WindowWatcherStart += OnWindowWatcherStart;
                 watcher.WindowWatcherExit  += OnWindowWatcherExit;
                 processWatcher.Value = watcher;
 
@@ -77,6 +87,12 @@ namespace LumiTracker.Models
         {
             Configuration.Logger.LogDebug("OnGenshinWindowFound");
             GenshinWindowFound?.Invoke();
+        }
+
+        private void OnWindowWatcherStart()
+        {
+            Configuration.Logger.LogDebug("OnWindowWatcherStart");
+            WindowWatcherStart?.Invoke();
         }
 
         private void OnWindowWatcherExit()

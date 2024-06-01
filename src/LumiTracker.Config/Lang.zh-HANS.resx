@@ -189,4 +189,16 @@
     <value>云·原神</value>
     <comment/>
   </data>
+  <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
+    <value>未检测到游戏窗口</value>
+    <comment/>
+  </data>
+  <data name="GameWatcherState_WindowNotForeground" xml:space="preserve">
+    <value>游戏窗口未置于前台</value>
+    <comment/>
+  </data>
+  <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
+    <value>记牌器已启动</value>
+    <comment/>
+  </data>
 </root>

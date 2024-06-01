@@ -13,6 +13,7 @@ using LumiTracker.Views.Windows;
 using LumiTracker.Views.Pages;
 using LumiTracker.ViewModels.Pages;
 using LumiTracker.Helpers;
+using System.Windows.Controls;
 
 namespace LumiTracker.Services
 { 
@@ -59,9 +60,12 @@ namespace LumiTracker.Services
 
             // Refresh start page
             _startViewModel.ClientTypes = Enum.GetValues(typeof(EClientType)).Cast<EClientType>();
-            int prev_idx = _startPage.ClientTypeComboBox.SelectedIndex;
-            _startPage.ClientTypeComboBox.SelectedIndex = prev_idx == 0 ? 1 : 0;
-            _startPage.ClientTypeComboBox.SelectedIndex = prev_idx;
+            
+            int index = _startPage.ClientTypeComboBox.SelectedIndex;
+            _startPage.ClientTypeComboBox.SelectedIndex = -1;
+            _startPage.ClientTypeComboBox.SelectedIndex = index;
+
+            _startPage.GameWatcherStateText.Text = EnumToLocalizationConverter.EnumToLocalization(_startViewModel.GameWatcherState);
         }
     }
 }

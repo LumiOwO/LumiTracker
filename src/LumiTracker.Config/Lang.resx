@@ -178,15 +178,27 @@
     <comment/>
   </data>
   <data name="ClientType_YuanShen" xml:space="preserve">
-    <value>Chinese</value>
+    <value>YuanShen (Chinese)</value>
     <comment/>
   </data>
   <data name="ClientType_Global" xml:space="preserve">
-    <value>Global</value>
+    <value>Genshin (Global)</value>
     <comment/>
   </data>
   <data name="ClientType_Cloud" xml:space="preserve">
-    <value>Cloud</value>
+    <value>Cloud (Chinese)</value>
+    <comment/>
+  </data>
+  <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
+    <value>Game window not detected</value>
+    <comment/>
+  </data>
+  <data name="GameWatcherState_WindowNotForeground" xml:space="preserve">
+    <value>Game window not in the foreground</value>
+    <comment/>
+  </data>
+  <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
+    <value>LumiTracker started</value>
     <comment/>
   </data>
 </root>

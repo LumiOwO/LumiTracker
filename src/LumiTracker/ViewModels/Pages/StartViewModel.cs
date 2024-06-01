@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using System.Windows.Media;
+using System.Reflection.Metadata;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -21,7 +23,13 @@ namespace LumiTracker.ViewModels.Pages
         private EClientType _currentClientType;
 
         [ObservableProperty]
-        public IEnumerable<EClientType> _clientTypes = Enum.GetValues(typeof(EClientType)).Cast<EClientType>();
+        private IEnumerable<EClientType> _clientTypes = Enum.GetValues(typeof(EClientType)).Cast<EClientType>();
+
+        [ObservableProperty]
+        private EGameWatcherState _gameWatcherState = EGameWatcherState.NoWindowFound;
+
+        [ObservableProperty]
+        private Brush _gameWatcherStateBrush = Brushes.DarkGray;
 
         public StartViewModel(IDeckWindow deckWindow, GameWatcher gameWatcher)
         {
@@ -34,8 +42,9 @@ namespace LumiTracker.ViewModels.Pages
             Enum.TryParse(Configuration.Data.client_type, out EClientType clientType);
             CurrentClientType = clientType;
 
-            _gameWatcher.GenshinWindowFound += () => _deckWindow.ShowWindow();
-            _gameWatcher.WindowWatcherExit  += () => _deckWindow.HideWindow();
+            _gameWatcher.GenshinWindowFound += OnGenshinWindowFound;
+            _gameWatcher.WindowWatcherStart += OnWindowWatcherStart;
+            _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
 
             _gameWatcher.Start(GetProcessName(clientType));
         }
@@ -58,9 +67,43 @@ namespace LumiTracker.ViewModels.Pages
             return processName;
         }
 
-        [RelayCommand]
-        public void OnSelectedClientChanged()
+        private void OnGenshinWindowFound()
         {
+            GameWatcherState = EGameWatcherState.WindowNotForeground;
+            GameWatcherStateBrush = Brushes.DarkOrange;
+        }
+
+        private void OnWindowWatcherStart()
+        {
+            GameWatcherState = EGameWatcherState.WindowWatcherStarted;
+            GameWatcherStateBrush = Brushes.LimeGreen;
+            _deckWindow.ShowWindow();
+        }
+
+        private void OnWindowWatcherExit()
+        {
+            GameWatcherState = EGameWatcherState.NoWindowFound;
+            GameWatcherStateBrush = Brushes.DarkGray;
+            _deckWindow.HideWindow();
+        }
+
+        [RelayCommand]
+        public void OnSelectedClientChanged(ComboBox comboBox)
+        {
+            if (comboBox.SelectedItem == null)
+            {
+                Configuration.Logger.LogDebug($"Trigger an invalid OnSelectedClientChanged for language change");
+                return;
+            }
+
+            EClientType SelectedClientType = (EClientType)comboBox.SelectedItem;
+            Configuration.Logger.LogDebug($"{SelectedClientType}");
+            if (SelectedClientType == CurrentClientType) 
+            { 
+                return; 
+            }
+            CurrentClientType = SelectedClientType;
+
             string processName = GetProcessName(CurrentClientType);
             Configuration.Logger.LogDebug(processName);
 
