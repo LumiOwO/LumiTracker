@@ -6,6 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:LumiTracker.Views.Windows"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:models="clr-namespace:LumiTracker.Models"
+    xmlns:helpers="clr-namespace:LumiTracker.Helpers"
     mc:Ignorable="d"
     Title="DeckWindow" 
     Topmost="True" 
@@ -25,8 +27,50 @@
         </ControlTemplate>
     </Window.Template>
 
-    <Grid>
+    <Window.Resources>
+        <DataTemplate x:Key="PersonTemplate" DataType="{x:Type models:Person}">
+            <Grid Margin="8,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Ellipse
+                    x:Name="Ellipse"
+                    Grid.RowSpan="2"
+                    Width="32"
+                    Height="32"
+                    Margin="6"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Fill="{ui:ThemeResource ControlStrongStrokeColorDefaultBrush}" />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="12,6,0,0"
+                    FontWeight="Bold"
+                    Text="{Binding Name, Mode=OneWay}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="12,0,0,6"
+                    Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{Binding Company, Mode=OneWay}" />
+            </Grid>
+        </DataTemplate>
 
+        <Style TargetType="ListViewItem">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+
+        <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
+    </Window.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -36,12 +80,21 @@
             Content="This must stay fixed" 
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
-             />
+            />
         <Popup 
             Placement="Top" 
+            StaysOpen="True"
             AllowsTransparency="True"
-            PlacementTarget="{Binding ElementName=toggle}"
-            IsOpen="{Binding ElementName=toggle, Path=IsChecked}">
+            PlacementTarget="{Binding ElementName=toggle}">
+
+            <Popup.IsOpen>
+                <MultiBinding Converter="{StaticResource MultiBooleanAndConverter}">
+                    <Binding ElementName="toggle" Path="IsChecked" />
+                    <Binding Path="ViewModel.IsShowing" />
+                    <!-- Add more bindings for additional boolean properties -->
+                </MultiBinding>
+            </Popup.IsOpen>
+
             <TabControl 
                 Margin="0,8,0,0"
                 Background="#20aaaaaa" >
@@ -52,10 +105,17 @@
                             <TextBlock Text="Hello" />
                         </StackPanel>
                     </TabItem.Header>
-                    <Grid>
-                        <TextBlock Margin="12" Text="World" />
-                    </Grid>
+
+                    <ui:ListView
+                        Grid.Column="0"
+                        MaxHeight="200"
+                        d:ItemsSource="{d:SampleData ItemCount=2}"
+                        ItemsSource="{Binding ViewModel.BasicListViewItems, Mode=TwoWay}"
+                        SelectedIndex="1"
+                        ItemTemplate="{StaticResource PersonTemplate}"
+                        />
                 </TabItem>
+                
                 <TabItem 
                     Background="#20aaaaaa" 
                     IsSelected="True"
@@ -66,28 +126,18 @@
                             <TextBlock Text="The cake" />
                         </StackPanel>
                     </TabItem.Header>
-                    <Grid>
-                        <TextBlock Margin="12" Text="Is a lie." />
-                    </Grid>
+                    
+                    <ui:ListView
+                        Grid.Column="0"
+                        MaxHeight="200"
+                        d:ItemsSource="{d:SampleData ItemCount=2}"
+                        ItemsSource="{Binding ViewModel.BasicListViewItems, Mode=TwoWay}"
+                        SelectedIndex="1"
+                        ItemTemplate="{StaticResource PersonTemplate}"
+                        />
                 </TabItem>
-            </TabControl>
-            <!--<Grid 
-                Background="#20aaaaaa" 
-                Width="400">
-                <Grid.BitmapEffect>
-                    <DropShadowBitmapEffect />
-                </Grid.BitmapEffect>
 
-                <TextBlock 
-                    Foreground="White"
-                    TextWrapping="Wrap" 
-                    Margin="5">
-            This must expand upwards, not downwards.
-            The header must remain exactly where it is.
-            This TextBlock must appear above the header
-            and overlay the top radio buttons instead.
-                </TextBlock>
-            </Grid>-->
+            </TabControl>
         </Popup>
 
         

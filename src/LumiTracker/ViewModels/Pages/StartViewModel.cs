@@ -17,8 +17,6 @@ namespace LumiTracker.ViewModels.Pages
     public partial class StartViewModel : ObservableObject
     {
         private IDeckWindow _deckWindow;
-        private WindowSnapper? _snapper;
-
 
         private GameWatcher _gameWatcher;
 
@@ -80,17 +78,16 @@ namespace LumiTracker.ViewModels.Pages
         {
             GameWatcherState = EGameWatcherState.WindowWatcherStarted;
             GameWatcherStateBrush = Brushes.LimeGreen;
-
-            _snapper = new WindowSnapper((Window)_deckWindow, hwnd);
-            _snapper.Attach();
             _deckWindow.ShowWindow();
+
+            _deckWindow.AttachTo(hwnd);
         }
 
         private void OnWindowWatcherExit()
         {
+            _deckWindow.Detach();
+
             _deckWindow.HideWindow();
-            _snapper?.Detach();
-            _snapper = null;
         }
 
         [RelayCommand]

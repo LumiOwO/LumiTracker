@@ -13,12 +13,14 @@ namespace LumiTracker.Views.Windows
     {
         void ShowWindow();
         void HideWindow();
-        void CloseWindow();
+        void AttachTo(IntPtr hwnd);
+        void Detach();
     }
-
 
     public partial class DeckWindow : IDeckWindow
     {
+        private WindowSnapper? _snapper;
+
         public DeckWindowViewModel ViewModel { get; }
 
         public DeckWindow(DeckWindowViewModel viewModel)
@@ -30,8 +32,26 @@ namespace LumiTracker.Views.Windows
             InitializeComponent();
         }
 
-        public void ShowWindow() => Show();
-        public void HideWindow() => Hide();
-        public void CloseWindow() => Close();
+        public void AttachTo(IntPtr hwnd)
+        {
+            _snapper = new WindowSnapper(this, hwnd);
+            _snapper.Attach();
+        }
+        public void Detach()
+        {
+            _snapper?.Detach();
+            _snapper = null;
+        }
+
+        public void ShowWindow()
+        {
+            Show();
+            ViewModel.IsShowing = true;
+        }
+        public void HideWindow()
+        {
+            Hide();
+            ViewModel.IsShowing = false;
+        }
     }
 }

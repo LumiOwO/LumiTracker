@@ -7,8 +7,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using LumiTracker.Config;
+using LumiTracker.Views.Windows;
 using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.Helpers
@@ -100,22 +102,24 @@ namespace LumiTracker.Helpers
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetClientRect(IntPtr hWnd, ref Rect lpRect);
-
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr GetForegroundWindow();
 
         private DispatcherTimer _timer;
-        private IntPtr _hwnd;
-        private Rect _lastBounds;
-        private Window _window;
+        private Rect            _lastBounds;
+        private DeckWindow      _src_window;
+        private IntPtr          _src_hwnd;
+        private IntPtr          _dst_hwnd;
 
-        public WindowSnapper(Window window, IntPtr hwnd)
+        public WindowSnapper(DeckWindow window, IntPtr hwnd)
         {
-            _window = window;
-            _window.Topmost = true;
-            _hwnd = hwnd;
+            _src_window = window;
+            _src_hwnd   = new WindowInteropHelper(window).Handle;
+            _dst_hwnd   = hwnd;
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
-            _timer.Tick += (x, y) => SnapToWindow();
+            _timer.Tick += (x, y) => Tick();
             _timer.IsEnabled = false;
         }
 
@@ -129,14 +133,35 @@ namespace LumiTracker.Helpers
             _timer.Stop();
         }
 
-        private void SnapToWindow()
+        private void Tick()
         {
-            var bounds = GetWindowBounds(_hwnd);
-            if (bounds == _lastBounds) return;
-            Configuration.Logger.LogDebug($"{bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}");
+            var bounds = GetWindowBounds(_dst_hwnd);
+            if (bounds != _lastBounds)
+            {
+                SnapToWindow(bounds);
+            }
+
+            var foregroundHwnd = GetForegroundWindow();
+            //Configuration.Logger.LogDebug($"foregroundHwnd={foregroundHwnd}, _src_hwnd={_src_hwnd}, _dst_hwnd={_dst_hwnd}");
+            if (_src_hwnd != foregroundHwnd)
+            {
+                if (_dst_hwnd != foregroundHwnd)
+                {
+                    _src_window.HideWindow();
+                }
+                else
+                {
+                    _src_window.ShowWindow();
+                }
+            }
+        }
+
+        private void SnapToWindow(Rect bounds)
+        {
+            Configuration.Logger.LogDebug($"bounds: {bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}");
 
             const int MONITOR_DEFAULTTONEAREST = 0x00000002;
-            IntPtr hMonitor = MonitorFromWindow(_hwnd, MONITOR_DEFAULTTONEAREST);
+            IntPtr hMonitor = MonitorFromWindow(_dst_hwnd, MONITOR_DEFAULTTONEAREST);
             MONITORINFOEX monitorInfo = new MONITORINFOEX();
             monitorInfo.cbSize = Marshal.SizeOf(monitorInfo);
             GetMonitorInfo(hMonitor, ref monitorInfo);
@@ -151,13 +176,14 @@ namespace LumiTracker.Helpers
             Configuration.Logger.LogDebug($"PhysicalHeight={PhysicalHeight}, LogicalHeight={LogicalHeight}, scale={scale}");
 
             Rect clientRect = new Rect();
-            GetClientRect(_hwnd, ref clientRect);
-            Configuration.Logger.LogDebug($"{clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}");
+            GetClientRect(_dst_hwnd, ref clientRect);
+            Configuration.Logger.LogDebug($"clientRect: {clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}");
             POINT clientLeftTop = new POINT { x = clientRect.Left, y = clientRect.Top };
-            ClientToScreen(_hwnd, ref clientLeftTop);
+            ClientToScreen(_dst_hwnd, ref clientLeftTop);
 
-            _window.Left = clientLeftTop.x / scale;
-            _window.Top  = clientLeftTop.y / scale + clientRect.Height / scale - _window.Height;
+            _src_window.Left = clientLeftTop.x / scale;
+            _src_window.Top  = clientLeftTop.y / scale + clientRect.Height / scale - _src_window.Height;
+
             _lastBounds  = bounds;
         }
 
