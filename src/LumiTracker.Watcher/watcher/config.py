@@ -22,4 +22,4 @@ cfg = dict_to_simplenamespace(_data)
 
 import logging
 logging.basicConfig(level=logging.DEBUG if cfg.DEBUG else logging.INFO,
-                    format='%(asctime)s - [%(levelname)s] - %(message)s')
+                    format='{"level":"%(levelname)s", "data":{%(message)s}}')

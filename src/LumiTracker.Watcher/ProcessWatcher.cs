@@ -11,6 +11,7 @@
 
     using LumiTracker.Config;
     using System.Security.Cryptography;
+    using Newtonsoft.Json.Linq;
 
     public class WindowInfo
     {
@@ -26,9 +27,9 @@
 
     public delegate void OnGameStartedCallback();
 
-    public delegate void OnMyEventCardCallback();
+    public delegate void OnMyEventCardCallback(int card_id);
 
-    public delegate void OnOpEventCardCallback();
+    public delegate void OnOpEventCardCallback(int card_id);
 
     public class ProcessWatcher : IAsyncDisposable
     {
@@ -209,7 +210,33 @@
 
         private void WindowWatcherEventHandler(object sender, DataReceivedEventArgs e)
         {
+            if (e.Data == null) return;
             Console.WriteLine(e.Data);
+
+            JObject message = JObject.Parse(e.Data);
+            string message_level = message["level"]!.ToString();
+            if (message_level == "INFO")
+            {
+                var message_data = message["data"]!;
+
+                string message_type = message_data["type"]!.ToString();
+                if (message_type == "game_start")
+                {
+                    GameStarted?.Invoke();
+                }
+                else if (message_type == "my_event_card")
+                {
+                    int card_id = (int)message_data["card_id"]!;
+                    MyEventCard?.Invoke(card_id);
+                }
+                else if (message_type == "op_event_card")
+                {
+                    int card_id = (int)message_data["card_id"]!;
+                    OpEventCard?.Invoke(card_id);
+                }
+            }
+
+            
         }
     }
 

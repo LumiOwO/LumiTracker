@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 using LumiTracker.Config;
+using LumiTracker.ViewModels.Windows;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
+using Wpf.Ui.Appearance;
 
 namespace LumiTracker.Models
 {
@@ -29,6 +32,8 @@ namespace LumiTracker.Models
 
     public class GameWatcher
     {
+        private DeckWindowViewModel _deckWindowViewModel;
+
         private SpinLockedValue<string> processName = new ("");
 
         private SpinLockedValue<ProcessWatcher> processWatcher = new (null);
@@ -40,6 +45,11 @@ namespace LumiTracker.Models
         public event OnWindowWatcherStartCallback? WindowWatcherStart;
 
         public event OnWindowWatcherExitCallback?  WindowWatcherExit;
+
+        public GameWatcher(DeckWindowViewModel deckWindowViewModel)
+        {
+            _deckWindowViewModel = deckWindowViewModel;
+        }
 
         public void Start(string name)
         {
@@ -70,6 +80,9 @@ namespace LumiTracker.Models
                 watcher.GenshinWindowFound += OnGenshinWindowFound;
                 watcher.WindowWatcherStart += OnWindowWatcherStart;
                 watcher.WindowWatcherExit  += OnWindowWatcherExit;
+                watcher.MyEventCard        += OnMyEventCard;
+                watcher.OpEventCard        += OnOpEventCard;
+                watcher.GameStarted        += OnGameStarted;
                 processWatcher.Value = watcher;
 
                 watcher.Start(processName.Value!);
@@ -109,6 +122,37 @@ namespace LumiTracker.Models
         {
             Configuration.Logger.LogDebug("OnWindowWatcherExit");
             WindowWatcherExit?.Invoke();
+        }
+
+        private void OnGameStarted()
+        {
+            _deckWindowViewModel.MyEventCardsPlayed = new ObservableCollection<EventCardView>();
+            _deckWindowViewModel.OpEventCardsPlayed = new ObservableCollection<EventCardView>();
+        }
+
+        private void OnMyEventCard(int card_id)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _deckWindowViewModel.MyEventCardsPlayed.Add(new EventCardView() {
+                    CardID   = card_id,
+                    CardName = Configuration.Database["events"]![card_id]!["name_CN"]!.ToString(),
+                    Count    = 1,
+                });
+            });
+        }
+
+        private void OnOpEventCard(int card_id)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _deckWindowViewModel.OpEventCardsPlayed.Add(new EventCardView()
+                {
+                    CardID = card_id,
+                    CardName = Configuration.Database["events"]![card_id]!["name_CN"]!.ToString(),
+                    Count = 1,
+                });
+            });
         }
     }
 }

@@ -34,7 +34,7 @@
 
         <SolidColorBrush x:Key="MainContentBackground"
             Color="#282c34"
-            Opacity="0.7" />
+            Opacity="0.9" />
         <SolidColorBrush x:Key="TabHeaderBackground"
             Color="#ffffff"
             Opacity="0.1" />
@@ -175,9 +175,9 @@
                     <ui:ListView
                         Grid.Column="0"
                         MaxWidth="{Binding Width}"
-                        MaxHeight="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.6}"
+                        Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
-                        ItemsSource="{Binding ViewModel.BasicListViewItems, Mode=TwoWay}"
+                        ItemsSource="{Binding ViewModel.MyEventCardsPlayed, Mode=TwoWay}"
                         SelectedIndex="1"
                         ItemTemplate="{StaticResource EventCardViewTemplate}"
                         />
@@ -215,9 +215,9 @@
                     <ui:ListView
                         Grid.Column="0"
                         MaxWidth="{Binding Width}"
-                        MaxHeight="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.6}"
+                        Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
-                        ItemsSource="{Binding ViewModel.BasicListViewItems, Mode=TwoWay}"
+                        ItemsSource="{Binding ViewModel.OpEventCardsPlayed, Mode=TwoWay}"
                         SelectedIndex="1"
                         ItemTemplate="{StaticResource EventCardViewTemplate}"
                         />

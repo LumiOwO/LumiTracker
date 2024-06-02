@@ -71,13 +71,19 @@ namespace LumiTracker.Config
 
         private ConfigData _data;
 
+        private JObject _db;
+
         private ILogger _logger;
 
         private static readonly string configFilePath = "assets/config.json";
 
+        private static readonly string dbFilePath = "assets/database/db.json";
+
         private Configuration()
         {
             _data = LoadConfig();
+            _db = LoadDatabase();
+
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder
@@ -100,6 +106,12 @@ namespace LumiTracker.Config
             return jObject.ToObject<ConfigData>()!;
         }
 
+        private static JObject LoadDatabase()
+        {
+            string jsonString = File.ReadAllText(dbFilePath);
+            return JObject.Parse(jsonString);
+        }
+
         private static Configuration Instance
         {
             get
@@ -113,6 +125,14 @@ namespace LumiTracker.Config
             get
             {
                 return Instance._data;
+            }
+        }
+
+        public static JObject Database
+        {
+            get
+            {
+                return Instance._db;
             }
         }
 

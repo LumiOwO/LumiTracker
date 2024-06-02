@@ -70,14 +70,13 @@ class WindowWatcher:
         self.filters.game_start = StreamFilter(null_val=False)
 
     def Start(self, hwnd, title):
-        logging.info("WindowWatcher start")
-        logging.debug(f"{hwnd=}, {title=}")
+        logging.debug(f'"info": "WindowWatcher start, {hwnd=}, {title=}"')
 
         PROCESS_PER_MONITOR_DPI_AWARE = 2
         try:
             ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
         except Exception as e:
-            logging.error("Error setting DPI awareness:", e)
+            logging.error(f'"info": "Error setting DPI awareness: {e}"')
 
         self.hwnd = hwnd
 
@@ -151,8 +150,8 @@ class WindowWatcher:
         start = (dist <= cfg.threshold)
         start = self.filters.game_start.Filter(start)
         if start:
-            logging.info(f"Game start")
-            logging.debug(dist)
+            logging.debug(f'"info": "Game start, {dist=}"')
+            logging.info(f'"type": "game_start"')
             if cfg.DEBUG_SAVE:
                 buffer = start_event_frame.frame_buffer[:, :, 2::-1] # bgr to rgb
                 image  = Image.fromarray(buffer)
@@ -175,8 +174,8 @@ class WindowWatcher:
         my_id = self.filters.my_event.Filter(my_id)
 
         if my_id >= 0:
-            logging.info(f"my event: {self.db['events'][my_id].get('name_CN', 'None')}")
-            logging.debug(my_dist)
+            logging.debug(f'"info": "my event: {self.db["events"][my_id].get("name_CN", "None")}, {my_dist=}"')
+            logging.info(f'"type": "my_event_card", "card_id": {my_id}')
 
         # op event
         op_left = int(self.client_size[0] * cfg.op_event_pos[0]) + self.border_size[0]
@@ -191,8 +190,8 @@ class WindowWatcher:
         op_id = self.filters.op_event.Filter(op_id)
 
         if op_id >= 0:
-            logging.info(f"op event: {self.db['events'][op_id].get('name_CN', 'None')}")
-            logging.debug(op_dist)
+            logging.debug(f'"info": "op event: {self.db["events"][op_id].get("name_CN", "None")}, {op_dist=}"')
+            logging.info(f'"type": "op_event_card", "card_id": {op_id}')
 
         if cfg.DEBUG_SAVE:
             buffer = my_event_frame.frame_buffer[:, :, 2::-1] # bgr to rgb
@@ -213,7 +212,7 @@ class WindowWatcher:
         self.frame_count += 1
         cur_time = time.time()
         if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
-            logging.info(f"FPS: {self.frame_count / (cur_time - self.prev_log_time)}")
+            logging.debug(f'"info": "FPS: {self.frame_count / (cur_time - self.prev_log_time)}"')
             self.frame_count   = 0
             self.prev_log_time = cur_time
 
@@ -232,7 +231,7 @@ class WindowWatcher:
     # Called When The Capture Item Closes Usually When The Window Closes, Capture
     # Session Will End After This Function Ends
     def on_closed(self):
-        logging.info("Window Capture Session Closed")
+        logging.debug('"info": "Window Capture Session Closed"')
 
 if __name__ == '__main__':
     assert len(sys.argv) == 3, "Wrong number of arguments"
