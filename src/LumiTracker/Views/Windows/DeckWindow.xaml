@@ -28,37 +28,26 @@
     </Window.Template>
 
     <Window.Resources>
-        <DataTemplate x:Key="PersonTemplate" DataType="{x:Type models:Person}">
+        <DataTemplate x:Key="EventCardViewTemplate" DataType="{x:Type models:EventCardView}">
             <Grid Margin="8,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Ellipse
-                    x:Name="Ellipse"
-                    Grid.RowSpan="2"
-                    Width="32"
-                    Height="32"
-                    Margin="6"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Fill="{ui:ThemeResource ControlStrongStrokeColorDefaultBrush}" />
+                
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="1"
+                    Grid.Column="0"
                     Margin="12,6,0,0"
                     FontWeight="Bold"
-                    Text="{Binding Name, Mode=OneWay}" />
+                    Text="{Binding CardName, Mode=OneWay}" />
                 <TextBlock
-                    Grid.Row="1"
                     Grid.Column="1"
                     Margin="12,0,0,6"
                     Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding Company, Mode=OneWay}" />
+                    Text="{Binding Count, Mode=OneWay}" />
             </Grid>
         </DataTemplate>
 
@@ -112,7 +101,7 @@
                         d:ItemsSource="{d:SampleData ItemCount=2}"
                         ItemsSource="{Binding ViewModel.BasicListViewItems, Mode=TwoWay}"
                         SelectedIndex="1"
-                        ItemTemplate="{StaticResource PersonTemplate}"
+                        ItemTemplate="{StaticResource EventCardViewTemplate}"
                         />
                 </TabItem>
                 
@@ -133,7 +122,7 @@
                         d:ItemsSource="{d:SampleData ItemCount=2}"
                         ItemsSource="{Binding ViewModel.BasicListViewItems, Mode=TwoWay}"
                         SelectedIndex="1"
-                        ItemTemplate="{StaticResource PersonTemplate}"
+                        ItemTemplate="{StaticResource EventCardViewTemplate}"
                         />
                 </TabItem>
 

@@ -11,12 +11,11 @@ using System.Reflection;
 using System.Windows.Threading;
 using Wpf.Ui;
 
-using LumiTracker.Config;
-using LumiTracker.Watcher;
-using System.Globalization;
-using Wpf.Ui.Appearance;
 using Microsoft.Extensions.Logging;
+using LumiTracker.Config;
 using LumiTracker.Models;
+using Wpf.Ui.Appearance;
+using Microsoft.Win32;
 
 namespace LumiTracker
 {
@@ -71,6 +70,11 @@ namespace LumiTracker
 
             }).Build();
 
+        public App()
+        {
+            SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
+        }
+
         /// <summary>
         /// Gets registered service.
         /// </summary>
@@ -108,5 +112,39 @@ namespace LumiTracker
             // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
         }
 
+        private void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+        {
+            Configuration.Logger.LogDebug($"SystemEvents_SessionSwitch Reason={e.Reason}");
+            switch (e.Reason)
+            {
+                case SessionSwitchReason.SessionLock:
+                    // Screen locked, application might be suspended
+                    // refresh theme
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
+                        ApplicationThemeManager.Apply(curTheme);
+                    });
+                    break;
+                case SessionSwitchReason.SessionUnlock:
+                    // Screen unlocked, application might be resumed
+                    break;
+                case SessionSwitchReason.SessionLogoff:
+                    // User logged off
+                    break;
+                case SessionSwitchReason.SessionLogon:
+                    // User logged on
+                    break;
+                case SessionSwitchReason.RemoteDisconnect:
+                    // Remote session disconnected
+                    break;
+                case SessionSwitchReason.RemoteConnect:
+                    // Remote session connected
+                    break;
+                default:
+                    // Other session switch reasons
+                    break;
+            }
+        }
     }
 }

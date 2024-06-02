@@ -10,22 +10,14 @@ using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.Models
 {
-    public record Person
+    public struct EventCardView
     {
-        public string FirstName { get; init; }
+        public int Count { get; set; }
+        public int CardID { get; set; }
+        public string CardName { get; set; }
 
-        public string LastName { get; init; }
+        //public Image Snapshot { get; set; }
 
-        public string Name => $"{FirstName} {LastName}";
-
-        public string Company { get; init; }
-
-        public Person(string firstName, string lastName, string company)
-        {
-            FirstName = firstName;
-            LastName = lastName;
-            Company = company;
-        }
     }
 
     public enum EGameWatcherState

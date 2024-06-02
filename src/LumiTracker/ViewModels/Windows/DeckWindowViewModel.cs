@@ -13,22 +13,22 @@ namespace LumiTracker.ViewModels.Windows
         private GameWatcher _gameWatcher;
 
         [ObservableProperty]
-        private ObservableCollection<Person> _basicListViewItems;
+        private ObservableCollection<EventCardView> _basicListViewItems;
 
         [ObservableProperty]
         private bool _isShowing = false;
 
-        private static ObservableCollection<Person> GeneratePersons()
+        private static ObservableCollection<EventCardView> GenerateEventCardViews()
         {
             var random = new Random();
-            var persons = new ObservableCollection<Person>();
+            var cards = new ObservableCollection<EventCardView>();
 
             var names = new[]
             {
             "John",
             "Winston",
             "Adrianna",
-            "Spencer",
+            "交给我吧！",
             "Phoebe",
             "Lucas",
             "Carl",
@@ -40,52 +40,27 @@ namespace LumiTracker.ViewModels.Windows
             "Jamie",
             "Alexzander"
         };
-            var surnames = new[]
-            {
-            "Doe",
-            "Tapia",
-            "Cisneros",
-            "Lynch",
-            "Munoz",
-            "Marsh",
-            "Hudson",
-            "Bartlett",
-            "Gregory",
-            "Banks",
-            "Hood",
-            "Fry",
-            "Carroll"
-        };
-            var companies = new[]
-            {
-            "Pineapple Inc.",
-            "Macrosoft Redmond",
-            "Amazing Basics Ltd",
-            "Megabyte Computers Inc",
-            "Roude Mics",
-            "XD Projekt Red S.A.",
-            "Lepo.co"
-        };
 
             for (int i = 0; i < 50; i++)
             {
-                persons.Add(
-                    new Person(
-                        names[random.Next(0, names.Length)],
-                        surnames[random.Next(0, surnames.Length)],
-                        companies[random.Next(0, companies.Length)]
-                    )
+                cards.Add(
+                    new EventCardView( )
+                    {
+                        CardID = i,
+                        CardName = names[random.Next(0, names.Length)],
+                        Count = random.Next(0, names.Length)
+                    }
                 );
             }
 
-            return persons;
+            return cards;
         }
 
 
         public DeckWindowViewModel(GameWatcher gameWatcher)
         {
             _gameWatcher = gameWatcher;
-            _basicListViewItems = GeneratePersons();
+            _basicListViewItems = GenerateEventCardViews();
         }
     }
 }
