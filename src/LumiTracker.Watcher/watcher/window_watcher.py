@@ -71,6 +71,7 @@ class WindowWatcher:
 
     def Start(self, hwnd, title):
         logging.info("WindowWatcher start")
+        logging.debug(f"{hwnd=}, {title=}")
 
         PROCESS_PER_MONITOR_DPI_AWARE = 2
         try:

@@ -186,7 +186,7 @@
     <comment/>
   </data>
   <data name="ClientType_Cloud" xml:space="preserve">
-    <value>[CN] Cloud</value>
+    <value>[CN] Cloud (Coming soon)</value>
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
@@ -199,6 +199,14 @@
   </data>
   <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
     <value>LumiTracker started</value>
+    <comment/>
+  </data>
+  <data name="MyPlayedCards" xml:space="preserve">
+    <value>My Played</value>
+    <comment/>
+  </data>
+  <data name="OpPlayedCards" xml:space="preserve">
+    <value>Op Played</value>
     <comment/>
   </data>
 </root>

@@ -186,7 +186,7 @@
     <comment/>
   </data>
   <data name="ClientType_Cloud" xml:space="preserve">
-    <value>云·原神</value>
+    <value>云·原神（暂不支持）</value>
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
@@ -199,6 +199,14 @@
   </data>
   <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
     <value>记牌器已启动</value>
+    <comment/>
+  </data>
+  <data name="MyPlayedCards" xml:space="preserve">
+    <value>我方出牌</value>
+    <comment/>
+  </data>
+  <data name="OpPlayedCards" xml:space="preserve">
+    <value>对方出牌</value>
     <comment/>
   </data>
 </root>

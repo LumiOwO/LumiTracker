@@ -63,7 +63,8 @@ namespace LumiTracker.ViewModels.Pages
             }
             else if (clientType == EClientType.Cloud)
             {
-                processName = "Genshin Impact Cloud Game.exe";
+                // TODO: support Genshin Impact Cloud
+                processName = "Genshin Impact Cloud Game_TODOxxxxxxxx.exe";
             }
             return processName;
         }
@@ -78,15 +79,17 @@ namespace LumiTracker.ViewModels.Pages
         {
             GameWatcherState = EGameWatcherState.WindowWatcherStarted;
             GameWatcherStateBrush = Brushes.LimeGreen;
-            _deckWindow.ShowWindow();
 
+            _deckWindow.ShowWindow();
             _deckWindow.AttachTo(hwnd);
         }
 
         private void OnWindowWatcherExit()
         {
-            _deckWindow.Detach();
+            GameWatcherState = EGameWatcherState.NoWindowFound;
+            GameWatcherStateBrush = Brushes.DarkGray;
 
+            _deckWindow.Detach();
             _deckWindow.HideWindow();
         }
 

@@ -29,13 +29,6 @@ namespace LumiTracker.ViewModels.Windows
             "Winston",
             "Adrianna",
             "交给我吧！",
-            "Phoebe",
-            "Lucas",
-            "Carl",
-            "Marissa",
-            "Brandon",
-            "Antoine",
-            "Arielle",
             "Arielle",
             "Jamie",
             "Alexzander"

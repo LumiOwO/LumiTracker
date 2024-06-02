@@ -9,7 +9,6 @@
     xmlns:models="clr-namespace:LumiTracker.Models"
     xmlns:helpers="clr-namespace:LumiTracker.Helpers"
     xmlns:svs="clr-namespace:LumiTracker.Services"
-    xmlns:ctrls="clr-namespace:LumiTracker.Controls"
     mc:Ignorable="d"
     Title="DeckWindow" 
     Topmost="True" 
@@ -30,27 +29,36 @@
     </Window.Template>
 
     <Window.Resources>
+        <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
+        <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+
+        <SolidColorBrush x:Key="MainContentBackground"
+            Color="#282c34"
+            Opacity="0.7" />
+        <SolidColorBrush x:Key="TabHeaderBackground"
+            Color="#ffffff"
+            Opacity="0.1" />
+
         <DataTemplate x:Key="EventCardViewTemplate" DataType="{x:Type models:EventCardView}">
-            <Grid 
+            <Grid
                 HorizontalAlignment="Stretch"
                 Margin="2, -5, 10, -5">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
 
                 <Border 
                     Grid.Column="0" 
                     HorizontalAlignment="Right"
-                    VerticalAlignment="Stretch"
-                    Height="20"
+                    VerticalAlignment="Center"
                     >
                     <Border.OpacityMask>
                         <LinearGradientBrush StartPoint="1,0.5" EndPoint="0,0.5">
-                            <GradientStop Color="#bf000000" Offset="0.5" />
+                            <GradientStop Color="#bf000000" Offset="0.3" />
                             <GradientStop Color="Transparent" Offset="1" />
                         </LinearGradientBrush>
                     </Border.OpacityMask>
@@ -59,18 +67,36 @@
                         Stretch="UniformToFill"
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Center"
+                        Height="{Binding Height, 
+                            RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.035
+                            }"
                     />
                 </Border>
                 <TextBlock
                     Grid.Column="0"
-                    Margin="0,0,0,0"
-                    FontWeight="Bold"
+                    Margin="5,0,0,0"
+                    Foreground="White"
+                    VerticalAlignment="Center"
+                    FontSize="{Binding Height, 
+                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.018
+                        }"
                     Text="{Binding CardName, Mode=OneWay}" />
                 <TextBlock
                     Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Margin="0,0,0,0"
-                    Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                    Margin="5,0,0,0"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Foreground="#f9ca24"
+                    FontSize="{Binding Height, 
+                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.018
+                        }"
                     Text="{Binding Count, Mode=OneWay}" />
             </Grid>
         </DataTemplate>
@@ -80,7 +106,6 @@
             <Setter Property="IsHitTestVisible" Value="False"/>
         </Style>
 
-        <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
     </Window.Resources>
 
     <Grid>
@@ -94,7 +119,8 @@
             x:Name="toggle" 
             Content="{svs:Localization AppName}" 
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
+            Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.05}"
+            FontWeight="Bold"
             />
         <Popup 
             Grid.Row="0"
@@ -111,26 +137,45 @@
                 <MultiBinding Converter="{StaticResource MultiBooleanAndConverter}">
                     <Binding ElementName="toggle" Path="IsChecked" />
                     <Binding Path="ViewModel.IsShowing" />
-                    <!-- Add more bindings for additional boolean properties -->
                 </MultiBinding>
             </Popup.IsOpen>
 
-            <ctrls:HeaderFilledTabControl 
+            <TabControl 
                 Margin="0,8,0,0"
-                Background="#20aaaaaa" >
+                Background="{StaticResource MainContentBackground}" 
+                >
 
                 <TabItem 
-                    Background="#20aaaaaa">
+                    MinHeight="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.05}"
+                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.499}"
+                    Background="{StaticResource TabHeaderBackground}"
+                    >
                     <TabItem.Header>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="XboxConsole24" />
-                            <TextBlock Text="Hello" />
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon 
+                                FontSize="{Binding Height, 
+                                    RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                                    Converter={StaticResource SizeWithRatioConverter}, 
+                                    ConverterParameter=0.02
+                                    }"
+                                FontWeight="Bold"
+                                Margin="0,0,6,0" 
+                                Symbol="Person24" />
+                            <TextBlock 
+                                FontSize="{Binding Height, 
+                                    RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                                    Converter={StaticResource SizeWithRatioConverter}, 
+                                    ConverterParameter=0.02
+                                    }"
+                                FontWeight="Bold"
+                                Text="{svs:Localization MyPlayedCards}" />
                         </StackPanel>
                     </TabItem.Header>
 
                     <ui:ListView
                         Grid.Column="0"
-                        MaxHeight="200"
+                        MaxWidth="{Binding Width}"
+                        MaxHeight="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.6}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
                         ItemsSource="{Binding ViewModel.BasicListViewItems, Mode=TwoWay}"
                         SelectedIndex="1"
@@ -139,19 +184,38 @@
                 </TabItem>
                 
                 <TabItem 
-                    Background="#20aaaaaa" 
+                    MinHeight="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.05}"
+                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.499}"
+                    Background="{StaticResource TabHeaderBackground}"
                     IsSelected="True"
                     >
                     <TabItem.Header>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="StoreMicrosoft16" />
-                            <TextBlock Text="The cake" />
+                        <StackPanel 
+                            Orientation="Horizontal">
+                            <ui:SymbolIcon 
+                                FontSize="{Binding Height, 
+                                    RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                                    Converter={StaticResource SizeWithRatioConverter}, 
+                                    ConverterParameter=0.02
+                                    }"
+                                FontWeight="Bold"
+                                Margin="0,0,6,0" 
+                                Symbol="TargetArrow24" />
+                            <TextBlock 
+                                FontSize="{Binding Height, 
+                                    RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                                    Converter={StaticResource SizeWithRatioConverter}, 
+                                    ConverterParameter=0.02
+                                    }"
+                                FontWeight="Bold"
+                                Text="{svs:Localization OpPlayedCards}" />
                         </StackPanel>
                     </TabItem.Header>
                     
                     <ui:ListView
                         Grid.Column="0"
-                        MaxHeight="200"
+                        MaxWidth="{Binding Width}"
+                        MaxHeight="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.6}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
                         ItemsSource="{Binding ViewModel.BasicListViewItems, Mode=TwoWay}"
                         SelectedIndex="1"
@@ -159,7 +223,7 @@
                         />
                 </TabItem>
 
-            </ctrls:HeaderFilledTabControl>
+            </TabControl>
         </Popup>
 
         

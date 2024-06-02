@@ -10,6 +10,7 @@
     using Microsoft.Extensions.Logging;
 
     using LumiTracker.Config;
+    using System.Security.Cryptography;
 
     public class WindowInfo
     {
@@ -41,6 +42,15 @@
         public event OnMyEventCardCallback? MyEventCard;
         public event OnOpEventCardCallback? OpEventCard;
 
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        [DllImport("user32.dll")]
+        private static extern bool IsWindow(IntPtr hWnd);
+
         public ProcessWatcher(ILogger logger, ConfigData cfg)
         {
             this.logger = logger;
@@ -49,45 +59,40 @@
 
         public WindowInfo FindProcessWindow(string processName)
         {
-            var info = new WindowInfo();
+            var res = new WindowInfo();
 
             var processes = GetProcessByName(processName);
             if (processes.Count == 0)
             {
                 logger.LogInformation($"No process found with name: {processName}");
-                return info;
+                return res;
             }
 
             if (processes.Count > 1)
             {
                 logger.LogWarning($"Found multiple processes with name: {processName}, using the first one");
             }
-
             var proc = processes[0];
-            var infos = GetWindowsByPID(proc.Id);
 
-            if (infos.Count == 0)
+            var info = GetMainWindowInfo(proc);
+            if (info.hwnd == 0)
             {
                 logger.LogInformation($"No windows found for process '{processName}' (PID: {proc.Id})");
-                return info;
+                return res;
             }
             GenshinWindowFound?.Invoke();
 
             var foregroundHwnd = GetForegroundWindow();
-            if (infos[0].hwnd != foregroundHwnd)
+            if (info.hwnd != foregroundHwnd)
             {
                 logger.LogInformation($"Window for process '{processName}' (PID: {proc.Id}) is not foreground");
-                return info;
+                return res;
             }
 
-            info = infos[0];
-            logger.LogInformation($"Window titles for process '{processName}' (PID: {proc.Id}):");
-            foreach (var i in infos)
-            {
-                logger.LogInformation($"  - {i.title}");
-            }
-
-            return info;
+            logger.LogInformation($"Window title for process '{processName}' (PID: {proc.Id}): {info.title}");
+            
+            res = info;
+            return res;
         }
 
         private List<Process> GetProcessByName(string processName)
@@ -100,44 +105,23 @@
             return processes;
         }
 
-        private List<WindowInfo> GetWindowsByPID(int pid)
+        private WindowInfo GetMainWindowInfo(Process process)
         {
-            var infos = new List<WindowInfo>();
+            var info = new WindowInfo();
 
-            bool EnumWindowsProc(IntPtr hwnd, IntPtr lParam)
+            if (process != null)
             {
-                GetWindowThreadProcessId(hwnd, out var processId);
-                if (processId == pid && IsWindowVisible(hwnd))
+                IntPtr hwnd = process.MainWindowHandle;
+                if (IsWindow(hwnd))
                 {
-                    var info = new WindowInfo
-                    {
-                        hwnd = hwnd,
-                        title = GetWindowText(hwnd)
-                    };
-                    infos.Add(info);
+                    info.hwnd  = hwnd;
+                    info.title = GetWindowText(hwnd);
                 }
-                return true;
+                logger.LogInformation($"###Main window: hwnd={info.hwnd}, title={info.title}");
             }
 
-            EnumWindows(EnumWindowsProc, IntPtr.Zero);
-            return infos;
+            return info;
         }
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
         private static string GetWindowText(IntPtr hWnd)
         {
@@ -146,10 +130,7 @@
             return GetWindowText(hWnd, Buff, nChars) > 0 ? Buff.ToString() : "";
         }
 
-        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
-
         private SpinLockedValue<bool> ShouldCancel = new (false);
-
         private Task? _processWatcherTask;
         private Task? _windowWatcherTask;
 
