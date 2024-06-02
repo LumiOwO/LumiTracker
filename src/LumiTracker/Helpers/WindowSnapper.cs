@@ -184,6 +184,11 @@ namespace LumiTracker.Helpers
             _src_window.Left = clientLeftTop.x / scale;
             _src_window.Top  = clientLeftTop.y / scale + clientRect.Height / scale - _src_window.Height;
 
+            // Refresh popup, force the Popup to recalculate its position
+            var offset = _src_window.DeckWindowPopup.HorizontalOffset;
+            _src_window.DeckWindowPopup.HorizontalOffset = offset + 1;
+            _src_window.DeckWindowPopup.HorizontalOffset = offset;
+
             _lastBounds  = bounds;
         }
 
