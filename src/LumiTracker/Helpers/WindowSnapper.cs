@@ -57,6 +57,11 @@ namespace LumiTracker.Helpers
                 get { return Bottom - Top; }
             }
 
+            public int Width
+            {
+                get { return Right - Left; }
+            }
+
             public static bool operator!=(Rect r1, Rect r2)
             {
                 return !(r1 == r2);
@@ -116,6 +121,11 @@ namespace LumiTracker.Helpers
             _src_window = window;
             _src_hwnd   = new WindowInteropHelper(window).Handle;
             _dst_hwnd   = hwnd;
+
+            _lastBounds.Left   = 0;
+            _lastBounds.Top    = 0;
+            _lastBounds.Right  = 0;
+            _lastBounds.Bottom = 0;
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
@@ -181,15 +191,17 @@ namespace LumiTracker.Helpers
             POINT clientLeftTop = new POINT { x = clientRect.Left, y = clientRect.Top };
             ClientToScreen(_dst_hwnd, ref clientLeftTop);
 
-            _src_window.Left = clientLeftTop.x / scale;
-            _src_window.Top  = clientLeftTop.y / scale + clientRect.Height / scale - _src_window.Height;
+            _src_window.Width  = clientRect.Width  / scale * 0.2;
+            _src_window.Height = clientRect.Height / scale;
+            _src_window.Left   = clientLeftTop.x / scale;
+            _src_window.Top    = clientLeftTop.y / scale + clientRect.Height / scale - _src_window.Height;
 
             // Refresh popup, force the Popup to recalculate its position
             var offset = _src_window.DeckWindowPopup.HorizontalOffset;
             _src_window.DeckWindowPopup.HorizontalOffset = offset + 1;
             _src_window.DeckWindowPopup.HorizontalOffset = offset;
 
-            _lastBounds  = bounds;
+            _lastBounds = bounds;
         }
 
         private Rect GetWindowBounds(IntPtr handle)

@@ -8,6 +8,8 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:models="clr-namespace:LumiTracker.Models"
     xmlns:helpers="clr-namespace:LumiTracker.Helpers"
+    xmlns:svs="clr-namespace:LumiTracker.Services"
+    xmlns:ctrls="clr-namespace:LumiTracker.Controls"
     mc:Ignorable="d"
     Title="DeckWindow" 
     Topmost="True" 
@@ -29,23 +31,45 @@
 
     <Window.Resources>
         <DataTemplate x:Key="EventCardViewTemplate" DataType="{x:Type models:EventCardView}">
-            <Grid Margin="8,0">
+            <Grid 
+                HorizontalAlignment="Stretch"
+                Margin="2, -5, 10, -5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="20" />
                 </Grid.ColumnDefinitions>
-                
+
+                <Border 
+                    Grid.Column="0" 
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    Height="20"
+                    >
+                    <Border.OpacityMask>
+                        <LinearGradientBrush StartPoint="1,0.5" EndPoint="0,0.5">
+                            <GradientStop Color="#bf000000" Offset="0.5" />
+                            <GradientStop Color="Transparent" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.OpacityMask>
+                    <Image 
+                        Source="pack://siteoforigin:,,,/assets/start.png" 
+                        Stretch="UniformToFill"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Center"
+                    />
+                </Border>
                 <TextBlock
                     Grid.Column="0"
-                    Margin="12,6,0,0"
+                    Margin="0,0,0,0"
                     FontWeight="Bold"
                     Text="{Binding CardName, Mode=OneWay}" />
                 <TextBlock
                     Grid.Column="1"
-                    Margin="12,0,0,6"
+                    HorizontalAlignment="Right"
+                    Margin="0,0,0,0"
                     Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
                     Text="{Binding Count, Mode=OneWay}" />
             </Grid>
@@ -62,18 +86,25 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <ToggleButton 
+            Grid.Row="1"
             x:Name="toggle" 
-            Content="This must stay fixed" 
+            Content="{svs:Localization AppName}" 
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
             />
         <Popup 
+            Grid.Row="0"
+            x:Name="DeckWindowPopup" 
             Placement="Top" 
             StaysOpen="True"
             AllowsTransparency="True"
+            Width="{Binding Width}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
             PlacementTarget="{Binding ElementName=toggle}">
 
             <Popup.IsOpen>
@@ -84,12 +115,14 @@
                 </MultiBinding>
             </Popup.IsOpen>
 
-            <TabControl 
+            <ctrls:HeaderFilledTabControl 
                 Margin="0,8,0,0"
                 Background="#20aaaaaa" >
-                <TabItem Background="#20aaaaaa">
+
+                <TabItem 
+                    Background="#20aaaaaa">
                     <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                             <ui:SymbolIcon Margin="0,0,6,0" Symbol="XboxConsole24" />
                             <TextBlock Text="Hello" />
                         </StackPanel>
@@ -110,7 +143,7 @@
                     IsSelected="True"
                     >
                     <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                             <ui:SymbolIcon Margin="0,0,6,0" Symbol="StoreMicrosoft16" />
                             <TextBlock Text="The cake" />
                         </StackPanel>
@@ -126,7 +159,7 @@
                         />
                 </TabItem>
 
-            </TabControl>
+            </ctrls:HeaderFilledTabControl>
         </Popup>
 
         
