@@ -42,7 +42,7 @@
         <DataTemplate x:Key="EventCardViewTemplate" DataType="{x:Type models:EventCardView}">
             <Grid
                 HorizontalAlignment="Stretch"
-                Margin="2, -5, 10, -5">
+                Margin="2, -5, 0, -5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
@@ -78,6 +78,7 @@
                     Grid.Column="0"
                     Margin="5,0,0,0"
                     Foreground="White"
+                    FontWeight="Medium"
                     VerticalAlignment="Center"
                     FontSize="{Binding Height, 
                         RelativeSource={RelativeSource AncestorType={x:Type Window}},
@@ -87,15 +88,15 @@
                     Text="{Binding CardName, Mode=OneWay}" />
                 <TextBlock
                     Grid.Column="1"
-                    Margin="5,0,0,0"
+                    Margin="7,2,4,0"
                     FontWeight="Bold"
-                    HorizontalAlignment="Left"
+                    HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Foreground="#f9ca24"
                     FontSize="{Binding Height, 
                         RelativeSource={RelativeSource AncestorType={x:Type Window}},
                         Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.018
+                        ConverterParameter=0.02
                         }"
                     Text="{Binding Count, Mode=OneWay}" />
             </Grid>
@@ -143,6 +144,8 @@
             <TabControl 
                 Margin="0,8,0,0"
                 Background="{StaticResource MainContentBackground}" 
+                SelectionChanged="OnSelectionChanged"
+                x:Name="DeckWindowTabControl" 
                 >
 
                 <TabItem 
@@ -174,12 +177,13 @@
 
                     <ui:ListView
                         Grid.Column="0"
+                        ScrollViewer.VerticalScrollBarVisibility="Hidden"
                         MaxWidth="{Binding Width}"
                         Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
                         ItemsSource="{Binding ViewModel.MyEventCardsPlayed, Mode=TwoWay}"
-                        SelectedIndex="1"
                         ItemTemplate="{StaticResource EventCardViewTemplate}"
+                        PreviewMouseDown="OnPreviewMouseDown"
                         />
                 </TabItem>
                 
@@ -214,12 +218,13 @@
                     
                     <ui:ListView
                         Grid.Column="0"
+                        ScrollViewer.VerticalScrollBarVisibility="Hidden"
                         MaxWidth="{Binding Width}"
                         Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
                         ItemsSource="{Binding ViewModel.OpEventCardsPlayed, Mode=TwoWay}"
-                        SelectedIndex="1"
                         ItemTemplate="{StaticResource EventCardViewTemplate}"
+                        PreviewMouseDown="OnPreviewMouseDown"
                         />
                 </TabItem>
 

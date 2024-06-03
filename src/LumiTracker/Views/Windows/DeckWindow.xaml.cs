@@ -2,6 +2,9 @@
 using LumiTracker.Services;
 using LumiTracker.ViewModels.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
@@ -52,6 +55,26 @@ namespace LumiTracker.Views.Windows
         {
             Hide();
             ViewModel.IsShowing = false;
+        }
+
+        private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            foreach (TabItem tabItem in DeckWindowTabControl.Items)
+            {
+                if (tabItem.IsSelected)
+                {
+                    tabItem.Opacity = 1;
+                }
+                else
+                {
+                    tabItem.Opacity = 0.3;
+                }
+            }
+        }
+
+        private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }

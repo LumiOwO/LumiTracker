@@ -186,7 +186,7 @@
     <comment/>
   </data>
   <data name="ClientType_Cloud" xml:space="preserve">
-    <value>[CN] Cloud (Coming soon)</value>
+    <value>[CN] Cloud (Coming soon...)</value>
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">

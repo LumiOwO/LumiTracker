@@ -186,7 +186,7 @@
     <comment/>
   </data>
   <data name="ClientType_Cloud" xml:space="preserve">
-    <value>云·原神（暂不支持）</value>
+    <value>云·原神（维护中...）</value>
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">

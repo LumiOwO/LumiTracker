@@ -5,6 +5,9 @@ using LumiTracker.Config;
 using LumiTracker.Models;
 using LumiTracker.Views.Windows;
 using LumiTracker.Helpers;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Controls;
 
 namespace LumiTracker.ViewModels.Windows
 {
@@ -19,5 +22,8 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private bool _isShowing = false;
 
+        public DeckWindowViewModel()
+        {
+        }
     }
 }
