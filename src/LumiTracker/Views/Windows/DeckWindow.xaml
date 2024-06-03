@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:LumiTracker.Views.Windows"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:models="clr-namespace:LumiTracker.Models"
+    xmlns:vm="clr-namespace:LumiTracker.ViewModels.Windows"
     xmlns:helpers="clr-namespace:LumiTracker.Helpers"
     xmlns:svs="clr-namespace:LumiTracker.Services"
     mc:Ignorable="d"
@@ -39,7 +39,7 @@
             Color="#ffffff"
             Opacity="0.1" />
 
-        <DataTemplate x:Key="EventCardViewTemplate" DataType="{x:Type models:EventCardView}">
+        <DataTemplate x:Key="EventCardViewTemplate" DataType="{x:Type vm:EventCardView}">
             <Grid
                 HorizontalAlignment="Stretch"
                 Margin="2, -5, 0, -5">
@@ -63,7 +63,7 @@
                         </LinearGradientBrush>
                     </Border.OpacityMask>
                     <Image 
-                        Source="pack://siteoforigin:,,,/assets/start.png" 
+                        Source="{Binding SnapshotUri, Mode=OneWay}" 
                         Stretch="UniformToFill"
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Center"

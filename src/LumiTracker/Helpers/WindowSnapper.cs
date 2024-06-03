@@ -150,9 +150,11 @@ namespace LumiTracker.Helpers
             {
                 SnapToWindow(bounds);
             }
+            //Configuration.Logger.LogDebug($"bounds: {bounds.Width}, {bounds.Height}");
+            //Configuration.Logger.LogDebug($"_lastBounds: {_lastBounds.Width}, {_lastBounds.Height}");
+            //Configuration.Logger.LogDebug($"_src_window.Height: {_src_window.Height}");
 
             var foregroundHwnd = GetForegroundWindow();
-            //Configuration.Logger.LogDebug($"foregroundHwnd={foregroundHwnd}, _src_hwnd={_src_hwnd}, _dst_hwnd={_dst_hwnd}");
             if (_src_hwnd != foregroundHwnd)
             {
                 if (_dst_hwnd != foregroundHwnd)
@@ -170,6 +172,16 @@ namespace LumiTracker.Helpers
         {
             Configuration.Logger.LogDebug($"bounds: {bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}");
 
+            // Get client rect
+            Rect clientRect = new Rect();
+            GetClientRect(_dst_hwnd, ref clientRect);
+            Configuration.Logger.LogDebug($"clientRect: {clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}");
+            if (clientRect.Height == 0 || clientRect.Width == 0) return;
+
+            POINT clientLeftTop = new POINT { x = clientRect.Left, y = clientRect.Top };
+            ClientToScreen(_dst_hwnd, ref clientLeftTop);
+
+            // Get dpi scale
             const int MONITOR_DEFAULTTONEAREST = 0x00000002;
             IntPtr hMonitor = MonitorFromWindow(_dst_hwnd, MONITOR_DEFAULTTONEAREST);
             MONITORINFOEX monitorInfo = new MONITORINFOEX();
@@ -185,12 +197,7 @@ namespace LumiTracker.Helpers
             float scale = (float)PhysicalHeight / LogicalHeight;
             Configuration.Logger.LogDebug($"PhysicalHeight={PhysicalHeight}, LogicalHeight={LogicalHeight}, scale={scale}");
 
-            Rect clientRect = new Rect();
-            GetClientRect(_dst_hwnd, ref clientRect);
-            Configuration.Logger.LogDebug($"clientRect: {clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}");
-            POINT clientLeftTop = new POINT { x = clientRect.Left, y = clientRect.Top };
-            ClientToScreen(_dst_hwnd, ref clientLeftTop);
-
+            // Snap to target window
             _src_window.Width  = clientRect.Width  / scale * 0.2;
             _src_window.Height = clientRect.Height / scale;
             _src_window.Left   = clientLeftTop.x / scale;

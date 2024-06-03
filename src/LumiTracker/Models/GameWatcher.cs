@@ -13,16 +13,6 @@ using Wpf.Ui.Appearance;
 
 namespace LumiTracker.Models
 {
-    public struct EventCardView
-    {
-        public int Count { get; set; }
-        public int CardID { get; set; }
-        public string CardName { get; set; }
-
-        //public Image Snapshot { get; set; }
-
-    }
-
     public enum EGameWatcherState
     {
         NoWindowFound,
@@ -32,8 +22,6 @@ namespace LumiTracker.Models
 
     public class GameWatcher
     {
-        private DeckWindowViewModel _deckWindowViewModel;
-
         private SpinLockedValue<string> processName = new ("");
 
         private SpinLockedValue<ProcessWatcher> processWatcher = new (null);
@@ -46,9 +34,15 @@ namespace LumiTracker.Models
 
         public event OnWindowWatcherExitCallback?  WindowWatcherExit;
 
-        public GameWatcher(DeckWindowViewModel deckWindowViewModel)
+        public event OnGameStartedCallback? GameStarted;
+
+        public event OnMyEventCardCallback? MyEventCard;
+
+        public event OnOpEventCardCallback? OpEventCard;
+
+        public GameWatcher()
         {
-            _deckWindowViewModel = deckWindowViewModel;
+
         }
 
         public void Start(string name)
@@ -126,33 +120,20 @@ namespace LumiTracker.Models
 
         private void OnGameStarted()
         {
-            _deckWindowViewModel.MyEventCardsPlayed = new ObservableCollection<EventCardView>();
-            _deckWindowViewModel.OpEventCardsPlayed = new ObservableCollection<EventCardView>();
+            Configuration.Logger.LogDebug("OnGameStarted");
+            GameStarted?.Invoke();
         }
 
         private void OnMyEventCard(int card_id)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _deckWindowViewModel.MyEventCardsPlayed.Add(new EventCardView() {
-                    CardID   = card_id,
-                    CardName = Configuration.Database["events"]![card_id]!["name_CN"]!.ToString(),
-                    Count    = 1,
-                });
-            });
+            Configuration.Logger.LogDebug("OnMyEventCard");
+            MyEventCard?.Invoke(card_id);
         }
 
         private void OnOpEventCard(int card_id)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _deckWindowViewModel.OpEventCardsPlayed.Add(new EventCardView()
-                {
-                    CardID = card_id,
-                    CardName = Configuration.Database["events"]![card_id]!["name_CN"]!.ToString(),
-                    Count = 1,
-                });
-            });
+            Configuration.Logger.LogDebug("OnOpEventCard");
+            OpEventCard?.Invoke(card_id);
         }
     }
 }
