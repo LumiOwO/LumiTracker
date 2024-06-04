@@ -76,5 +76,15 @@ namespace LumiTracker.Views.Windows
         {
             e.Handled = true;
         }
+
+        private void OnMouseEnter(object sender, MouseEventArgs e)
+        {
+            ViewModel.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+        }
+
+        private void OnMouseLeave(object sender, MouseEventArgs e)
+        {
+            ViewModel.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+        }
     }
 }

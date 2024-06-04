@@ -27,11 +27,11 @@ namespace LumiTracker.ViewModels.Windows
 
         public EventCardView(int card_id) 
         {
-            var cardInfo = Configuration.Database["events"]![card_id]!;
+            var cardInfo  = Configuration.Database["events"]![card_id]!;
             _cardID       = card_id;
             _cardName     = cardInfo["zh-HANS"]!.ToString(); // TODO: localization
             _count        = 1;
-            SnapshotUri = $"pack://siteoforigin:,,,/assets/snapshots/events/{card_id}.jpg";
+            _snapshotUri  = $"pack://siteoforigin:,,,/assets/snapshots/events/{card_id}.jpg";
         }
     }
 
@@ -47,6 +47,9 @@ namespace LumiTracker.ViewModels.Windows
 
         [ObservableProperty]
         private bool _isShowing = false;
+
+        [ObservableProperty]
+        private ScrollBarVisibility _VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
 
         private GameWatcher _gameWatcher;
         public DeckWindowViewModel(GameWatcher gameWatcher)
