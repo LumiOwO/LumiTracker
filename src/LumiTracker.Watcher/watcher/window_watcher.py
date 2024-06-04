@@ -60,9 +60,9 @@ class WindowWatcher:
         self.window_size   = (0, 0) # border included
         self.client_size   = (0, 0)
 
-        self.prev_log_time = time.time()
-        self.frame_count   = 0
-        self.skip_count    = 0
+        self.prev_log_time   = time.time()
+        self.prev_frame_time = self.prev_log_time
+        self.frame_count     = 0
 
         self.filters            = SimpleNamespace()
         self.filters.my_event   = StreamFilter(null_val=-1)
@@ -204,29 +204,27 @@ class WindowWatcher:
 
     # Called Every Time A New Frame Is Available
     def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):
-        self.skip_count += 1
-        if self.skip_count <= cfg.SKIP_FRAMES:
-            return
-        self.skip_count = 0
-
-        self.frame_count += 1
-        cur_time = time.time()
-        if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
-            logging.debug(f'"info": "FPS: {self.frame_count / (cur_time - self.prev_log_time)}"')
-            self.frame_count   = 0
-            self.prev_log_time = cur_time
-
         if frame.width != self.window_size[0] or frame.height != self.window_size[1]:
             self.UpdateWindowBorderSize(frame.width, frame.height)
 
         self.DetectGameStart(frame)
         self.DetectEvent(frame)
 
-        # # Save The Frame As An Image To The Specified Path
-        # frame.save_as_image("image.png")
+        # frame done
+        self.frame_count += 1
 
-        # # Gracefully Stop The Capture Thread
-        # capture_control.stop()
+        # limit the speed in case of too fast
+        INTERVAL = 0.01
+        dt = time.time() - self.prev_frame_time
+        if dt < INTERVAL:
+            time.sleep(INTERVAL - dt)
+        cur_time = time.time()
+        self.prev_frame_time = cur_time
+
+        if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
+            logging.debug(f'"info": "FPS: {self.frame_count / (cur_time - self.prev_log_time)}"')
+            self.frame_count   = 0
+            self.prev_log_time = cur_time
 
     # Called When The Capture Item Closes Usually When The Window Closes, Capture
     # Session Will End After This Function Ends

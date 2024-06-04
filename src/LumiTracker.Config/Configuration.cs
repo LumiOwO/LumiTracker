@@ -20,9 +20,9 @@ namespace LumiTracker.Config
         public bool DEBUG { get; set; }
         public bool DEBUG_SAVE { get; set; }
         public string debug_dir { get; set; }
-        public int SKIP_FRAMES { get; set; }
         public int LOG_INTERVAL { get; set; }
         public int proc_watch_interval { get; set; }
+        public string assets_dir { get; set; }
         public string database_dir { get; set; }
         public string events_ann_filename { get; set; }
         public string db_filename { get; set; }

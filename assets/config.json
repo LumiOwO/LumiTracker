@@ -2,7 +2,6 @@
   "DEBUG": true,
   "DEBUG_SAVE": false,
   "debug_dir": "temp",
-  "SKIP_FRAMES": 0,
   "LOG_INTERVAL": 3,
   "proc_watch_interval": 1,
   "assets_dir": "assets",
