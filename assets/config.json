@@ -5,6 +5,7 @@
   "SKIP_FRAMES": 0,
   "LOG_INTERVAL": 3,
   "proc_watch_interval": 1,
+  "assets_dir": "assets",
   "database_dir": "assets/database",
   "events_ann_filename": "events.ann",
   "db_filename": "db.json",

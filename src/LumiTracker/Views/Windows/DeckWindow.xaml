@@ -58,7 +58,7 @@
                     >
                     <Border.OpacityMask>
                         <LinearGradientBrush StartPoint="1,0.5" EndPoint="0,0.5">
-                            <GradientStop Color="#bf000000" Offset="0.3" />
+                            <GradientStop Color="#bf000000" Offset="0.4" />
                             <GradientStop Color="Transparent" Offset="1" />
                         </LinearGradientBrush>
                     </Border.OpacityMask>

@@ -29,10 +29,9 @@ namespace LumiTracker.ViewModels.Windows
         {
             var cardInfo = Configuration.Database["events"]![card_id]!;
             _cardID       = card_id;
-            _cardName     = cardInfo["name_CN"]!.ToString();
+            _cardName     = cardInfo["zh-HANS"]!.ToString(); // TODO: localization
             _count        = 1;
-            _snapshotUri  = "pack://siteoforigin:,,,/assets/start.png";
-            //SnapshotUri = $"pack://siteoforigin:,,,/assets/snapshots/events/{card_id}.png",
+            SnapshotUri = $"pack://siteoforigin:,,,/assets/snapshots/events/{card_id}.jpg";
         }
     }
 

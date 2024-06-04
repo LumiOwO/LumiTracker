@@ -6,6 +6,7 @@ import imagehash
 import logging
 import time
 import json
+import csv
 import os
 from pathlib import Path
 
@@ -48,7 +49,7 @@ class Database:
     def __setitem__(self, key, value):
         self.data[key] = value
     
-    def UpdateControls(self):
+    def _UpdateControls(self):
         controls = {}
 
         start_filename = "start.png"
@@ -59,18 +60,23 @@ class Database:
 
         self.data["controls"] = controls
 
-    def UpdateEventCards(self):
-        event_cards_dir = os.path.join(cfg.cards_dir, "events")
-        files = os.listdir(event_cards_dir)
-        image_files = [file for file in files if file.lower().endswith(".png")]
+    def _UpdateEventCards(self):
+        with open(os.path.join(cfg.cards_dir, "events.csv"), 
+                    mode='r', newline='', encoding='utf-8') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            csv_data = [row for row in csv_reader]
 
         border_filename = "tcg_border_bg.png"
         border = Image.open(os.path.join(cfg.cards_dir, border_filename)).convert("RGBA")
 
-        n_images = len(image_files)
+        event_cards_dir = os.path.join(cfg.cards_dir, "events")
+        n_images = len(csv_data)
         events   = [None] * n_images
         features = [None] * n_images
-        for image_file in image_files:
+        for row in csv_data:
+            card_id = int(row["id"])
+            image_file = f'event_{card_id}_{row["zh-HANS"]}.png'
+
             image_path = os.path.join(event_cards_dir, image_file)
             image = Image.open(image_path)
             if image is not None:
@@ -80,27 +86,32 @@ class Database:
                 
                 feature = ExtractFeature(image.convert("RGB"))
 
-                infos = image_file.split("_")
-                card_id = int(infos[1])
                 features[card_id] = feature
-                events[card_id] = {
-                    "id"        : card_id,
-                    "type"      : infos[0],
-                    "filename"  : image_file,
-                    "name_CN"   : infos[2].removesuffix('.png')
-                }
-            else:
-                logging.error(f"Failed to load image: {image_path}")
+                events[card_id]   = row
 
-        logging.info(f"Loaded {len(features)} images from {event_cards_dir}")
+                # create snapshot
+                top    = int(row["snapshot_top"])
+                left   = 12
+                height = 150
+                crop_box = (left, top, 420 - left, top + height)
+                snapshot = image.crop(crop_box).convert("RGB")
+                snapshot_path = os.path.join(
+                    cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
+                snapshot.save(snapshot_path)
+
+            else:
+                logging.error(f'"info": "Failed to load image: {image_path}"')
+
+        logging.info(f'"info": "Loaded {len(features)} images from {event_cards_dir}"')
         self.data["events"] = events
 
-        if cfg.DEBUG:
-            image_file = events[211]["filename"]
+        if cfg.DEBUG_SAVE:
+            card_id = 211
+            image_file = f'event_{card_id}_{events[card_id]["zh-HANS"]}.png'
             image = Image.open(os.path.join(event_cards_dir, image_file))
             image = Image.alpha_composite(image, border)
             image.save(os.path.join(cfg.debug_dir, image_file))
-            logging.debug(f"save {image_file} at {cfg.debug_dir}")
+            logging.debug(f'"info": "save {image_file} at {cfg.debug_dir}"')
 
         ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         for i in range(len(features)):
@@ -109,7 +120,7 @@ class Database:
         ann.save(os.path.join(cfg.database_dir, cfg.events_ann_filename))
         self.events_ann = ann
 
-        if cfg.DEBUG:
+        if cfg.DEBUG_SAVE:
             test_dir = os.path.join(cfg.debug_dir, "test")
             files = os.listdir(test_dir)
             image_files = [file for file in files if file.lower().endswith(".png")]
@@ -122,11 +133,11 @@ class Database:
                 my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=10, include_distances=True)
 
                 dt = time.time() - begin_time
-                logging.debug(dt)
-                # logging.debug(my_ids)
-                logging.debug(my_dists)
+                logging.debug(f'"info": {dt=}')
+                logging.debug(f'"info": {my_ids=}')
+                logging.debug(f'"info": {my_dists=}')
                 found_name = events[my_ids[0]]['name_CN'] if my_dists[0] <= cfg.threshold else "None"
-                logging.debug(f"{file}: {found_name}")
+                logging.debug(f'"info": "{file}: {found_name}"')
 
             # save last one
             for i, card_id in enumerate(my_ids):
@@ -134,13 +145,13 @@ class Database:
                 image.save(os.path.join(cfg.debug_dir, f"found{i}.png"))
 
 
-    def Update(self):
-        self.UpdateControls()
-        self.UpdateEventCards()
+    def _Update(self):
+        self._UpdateControls()
+        self._UpdateEventCards()
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:
             json.dump(self.data, f, indent=2, ensure_ascii=False)
-    
+
     def Load(self):
         self.events_ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         self.events_ann.load(os.path.join(cfg.database_dir, cfg.events_ann_filename))
@@ -158,4 +169,4 @@ class Database:
 
 if __name__ == '__main__':
     db = Database()
-    db.Update()
+    db._Update()

@@ -23,3 +23,4 @@ cfg = dict_to_simplenamespace(_data)
 import logging
 logging.basicConfig(level=logging.DEBUG if cfg.DEBUG else logging.INFO,
                     format='{"level":"%(levelname)s", "data":{%(message)s}}')
+logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
