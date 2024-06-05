@@ -37,7 +37,7 @@ namespace LumiTracker.ViewModels.Pages
 
         private void InitializeViewModel()
         {
-            AppVersion = $"{LocalizationSource.Instance["AppName"]} - {GetAssemblyVersion()}";
+            AppVersion = $"{LocalizationSource.Instance["AppName"]} v{GetAssemblyVersion()}";
 
             var random = new Random();
             var colorCollection = new List<DataColor>();

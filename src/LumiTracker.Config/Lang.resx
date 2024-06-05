@@ -209,4 +209,20 @@
     <value>Op Played</value>
     <comment/>
   </data>
+  <data name="Instruction" xml:space="preserve">
+    <value>Instruction</value>
+    <comment/>
+  </data>
+  <data name="Instruction1" xml:space="preserve">
+    <value>For fullscreen, change "Fullscreen" to "Borderless" in Genshin's Settings -> Graphics -> Display Mode;</value>
+    <comment/>
+  </data>
+  <data name="Instruction2" xml:space="preserve">
+    <value>Only window sizes with an aspect ratio of 16:9 are supported.</value>
+    <comment/>
+  </data>
+  <data name="FreeDeclaration" xml:space="preserve">
+    <value>This software is open-source and completely free. If you paid for it, you have been scammed!</value>
+    <comment/>
+  </data>
 </root>

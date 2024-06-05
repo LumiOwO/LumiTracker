@@ -83,5 +83,29 @@
                 Text="{Binding ViewModel.GameWatcherState, Mode=OneWay, Converter={StaticResource EnumToLocalizationConverter}}" />
         </Grid>
 
+        <TextBlock 
+            Margin="0,60,0,2" 
+            Text="{svs:Localization Instruction}" 
+            FontSize="20"
+            FontWeight="Bold"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Grid.Column="0" />
+
+        <TextBlock 
+            Margin="20,10,0,2" 
+            Text="{svs:Localization Instruction1}" 
+            FontSize="15"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Grid.Column="0" />
+        <TextBlock 
+            Margin="20,10,0,2" 
+            Text="{svs:Localization Instruction2}" 
+            FontSize="15"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Grid.Column="0" />
+
     </StackPanel>
 </Page>
