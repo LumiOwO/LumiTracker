@@ -121,8 +121,20 @@
             Content="{svs:Localization AppName}" 
             HorizontalAlignment="Stretch"
             Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.05}"
-            FontWeight="Bold"
+            FontWeight="Bold" 
+            Checked="OnChecked"
+            Unchecked="OnUnchecked"
             />
+        <ui:SymbolIcon 
+            Grid.Row="1"
+            Foreground="#333333"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            FontWeight="Bold"
+            Margin="0,0,6,0" 
+            IsHitTestVisible="False"
+            Symbol="{Binding ViewModel.ToggleButtonIcon}" />
+        
         <Popup 
             Grid.Row="0"
             x:Name="DeckWindowPopup" 

@@ -86,5 +86,15 @@ namespace LumiTracker.Views.Windows
         {
             ViewModel.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
         }
+
+        private void OnChecked(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ToggleButtonIcon = SymbolRegular.ChevronDown48;
+        }
+
+        private void OnUnchecked(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ToggleButtonIcon = SymbolRegular.ChevronUp48;
+        }
     }
 }

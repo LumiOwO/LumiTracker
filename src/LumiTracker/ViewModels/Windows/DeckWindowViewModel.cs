@@ -51,6 +51,9 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private ScrollBarVisibility _VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
 
+        [ObservableProperty]
+        private SymbolRegular _toggleButtonIcon = SymbolRegular.ChevronUp48;
+
         private GameWatcher _gameWatcher;
         public DeckWindowViewModel(GameWatcher gameWatcher)
         {

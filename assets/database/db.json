@@ -2144,6 +2144,34 @@
       "zh-HANS": "金流监督",
       "en-US": "金流监督",
       "snapshot_top": "180"
+    },
+    {
+      "id": "306",
+      "type": "event",
+      "zh-HANS": "禁忌知识",
+      "en-US": "禁忌知识",
+      "snapshot_top": "380"
+    },
+    {
+      "id": "307",
+      "type": "event",
+      "zh-HANS": "圣俗杂座",
+      "en-US": "圣俗杂座",
+      "snapshot_top": "180"
+    },
+    {
+      "id": "308",
+      "type": "event",
+      "zh-HANS": "唤醒眷属",
+      "en-US": "唤醒眷属",
+      "snapshot_top": "380"
+    },
+    {
+      "id": "309",
+      "type": "event",
+      "zh-HANS": "噬骸能量块",
+      "en-US": "噬骸能量块",
+      "snapshot_top": "330"
     }
   ]
 }
