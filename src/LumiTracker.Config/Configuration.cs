@@ -75,6 +75,8 @@ namespace LumiTracker.Config
 
         private ILogger _logger;
 
+        private StreamWriter _errorWriter;
+
         private static readonly string configFilePath = "assets/config.json";
 
         private static readonly string dbFilePath = "assets/database/db.json";
@@ -91,6 +93,9 @@ namespace LumiTracker.Config
                     .SetMinimumLevel(_data.DEBUG ? LogLevel.Debug : LogLevel.Information);
             });
             _logger = loggerFactory.CreateLogger<Configuration>();
+
+            Directory.CreateDirectory("log");
+            _errorWriter = new StreamWriter("log/error.log", true) { AutoFlush = true };
         }
 
         private static ConfigData LoadConfig()
@@ -141,6 +146,14 @@ namespace LumiTracker.Config
             get
             {
                 return Instance._logger;
+            }
+        }
+
+        public static StreamWriter ErrorWriter
+        {
+            get
+            {
+                return Instance._errorWriter;
             }
         }
 

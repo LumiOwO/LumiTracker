@@ -77,6 +77,7 @@ namespace LumiTracker.Models
                 watcher.MyEventCard        += OnMyEventCard;
                 watcher.OpEventCard        += OnOpEventCard;
                 watcher.GameStarted        += OnGameStarted;
+                watcher.ExceptionHandler   += OnException;
                 processWatcher.Value = watcher;
 
                 watcher.Start(processName.Value!);
@@ -134,6 +135,13 @@ namespace LumiTracker.Models
         {
             Configuration.Logger.LogDebug("OnOpEventCard");
             OpEventCard?.Invoke(card_id);
+        }
+
+        private void OnException(Exception e)
+        {
+            Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {e.Message}\n{e.StackTrace}");
+            MessageBox.Show($"ProcessWatcher error occurred: {e.Message}", "Error", MessageBoxButton.OK);
+            throw e;
         }
     }
 }

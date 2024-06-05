@@ -110,6 +110,8 @@ namespace LumiTracker
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
+            Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [App] {e.Exception.Message} \n{e.Exception.StackTrace}");
+            MessageBox.Show($"App error occurred: {e.Exception.Message}", "Error", MessageBoxButton.OK);
         }
 
         private void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)

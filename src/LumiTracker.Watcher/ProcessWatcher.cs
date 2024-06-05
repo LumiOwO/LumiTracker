@@ -1,18 +1,20 @@
-﻿namespace LumiTracker.Watcher
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+
+using LumiTracker.Config;
+using System.Security.Cryptography;
+using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Windows;
+
+namespace LumiTracker.Watcher
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Runtime.InteropServices;
-    using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging;
-
-    using LumiTracker.Config;
-    using System.Security.Cryptography;
-    using Newtonsoft.Json.Linq;
-
     public class WindowInfo
     {
         public IntPtr hwnd { get; set; }  = IntPtr.Zero;
@@ -31,6 +33,8 @@
 
     public delegate void OnOpEventCardCallback(int card_id);
 
+    public delegate void ExceptionHandlerCallback(Exception ex);
+
     public class ProcessWatcher : IAsyncDisposable
     {
         private readonly ILogger logger;
@@ -42,6 +46,7 @@
         public event OnGameStartedCallback? GameStarted;
         public event OnMyEventCardCallback? MyEventCard;
         public event OnOpEventCardCallback? OpEventCard;
+        public event ExceptionHandlerCallback? ExceptionHandler;
 
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -155,17 +160,24 @@
 
         public async Task StartProcessWatcher(string processName)
         {
-            int interval = cfg.proc_watch_interval * 1000;
-            while (!ShouldCancel.Value)
+            try
             {
-                var info = FindProcessWindow(processName);
-                if (info.hwnd != IntPtr.Zero)
+                int interval = cfg.proc_watch_interval * 1000;
+                while (!ShouldCancel.Value)
                 {
-                    _windowWatcherTask = StartWindowWatcher(info, interval);
-                    await _windowWatcherTask;
-                }
+                    var info = FindProcessWindow(processName);
+                    if (info.hwnd != IntPtr.Zero)
+                    {
+                        _windowWatcherTask = StartWindowWatcher(info, interval);
+                        await _windowWatcherTask;
+                    }
 
-                await Task.Delay(interval);
+                    await Task.Delay(interval);
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler?.Invoke(ex);
             }
         }
 
@@ -210,33 +222,50 @@
 
         private void WindowWatcherEventHandler(object sender, DataReceivedEventArgs e)
         {
-            if (e.Data == null) return;
-            Console.WriteLine(e.Data);
-
-            JObject message = JObject.Parse(e.Data);
-            string message_level = message["level"]!.ToString();
-            if (message_level == "INFO")
+            try
             {
-                var message_data = message["data"]!;
+                if (e.Data == null) return;
+                if (Configuration.Data.DEBUG)
+                {
+                    Console.WriteLine(e.Data);
+                }
 
-                string message_type = message_data["type"]!.ToString();
-                if (message_type == "game_start")
+                JObject message = JObject.Parse(e.Data);
+                string message_level = message["level"]!.ToString();
+                if (message_level == "INFO")
                 {
-                    GameStarted?.Invoke();
+                    var message_data = message["data"]!;
+
+                    string message_type = message_data["type"]!.ToString();
+                    if (message_type == "game_start")
+                    {
+                        GameStarted?.Invoke();
+                    }
+                    else if (message_type == "my_event_card")
+                    {
+                        int card_id = (int)message_data["card_id"]!;
+                        MyEventCard?.Invoke(card_id);
+                    }
+                    else if (message_type == "op_event_card")
+                    {
+                        int card_id = (int)message_data["card_id"]!;
+                        OpEventCard?.Invoke(card_id);
+                    }
                 }
-                else if (message_type == "my_event_card")
+                else if (message_level == "ERROR")
                 {
-                    int card_id = (int)message_data["card_id"]!;
-                    MyEventCard?.Invoke(card_id);
-                }
-                else if (message_type == "op_event_card")
-                {
-                    int card_id = (int)message_data["card_id"]!;
-                    OpEventCard?.Invoke(card_id);
+                    Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {message}");
                 }
             }
-
-            
+            catch (JsonException ex)
+            {
+                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {e.Data}");
+                ExceptionHandler?.Invoke(ex);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler?.Invoke(ex);
+            }
         }
     }
 
