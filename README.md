@@ -1,18 +1,13 @@
-# LumiTracker
+# LumiTracker - 七圣召唤记牌器
 
-```
-<div align="center">
-  <a href="https://dotnet.microsoft.com/zh-cn/download/dotnet/latest/runtime"><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-blue?logo=windowsxp&style=flat-square&color=1E9BFA" /></a>
-</div>
-```
 
-七圣召唤记牌器
+<a href="https://dotnet.microsoft.com/zh-cn/download/dotnet/latest/runtime"><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-blue?logo=windowsxp&style=flat-square&color=1E9BFA" /></a>
 
-![image-20240607051247421](images/image-20240607051247421.png)
+中文 | [English](README_en.md)
 
 ## 功能
 
-- [ ] 记录已打出的手牌
+- [x] 记录已打出的手牌
 - [ ] 段位查询
 - [ ] 伤害计算
 
@@ -29,15 +24,19 @@
 
 ## 常见问题
 
-- 启动游戏时报错
+**1. 启动游戏时弹窗报错**
 
 ![image-20240607052418136](images/image-20240607052418136.png)
 
-请点击确认，安装[.NET 8.0 运行时](https://dotnet.microsoft.com/zh-cn/download/dotnet/8.0/runtime)后即可运行
+安装[.NET 8.0 运行时](https://dotnet.microsoft.com/zh-cn/download/dotnet/8.0/runtime)后即可运行，点击确认后会自动安装
 
-- 双击程序后没反应，系统托盘图标闪退
+**2. 双击程序后没反应，系统托盘图标闪退**
 
-尝试以管理员身份运行
+请尝试以管理员身份运行
+
+## 截图
+
+![image-20240607051247421](images/image-20240607051247421.png)
 
 ## 参考
 
