@@ -12,6 +12,7 @@ using System.Security.Cryptography;
 using Newtonsoft.Json.Linq;
 using System.Text.Json;
 using System.Windows;
+using Newtonsoft.Json;
 
 namespace LumiTracker.Watcher
 {
@@ -177,6 +178,7 @@ namespace LumiTracker.Watcher
             }
             catch (Exception ex)
             {
+                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {ex.Message}\n{ex.StackTrace}");
                 ExceptionHandler?.Invoke(ex);
             }
         }
@@ -257,13 +259,14 @@ namespace LumiTracker.Watcher
                     Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {message}");
                 }
             }
-            catch (JsonException ex)
+            catch (JsonReaderException ex)
             {
-                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {e.Data}");
+                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [python] {e.Data}");
                 ExceptionHandler?.Invoke(ex);
             }
             catch (Exception ex)
             {
+                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {ex.Message}\n{ex.StackTrace}");
                 ExceptionHandler?.Invoke(ex);
             }
         }

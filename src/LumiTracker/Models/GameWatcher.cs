@@ -139,9 +139,7 @@ namespace LumiTracker.Models
 
         private void OnException(Exception e)
         {
-            Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {e.Message}\n{e.StackTrace}");
-            MessageBox.Show($"ProcessWatcher error occurred: {e.Message}", "Error", MessageBoxButton.OK);
-            throw e;
+            // do nothing
         }
     }
 }

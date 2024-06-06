@@ -95,7 +95,7 @@ namespace LumiTracker.Config
             _logger = loggerFactory.CreateLogger<Configuration>();
 
             Directory.CreateDirectory("log");
-            _errorWriter = new StreamWriter("log/error.log", true) { AutoFlush = true };
+            _errorWriter = new StreamWriter("log/error.log", false) { AutoFlush = true };
         }
 
         private static ConfigData LoadConfig()
