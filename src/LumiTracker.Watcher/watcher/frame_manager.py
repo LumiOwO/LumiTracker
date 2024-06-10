@@ -115,16 +115,8 @@ class FrameManager:
         self.DetectGameStart(frame)
         self.DetectEvent(frame)
 
-        # frame done
         self.frame_count += 1
-
-        # limit the speed in case of too fast
-        INTERVAL = 0.01
-        dt = time.time() - self.prev_frame_time
-        if dt < INTERVAL:
-            time.sleep(INTERVAL - dt)
         cur_time = time.time()
-        self.prev_frame_time = cur_time
 
         if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
             logging.debug(f'"info": "FPS: {self.frame_count / (cur_time - self.prev_log_time)}"')

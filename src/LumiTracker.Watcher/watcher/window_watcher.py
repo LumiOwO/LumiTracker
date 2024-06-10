@@ -1,4 +1,3 @@
-from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 import sys
 import win32api
 import logging
@@ -63,6 +62,7 @@ if __name__ == '__main__':
     hwnd  = int(sys.argv[1])
     title = sys.argv[2]
 
-    from .capture import WindowsCaptureWatcher
-    window_watcher = WindowsCaptureWatcher()
+    from .capture import WindowsCaptureWatcher, BitBltWatcher
+    # window_watcher = WindowsCaptureWatcher()
+    window_watcher = BitBltWatcher()
     window_watcher.Start(hwnd, title)

@@ -1,14 +1,9 @@
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
-import sys
-import win32api
+import time
 import win32gui
 import logging
-import ctypes
 
 from PIL import Image
-
-from ..config import cfg
-from ..frame_manager import FrameManager
 
 from ..window_watcher import WindowWatcher
 
@@ -18,6 +13,8 @@ class WindowsCaptureWatcher(WindowWatcher):
         self.border_size   = (0, 0)
         self.window_size   = (0, 0) # border included
         self.client_size   = (0, 0)
+
+        self.prev_frame_time = time.time()
 
     def OnStart(self, hwnd, title):
         # Every Error From on_closed and on_frame_arrived Will End Up Here
@@ -65,16 +62,16 @@ class WindowsCaptureWatcher(WindowWatcher):
         image  = Image.fromarray(buffer)
         self.OnFrameArrived(image)
 
+        # limit the speed in case of too fast
+        INTERVAL = 0.01
+        dt = time.time() - self.prev_frame_time
+        if dt < INTERVAL:
+            time.sleep(INTERVAL - dt)
+        cur_time = time.time()
+        self.prev_frame_time = cur_time
+
     # Called When The Capture Item Closes Usually When The Window Closes, Capture
     # Session Will End After This Function Ends
     def on_closed(self):
         logging.debug('"info": "Window Capture Session Closed"')
         self.OnClosed()
-
-if __name__ == '__main__':
-    assert len(sys.argv) == 3, "Wrong number of arguments"
-    hwnd  = int(sys.argv[1])
-    title = sys.argv[2]
-
-    window_watcher = WindowWatcher()
-    window_watcher.Start(hwnd, title)
