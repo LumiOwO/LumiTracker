@@ -13,6 +13,8 @@ using Newtonsoft.Json.Linq;
 using System.Text.Json;
 using System.Windows;
 using Newtonsoft.Json;
+using Windows.Foundation.Metadata;
+
 
 namespace LumiTracker.Watcher
 {
@@ -169,7 +171,7 @@ namespace LumiTracker.Watcher
                     var info = FindProcessWindow(processName);
                     if (info.hwnd != IntPtr.Zero)
                     {
-                        _windowWatcherTask = StartWindowWatcher(info, interval);
+                        _windowWatcherTask = StartWindowWatcher(info, processName, interval);
                         await _windowWatcherTask;
                     }
 
@@ -178,19 +180,28 @@ namespace LumiTracker.Watcher
             }
             catch (Exception ex)
             {
-                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {ex.Message}\n{ex.StackTrace}");
+                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {ex.Message}\n{ex.StackTrace}");
                 ExceptionHandler?.Invoke(ex);
             }
         }
 
-        public async Task StartWindowWatcher(WindowInfo info, int interval)
+        public async Task StartWindowWatcher(WindowInfo info, string processName, int interval)
         {
             logger.LogInformation($"Begin to start window watcher");
-            
+
+            string captureType = "BitBlt"; // default 
+            if (processName == "Genshin Impact Cloud Game.exe")
+            {
+                captureType = "WindowsCapture"; // Genshin cloud cannot captured by bitblt
+            }
+
+            bool canHideBorder = ApiInformation.IsPropertyPresent(
+                "Windows.Graphics.Capture.GraphicsCaptureSession", "IsBorderRequired");
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = "python/python.exe",
-                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {info.title}",
+                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {captureType} {(canHideBorder ? 1 : 0)}",
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
@@ -256,7 +267,7 @@ namespace LumiTracker.Watcher
                 }
                 else if (message_level == "ERROR")
                 {
-                    Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {message}");
+                    Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {message}");
                 }
             }
             catch (JsonReaderException ex)
@@ -266,7 +277,7 @@ namespace LumiTracker.Watcher
             }
             catch (Exception ex)
             {
-                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [WindowWatcher] {ex.Message}\n{ex.StackTrace}");
+                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {ex.Message}\n{ex.StackTrace}");
                 ExceptionHandler?.Invoke(ex);
             }
         }

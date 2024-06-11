@@ -1,5 +1,6 @@
 import sys
 import win32api
+import win32gui
 import logging
 import ctypes
 
@@ -10,9 +11,7 @@ class WindowWatcher:
         self.frame_manager = None
         self.hwnd          = 0
 
-    def Start(self, hwnd, title):
-        logging.debug(f'"info": "WindowWatcher start, {hwnd=}, {title=}"')
-
+    def Start(self, hwnd):
         PROCESS_PER_MONITOR_DPI_AWARE = 2
         try:
             ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
@@ -22,9 +21,9 @@ class WindowWatcher:
         self.hwnd = hwnd
         self.frame_manager = FrameManager()
 
-        self.OnStart(hwnd, title)
+        self.OnStart(hwnd)
 
-    def OnStart(self, hwnd, title):
+    def OnStart(self, hwnd):
         pass
     
     def OnClosed(self):
@@ -32,6 +31,20 @@ class WindowWatcher:
 
     def OnFrameArrived(self, frame):
         self.frame_manager.OnFrameArrived(frame)
+
+    def GetClientRect(self):
+        # Get window rect
+        window_left, window_top, window_right, window_bot = win32gui.GetWindowRect(self.hwnd)
+
+        # Get client rect
+        client_rect = win32gui.GetClientRect(self.hwnd)
+        client_left, client_top, client_right, client_bot = client_rect
+
+        # Compute client rect offset
+        client_left, client_top = win32gui.ClientToScreen(self.hwnd, (client_left, client_top))
+        offset = (client_left - window_left, client_top - window_top)
+
+        return client_rect, offset
 
     def GetMonitorScale(self):
         MONITOR_DEFAULTTONEAREST = 0x00000002
@@ -58,11 +71,20 @@ class WindowWatcher:
 
 
 if __name__ == '__main__':
-    assert len(sys.argv) == 3, "Wrong number of arguments"
-    hwnd  = int(sys.argv[1])
-    title = sys.argv[2]
+    assert len(sys.argv) == 4, "Wrong number of arguments"
+    hwnd            = int(sys.argv[1])
+    capture_type    = sys.argv[2]
+    can_hide_border = int(sys.argv[3])
 
-    from .capture import WindowsCaptureWatcher, BitBltWatcher
-    window_watcher = WindowsCaptureWatcher()
-    # window_watcher = BitBltWatcher()
-    window_watcher.Start(hwnd, title)
+    logging.debug(f'"info": "WindowWatcher start, {hwnd=}, {capture_type=}, {can_hide_border=}"')
+
+    if capture_type == "BitBlt":
+        from .capture import BitBltWatcher
+        window_watcher = BitBltWatcher()
+    elif capture_type == "WindowsCapture":
+        from .capture import WindowsCaptureWatcher
+        window_watcher = WindowsCaptureWatcher(can_hide_border)
+    else:
+        raise NotImplementedError()
+
+    window_watcher.Start(hwnd)

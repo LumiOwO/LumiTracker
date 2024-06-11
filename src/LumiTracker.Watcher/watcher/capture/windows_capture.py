@@ -1,26 +1,30 @@
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 import time
-import win32gui
 import logging
 
 from PIL import Image
 
 from ..window_watcher import WindowWatcher
+from ..config import cfg
 
 class WindowsCaptureWatcher(WindowWatcher):
-    def __init__(self):
-        self.capture       = None
-        self.border_size   = (0, 0)
-        self.window_size   = (0, 0) # border included
-        self.client_size   = (0, 0)
+    def __init__(self, can_hide_border):
+        super().__init__()
+
+        self.capture         = None
+        self.draw_border     = not can_hide_border
+
+        self.border_size     = (0, 0)
+        self.window_size     = (0, 0) # border included
+        self.client_size     = (0, 0)
 
         self.prev_frame_time = time.time()
 
-    def OnStart(self, hwnd, title):
+    def OnStart(self, hwnd):
         # Every Error From on_closed and on_frame_arrived Will End Up Here
         self.capture = WindowsCapture(
             cursor_capture=False,
-            draw_border=False,
+            draw_border=self.draw_border,
             hwnd=hwnd,
         )
         self.capture.event(self.on_frame_arrived)
@@ -36,14 +40,8 @@ class WindowsCaptureWatcher(WindowWatcher):
         # Now DpiAwareness enabled, so no need to scale
         # scale = self.GetMonitorScale()
 
-        # Get the client rect (excludes borders and title bar)
-        client_rect = win32gui.GetClientRect(self.hwnd)
-        client_left, client_top, client_right, client_bottom = client_rect
+        (client_left, client_top, client_right, client_bottom), self.border_size = self.GetClientRect()
         self.client_size = (client_right - client_left, client_bottom - client_top)
-
-        left_border  = (self.window_size[0] - self.client_size[0]) // 2
-        title_height =  self.window_size[1] - self.client_size[1]
-        self.border_size = (left_border, title_height)
 
         # logging.debug(self.window_size)
         # logging.debug(self.client_size)
@@ -63,7 +61,7 @@ class WindowsCaptureWatcher(WindowWatcher):
         self.OnFrameArrived(image)
 
         # limit the speed in case of too fast
-        INTERVAL = 0.01
+        INTERVAL = cfg.frame_interval
         dt = time.time() - self.prev_frame_time
         if dt < INTERVAL:
             time.sleep(INTERVAL - dt)
