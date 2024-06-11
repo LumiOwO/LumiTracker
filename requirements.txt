@@ -1,6 +1,7 @@
 python/annoy-1.17.0-cp39-cp39-win_amd64.whl
+python/windows_capture-1.2.0-cp39-abi3-win_amd64.whl
 annoy==1.17.0
-windows-capture==1.1.9
+windows-capture==1.2.0
 imagehash==4.3.1
 psutil==5.9.8
 pywin32==306

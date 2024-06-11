@@ -63,6 +63,6 @@ if __name__ == '__main__':
     title = sys.argv[2]
 
     from .capture import WindowsCaptureWatcher, BitBltWatcher
-    # window_watcher = WindowsCaptureWatcher()
-    window_watcher = BitBltWatcher()
+    window_watcher = WindowsCaptureWatcher()
+    # window_watcher = BitBltWatcher()
     window_watcher.Start(hwnd, title)

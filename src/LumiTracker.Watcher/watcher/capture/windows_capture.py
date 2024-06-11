@@ -21,7 +21,7 @@ class WindowsCaptureWatcher(WindowWatcher):
         self.capture = WindowsCapture(
             cursor_capture=False,
             draw_border=False,
-            window_name=title,
+            hwnd=hwnd,
         )
         self.capture.event(self.on_frame_arrived)
         self.capture.event(self.on_closed)

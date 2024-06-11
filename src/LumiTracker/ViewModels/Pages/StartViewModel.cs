@@ -63,8 +63,7 @@ namespace LumiTracker.ViewModels.Pages
             }
             else if (clientType == EClientType.Cloud)
             {
-                // TODO: support Genshin Impact Cloud
-                processName = "Genshin Impact Cloud Game_TODOxxxxxxxx.exe";
+                processName = "Genshin Impact Cloud Game.exe";
             }
             return processName;
         }

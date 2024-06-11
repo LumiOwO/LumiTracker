@@ -46,6 +46,7 @@ class BitBltWatcher(WindowWatcher):
 
             if cfg.DEBUG_SAVE:
                 image.save(os.path.join(cfg.debug_dir, "save", f"bitblt.png"))
+                # exit(1)
 
             # Sleep to maintain 60 FPS
             dt = delay - (time.time() - start_time)
