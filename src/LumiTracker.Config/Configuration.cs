@@ -33,10 +33,6 @@ namespace LumiTracker.Config
         public int threshold { get; set; }
         public string ann_metric { get; set; }
         public int ann_n_trees { get; set; }
-        public float[] start_screen_size { get; set; }
-        public float[] event_screen_size { get; set; }
-        public float[] my_event_pos { get; set; }
-        public float[] op_event_pos { get; set; }
         public string lang { get; set; }
         public string closing_behavior { get; set; }
         public string theme { get; set; }

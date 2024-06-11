@@ -40,6 +40,8 @@ namespace LumiTracker.Models
 
         public event OnOpEventCardCallback? OpEventCard;
 
+        public event OnUnsupportedRatioCallback? UnsupportedRatio;
+
         public GameWatcher()
         {
 
@@ -77,6 +79,7 @@ namespace LumiTracker.Models
                 watcher.MyEventCard        += OnMyEventCard;
                 watcher.OpEventCard        += OnOpEventCard;
                 watcher.GameStarted        += OnGameStarted;
+                watcher.UnsupportedRatio   += OnUnsupportedRatio;
                 watcher.ExceptionHandler   += OnException;
                 processWatcher.Value = watcher;
 
@@ -137,6 +140,12 @@ namespace LumiTracker.Models
             OpEventCard?.Invoke(card_id);
         }
 
+        private void OnUnsupportedRatio()
+        {
+            Configuration.Logger.LogDebug("OnUnsupportedRatio");
+            UnsupportedRatio?.Invoke();
+        }
+        
         private void OnException(Exception e)
         {
             // do nothing

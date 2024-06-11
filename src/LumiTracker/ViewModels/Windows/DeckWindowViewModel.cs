@@ -3,14 +3,8 @@ using Wpf.Ui.Controls;
 
 using LumiTracker.Config;
 using LumiTracker.Models;
-using LumiTracker.Views.Windows;
-using LumiTracker.Helpers;
-using System.Windows;
-using System.Windows.Media;
 using System.Windows.Controls;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
-using System.ComponentModel;
+
 
 namespace LumiTracker.ViewModels.Windows
 {
@@ -61,6 +55,7 @@ namespace LumiTracker.ViewModels.Windows
             _gameWatcher.GameStarted += OnGameStarted;
             _gameWatcher.MyEventCard += OnMyEventCard;
             _gameWatcher.OpEventCard += OnOpEventCard;
+            _gameWatcher.UnsupportedRatio += OnUnsupportedRatio;
         }
 
         private void OnGameStarted()
@@ -117,5 +112,13 @@ namespace LumiTracker.ViewModels.Windows
         {
             UpdatePlayedEventCard(card_id, OpEventCardsPlayed, OpPlayedCardIDs);
         }
+
+        private void OnUnsupportedRatio()
+        {
+            System.Windows.MessageBox.Show(
+                $"{LocalizationSource.Instance["Start"]}", "Warning", 
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+        }
+
     }
 }

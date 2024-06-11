@@ -36,6 +36,8 @@ namespace LumiTracker.Watcher
 
     public delegate void OnOpEventCardCallback(int card_id);
 
+    public delegate void OnUnsupportedRatioCallback();
+
     public delegate void ExceptionHandlerCallback(Exception ex);
 
     public class ProcessWatcher : IAsyncDisposable
@@ -49,6 +51,7 @@ namespace LumiTracker.Watcher
         public event OnGameStartedCallback? GameStarted;
         public event OnMyEventCardCallback? MyEventCard;
         public event OnOpEventCardCallback? OpEventCard;
+        public event OnUnsupportedRatioCallback? UnsupportedRatio;
         public event ExceptionHandlerCallback? ExceptionHandler;
 
 
@@ -264,8 +267,12 @@ namespace LumiTracker.Watcher
                         int card_id = (int)message_data["card_id"]!;
                         OpEventCard?.Invoke(card_id);
                     }
+                    else if (message_type == "unsupported_ratio")
+                    {
+                        UnsupportedRatio?.Invoke();
+                    }
                 }
-                else if (message_level == "ERROR")
+                else if (message_level == "WARNING" || message_level == "ERROR")
                 {
                     Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {message}");
                 }

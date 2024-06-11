@@ -32,7 +32,7 @@ class WindowsCaptureWatcher(WindowWatcher):
 
         self.capture.start()
 
-    def UpdateWindowBorderSize(self, window_width, window_height):
+    def OnResize(self, window_width, window_height):
         self.window_size = (window_width, window_height)
 
         # !!! Must consider DPI scale !!!
@@ -47,10 +47,12 @@ class WindowsCaptureWatcher(WindowWatcher):
         # logging.debug(self.client_size)
         # logging.debug(self.border_size)
 
+        self.SetFrameRatio(self.client_size[0], self.client_size[1])
+
     # Called Every Time A New Frame Is Available
     def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):
         if frame.width != self.window_size[0] or frame.height != self.window_size[1]:
-            self.UpdateWindowBorderSize(frame.width, frame.height)
+            self.OnResize(frame.width, frame.height)
 
         left   = self.border_size[0]
         top    = self.border_size[1]

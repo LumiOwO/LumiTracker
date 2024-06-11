@@ -15,22 +15,6 @@
   "threshold": 18,
   "ann_metric": "hamming",
   "ann_n_trees": 10,
-  "start_screen_size": [
-    0.1445,
-    0.2847
-  ],
-  "event_screen_size": [
-    0.14,
-    0.427
-  ],
-  "my_event_pos": [
-    0.1225,
-    0.1755
-  ],
-  "op_event_pos": [
-    0.738,
-    0.1755
-  ],
   "lang": "zh-HANS",
   "closing_behavior": "Minimize",
   "theme": "Dark",

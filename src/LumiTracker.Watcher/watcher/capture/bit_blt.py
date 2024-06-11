@@ -79,6 +79,11 @@ class BitBltWatcher(WindowWatcher):
             return
         win32gui.DeleteObject(self.bitmap.GetHandle())
 
+    def OnResize(self, client_width, client_height):
+        self.DestroyBitmap()
+        self.CreateBitmap(client_width, client_height)
+        self.SetFrameRatio(client_width, client_height)
+
     def CaptureWindow(self):
         try:
             (client_left, client_top, client_right, client_bot), offset = self.GetClientRect()
@@ -88,8 +93,7 @@ class BitBltWatcher(WindowWatcher):
                 return (None, BitBltWatcher.MINIMIZED)
 
             if client_width != self.width or client_height != self.height:
-                self.DestroyBitmap()
-                self.CreateBitmap(client_width, client_height)
+                self.OnResize(client_width, client_height)
 
             # BitBlt to capture the window frame
             self.save_dc.BitBlt(

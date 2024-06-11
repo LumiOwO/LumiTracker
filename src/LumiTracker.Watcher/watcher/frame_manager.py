@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from PIL import Image
 
 from .config import cfg
+from .position import POS
 from .database import Database
 from .database import ExtractFeature, FeatureDistance, HashToFeature
 
@@ -41,6 +42,7 @@ class FrameManager:
         self.db            = Database()
         self.db.Load()
         self.start_feature = HashToFeature(self.db["controls"]["start_hash"])
+        self.ratio         = "16:9"
 
         self.prev_log_time   = time.time()
         self.prev_frame_time = self.prev_log_time
@@ -51,13 +53,13 @@ class FrameManager:
         self.filters.op_event   = StreamFilter(null_val=-1)
         self.filters.game_start = StreamFilter(null_val=False)
 
-    def DetectGameStart(self, frame):
-        start_w = int(frame.size[0] * cfg.start_screen_size[0])
-        start_h = int(frame.size[1] * cfg.start_screen_size[1])
+    def DetectGameStart(self, frame, pos):
+        start_w = int(frame.size[0] * pos.start_screen_size[0])
+        start_h = int(frame.size[1] * pos.start_screen_size[1])
 
-        start_left = (1.0 - cfg.start_screen_size[0]) / 2
+        start_left = (1.0 - pos.start_screen_size[0]) / 2
         start_left = int(frame.size[0] * start_left)
-        start_top  = (1.0 - cfg.start_screen_size[1]) / 2
+        start_top  = (1.0 - pos.start_screen_size[1]) / 2
         start_top  = int(frame.size[1] * start_top )
         start_event_frame = frame.crop((start_left, start_top, start_left + start_w, start_top + start_h))
 
@@ -71,13 +73,13 @@ class FrameManager:
             if cfg.DEBUG_SAVE:
                 start_event_frame.save(os.path.join(cfg.debug_dir, "save", f"start_event_frame.png"))
 
-    def DetectEvent(self, frame):
-        event_w = int(frame.size[0] * cfg.event_screen_size[0])
-        event_h = int(frame.size[1] * cfg.event_screen_size[1])
+    def DetectEvent(self, frame, pos):
+        event_w = int(frame.size[0] * pos.event_screen_size[0])
+        event_h = int(frame.size[1] * pos.event_screen_size[1])
         
         # my event
-        my_left = int(frame.size[0] * cfg.my_event_pos[0])
-        my_top  = int(frame.size[1] * cfg.my_event_pos[1])
+        my_left = int(frame.size[0] * pos.my_event_pos[0])
+        my_top  = int(frame.size[1] * pos.my_event_pos[1])
         my_event_frame = frame.crop((my_left, my_top, my_left + event_w, my_top + event_h))
 
         my_feature = ExtractFeature(my_event_frame)
@@ -92,8 +94,8 @@ class FrameManager:
             logging.info(f'"type": "my_event_card", "card_id": {my_id}')
 
         # op event
-        op_left = int(frame.size[0] * cfg.op_event_pos[0])
-        op_top  = int(frame.size[1] * cfg.op_event_pos[1])
+        op_left = int(frame.size[0] * pos.op_event_pos[0])
+        op_top  = int(frame.size[1] * pos.op_event_pos[1])
         op_event_frame = frame.crop((op_left, op_top, op_left + event_w, op_top + event_h))
 
         op_feature = ExtractFeature(op_event_frame)
@@ -112,8 +114,9 @@ class FrameManager:
             op_event_frame.save(os.path.join(cfg.debug_dir, "save", f"op_image{self.frame_count}.png"))
 
     def OnFrameArrived(self, frame: Image):
-        self.DetectGameStart(frame)
-        self.DetectEvent(frame)
+        pos = POS[self.ratio]
+        self.DetectGameStart(frame, pos)
+        self.DetectEvent(frame, pos)
 
         self.frame_count += 1
         cur_time = time.time()

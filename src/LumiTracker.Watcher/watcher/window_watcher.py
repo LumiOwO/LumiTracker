@@ -32,6 +32,23 @@ class WindowWatcher:
     def OnFrameArrived(self, frame):
         self.frame_manager.OnFrameArrived(frame)
 
+    def SetFrameRatio(self, client_width, client_height):
+        if client_height == 0:
+            return
+
+        ratio = client_width / client_height
+        EPSILON = 1e-5
+        if   abs( ratio - 16 / 9 ) < EPSILON:
+            self.frame_manager.ratio = "16:9"
+        elif abs( ratio - 16 / 10) < EPSILON:
+            self.frame_manager.ratio = "16:10"
+        elif abs( ratio - 21 / 9 ) < EPSILON:
+            self.frame_manager.ratio = "21:9"
+        else:
+            logging.info(f'"type": "unsupported_ratio"')
+            logging.warning(f'"info": "Current resolution is {client_width}x{client_height} with {ratio=}, which is not supported now."')
+            self.frame_manager.ratio = "16:9" # default
+
     def GetClientRect(self):
         # Get window rect
         window_left, window_top, window_right, window_bot = win32gui.GetWindowRect(self.hwnd)
