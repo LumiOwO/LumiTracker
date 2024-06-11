@@ -170,13 +170,13 @@ namespace LumiTracker.Helpers
 
         private void SnapToWindow(Rect bounds)
         {
-            Configuration.Logger.LogDebug($"bounds: {bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}");
-
             // Get client rect
             Rect clientRect = new Rect();
             GetClientRect(_dst_hwnd, ref clientRect);
-            Configuration.Logger.LogDebug($"clientRect: {clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}");
             if (clientRect.Height == 0 || clientRect.Width == 0) return;
+
+            Configuration.Logger.LogDebug($"bounds: {bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}");
+            Configuration.Logger.LogDebug($"clientRect: {clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}");
 
             POINT clientLeftTop = new POINT { x = clientRect.Left, y = clientRect.Top };
             ClientToScreen(_dst_hwnd, ref clientLeftTop);

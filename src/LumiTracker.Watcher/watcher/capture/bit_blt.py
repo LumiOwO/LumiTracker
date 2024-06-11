@@ -13,6 +13,10 @@ from ..config import cfg
 from ..window_watcher import WindowWatcher
 
 class BitBltWatcher(WindowWatcher):
+    SUCCESS   = 0
+    FAILED    = 1
+    MINIMIZED = 2
+
     def __init__(self):
         super().__init__()
 
@@ -34,11 +38,16 @@ class BitBltWatcher(WindowWatcher):
             start_time = time.time()
 
             # Capture frame
-            image, success = self.CaptureWindow()
-            if not success:
+            image, status = self.CaptureWindow()
+            if status == BitBltWatcher.SUCCESS:
+                self.OnFrameArrived(image)
+            elif status == BitBltWatcher.FAILED:
                 self.OnClosed()
                 break
-            self.OnFrameArrived(image)
+            elif status == BitBltWatcher.MINIMIZED:
+                pass
+            else:
+                raise NotImplementedError()
 
             if cfg.DEBUG_SAVE:
                 # image.save(os.path.join(cfg.debug_dir, "save", f"bitblt.png"))
@@ -75,6 +84,8 @@ class BitBltWatcher(WindowWatcher):
             (client_left, client_top, client_right, client_bot), offset = self.GetClientRect()
             client_width  = client_right - client_left
             client_height = client_bot   - client_top
+            if client_width == 0 or client_height == 0:
+                return (None, BitBltWatcher.MINIMIZED)
 
             if client_width != self.width or client_height != self.height:
                 self.DestroyBitmap()
@@ -97,6 +108,6 @@ class BitBltWatcher(WindowWatcher):
                 1
             )
 
-            return (image, True)
+            return (image, BitBltWatcher.SUCCESS)
         except win32gui.error:
-            return (None, False)
+            return (None, BitBltWatcher.FAILED)
