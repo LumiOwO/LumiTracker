@@ -42,8 +42,12 @@ class WindowWatcher:
             self.frame_manager.ratio = "16:9"
         elif abs( ratio - 16 / 10) < EPSILON:
             self.frame_manager.ratio = "16:10"
-        elif abs( ratio - 21 / 9 ) < EPSILON:
-            self.frame_manager.ratio = "21:9"
+        elif abs( ratio - 64 / 27) < EPSILON:
+            self.frame_manager.ratio = "64:27"
+        elif abs( ratio - 43 / 18) < EPSILON:
+            self.frame_manager.ratio = "43:18"
+        elif abs( ratio - 12 / 5 ) < EPSILON:
+            self.frame_manager.ratio = "12:5"
         else:
             logging.info(f'"type": "unsupported_ratio"')
             logging.warning(f'"info": "Current resolution is {client_width}x{client_height} with {ratio=}, which is not supported now."')

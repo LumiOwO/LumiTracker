@@ -136,13 +136,8 @@ class Database:
                 logging.debug(f'"info": {dt=}')
                 logging.debug(f'"info": {my_ids=}')
                 logging.debug(f'"info": {my_dists=}')
-                found_name = events[my_ids[0]]['name_CN'] if my_dists[0] <= cfg.threshold else "None"
+                found_name = events[my_ids[0]]['zh-HANS'] if my_dists[0] <= cfg.threshold else "None"
                 logging.debug(f'"info": "{file}: {found_name}"')
-
-            # save last one
-            for i, card_id in enumerate(my_ids):
-                image = Image.open(os.path.join(event_cards_dir, events[card_id]["filename"]))
-                image.save(os.path.join(cfg.debug_dir, f"found{i}.png"))
 
 
     def _Update(self):

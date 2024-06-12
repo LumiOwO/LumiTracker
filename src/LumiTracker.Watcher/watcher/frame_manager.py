@@ -57,10 +57,8 @@ class FrameManager:
         start_w = int(frame.size[0] * pos.start_screen_size[0])
         start_h = int(frame.size[1] * pos.start_screen_size[1])
 
-        start_left = (1.0 - pos.start_screen_size[0]) / 2
-        start_left = int(frame.size[0] * start_left)
-        start_top  = (1.0 - pos.start_screen_size[1]) / 2
-        start_top  = int(frame.size[1] * start_top )
+        start_left = int(frame.size[0] * pos.start_screen_pos[0])
+        start_top  = int(frame.size[1] * pos.start_screen_pos[1])
         start_event_frame = frame.crop((start_left, start_top, start_left + start_w, start_top + start_h))
 
         start_feature = ExtractFeature(start_event_frame)
