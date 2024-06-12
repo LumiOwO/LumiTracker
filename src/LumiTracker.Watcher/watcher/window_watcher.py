@@ -37,7 +37,7 @@ class WindowWatcher:
             return
 
         ratio = client_width / client_height
-        EPSILON = 1e-5
+        EPSILON = 0.005
         if   abs( ratio - 16 / 9 ) < EPSILON:
             self.frame_manager.ratio = "16:9"
         elif abs( ratio - 16 / 10) < EPSILON:

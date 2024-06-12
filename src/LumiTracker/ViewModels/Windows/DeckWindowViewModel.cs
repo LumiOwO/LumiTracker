@@ -116,7 +116,7 @@ namespace LumiTracker.ViewModels.Windows
         private void OnUnsupportedRatio()
         {
             System.Windows.MessageBox.Show(
-                $"{LocalizationSource.Instance["Start"]}", "Warning", 
+                $"{LocalizationSource.Instance["UnsupportedRatioWarning"]}", $"{LocalizationSource.Instance["AppName"]}", 
                 System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
         }
 

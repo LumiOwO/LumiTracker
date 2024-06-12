@@ -225,4 +225,13 @@
     <value>此软件为开源软件，并且完全免费。如果你是付费获得的，说明你被骗了！</value>
     <comment/>
   </data>
+  <data name="UnsupportedRatioWarning" xml:space="preserve">
+<value>当前游戏窗口的分辨率暂时不受支持。
+已支持的比例：
+- 16:9
+- 16:10
+- 21:9 系列（包括 64:27、43:18、12:5）
+</value>
+    <comment/>
+  </data>
 </root>

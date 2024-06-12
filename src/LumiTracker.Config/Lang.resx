@@ -225,4 +225,13 @@
     <value>This software is open-source and completely free. If you paid for it, you have been scammed!</value>
     <comment/>
   </data>
+  <data name="UnsupportedRatioWarning" xml:space="preserve">
+<value>Current resolution of game window is not supported.
+Supported aspect ratios:
+- 16:9
+- 16:10
+- 21:9 series (including 64:27, 43:18, 12:5)
+</value>
+    <comment/>
+  </data>
 </root>

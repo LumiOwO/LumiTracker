@@ -4,7 +4,7 @@
   "debug_dir": "temp",
   "LOG_INTERVAL": 3,
   "proc_watch_interval": 1,
-  "frame_interval": 0.01,
+  "frame_interval": 0.015,
   "assets_dir": "assets",
   "database_dir": "assets/database",
   "events_ann_filename": "events.ann",
