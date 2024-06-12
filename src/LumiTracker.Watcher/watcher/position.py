@@ -16,10 +16,11 @@ POS = {
         op_event_pos      = ( 0.7215, 0.2285 ),
     ),
     "64:27": SimpleNamespace(
-        start_screen_size = ( 0.1445, 0.2847 ),
-        event_screen_size = ( 0.1400, 0.4270 ),
-        my_event_pos      = ( 0.1225, 0.1755 ),
-        op_event_pos      = ( 0.7380, 0.1755 ),
+        start_screen_size = ( 0.0780, 0.1100 ),
+        start_screen_pos  = ( 0.4605, 0.4400 ),
+        event_screen_size = ( 0.1050, 0.4270 ),
+        my_event_pos      = ( 0.2170, 0.1755 ),
+        op_event_pos      = ( 0.6785, 0.1755 ),
     ),
     "43:18": SimpleNamespace(
         start_screen_size = ( 0.0780, 0.1100 ),
@@ -29,9 +30,10 @@ POS = {
         op_event_pos      = ( 0.6776, 0.1755 ),
     ),
     "12:5": SimpleNamespace(
-        start_screen_size = ( 0.1445, 0.2847 ),
-        event_screen_size = ( 0.1400, 0.4270 ),
-        my_event_pos      = ( 0.1225, 0.1755 ),
-        op_event_pos      = ( 0.7380, 0.1755 ),
+        start_screen_size = ( 0.0780, 0.1100 ),
+        start_screen_pos  = ( 0.4605, 0.4400 ),
+        event_screen_size = ( 0.1045, 0.4270 ),
+        my_event_pos      = ( 0.2205, 0.1755 ),
+        op_event_pos      = ( 0.6765, 0.1755 ),
     ),
 }
