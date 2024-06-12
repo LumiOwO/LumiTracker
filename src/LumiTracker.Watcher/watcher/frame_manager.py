@@ -12,30 +12,56 @@ from .database import Database
 from .database import ExtractFeature, FeatureDistance, HashToFeature
 
 class StreamFilter:
-    def __init__(self, null_val, valid_count=5):
+    def __init__(self, null_val, valid_count=cfg.valid_count):
         self.value        = null_val
         self.count        = 0
-        self.valid_count  = valid_count
-        self.null_val     = null_val
+        self.signaled     = False
+
+        self.VALID_COUNT  = valid_count
+        self.NULL_VAL     = null_val
     
-    def Filter(self, value):
-        # push
-        if value == self.null_val:
-            self.value = value
-            self.count = 0
-        elif self.value == value:
+    def ReadSameValue(self):
+        if self.value == self.NULL_VAL:
+            return
+        
+        if self.count < self.VALID_COUNT:
             self.count += 1
+        elif not self.signaled:
+            self.signaled = True
+
+    def ReadDifferentValue(self, value):
+        if self.value == self.NULL_VAL:
+            self.value    = value
+            self.count    = 1
+            self.signaled = False
+        elif value == self.NULL_VAL:
+            if self.count > 1:
+                self.count -= 1
+            else:
+                self.value    = self.NULL_VAL
+                self.count    = 0
+                self.signaled = False
         else:
-            self.value = value
-            self.count = 1
+            self.value    = value
+            self.count    = 1
+            self.signaled = False
+
+    def Filter(self, value):
+        prev_signaled = self.signaled
+
+        # push
+        if value == self.value:
+            self.ReadSameValue()
+        else:
+            self.ReadDifferentValue(value)
 
         # logging.debug(self.count, self.value)
 
         # read
-        if self.value != self.null_val and self.count == self.valid_count:
+        if (not prev_signaled) and (self.signaled):
             return self.value
         else:
-            return self.null_val
+            return self.NULL_VAL
 
 class FrameManager:
     def __init__(self):
@@ -47,6 +73,8 @@ class FrameManager:
         self.prev_log_time   = time.time()
         self.prev_frame_time = self.prev_log_time
         self.frame_count     = 0
+        self.min_fps         = 100000
+        self.first_log       = True
 
         self.filters            = SimpleNamespace()
         self.filters.my_event   = StreamFilter(null_val=-1)
@@ -120,6 +148,12 @@ class FrameManager:
         cur_time = time.time()
 
         if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
-            logging.debug(f'"info": "FPS: {self.frame_count / (cur_time - self.prev_log_time)}"')
+            fps = self.frame_count / (cur_time - self.prev_log_time)
+            logging.debug(f'"info": "FPS: {fps}"')
+            if (not self.first_log) and (fps < self.min_fps):
+                logging.warning(f'"info": "Min FPS = {fps}"')
+                self.min_fps = fps
+
             self.frame_count   = 0
             self.prev_log_time = cur_time
+            self.first_log     = False
