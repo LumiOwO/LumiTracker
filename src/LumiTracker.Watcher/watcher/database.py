@@ -25,11 +25,18 @@ def ExtractFeature(image: Image):
 
     return feature
 
+def ExtractFeatureAHash(image: Image):
+    feature = imagehash.average_hash(image, hash_size=cfg.hash_size)
+    feature = feature.hash.flatten()
+    return feature
+
 def FeatureDistance(feature1, feature2):
     return imagehash.ImageHash(feature1) - imagehash.ImageHash(feature2)
 
 def HashToFeature(hash_str):
     binary_string = bin(int(hash_str, 16))[2:]
+    expected_length = len(hash_str) * 4
+    binary_string = binary_string.zfill(expected_length)
     bool_list = [bit == '1' for bit in binary_string]
     feature = np.array(bool_list, dtype=bool)
     return feature
@@ -38,6 +45,7 @@ class Database:
     def __init__(self):
         self.data       = {}
         self.events_ann = None
+        self.rounds_ann = None
 
         Path(cfg.database_dir).mkdir(parents=True, exist_ok=True)
         if cfg.DEBUG:
@@ -52,11 +60,20 @@ class Database:
     def _UpdateControls(self):
         controls = {}
 
-        start_filename = "start.png"
-        start = Image.open(os.path.join(cfg.cards_dir, start_filename)).convert("RGBA")
-        feature = ExtractFeature(start.convert("RGB"))
-        hash_str = str(imagehash.ImageHash(feature))
-        controls["start_hash"] = hash_str
+        start = Image.open(os.path.join(cfg.cards_dir, "controls", "control_GameStart.png")).convert("RGBA")
+        start_feature = ExtractFeature(start.convert("RGB"))
+        controls["GameStart"] = str(imagehash.ImageHash(start_feature))
+
+        game_round = Image.open(os.path.join(cfg.cards_dir, "controls", "control_Round.png")).convert("RGBA")
+        round_feature = ExtractFeatureAHash(game_round.convert("RGB"))
+        controls["GameRound"] = str(imagehash.ImageHash(round_feature))
+        if cfg.DEBUG:
+            n_rounds = 14
+            for i in range(n_rounds):
+                round_image = Image.open(os.path.join(cfg.debug_dir, f"crop{i + 1}.png")).convert("RGBA")
+                feature = ExtractFeatureAHash(round_image.convert("RGB"))
+                dist = FeatureDistance(feature, round_feature)
+                logging.debug(f'"info": "round{i + 1}, {dist=}"')
 
         self.data["controls"] = controls
 
@@ -150,15 +167,22 @@ class Database:
     def Load(self):
         self.events_ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         self.events_ann.load(os.path.join(cfg.database_dir, cfg.events_ann_filename))
+        self.rounds_ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
+        self.rounds_ann.load(os.path.join(cfg.database_dir, cfg.rounds_ann_filename))
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), encoding='utf-8') as f:
             self.data = json.load(f)
         
-    def SearchByFeature(self, feature, card_type):
-        if card_type == "event":
+    def SearchByFeature(self, feature, ann_name):
+        if ann_name == "event":
             ann = self.events_ann
+        elif ann_name == "round":
+            ann = self.rounds_ann
     
         ids, dists = ann.get_nns_by_vector(feature, n=1, include_distances=True)
+        if ann_name == "round":
+            ids, dists = ann.get_nns_by_vector(feature, n=5, include_distances=True)
+            logging.debug(f'"info": {ids=}, {dists=}')
         return ids[0], dists[0]
 
 

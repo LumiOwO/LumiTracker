@@ -61,10 +61,21 @@ class BitBltWatcher(WindowWatcher):
     def OnClosed(self):
         # Clean up
         self.DestroyBitmap()
+        
+        try:
+            self.save_dc.DeleteDC()
+        except win32ui.error as e:
+            logging.warning(f'"info": "Error deleting save_dc, maybe the reason is the closed hwnd"')
+    
+        try:
+            self.mfc_dc.DeleteDC()
+        except win32ui.error as e:
+            logging.warning(f'"info": "Error deleting mfc_dc, maybe the reason is the closed hwnd"')
 
-        self.save_dc.DeleteDC()
-        self.mfc_dc.DeleteDC()
-        win32gui.ReleaseDC(self.hwnd, self.hwnd_dc)
+        try:
+            win32gui.ReleaseDC(self.hwnd, self.hwnd_dc)
+        except win32ui.error as e:
+            logging.warning(f'"info": "Error releasing hwnd_dc, maybe the reason is the closed hwnd"')
     
     def CreateBitmap(self, width, height):
         self.bitmap = win32ui.CreateBitmap()
@@ -90,6 +101,7 @@ class BitBltWatcher(WindowWatcher):
             client_width  = client_right - client_left
             client_height = client_bot   - client_top
             if client_width == 0 or client_height == 0:
+                self.frame_manager.prev_log_time = time.time()
                 return (None, BitBltWatcher.MINIMIZED)
 
             if client_width != self.width or client_height != self.height:

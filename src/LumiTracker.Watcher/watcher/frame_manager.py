@@ -9,7 +9,7 @@ from PIL import Image
 from .config import cfg
 from .position import POS
 from .database import Database
-from .database import ExtractFeature, FeatureDistance, HashToFeature
+from .database import ExtractFeature, ExtractFeatureAHash, FeatureDistance, HashToFeature
 
 class StreamFilter:
     def __init__(self, null_val, valid_count=cfg.valid_count):
@@ -67,7 +67,8 @@ class FrameManager:
     def __init__(self):
         self.db            = Database()
         self.db.Load()
-        self.start_feature = HashToFeature(self.db["controls"]["start_hash"])
+        self.start_feature = HashToFeature(self.db["controls"]["GameStart"])
+        self.round_feature = HashToFeature(self.db["controls"]["GameRound"])
         self.ratio         = "16:9"
 
         self.prev_log_time   = time.time()
@@ -80,6 +81,7 @@ class FrameManager:
         self.filters.my_event   = StreamFilter(null_val=-1)
         self.filters.op_event   = StreamFilter(null_val=-1)
         self.filters.game_start = StreamFilter(null_val=False)
+        self.filters.game_round = StreamFilter(null_val=False)
 
     def DetectGameStart(self, frame, pos):
         start_w = int(frame.size[0] * pos.start_screen_size[0])
@@ -98,6 +100,25 @@ class FrameManager:
             logging.info(f'"type": "game_start"')
             if cfg.DEBUG_SAVE:
                 start_event_frame.save(os.path.join(cfg.debug_dir, "save", f"start_event_frame.png"))
+        
+    def DetectRound(self, frame, pos):
+        round_w = int(frame.size[0] * pos.round_screen_size[0])
+        round_h = int(frame.size[1] * pos.round_screen_size[1])
+
+        round_left = int(frame.size[0] * pos.round_screen_pos[0])
+        round_top  = int(frame.size[1] * pos.round_screen_pos[1])
+        round_event_frame = frame.crop((round_left, round_top, round_left + round_w, round_top + round_h))
+
+        round_feature = ExtractFeatureAHash(round_event_frame)
+        round_dist = FeatureDistance(round_feature, self.round_feature)
+        round_detected = (round_dist <= cfg.threshold)
+        round_detected = self.filters.game_round.Filter(round_detected)
+
+        if round_detected:
+            logging.debug(f'"info": "Round detected, {round_dist=}"')
+            logging.info(f'"type": "game_round"')
+            if cfg.DEBUG_SAVE:
+                round_event_frame.save(os.path.join(cfg.debug_dir, "save", f"round_event_frame.png"))
 
     def DetectEvent(self, frame, pos):
         event_w = int(frame.size[0] * pos.event_screen_size[0])
@@ -109,14 +130,14 @@ class FrameManager:
         my_event_frame = frame.crop((my_left, my_top, my_left + event_w, my_top + event_h))
 
         my_feature = ExtractFeature(my_event_frame)
-        my_id, my_dist = self.db.SearchByFeature(my_feature, card_type="event")
+        my_id, my_dist = self.db.SearchByFeature(my_feature, ann_name="event")
         
         if my_dist > cfg.threshold:
             my_id = -1
         my_id = self.filters.my_event.Filter(my_id)
 
         if my_id >= 0:
-            logging.debug(f'"info": "my event: {self.db["events"][my_id].get("name_CN", "None")}, {my_dist=}"')
+            logging.debug(f'"info": "my event: {self.db["events"][my_id].get("zh-HANS", "None")}, {my_dist=}"')
             logging.info(f'"type": "my_event_card", "card_id": {my_id}')
 
         # op event
@@ -125,14 +146,14 @@ class FrameManager:
         op_event_frame = frame.crop((op_left, op_top, op_left + event_w, op_top + event_h))
 
         op_feature = ExtractFeature(op_event_frame)
-        op_id, op_dist = self.db.SearchByFeature(op_feature, card_type="event")
+        op_id, op_dist = self.db.SearchByFeature(op_feature, ann_name="event")
         
         if op_dist > cfg.threshold:
             op_id = -1
         op_id = self.filters.op_event.Filter(op_id)
 
         if op_id >= 0:
-            logging.debug(f'"info": "op event: {self.db["events"][op_id].get("name_CN", "None")}, {op_dist=}"')
+            logging.debug(f'"info": "op event: {self.db["events"][op_id].get("zh-HANS", "None")}, {op_dist=}"')
             logging.info(f'"type": "op_event_card", "card_id": {op_id}')
 
         if cfg.DEBUG_SAVE:
@@ -141,7 +162,9 @@ class FrameManager:
 
     def OnFrameArrived(self, frame: Image):
         pos = POS[self.ratio]
+
         self.DetectGameStart(frame, pos)
+        self.DetectRound(frame, pos)
         self.DetectEvent(frame, pos)
 
         self.frame_count += 1

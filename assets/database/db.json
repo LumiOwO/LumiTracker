@@ -1,6 +1,7 @@
 {
   "controls": {
-    "start_hash": "b6b9a9acc6cb4b4ed65d545663612526"
+    "GameStart": "b6b9a9acc6cb4b4ed65d545663612526",
+    "GameRound": "00f6f7f7f6f9f600"
   },
   "events": [
     {

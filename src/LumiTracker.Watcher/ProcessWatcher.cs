@@ -271,6 +271,15 @@ namespace LumiTracker.Watcher
                     {
                         UnsupportedRatio?.Invoke();
                     }
+                    //else if (message_type == "game_round")
+                    //{
+                    //    //UnsupportedRatio?.Invoke();
+                    //}
+                    else
+                    {
+                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] Unknown message type: {message_type}");
+                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {message}");
+                    }
                 }
                 else if (message_level == "WARNING" || message_level == "ERROR")
                 {

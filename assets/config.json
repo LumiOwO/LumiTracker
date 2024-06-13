@@ -9,6 +9,7 @@
   "assets_dir": "assets",
   "database_dir": "assets/database",
   "events_ann_filename": "events.ann",
+  "rounds_ann_filename": "rounds.ann",
   "db_filename": "db.json",
   "cards_dir": "cards",
   "hash_size": 8,
