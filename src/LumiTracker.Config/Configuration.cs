@@ -23,7 +23,6 @@ namespace LumiTracker.Config
         public int LOG_INTERVAL { get; set; }
         public int proc_watch_interval { get; set; }
         public float frame_interval { get; set; }
-        public int valid_count { get; set; }
         public string assets_dir { get; set; }
         public string database_dir { get; set; }
         public string events_ann_filename { get; set; }
@@ -39,6 +38,7 @@ namespace LumiTracker.Config
         public string theme { get; set; }
         public string client_type { get; set; }
     }
+
 
 
 
