@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="LumiTracker.Views.Pages.AboutPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -42,6 +42,12 @@
             FontSize="12">
             <Run FontWeight="Bold">Github: </Run>
             <Run>https://github.com/LumiOwO/LumiTracker</Run>
+        </TextBlock>
+
+        <TextBlock 
+            Margin="0,10,0,0" 
+            FontSize="12">
+            <Run>Copyright © 2024 LumiOwO </Run>
         </TextBlock>
     </StackPanel>
 
