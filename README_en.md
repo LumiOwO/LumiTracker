@@ -8,7 +8,13 @@
 
 ## Features
 
-- [x] Track played cards
+- [ ] Record cards
+  - [x] My/opponent's played cards
+  - [ ] Drawn cards
+  - [ ] Discarded cards
+  - [ ] Elemental Tuned cards
+  - [ ] Created cards placed into the deck
+- [ ] Import deck before the match, display remaining cards in the deck during the match
 - [ ] Show Ranking
 - [ ] Damage calculation
 
