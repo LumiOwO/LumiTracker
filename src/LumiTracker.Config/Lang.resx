@@ -186,7 +186,7 @@
     <comment/>
   </data>
   <data name="ClientType_Cloud" xml:space="preserve">
-    <value>[CN] Cloud (Coming soon...)</value>
+    <value>[CN] Cloud</value>
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
@@ -217,8 +217,11 @@
     <value>For fullscreen, change "Fullscreen" to "Borderless" in Genshin's Settings -> Graphics -> Display Mode;</value>
     <comment/>
   </data>
-  <data name="Instruction2" xml:space="preserve">
-    <value>Only window sizes with an aspect ratio of 16:9 are supported.</value>
+  <data name="SupportedRatioInfo" xml:space="preserve">
+<value>Supported aspect ratios:
+- 16:9
+- 16:10
+- 21:9 series (including 64:27, 43:18, 12:5)</value>
     <comment/>
   </data>
   <data name="FreeDeclaration" xml:space="preserve">
@@ -226,12 +229,7 @@
     <comment/>
   </data>
   <data name="UnsupportedRatioWarning" xml:space="preserve">
-<value>Current resolution of game window is not supported.
-Supported aspect ratios:
-- 16:9
-- 16:10
-- 21:9 series (including 64:27, 43:18, 12:5)
-</value>
+    <value>Current resolution of game window is not supported.</value>
     <comment/>
   </data>
 </root>

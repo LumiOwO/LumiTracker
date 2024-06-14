@@ -9,59 +9,8 @@ from PIL import Image
 from .config import cfg
 from .position import POS
 from .database import Database
-from .database import ExtractFeature, ExtractFeatureAHash, FeatureDistance, HashToFeature
-
-class StreamFilter:
-    def __init__(self, null_val, valid_count=cfg.valid_count):
-        self.value        = null_val
-        self.count        = 0
-        self.signaled     = False
-
-        self.VALID_COUNT  = valid_count
-        self.NULL_VAL     = null_val
-    
-    def ReadSameValue(self):
-        if self.value == self.NULL_VAL:
-            return
-        
-        if self.count < self.VALID_COUNT:
-            self.count += 1
-        elif not self.signaled:
-            self.signaled = True
-
-    def ReadDifferentValue(self, value):
-        if self.value == self.NULL_VAL:
-            self.value    = value
-            self.count    = 1
-            self.signaled = False
-        elif value == self.NULL_VAL:
-            if self.count > 1:
-                self.count -= 1
-            else:
-                self.value    = self.NULL_VAL
-                self.count    = 0
-                self.signaled = False
-        else:
-            self.value    = value
-            self.count    = 1
-            self.signaled = False
-
-    def Filter(self, value):
-        prev_signaled = self.signaled
-
-        # push
-        if value == self.value:
-            self.ReadSameValue()
-        else:
-            self.ReadDifferentValue(value)
-
-        # logging.debug(self.count, self.value)
-
-        # read
-        if (not prev_signaled) and (self.signaled):
-            return self.value
-        else:
-            return self.NULL_VAL
+from .database import ExtractFeature, FeatureDistance, HashToFeature
+from .stream_filter import StreamFilter
 
 class FrameManager:
     def __init__(self):
@@ -134,6 +83,7 @@ class FrameManager:
         
         if my_dist > cfg.threshold:
             my_id = -1
+        # logging.debug(f'"info": "my event: {self.db["events"][my_id]["zh-HANS"] if my_id >= 0 else "None"}, {my_dist=}"')
         my_id = self.filters.my_event.Filter(my_id)
 
         if my_id >= 0:

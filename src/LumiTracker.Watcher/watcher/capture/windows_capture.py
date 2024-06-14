@@ -12,7 +12,7 @@ class WindowsCaptureWatcher(WindowWatcher):
         super().__init__()
 
         self.capture         = None
-        self.draw_border     = not can_hide_border
+        self.draw_border     = False if can_hide_border else None
 
         self.border_size     = (0, 0)
         self.window_size     = (0, 0) # border included

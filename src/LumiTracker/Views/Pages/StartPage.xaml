@@ -101,7 +101,8 @@
             Grid.Column="0" />
         <TextBlock 
             Margin="20,10,0,2" 
-            Text="{svs:Localization Instruction2}" 
+            Text="{svs:Localization SupportedRatioInfo}" 
+            LineHeight="23"
             FontSize="15"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
