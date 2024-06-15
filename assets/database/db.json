@@ -2173,27 +2173,6 @@
       "zh-HANS": "噬骸能量块",
       "en-US": "噬骸能量块",
       "snapshot_top": "330"
-    },
-    {
-      "id": "310",
-      "type": "event",
-      "zh-HANS": "幻戏倒计时：2",
-      "en-US": "幻戏倒计时：2",
-      "snapshot_top": "400"
-    },
-    {
-      "id": "311",
-      "type": "event",
-      "zh-HANS": "幻戏倒计时：1",
-      "en-US": "幻戏倒计时：1",
-      "snapshot_top": "400"
-    },
-    {
-      "id": "312",
-      "type": "event",
-      "zh-HANS": "幻戏开始！",
-      "en-US": "幻戏开始！",
-      "snapshot_top": "400"
     }
   ]
 }

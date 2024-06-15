@@ -49,34 +49,26 @@ class FrameManager:
             logging.info(f'"type": "game_start"')
             if cfg.DEBUG_SAVE:
                 start_event_frame.save(os.path.join(cfg.debug_dir, "save", f"start_event_frame.png"))
-        
-    def DetectRound(self, frame, pos):
-        round_w = int(frame.size[0] * pos.round_screen_size[0])
-        round_h = int(frame.size[1] * pos.round_screen_size[1])
-
-        round_left = int(frame.size[0] * pos.round_screen_pos[0])
-        round_top  = int(frame.size[1] * pos.round_screen_pos[1])
-        round_event_frame = frame.crop((round_left, round_top, round_left + round_w, round_top + round_h))
-
-        round_feature = ExtractFeature(round_event_frame)
-        round_dist = FeatureDistance(round_feature, self.round_feature)
-        round_detected = (round_dist <= cfg.threshold)
-        round_detected = self.filters.game_round.Filter(round_detected)
-
-        if round_detected:
-            logging.debug(f'"info": "Round detected, {round_dist=}"')
-            logging.info(f'"type": "game_round"')
-            if cfg.DEBUG_SAVE:
-                round_event_frame.save(os.path.join(cfg.debug_dir, "save", f"round_event_frame.png"))
 
     def DetectEvent(self, frame, pos):
         event_w = int(frame.size[0] * pos.event_screen_size[0])
         event_h = int(frame.size[1] * pos.event_screen_size[1])
-        
+        inner_crop = (
+            cfg.center_cropbox[0] * event_w, 
+            cfg.center_cropbox[1] * event_h, 
+            cfg.center_cropbox[2] * event_w, 
+            cfg.center_cropbox[3] * event_h
+        )
+
         # my event
         my_left = int(frame.size[0] * pos.my_event_pos[0])
         my_top  = int(frame.size[1] * pos.my_event_pos[1])
-        my_event_frame = frame.crop((my_left, my_top, my_left + event_w, my_top + event_h))
+        my_event_frame = frame.crop((
+            my_left + inner_crop[0], 
+            my_top  + inner_crop[1], 
+            my_left + inner_crop[2], 
+            my_top  + inner_crop[3]
+        ))
 
         my_feature = ExtractFeature(my_event_frame)
         my_id, my_dist = self.db.SearchByFeature(my_feature, ann_name="event")
@@ -93,7 +85,12 @@ class FrameManager:
         # op event
         op_left = int(frame.size[0] * pos.op_event_pos[0])
         op_top  = int(frame.size[1] * pos.op_event_pos[1])
-        op_event_frame = frame.crop((op_left, op_top, op_left + event_w, op_top + event_h))
+        op_event_frame = frame.crop((
+            op_left + inner_crop[0], 
+            op_top  + inner_crop[1], 
+            op_left + inner_crop[2], 
+            op_top  + inner_crop[3]
+        ))
 
         op_feature = ExtractFeature(op_event_frame)
         op_id, op_dist = self.db.SearchByFeature(op_feature, ann_name="event")
