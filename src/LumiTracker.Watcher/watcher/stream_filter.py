@@ -31,7 +31,7 @@ class SlidingWindow:
 
 
 class StreamFilter:
-    def __init__(self, null_val, window_size=30, valid_count=10):
+    def __init__(self, null_val, window_size=40, valid_count=15):
         self.NULL_VAL    = null_val
         self.VALID_COUNT = valid_count
 

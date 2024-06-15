@@ -83,12 +83,6 @@ class Database:
                 # add border
                 image = image.convert("RGBA")
                 image = Image.alpha_composite(image, border)
-                
-                feature = ExtractFeature(image.convert("RGB"))
-
-                features[card_id] = feature
-                events[card_id]   = row
-
                 # create snapshot
                 top    = int(row["snapshot_top"])
                 left   = 12
@@ -98,6 +92,19 @@ class Database:
                 snapshot_path = os.path.join(
                     cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
                 snapshot.save(snapshot_path)
+
+                # use center subimage as feature
+                # top    = 150
+                # left   = 12
+                # height = 350
+                center_crop = cfg.center_cropbox
+                center_crop = (center_crop[0] * 420, center_crop[1] * 720, center_crop[2] * 420, center_crop[3] * 720)
+                center = image.crop(center_crop).convert("RGB")
+                feature = ExtractFeature(center)
+                # logging.debug(f'"{row["zh-HANS"]}": "{str(imagehash.ImageHash(feature))}"')
+
+                features[card_id] = feature
+                events[card_id]   = row
 
             else:
                 logging.error(f'"info": "Failed to load image: {image_path}"')
