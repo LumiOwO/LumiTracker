@@ -25,11 +25,6 @@ def ExtractFeature(image: Image):
 
     return feature
 
-def ExtractFeatureAHash(image: Image):
-    feature = imagehash.average_hash(image, hash_size=cfg.hash_size)
-    feature = feature.hash.flatten()
-    return feature
-
 def FeatureDistance(feature1, feature2):
     return imagehash.ImageHash(feature1) - imagehash.ImageHash(feature2)
 
@@ -65,13 +60,13 @@ class Database:
         controls["GameStart"] = str(imagehash.ImageHash(start_feature))
 
         game_round = Image.open(os.path.join(cfg.cards_dir, "controls", "control_Round.png")).convert("RGBA")
-        round_feature = ExtractFeatureAHash(game_round.convert("RGB"))
+        round_feature = ExtractFeature(game_round.convert("RGB"))
         controls["GameRound"] = str(imagehash.ImageHash(round_feature))
         if cfg.DEBUG:
             n_rounds = 14
             for i in range(n_rounds):
                 round_image = Image.open(os.path.join(cfg.debug_dir, f"crop{i + 1}.png")).convert("RGBA")
-                feature = ExtractFeatureAHash(round_image.convert("RGB"))
+                feature = ExtractFeature(round_image.convert("RGB"))
                 dist = FeatureDistance(feature, round_feature)
                 logging.debug(f'"info": "round{i + 1}, {dist=}"')
 
@@ -100,11 +95,6 @@ class Database:
                 # add border
                 image = image.convert("RGBA")
                 image = Image.alpha_composite(image, border)
-                
-                feature = ExtractFeature(image.convert("RGB"))
-
-                features[card_id] = feature
-                events[card_id]   = row
 
                 # create snapshot
                 top    = int(row["snapshot_top"])
@@ -116,6 +106,12 @@ class Database:
                     cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
                 snapshot.save(snapshot_path)
 
+                # use snapshot as feature
+                feature = ExtractFeature(snapshot)
+
+                features[card_id] = feature
+                events[card_id]   = row
+                logging.debug(f'"{row["zh-HANS"]}": "{str(imagehash.ImageHash(feature))}"')
             else:
                 logging.error(f'"info": "Failed to load image: {image_path}"')
 
@@ -167,8 +163,6 @@ class Database:
     def Load(self):
         self.events_ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         self.events_ann.load(os.path.join(cfg.database_dir, cfg.events_ann_filename))
-        self.rounds_ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
-        self.rounds_ann.load(os.path.join(cfg.database_dir, cfg.rounds_ann_filename))
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), encoding='utf-8') as f:
             self.data = json.load(f)

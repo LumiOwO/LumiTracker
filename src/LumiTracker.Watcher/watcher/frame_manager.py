@@ -58,7 +58,7 @@ class FrameManager:
         round_top  = int(frame.size[1] * pos.round_screen_pos[1])
         round_event_frame = frame.crop((round_left, round_top, round_left + round_w, round_top + round_h))
 
-        round_feature = ExtractFeatureAHash(round_event_frame)
+        round_feature = ExtractFeature(round_event_frame)
         round_dist = FeatureDistance(round_feature, self.round_feature)
         round_detected = (round_dist <= cfg.threshold)
         round_detected = self.filters.game_round.Filter(round_detected)
@@ -81,13 +81,13 @@ class FrameManager:
         my_feature = ExtractFeature(my_event_frame)
         my_id, my_dist = self.db.SearchByFeature(my_feature, ann_name="event")
         
+        logging.debug(f'"info": "{my_dist=}, my event: {self.db["events"][my_id]["zh-HANS"] if my_id >= 0 else "None"}"')
         if my_dist > cfg.threshold:
             my_id = -1
-        # logging.debug(f'"info": "my event: {self.db["events"][my_id]["zh-HANS"] if my_id >= 0 else "None"}, {my_dist=}"')
         my_id = self.filters.my_event.Filter(my_id)
 
         if my_id >= 0:
-            logging.debug(f'"info": "my event: {self.db["events"][my_id].get("zh-HANS", "None")}, {my_dist=}"')
+            # logging.debug(f'"info": "my event: {self.db["events"][my_id].get("zh-HANS", "None")}, {my_dist=}"')
             logging.info(f'"type": "my_event_card", "card_id": {my_id}')
 
         # op event
