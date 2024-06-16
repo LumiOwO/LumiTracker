@@ -5,11 +5,17 @@
   "LOG_INTERVAL": 3,
   "proc_watch_interval": 1,
   "frame_interval": 0.015,
-  "center_cropbox": [
-    0.028571429,
-    0.20833333,
-    0.9714286,
-    0.6944444
+  "event_crop_box1": [
+    0.11904762,
+    0.097222224,
+    0.88095236,
+    0.19444445
+  ],
+  "event_crop_box2": [
+    0.11904762,
+    0.3472222,
+    0.88095236,
+    0.7638889
   ],
   "assets_dir": "assets",
   "database_dir": "assets/database",

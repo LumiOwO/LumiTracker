@@ -5,11 +5,12 @@ import logging
 from types import SimpleNamespace
 
 from PIL import Image
+import numpy as np
 
 from .config import cfg
 from .position import POS
 from .database import Database
-from .database import ExtractFeature, FeatureDistance, HashToFeature
+from .database import ExtractFeature, FeatureDistance, HashToFeature, GetEventFeatureImage
 from .stream_filter import StreamFilter
 
 class FrameManager:
@@ -53,27 +54,18 @@ class FrameManager:
     def DetectEvent(self, frame, pos):
         event_w = int(frame.size[0] * pos.event_screen_size[0])
         event_h = int(frame.size[1] * pos.event_screen_size[1])
-        inner_crop = (
-            cfg.center_cropbox[0] * event_w, 
-            cfg.center_cropbox[1] * event_h, 
-            cfg.center_cropbox[2] * event_w, 
-            cfg.center_cropbox[3] * event_h
-        )
+        frame_array = np.asarray(frame)
 
         # my event
         my_left = int(frame.size[0] * pos.my_event_pos[0])
         my_top  = int(frame.size[1] * pos.my_event_pos[1])
-        my_event_frame = frame.crop((
-            my_left + inner_crop[0], 
-            my_top  + inner_crop[1], 
-            my_left + inner_crop[2], 
-            my_top  + inner_crop[3]
-        ))
+        my_event_array = frame_array[my_top:my_top + event_h, my_left:my_left + event_w]
 
-        my_feature = ExtractFeature(my_event_frame)
+        my_feature_image = GetEventFeatureImage(my_event_array)
+        my_feature = ExtractFeature(my_feature_image)
         my_id, my_dist = self.db.SearchByFeature(my_feature, ann_name="event")
         
-        logging.debug(f'"info": "{my_dist=}, my event: {self.db["events"][my_id]["zh-HANS"] if my_id >= 0 else "None"}"')
+        # logging.debug(f'"info": "{my_dist=}, my event: {self.db["events"][my_id]["zh-HANS"] if my_id >= 0 else "None"}"')
         if my_dist > cfg.threshold:
             my_id = -1
         my_id = self.filters.my_event.Filter(my_id)
@@ -85,14 +77,10 @@ class FrameManager:
         # op event
         op_left = int(frame.size[0] * pos.op_event_pos[0])
         op_top  = int(frame.size[1] * pos.op_event_pos[1])
-        op_event_frame = frame.crop((
-            op_left + inner_crop[0], 
-            op_top  + inner_crop[1], 
-            op_left + inner_crop[2], 
-            op_top  + inner_crop[3]
-        ))
+        op_event_array = frame_array[op_top:op_top + event_h, op_left:op_left + event_w]
 
-        op_feature = ExtractFeature(op_event_frame)
+        op_feature_image = GetEventFeatureImage(op_event_array)
+        op_feature = ExtractFeature(op_feature_image)
         op_id, op_dist = self.db.SearchByFeature(op_feature, ann_name="event")
         
         if op_dist > cfg.threshold:
@@ -104,6 +92,8 @@ class FrameManager:
             logging.info(f'"type": "op_event_card", "card_id": {op_id}')
 
         if cfg.DEBUG_SAVE:
+            my_event_frame = Image.fromarray(my_event_array)
+            op_event_frame = Image.fromarray(op_event_array)
             my_event_frame.save(os.path.join(cfg.debug_dir, "save", f"my_image{self.frame_count}.png"))
             op_event_frame.save(os.path.join(cfg.debug_dir, "save", f"op_image{self.frame_count}.png"))
 
@@ -111,7 +101,6 @@ class FrameManager:
         pos = POS[self.ratio]
 
         self.DetectGameStart(frame, pos)
-        self.DetectRound(frame, pos)
         self.DetectEvent(frame, pos)
 
         self.frame_count += 1

@@ -36,6 +36,48 @@ def HashToFeature(hash_str):
     feature = np.array(bool_list, dtype=bool)
     return feature
 
+def GetEventFeatureImage(image_array):
+    # left   = 50
+    # top    = 70
+    # height = 70
+    # crop_box1 = (left, top, 420 - left, top + height)
+    # print((crop_box1[0] / 420, crop_box1[1] / 720, crop_box1[2] / 420, crop_box1[3] / 720))
+    # top    = 250
+    # height = 300
+    # crop_box2 = (left, top, 420 - left, top + height)
+    # print((crop_box2[0] / 420, crop_box2[1] / 720, crop_box2[2] / 420, crop_box2[3] / 720))
+
+    h, w = image_array.shape[0:2]
+    # print(w, h)
+
+    crop_box1 = cfg.event_crop_box1
+    crop_box1 = (crop_box1[0] * w, crop_box1[1] * h, crop_box1[2] * w, crop_box1[3] * h)
+    crop_box1 = tuple(int(i) for i in crop_box1)
+
+    crop_box2 = cfg.event_crop_box2
+    crop_box2 = (crop_box2[0] * w, crop_box2[1] * h, crop_box2[2] * w, crop_box2[3] * h)
+    crop_box2 = tuple(int(i) for i in crop_box2)
+
+    # Crop the subimages using array slicing (this creates views, not copies)
+    subimage1 = image_array[crop_box1[1]:crop_box1[3], crop_box1[0]:crop_box1[2]]
+    subimage2 = image_array[crop_box2[1]:crop_box2[3], crop_box2[0]:crop_box2[2]]
+
+    # Concatenate the arrays vertically to create a new buffer
+    concatenated_array = np.vstack((subimage1, subimage2))
+
+    # Create a new image from the buffer
+    feature_image = Image.frombuffer(
+        'RGB', 
+        (concatenated_array.shape[1], concatenated_array.shape[0]), 
+        concatenated_array, 
+        'raw', 
+        'RGB', 
+        0, 
+        1
+        )
+
+    return feature_image
+
 class Database:
     def __init__(self):
         self.data       = {}
@@ -109,17 +151,70 @@ class Database:
                 # top    = 150
                 # left   = 12
                 # height = 350
-                center_crop = cfg.center_cropbox
-                center_crop = (center_crop[0] * 420, center_crop[1] * 720, center_crop[2] * 420, center_crop[3] * 720)
-                center = image.crop(center_crop).convert("RGB")
-                feature = ExtractFeature(center)
-                # logging.debug(f'"{row["zh-HANS"]}": "{str(imagehash.ImageHash(feature))}"')
+                # center_crop = cfg.center_cropbox
+                # center_crop = (center_crop[0] * 420, center_crop[1] * 720, center_crop[2] * 420, center_crop[3] * 720)
+                # center = image.crop(crop_box).convert("RGB")
+
+                # Convert image to a NumPy array (attempting to use a view)
+                image_array = np.asarray(image.convert("RGB"))
+                feature_image = GetEventFeatureImage(image_array)
+                
+                # # Convert image to a NumPy array (attempting to use a view)
+                # image_array = np.asarray(image.convert("RGB"))
+
+                # left   = 50
+                # top    = 70
+                # height = 70
+                # crop_box1 = (left, top, 420 - left, top + height)
+                # top    = 250
+                # height = 300
+                # crop_box2 = (left, top, 420 - left, top + height)
+
+                # # Crop the subimages using array slicing (this creates views, not copies)
+                # subimage1 = image_array[crop_box1[1]:crop_box1[3], crop_box1[0]:crop_box1[2]]
+                # subimage2 = image_array[crop_box2[1]:crop_box2[3], crop_box2[0]:crop_box2[2]]
+
+                # # Concatenate the arrays vertically to create a new buffer
+                # concatenated_array = np.vstack((subimage1, subimage2))
+
+                # # Create a new image from the buffer
+                # feature_image = Image.frombuffer(
+                #     'RGB', 
+                #     (concatenated_array.shape[1], concatenated_array.shape[0]), 
+                #     concatenated_array, 
+                #     'raw', 
+                #     'RGB', 
+                #     0, 
+                #     1
+                #     )
+                # # feature_image = Image.fromarray(concatenated_array)
+                # feature_image.save(snapshot_path)
+                feature = ExtractFeature(feature_image)
 
                 features[card_id] = feature
                 events[card_id]   = row
 
             else:
                 logging.error(f'"info": "Failed to load image: {image_path}"')
+        
+        if cfg.DEBUG:
+            logging.debug(f"{FeatureDistance(features[46], features[204])}")
+            logging.debug(f"{FeatureDistance(features[310], features[287])}")
+            n = len(features)
+            min_dist = 100000
+            from collections import defaultdict
+            close_dists = defaultdict(list)
+            for i in range(n):
+                for j in range(i + 1, n):
+                    dist = FeatureDistance(features[i], features[j])
+                    min_dist = min(dist, min_dist)
+                    if dist <= 20:
+                        close_dists[dist].append(f'{i}{events[i]["zh-HANS"]} <-----> {j}{events[j]["zh-HANS"]}') 
+            
+            close_dists = {key: close_dists[key] for key in sorted(close_dists)}
+            logging.warning(f'{json.dumps(close_dists, indent=2, ensure_ascii=False)}')
+            logging.warning(f'{min_dist=}')
+
 
         logging.info(f'"info": "Loaded {len(features)} images from {event_cards_dir}"')
         self.data["events"] = events
