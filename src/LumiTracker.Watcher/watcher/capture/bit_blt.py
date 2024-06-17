@@ -7,6 +7,7 @@ import win32ui
 import win32con
 
 from PIL import Image
+import numpy as np
 
 from ..config import cfg
 
@@ -35,12 +36,12 @@ class BitBltWatcher(WindowWatcher):
 
         delay = cfg.frame_interval
         while True:
-            start_time = time.time()
+            start_time = time.perf_counter()
 
             # Capture frame
-            image, status = self.CaptureWindow()
+            frame_buffer, status = self.CaptureWindow()
             if status == BitBltWatcher.SUCCESS:
-                self.OnFrameArrived(image)
+                self.OnFrameArrived(frame_buffer)
             elif status == BitBltWatcher.FAILED:
                 self.OnClosed()
                 break
@@ -54,7 +55,7 @@ class BitBltWatcher(WindowWatcher):
                 # exit(1)
                 pass
 
-            dt = time.time() - start_time
+            dt = time.perf_counter() - start_time
             if dt < delay:
                 time.sleep(delay - dt)
     
@@ -93,7 +94,7 @@ class BitBltWatcher(WindowWatcher):
     def OnResize(self, client_width, client_height):
         self.DestroyBitmap()
         self.CreateBitmap(client_width, client_height)
-        self.SetFrameRatio(client_width, client_height)
+        self.frame_manager.Resize(client_width, client_height)
 
     def CaptureWindow(self):
         try:
@@ -101,7 +102,7 @@ class BitBltWatcher(WindowWatcher):
             client_width  = client_right - client_left
             client_height = client_bot   - client_top
             if client_width == 0 or client_height == 0:
-                self.frame_manager.prev_log_time = time.time()
+                self.frame_manager.prev_log_time = time.perf_counter()
                 return (None, BitBltWatcher.MINIMIZED)
 
             if client_width != self.width or client_height != self.height:
@@ -114,16 +115,9 @@ class BitBltWatcher(WindowWatcher):
 
             # Get the bitmap data
             bitmap_bits = self.bitmap.GetBitmapBits(True)
-            image = Image.frombuffer(
-                'RGB',
-                (client_width, client_height),
-                bitmap_bits,
-                'raw',
-                'BGRX',
-                0,
-                1
-            )
+            frame_buffer = np.frombuffer(bitmap_bits, dtype=np.uint8)
+            frame_buffer = frame_buffer.reshape((client_height, client_width, 4))
 
-            return (image, BitBltWatcher.SUCCESS)
+            return (frame_buffer, BitBltWatcher.SUCCESS)
         except win32gui.error:
             return (None, BitBltWatcher.FAILED)

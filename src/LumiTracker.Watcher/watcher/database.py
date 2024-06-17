@@ -12,7 +12,25 @@ from pathlib import Path
 
 from .config import cfg
 
-# Only accept PIL Image with RGB format
+class CropBox:
+    def __init__(self, left, top, right, bottom):
+        self.left   = left
+        self.top    = top
+        self.right  = right
+        self.bottom = bottom
+    
+    @property
+    def width(self):
+        return self.right - self.left
+
+    @property
+    def height(self):
+        return self.bottom - self.top
+    
+    def __str__(self):
+        return f"CropBox(left={self.left}, top={self.top}, right={self.right}, bottom={self.bottom})"
+
+
 def ExtractFeature(image: Image):
     # use dhash + ahash for better robustness
     feature1 = imagehash.dhash(image, hash_size=cfg.hash_size)
@@ -25,6 +43,21 @@ def ExtractFeature(image: Image):
 
     return feature
 
+'''
+    image_buffer: (h, w, 4), BGRX
+'''
+def ExtractFeatureFromBuffer(image_buffer: np.ndarray):
+    image = Image.frombuffer(
+        'RGBX', 
+        (image_buffer.shape[1], image_buffer.shape[0]), 
+        image_buffer, 
+        'raw', 
+        'BGRX', 
+        0, 
+        1
+        )
+    return ExtractFeature(image)
+
 def FeatureDistance(feature1, feature2):
     return imagehash.ImageHash(feature1) - imagehash.ImageHash(feature2)
 
@@ -36,7 +69,7 @@ def HashToFeature(hash_str):
     feature = np.array(bool_list, dtype=bool)
     return feature
 
-def GetEventFeatureImage(image_array):
+def CopyEventFeatureRegion(dst_buffer, src_buffer):
     # left   = 50
     # top    = 70
     # height = 70
@@ -47,36 +80,30 @@ def GetEventFeatureImage(image_array):
     # crop_box2 = (left, top, 420 - left, top + height)
     # print((crop_box2[0] / 420, crop_box2[1] / 720, crop_box2[2] / 420, crop_box2[3] / 720))
 
-    h, w = image_array.shape[0:2]
+    h, w = src_buffer.shape[0:2]
     # print(w, h)
 
-    crop_box1 = cfg.event_crop_box1
-    crop_box1 = (crop_box1[0] * w, crop_box1[1] * h, crop_box1[2] * w, crop_box1[3] * h)
-    crop_box1 = tuple(int(i) for i in crop_box1)
+    crop_box1 = CropBox(
+        int(cfg.event_crop_box1[0] * w),
+        int(cfg.event_crop_box1[1] * h),
+        int(cfg.event_crop_box1[2] * w),
+        int(cfg.event_crop_box1[3] * h),
+    )
+    dst_buffer[0:crop_box1.height, :] = src_buffer[
+        crop_box1.top  : crop_box1.bottom, 
+        crop_box1.left : crop_box1.right
+    ]
 
-    crop_box2 = cfg.event_crop_box2
-    crop_box2 = (crop_box2[0] * w, crop_box2[1] * h, crop_box2[2] * w, crop_box2[3] * h)
-    crop_box2 = tuple(int(i) for i in crop_box2)
-
-    # Crop the subimages using array slicing (this creates views, not copies)
-    subimage1 = image_array[crop_box1[1]:crop_box1[3], crop_box1[0]:crop_box1[2]]
-    subimage2 = image_array[crop_box2[1]:crop_box2[3], crop_box2[0]:crop_box2[2]]
-
-    # Concatenate the arrays vertically to create a new buffer
-    concatenated_array = np.vstack((subimage1, subimage2))
-
-    # Create a new image from the buffer
-    feature_image = Image.frombuffer(
-        'RGB', 
-        (concatenated_array.shape[1], concatenated_array.shape[0]), 
-        concatenated_array, 
-        'raw', 
-        'RGB', 
-        0, 
-        1
-        )
-
-    return feature_image
+    crop_box2 = CropBox(
+        int(cfg.event_crop_box2[0] * w),
+        int(cfg.event_crop_box2[1] * h),
+        int(cfg.event_crop_box2[2] * w),
+        int(cfg.event_crop_box2[3] * h),
+    )
+    dst_buffer[crop_box1.height:, :] = src_buffer[
+        crop_box2.top  : crop_box2.bottom, 
+        crop_box2.left : crop_box2.right
+    ]
 
 class Database:
     def __init__(self):
@@ -123,6 +150,21 @@ class Database:
         border_filename = "tcg_border_bg.png"
         border = Image.open(os.path.join(cfg.cards_dir, border_filename)).convert("RGBA")
 
+        feature_crop1 = CropBox(
+            int(cfg.event_crop_box1[0] * 420),
+            int(cfg.event_crop_box1[1] * 720),
+            int(cfg.event_crop_box1[2] * 420),
+            int(cfg.event_crop_box1[3] * 720),
+        )
+        feature_crop2 = CropBox(
+            int(cfg.event_crop_box2[0] * 420),
+            int(cfg.event_crop_box2[1] * 720),
+            int(cfg.event_crop_box2[2] * 420),
+            int(cfg.event_crop_box2[3] * 720),
+        )
+        feature_buffer = np.zeros(
+            (feature_crop1.height + feature_crop2.height, feature_crop1.width, 4), dtype=np.uint8)
+
         event_cards_dir = os.path.join(cfg.cards_dir, "events")
         n_images = len(csv_data)
         events   = [None] * n_images
@@ -156,8 +198,8 @@ class Database:
                 # center = image.crop(crop_box).convert("RGB")
 
                 # Convert image to a NumPy array (attempting to use a view)
-                image_array = np.asarray(image.convert("RGB"))
-                feature_image = GetEventFeatureImage(image_array)
+                image_array = np.asarray(image)
+                CopyEventFeatureRegion(feature_buffer, image_array)
                 
                 # # Convert image to a NumPy array (attempting to use a view)
                 # image_array = np.asarray(image.convert("RGB"))
@@ -189,7 +231,8 @@ class Database:
                 #     )
                 # # feature_image = Image.fromarray(concatenated_array)
                 # feature_image.save(snapshot_path)
-                feature = ExtractFeature(feature_image)
+                feature_buffer[:, :, 0:3] = feature_buffer[:, :, 2::-1] # rgb to bgr
+                feature = ExtractFeatureFromBuffer(feature_buffer)
 
                 features[card_id] = feature
                 events[card_id]   = row
@@ -241,12 +284,12 @@ class Database:
             image_files = sorted(image_files)
             for file in image_files:
                 image = Image.open(os.path.join(test_dir, file)).convert("RGBA")
-                begin_time = time.time()
+                begin_time = time.perf_counter()
 
                 my_feature = ExtractFeature(image.convert("RGB"))
                 my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=10, include_distances=True)
 
-                dt = time.time() - begin_time
+                dt = time.perf_counter() - begin_time
                 logging.debug(f'"info": {dt=}')
                 logging.debug(f'"info": {my_ids=}')
                 logging.debug(f'"info": {my_dists=}')

@@ -28,30 +28,12 @@ class WindowWatcher:
     
     def OnClosed(self):
         pass
-
-    def OnFrameArrived(self, frame):
-        self.frame_manager.OnFrameArrived(frame)
-
-    def SetFrameRatio(self, client_width, client_height):
-        if client_height == 0:
-            return
-
-        ratio = client_width / client_height
-        EPSILON = 0.005
-        if   abs( ratio - 16 / 9 ) < EPSILON:
-            self.frame_manager.ratio = "16:9"
-        elif abs( ratio - 16 / 10) < EPSILON:
-            self.frame_manager.ratio = "16:10"
-        elif abs( ratio - 64 / 27) < EPSILON:
-            self.frame_manager.ratio = "64:27"
-        elif abs( ratio - 43 / 18) < EPSILON:
-            self.frame_manager.ratio = "43:18"
-        elif abs( ratio - 12 / 5 ) < EPSILON:
-            self.frame_manager.ratio = "12:5"
-        else:
-            logging.info(f'"type": "unsupported_ratio"')
-            logging.warning(f'"info": "Current resolution is {client_width}x{client_height} with {ratio=}, which is not supported now."')
-            self.frame_manager.ratio = "16:9" # default
+    
+    '''
+        frame_buffer: 4-channels, BGRX
+    '''
+    def OnFrameArrived(self, frame_buffer):
+        self.frame_manager.OnFrameArrived(frame_buffer)
 
     def GetClientRect(self):
         # Get window rect
@@ -98,7 +80,7 @@ if __name__ == '__main__':
     can_hide_border = int(sys.argv[3])
 
     logging.debug(f'"info": "WindowWatcher start, {hwnd=}, {capture_type=}, {can_hide_border=}"')
-
+    capture_type = "WindowsCapture"
     if capture_type == "BitBlt":
         from .capture import BitBltWatcher
         window_watcher = BitBltWatcher()

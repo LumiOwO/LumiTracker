@@ -4,7 +4,7 @@
   "debug_dir": "temp",
   "LOG_INTERVAL": 3,
   "proc_watch_interval": 1,
-  "frame_interval": 0.015,
+  "frame_interval": 0.014,
   "event_crop_box1": [
     0.11904762,
     0.097222224,
@@ -25,7 +25,7 @@
   "cards_dir": "cards",
   "hash_size": 8,
   "ann_index_len": 128,
-  "threshold": 18,
+  "threshold": 15,
   "ann_metric": "hamming",
   "ann_n_trees": 10,
   "lang": "zh-HANS",

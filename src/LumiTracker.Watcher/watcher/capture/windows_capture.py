@@ -18,7 +18,7 @@ class WindowsCaptureWatcher(WindowWatcher):
         self.window_size     = (0, 0) # border included
         self.client_size     = (0, 0)
 
-        self.prev_frame_time = time.time()
+        self.prev_frame_time = time.perf_counter()
 
     def OnStart(self, hwnd):
         # Every Error From on_closed and on_frame_arrived Will End Up Here
@@ -47,7 +47,7 @@ class WindowsCaptureWatcher(WindowWatcher):
         # logging.debug(self.client_size)
         # logging.debug(self.border_size)
 
-        self.SetFrameRatio(self.client_size[0], self.client_size[1])
+        self.frame_manager.Resize(self.client_size[0], self.client_size[1])
 
     # Called Every Time A New Frame Is Available
     def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):
@@ -58,16 +58,14 @@ class WindowsCaptureWatcher(WindowWatcher):
         top    = self.border_size[1]
         frame  = frame.crop(left, top, left + self.client_size[0], top + self.client_size[1])
 
-        buffer = frame.frame_buffer[:, :, 2::-1] # bgr to rgb
-        image  = Image.fromarray(buffer)
-        self.OnFrameArrived(image)
+        self.OnFrameArrived(frame.frame_buffer)
 
         # limit the speed in case of too fast
         INTERVAL = cfg.frame_interval
-        dt = time.time() - self.prev_frame_time
+        dt = time.perf_counter() - self.prev_frame_time
         if dt < INTERVAL:
             time.sleep(INTERVAL - dt)
-        cur_time = time.time()
+        cur_time = time.perf_counter()
         self.prev_frame_time = cur_time
 
     # Called When The Capture Item Closes Usually When The Window Closes, Capture
