@@ -4,7 +4,7 @@ import logging
 
 from types import SimpleNamespace
 
-from PIL import Image
+from PIL import Image, ImageOps
 import numpy as np
 
 from .config import cfg
@@ -16,30 +16,31 @@ from .stream_filter import StreamFilter
 
 class FrameManager:
     def __init__(self):
-        self.db                 = Database()
+        self.db                  = Database()
         self.db.Load()
-        self.start_feature      = HashToFeature(self.db["controls"]["GameStart"])
-        self.round_feature      = HashToFeature(self.db["controls"]["GameRound"])
+        self.start_feature       = HashToFeature(self.db["controls"]["GameStart"])
+        self.round_feature       = HashToFeature(self.db["controls"]["GameRound"])
 
-        self.ratio              = "16:9"
-        self.start_crop         = None
-        self.my_crop            = None
-        self.op_crop            = None
-        self.start_buffer       = None
-        self.my_feature_buffer  = None
-        self.op_feature_buffer  = None
+        self.ratio               = "16:9"
+        self.start_crop          = None
+        self.my_crop             = None
+        self.op_crop             = None
+        self.event_feature_crops = []
+        self.start_buffer        = None
+        self.my_feature_buffer   = None
+        self.op_feature_buffer   = None
 
-        self.prev_log_time      = time.perf_counter()
-        self.prev_frame_time    = self.prev_log_time
-        self.frame_count        = 0
-        self.min_fps            = 100000
-        self.first_log          = True
+        self.prev_log_time       = time.perf_counter()
+        self.prev_frame_time     = self.prev_log_time
+        self.frame_count         = 0
+        self.min_fps             = 100000
+        self.first_log           = True
 
-        self.filters            = SimpleNamespace()
-        self.filters.my_event   = StreamFilter(null_val=-1)
-        self.filters.op_event   = StreamFilter(null_val=-1)
-        self.filters.game_start = StreamFilter(null_val=False)
-        self.filters.game_round = StreamFilter(null_val=False)
+        self.filters             = SimpleNamespace()
+        self.filters.my_event    = StreamFilter(null_val=-1)
+        self.filters.op_event    = StreamFilter(null_val=-1)
+        self.filters.game_start  = StreamFilter(null_val=False)
+        self.filters.game_round  = StreamFilter(null_val=False)
 
     def Resize(self, client_width, client_height):
         if client_height == 0:
@@ -77,30 +78,72 @@ class FrameManager:
         # event played
         event_w = int(client_width * pos.event_screen_size[0])
         event_h = int(client_height * pos.event_screen_size[1])
+
+        # ////////////////////////////////
+        # //
+        # //    ---------------------
+        # //    |         |         |
+        # //    |         |         |
+        # //    |    0    |    1    |
+        # //    |         |         |
+        # //    |         |         |
+        # //    |         |---------|
+        # //    |         |         |
+        # //    |         |    2    |
+        # //    |         |         |
+        # //    |         |         |
+        # //    |---------|---------|
+        # //
+        # ////////////////////////////////
+
+        feature_crop_l0 = int(cfg.event_crop_box0[0] * event_w)
+        feature_crop_t0 = int(cfg.event_crop_box0[1] * event_h)
+        feature_crop_w0 = int((cfg.event_crop_box0[2] - cfg.event_crop_box0[0]) * event_w)
+        feature_crop_h0 = int((cfg.event_crop_box0[3] - cfg.event_crop_box0[1]) * event_h)
+        feature_crop0 = CropBox(
+            feature_crop_l0,
+            feature_crop_t0,
+            feature_crop_l0 + feature_crop_w0,
+            feature_crop_t0 + feature_crop_h0,
+        )
+
+        feature_crop_l1 = int(cfg.event_crop_box1[0] * event_w)
+        feature_crop_t1 = int(cfg.event_crop_box1[1] * event_h)
+        feature_crop_w1 = int((cfg.event_crop_box1[2] - cfg.event_crop_box1[0]) * event_w)
+        feature_crop_h1 = int((cfg.event_crop_box1[3] - cfg.event_crop_box1[1]) * event_h)
         feature_crop1 = CropBox(
-            int(cfg.event_crop_box1[0] * event_w),
-            int(cfg.event_crop_box1[1] * event_h),
-            int(cfg.event_crop_box1[2] * event_w),
-            int(cfg.event_crop_box1[3] * event_h),
+            feature_crop_l1,
+            feature_crop_t1,
+            feature_crop_l1 + feature_crop_w1,
+            feature_crop_t1 + feature_crop_h1,
         )
+
+        feature_crop_l2 = int(cfg.event_crop_box2[0] * event_w)
+        feature_crop_t2 = int(cfg.event_crop_box2[1] * event_h)
+        feature_crop_w2 = feature_crop_w1
+        feature_crop_h2 = feature_crop_h0 - feature_crop_h1
         feature_crop2 = CropBox(
-            int(cfg.event_crop_box2[0] * event_w),
-            int(cfg.event_crop_box2[1] * event_h),
-            int(cfg.event_crop_box2[2] * event_w),
-            int(cfg.event_crop_box2[3] * event_h),
+            feature_crop_l2,
+            feature_crop_t2,
+            feature_crop_l2 + feature_crop_w2,
+            feature_crop_t2 + feature_crop_h2,
         )
+
+        self.event_feature_crops = [feature_crop0, feature_crop1, feature_crop2]
+        feature_buffer_width  = feature_crop0.width + feature_crop1.width
+        feature_buffer_height = feature_crop0.height
 
         my_left = int(client_width * pos.my_event_pos[0])
         my_top  = int(client_height * pos.my_event_pos[1])
         self.my_crop = CropBox(my_left, my_top, my_left + event_w, my_top + event_h)
         self.my_feature_buffer = np.zeros(
-            (feature_crop1.height + feature_crop2.height, feature_crop1.width, 4), dtype=np.uint8)
+            (feature_buffer_height, feature_buffer_width, 4), dtype=np.uint8)
 
         op_left = int(client_width * pos.op_event_pos[0])
         op_top  = int(client_height * pos.op_event_pos[1])
         self.op_crop = CropBox(op_left, op_top, op_left + event_w, op_top + event_h)
         self.op_feature_buffer = np.zeros(
-            (feature_crop1.height + feature_crop2.height, feature_crop1.width, 4), dtype=np.uint8)
+            (feature_buffer_height, feature_buffer_width, 4), dtype=np.uint8)
 
     def DetectGameStart(self, frame_buffer):
         self.start_buffer[:, :] = frame_buffer[
@@ -126,13 +169,13 @@ class FrameManager:
             self.my_crop.top  : self.my_crop.bottom, 
             self.my_crop.left : self.my_crop.right
         ]
-        CopyEventFeatureRegion(self.my_feature_buffer, my_buffer)
+        CopyEventFeatureRegion(self.my_feature_buffer, my_buffer, self.event_feature_crops)
         my_feature = ExtractFeatureFromBuffer(self.my_feature_buffer)
         my_id, my_dist = self.db.SearchByFeature(my_feature, ann_name="event")
         
-        logging.debug(f'"info": "{my_dist=}, my event: {self.db["events"][my_id]["zh-HANS"] if my_id >= 0 else "None"}"')
         if my_dist > cfg.threshold:
             my_id = -1
+        logging.debug(f'"info": "{my_dist=}, my event: {self.db["events"][my_id]["zh-HANS"] if my_id >= 0 else "None"}"')
         my_id = self.filters.my_event.Filter(my_id)
 
         if my_id >= 0:
@@ -144,7 +187,7 @@ class FrameManager:
             self.op_crop.top  : self.op_crop.bottom, 
             self.op_crop.left : self.op_crop.right
         ]
-        CopyEventFeatureRegion(self.op_feature_buffer, op_buffer)
+        CopyEventFeatureRegion(self.op_feature_buffer, op_buffer, self.event_feature_crops)
         op_feature = ExtractFeatureFromBuffer(self.op_feature_buffer)
         op_id, op_dist = self.db.SearchByFeature(op_feature, ann_name="event")
         
@@ -157,7 +200,18 @@ class FrameManager:
             logging.info(f'"type": "op_event_card", "card_id": {op_id}')
 
         if cfg.DEBUG_SAVE:
-            my_image = Image.fromarray(my_buffer[:, :, 2::-1])
+            my_image = Image.frombuffer(
+                'RGBX', 
+                (self.my_feature_buffer.shape[1], self.my_feature_buffer.shape[0]), 
+                self.my_feature_buffer, 
+                'raw', 
+                'BGRX', 
+                0, 
+                1
+                )
+            my_image = my_image.convert('L')
+            my_image = ImageOps.equalize(my_image)
+            # my_image = Image.fromarray(my_buffer[:, :, 2::-1])
             my_image.save(os.path.join(cfg.debug_dir, "save", f"my_image{self.frame_count}.png"))
             op_image = Image.fromarray(op_buffer[:, :, 2::-1])
             op_image.save(os.path.join(cfg.debug_dir, "save", f"op_image{self.frame_count}.png"))

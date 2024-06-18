@@ -1,5 +1,5 @@
 from annoy import AnnoyIndex
-from PIL import Image
+from PIL import Image, ImageOps, ImageEnhance
 import numpy as np
 import imagehash
 
@@ -32,14 +32,21 @@ class CropBox:
 
 
 def ExtractFeature(image: Image):
-    # use dhash + ahash for better robustness
-    feature1 = imagehash.dhash(image, hash_size=cfg.hash_size)
-    feature1 = feature1.hash.flatten()
+    # histogram equalization
+    image = image.convert('L')
+    image = ImageOps.equalize(image)
 
-    feature2 = imagehash.average_hash(image, hash_size=cfg.hash_size)
-    feature2 = feature2.hash.flatten()
+    # feature1 = imagehash.colorhash(image, binbits=6)
+    # feature1 = feature1.hash.flatten()
 
-    feature = np.append(feature1, feature2)
+    # feature2 = imagehash.average_hash(image, hash_size=cfg.hash_size)
+    # feature2 = feature2.hash.flatten()
+
+    # feature = np.append(feature1, feature2)
+
+    # perceptual hash
+    feature = imagehash.phash(image, hash_size=cfg.hash_size, highfreq_factor=1)
+    feature = feature.hash.flatten()
 
     return feature
 
@@ -69,40 +76,20 @@ def HashToFeature(hash_str):
     feature = np.array(bool_list, dtype=bool)
     return feature
 
-def CopyEventFeatureRegion(dst_buffer, src_buffer):
-    # left   = 50
-    # top    = 70
-    # height = 70
-    # crop_box1 = (left, top, 420 - left, top + height)
-    # print((crop_box1[0] / 420, crop_box1[1] / 720, crop_box1[2] / 420, crop_box1[3] / 720))
-    # top    = 250
-    # height = 300
-    # crop_box2 = (left, top, 420 - left, top + height)
-    # print((crop_box2[0] / 420, crop_box2[1] / 720, crop_box2[2] / 420, crop_box2[3] / 720))
-
-    h, w = src_buffer.shape[0:2]
-    # print(w, h)
-
-    crop_box1 = CropBox(
-        int(cfg.event_crop_box1[0] * w),
-        int(cfg.event_crop_box1[1] * h),
-        int(cfg.event_crop_box1[2] * w),
-        int(cfg.event_crop_box1[3] * h),
-    )
-    dst_buffer[0:crop_box1.height, :] = src_buffer[
-        crop_box1.top  : crop_box1.bottom, 
-        crop_box1.left : crop_box1.right
+def CopyEventFeatureRegion(dst_buffer, src_buffer, crop_boxes):
+    dst_buffer[:crop_boxes[0].height, :crop_boxes[0].width] = src_buffer[
+        crop_boxes[0].top  : crop_boxes[0].bottom, 
+        crop_boxes[0].left : crop_boxes[0].right
     ]
 
-    crop_box2 = CropBox(
-        int(cfg.event_crop_box2[0] * w),
-        int(cfg.event_crop_box2[1] * h),
-        int(cfg.event_crop_box2[2] * w),
-        int(cfg.event_crop_box2[3] * h),
-    )
-    dst_buffer[crop_box1.height:, :] = src_buffer[
-        crop_box2.top  : crop_box2.bottom, 
-        crop_box2.left : crop_box2.right
+    dst_buffer[:crop_boxes[1].height, crop_boxes[0].width:] = src_buffer[
+        crop_boxes[1].top  : crop_boxes[1].bottom, 
+        crop_boxes[1].left : crop_boxes[1].right
+    ]
+
+    dst_buffer[crop_boxes[1].height:, crop_boxes[0].width:] = src_buffer[
+        crop_boxes[2].top  : crop_boxes[2].bottom, 
+        crop_boxes[2].left : crop_boxes[2].right
     ]
 
 class Database:
@@ -150,20 +137,24 @@ class Database:
         border_filename = "tcg_border_bg.png"
         border = Image.open(os.path.join(cfg.cards_dir, border_filename)).convert("RGBA")
 
-        feature_crop1 = CropBox(
-            int(cfg.event_crop_box1[0] * 420),
-            int(cfg.event_crop_box1[1] * 720),
-            int(cfg.event_crop_box1[2] * 420),
-            int(cfg.event_crop_box1[3] * 720),
-        )
-        feature_crop2 = CropBox(
-            int(cfg.event_crop_box2[0] * 420),
-            int(cfg.event_crop_box2[1] * 720),
-            int(cfg.event_crop_box2[2] * 420),
-            int(cfg.event_crop_box2[3] * 720),
-        )
-        feature_buffer = np.zeros(
-            (feature_crop1.height + feature_crop2.height, feature_crop1.width, 4), dtype=np.uint8)
+        left   = 70
+        width  = 100
+        top    = 320
+        height = 300
+        crop_box0 = CropBox(left, top, left + width, top + height)
+        cfg.event_crop_box0 = ((crop_box0.left / 420, crop_box0.top / 720, crop_box0.right / 420, crop_box0.bottom / 720))
+        left   = 180
+        width  = 100
+        top    = 220
+        height = 200
+        crop_box1 = CropBox(left, top, left + width, top + height)
+        cfg.event_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.right / 420, crop_box1.bottom / 720))
+        left   = 250
+        width  = 100
+        top    = 450
+        height = 100
+        crop_box2 = CropBox(left, top, left + width, top + height)
+        cfg.event_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.right / 420, crop_box2.bottom / 720))
 
         event_cards_dir = os.path.join(cfg.cards_dir, "events")
         n_images = len(csv_data)
@@ -189,50 +180,16 @@ class Database:
                     cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
                 snapshot.save(snapshot_path)
 
-                # use center subimage as feature
-                # top    = 150
-                # left   = 12
-                # height = 350
-                # center_crop = cfg.center_cropbox
-                # center_crop = (center_crop[0] * 420, center_crop[1] * 720, center_crop[2] * 420, center_crop[3] * 720)
-                # center = image.crop(crop_box).convert("RGB")
-
-                # Convert image to a NumPy array (attempting to use a view)
+                # create subimage for feature
                 image_array = np.asarray(image)
-                CopyEventFeatureRegion(feature_buffer, image_array)
-                
-                # # Convert image to a NumPy array (attempting to use a view)
-                # image_array = np.asarray(image.convert("RGB"))
+                subimage1 = image_array[crop_box0.top:crop_box0.bottom, crop_box0.left:crop_box0.right]
+                subimage2 = image_array[crop_box1.top:crop_box1.bottom, crop_box1.left:crop_box1.right]
+                subimage3 = image_array[crop_box2.top:crop_box2.bottom, crop_box2.left:crop_box2.right]
+                concatenated_array = np.hstack((subimage1, np.vstack((subimage2, subimage3))))
 
-                # left   = 50
-                # top    = 70
-                # height = 70
-                # crop_box1 = (left, top, 420 - left, top + height)
-                # top    = 250
-                # height = 300
-                # crop_box2 = (left, top, 420 - left, top + height)
-
-                # # Crop the subimages using array slicing (this creates views, not copies)
-                # subimage1 = image_array[crop_box1[1]:crop_box1[3], crop_box1[0]:crop_box1[2]]
-                # subimage2 = image_array[crop_box2[1]:crop_box2[3], crop_box2[0]:crop_box2[2]]
-
-                # # Concatenate the arrays vertically to create a new buffer
-                # concatenated_array = np.vstack((subimage1, subimage2))
-
-                # # Create a new image from the buffer
-                # feature_image = Image.frombuffer(
-                #     'RGB', 
-                #     (concatenated_array.shape[1], concatenated_array.shape[0]), 
-                #     concatenated_array, 
-                #     'raw', 
-                #     'RGB', 
-                #     0, 
-                #     1
-                #     )
-                # # feature_image = Image.fromarray(concatenated_array)
-                # feature_image.save(snapshot_path)
-                feature_buffer[:, :, 0:3] = feature_buffer[:, :, 2::-1] # rgb to bgr
-                feature = ExtractFeatureFromBuffer(feature_buffer)
+                feature_image = Image.fromarray(concatenated_array)
+                feature = ExtractFeature(feature_image)
+                # feature_image.convert("RGB").save(snapshot_path)
 
                 features[card_id] = feature
                 events[card_id]   = row
@@ -251,7 +208,7 @@ class Database:
                 for j in range(i + 1, n):
                     dist = FeatureDistance(features[i], features[j])
                     min_dist = min(dist, min_dist)
-                    if dist <= 20:
+                    if dist <= cfg.threshold:
                         close_dists[dist].append(f'{i}{events[i]["zh-HANS"]} <-----> {j}{events[j]["zh-HANS"]}') 
             
             close_dists = {key: close_dists[key] for key in sorted(close_dists)}
@@ -270,6 +227,7 @@ class Database:
             image.save(os.path.join(cfg.debug_dir, image_file))
             logging.debug(f'"info": "save {image_file} at {cfg.debug_dir}"')
 
+        cfg.ann_index_len = len(features[0])
         ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         for i in range(len(features)):
             ann.add_item(i, features[i])
@@ -280,13 +238,13 @@ class Database:
         if cfg.DEBUG_SAVE:
             test_dir = os.path.join(cfg.debug_dir, "test")
             files = os.listdir(test_dir)
-            image_files = [file for file in files if file.lower().endswith(".png")]
+            image_files = [file for file in files if (file.lower().endswith(".png") or file.lower().endswith(".jpg"))]
             image_files = sorted(image_files)
             for file in image_files:
                 image = Image.open(os.path.join(test_dir, file)).convert("RGBA")
                 begin_time = time.perf_counter()
 
-                my_feature = ExtractFeature(image.convert("RGB"))
+                my_feature = ExtractFeature(image)
                 my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=10, include_distances=True)
 
                 dt = time.perf_counter() - begin_time
@@ -303,6 +261,9 @@ class Database:
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:
             json.dump(self.data, f, indent=2, ensure_ascii=False)
+        
+        with open("assets/config.json", 'w') as f:
+            json.dump(vars(cfg), f, indent=2, ensure_ascii=False)
 
     def Load(self):
         self.events_ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)

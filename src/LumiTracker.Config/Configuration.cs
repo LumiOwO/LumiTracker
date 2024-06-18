@@ -23,6 +23,7 @@ namespace LumiTracker.Config
         public int LOG_INTERVAL { get; set; }
         public int proc_watch_interval { get; set; }
         public float frame_interval { get; set; }
+        public float[] event_crop_box0 { get; set; }
         public float[] event_crop_box1 { get; set; }
         public float[] event_crop_box2 { get; set; }
         public string assets_dir { get; set; }

@@ -80,7 +80,7 @@ if __name__ == '__main__':
     can_hide_border = int(sys.argv[3])
 
     logging.debug(f'"info": "WindowWatcher start, {hwnd=}, {capture_type=}, {can_hide_border=}"')
-    capture_type = "WindowsCapture"
+
     if capture_type == "BitBlt":
         from .capture import BitBltWatcher
         window_watcher = BitBltWatcher()
