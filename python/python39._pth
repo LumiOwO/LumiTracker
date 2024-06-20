@@ -3,6 +3,7 @@ Lib/site-packages
 python39.zip
 .
 ..
+Thirdparty
 
 # Uncomment to run site.main() automatically
 import site
