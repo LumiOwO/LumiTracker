@@ -236,6 +236,16 @@ namespace LumiTracker.Watcher
             WindowWatcherExit?.Invoke();
         }
 
+        public enum ETaskType
+        {
+            GAME_START = 0,
+            MY_EVENT,
+            OP_EVENT,
+
+            // types for exception
+            UNSUPPORTED_RATIO,
+        }
+
         private void WindowWatcherEventHandler(object sender, DataReceivedEventArgs e)
         {
             try
@@ -252,32 +262,33 @@ namespace LumiTracker.Watcher
                 {
                     var message_data = message["data"]!;
 
-                    string message_type = message_data["type"]!.ToString();
-                    if (message_type == "game_start")
+                    string task_type_name = message_data["type"]!.ToString();
+                    if (!Enum.TryParse(task_type_name, out ETaskType task_type))
+                    {
+                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] Unknown task type: {task_type_name}");
+                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {message}");
+                    }
+                    else if (task_type == ETaskType.GAME_START)
                     {
                         GameStarted?.Invoke();
                     }
-                    else if (message_type == "my_event_card")
+                    else if (task_type == ETaskType.MY_EVENT)
                     {
                         int card_id = (int)message_data["card_id"]!;
                         MyEventCard?.Invoke(card_id);
                     }
-                    else if (message_type == "op_event_card")
+                    else if (task_type == ETaskType.OP_EVENT)
                     {
                         int card_id = (int)message_data["card_id"]!;
                         OpEventCard?.Invoke(card_id);
                     }
-                    else if (message_type == "unsupported_ratio")
+                    else if (task_type == ETaskType.UNSUPPORTED_RATIO)
                     {
                         UnsupportedRatio?.Invoke();
                     }
-                    //else if (message_type == "game_round")
-                    //{
-                    //    //UnsupportedRatio?.Invoke();
-                    //}
                     else
                     {
-                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] Unknown message type: {message_type}");
+                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] Enum {task_type_name} defined but not handled");
                         Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {message}");
                     }
                 }

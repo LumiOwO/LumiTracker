@@ -1,5 +1,5 @@
 from annoy import AnnoyIndex
-from PIL import Image, ImageOps, ImageEnhance
+from PIL import Image, ImageOps
 import numpy as np
 import imagehash
 
@@ -36,24 +36,14 @@ def ExtractFeature(image: Image):
     image = image.convert('L')
     image = ImageOps.equalize(image)
 
-    # feature1 = imagehash.colorhash(image, binbits=6)
-    # feature1 = feature1.hash.flatten()
-
-    # feature2 = imagehash.average_hash(image, hash_size=cfg.hash_size)
-    # feature2 = feature2.hash.flatten()
-
-    # feature = np.append(feature1, feature2)
-
     # perceptual hash
     feature = imagehash.phash(image, hash_size=cfg.hash_size, highfreq_factor=1)
     feature = feature.hash.flatten()
 
     return feature
 
-'''
-    image_buffer: (h, w, 4), BGRX
-'''
 def ExtractFeatureFromBuffer(image_buffer: np.ndarray):
+    # image_buffer: (h, w, 4), BGRX
     image = Image.frombuffer(
         'RGBX', 
         (image_buffer.shape[1], image_buffer.shape[0]), 
@@ -75,22 +65,6 @@ def HashToFeature(hash_str):
     bool_list = [bit == '1' for bit in binary_string]
     feature = np.array(bool_list, dtype=bool)
     return feature
-
-def CopyEventFeatureRegion(dst_buffer, src_buffer, crop_boxes):
-    dst_buffer[:crop_boxes[0].height, :crop_boxes[0].width] = src_buffer[
-        crop_boxes[0].top  : crop_boxes[0].bottom, 
-        crop_boxes[0].left : crop_boxes[0].right
-    ]
-
-    dst_buffer[:crop_boxes[1].height, crop_boxes[0].width:] = src_buffer[
-        crop_boxes[1].top  : crop_boxes[1].bottom, 
-        crop_boxes[1].left : crop_boxes[1].right
-    ]
-
-    dst_buffer[crop_boxes[1].height:, crop_boxes[0].width:] = src_buffer[
-        crop_boxes[2].top  : crop_boxes[2].bottom, 
-        crop_boxes[2].left : crop_boxes[2].right
-    ]
 
 class Database:
     def __init__(self):
@@ -137,24 +111,30 @@ class Database:
         border_filename = "tcg_border_bg.png"
         border = Image.open(os.path.join(cfg.cards_dir, border_filename)).convert("RGBA")
 
-        left   = 70
-        width  = 100
-        top    = 320
-        height = 300
-        crop_box0 = CropBox(left, top, left + width, top + height)
-        cfg.event_crop_box0 = ((crop_box0.left / 420, crop_box0.top / 720, crop_box0.right / 420, crop_box0.bottom / 720))
-        left   = 180
-        width  = 100
-        top    = 220
-        height = 200
-        crop_box1 = CropBox(left, top, left + width, top + height)
-        cfg.event_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.right / 420, crop_box1.bottom / 720))
-        left   = 250
-        width  = 100
-        top    = 450
-        height = 100
-        crop_box2 = CropBox(left, top, left + width, top + height)
-        cfg.event_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.right / 420, crop_box2.bottom / 720))
+        # left   = 70
+        # width  = 100
+        # top    = 320
+        # height = 300
+        # crop_box0 = CropBox(left, top, left + width, top + height)
+        # cfg.event_crop_box0 = ((crop_box0.left / 420, crop_box0.top / 720, crop_box0.width / 420, crop_box0.height / 720))
+        # left   = 180
+        # width  = 100
+        # top    = 220
+        # height = 200
+        # crop_box1 = CropBox(left, top, left + width, top + height)
+        # cfg.event_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.width / 420, crop_box1.height / 720))
+        # left   = 250
+        # width  = 100
+        # top    = 450
+        # height = 100
+        # crop_box2 = CropBox(left, top, left + width, top + height)
+        # cfg.event_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
+
+        # do not call Tick() when updating database 
+        from .tasks import CardPlayedTask
+        task = CardPlayedTask(None, None)
+        task._ResizeFeatureBuffer(420, 720)
+        task.crop_box = CropBox(0, 0, 420, 720)
 
         event_cards_dir = os.path.join(cfg.cards_dir, "events")
         n_images = len(csv_data)
@@ -166,37 +146,46 @@ class Database:
 
             image_path = os.path.join(event_cards_dir, image_file)
             image = Image.open(image_path)
-            if image is not None:
-                # add border
-                image = image.convert("RGBA")
-                image = Image.alpha_composite(image, border)
-                # create snapshot
-                top    = int(row["snapshot_top"])
-                left   = 12
-                height = 150
-                crop_box = (left, top, 420 - left, top + height)
-                snapshot = image.crop(crop_box).convert("RGB")
-                snapshot_path = os.path.join(
-                    cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
-                snapshot.save(snapshot_path)
-
-                # create subimage for feature
-                image_array = np.asarray(image)
-                subimage1 = image_array[crop_box0.top:crop_box0.bottom, crop_box0.left:crop_box0.right]
-                subimage2 = image_array[crop_box1.top:crop_box1.bottom, crop_box1.left:crop_box1.right]
-                subimage3 = image_array[crop_box2.top:crop_box2.bottom, crop_box2.left:crop_box2.right]
-                concatenated_array = np.hstack((subimage1, np.vstack((subimage2, subimage3))))
-
-                feature_image = Image.fromarray(concatenated_array)
-                feature = ExtractFeature(feature_image)
-                # feature_image.convert("RGB").save(snapshot_path)
-
-                features[card_id] = feature
-                events[card_id]   = row
-
-            else:
+            if image is None:
                 logging.error(f'"info": "Failed to load image: {image_path}"')
+                exit(1)
         
+            # add border
+            image = image.convert("RGBA")
+            image = Image.alpha_composite(image, border)
+
+            # create snapshot
+            top    = int(row["snapshot_top"])
+            left   = 12
+            height = 150
+            crop_box = (left, top, 420 - left, top + height)
+            snapshot = image.crop(crop_box).convert("RGB")
+            snapshot_path = os.path.join(
+                cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
+            snapshot.save(snapshot_path)
+
+            # extract feature
+            image_array = np.asarray(image)
+            image_array = image_array[..., [2, 1, 0, 3]].copy() # rgba to bgra
+
+            task.frame_buffer = image_array
+            task._UpdateFeatureBuffer()
+
+            feature_image = Image.frombuffer(
+                'RGBX', 
+                (task.feature_buffer.shape[1], task.feature_buffer.shape[0]), 
+                task.feature_buffer, 
+                'raw', 
+                'BGRX', 
+                0, 
+                1
+                )
+            feature = ExtractFeature(feature_image)
+            # feature_image.convert("RGB").save(snapshot_path)
+
+            features[card_id] = feature
+            events[card_id]   = row
+
         if cfg.DEBUG:
             logging.debug(f"{FeatureDistance(features[46], features[204])}")
             logging.debug(f"{FeatureDistance(features[310], features[287])}")
@@ -275,13 +264,10 @@ class Database:
     def SearchByFeature(self, feature, ann_name):
         if ann_name == "event":
             ann = self.events_ann
-        elif ann_name == "round":
-            ann = self.rounds_ann
+        else:
+            raise NotImplementedError()
     
         ids, dists = ann.get_nns_by_vector(feature, n=1, include_distances=True)
-        if ann_name == "round":
-            ids, dists = ann.get_nns_by_vector(feature, n=5, include_distances=True)
-            logging.debug(f'"info": {ids=}, {dists=}')
         return ids[0], dists[0]
 
 

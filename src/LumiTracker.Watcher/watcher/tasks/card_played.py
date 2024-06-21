@@ -1,0 +1,148 @@
+from .base import TaskBase
+from ..stream_filter import StreamFilter
+
+from ..config import cfg
+from ..position import POS
+from ..database import CropBox
+from ..database import ExtractFeatureFromBuffer
+from ..stream_filter import StreamFilter
+
+import numpy as np
+import logging
+import os
+
+class CardPlayedTask(TaskBase):
+    def __init__(self, db, task_type):
+        super().__init__(db, task_type)
+        
+        self.filter         = StreamFilter(null_val=-1)
+        self.feature_buffer = None
+        self.feature_crops  = []
+        self.crop_cfgs      = (cfg.event_crop_box0, cfg.event_crop_box1, cfg.event_crop_box2)
+    
+    def OnResize(self, client_width, client_height, ratio_type):
+        # ////////////////////////////////
+        # //    Feature buffer
+        # //    Stacked by cropped region
+        # //    
+        # //    ---------------------
+        # //    |         |         |
+        # //    |         |         |
+        # //    |    0    |    1    |
+        # //    |         |         |
+        # //    |         |         |
+        # //    |         |---------|
+        # //    |         |         |
+        # //    |         |    2    |
+        # //    |         |         |
+        # //    |         |         |
+        # //    |---------|---------|
+        # //
+        # ////////////////////////////////
+
+        pos    = POS[ratio_type]
+
+        left   = int(client_width  * pos[self.task_type][0])
+        top    = int(client_height * pos[self.task_type][1])
+        width  = int(client_width  * pos[self.task_type][2])
+        height = int(client_height * pos[self.task_type][3])
+
+        self.crop_box = CropBox(left, top, left + width, top + height)
+
+        self._ResizeFeatureBuffer(width, height)
+
+    def Tick(self):
+        self._UpdateFeatureBuffer()
+
+        # Extract feature
+        feature = ExtractFeatureFromBuffer(self.feature_buffer)
+        card_id, dist = self.db.SearchByFeature(feature, ann_name="event")
+        
+        if dist > cfg.threshold:
+            card_id = -1
+        if self.task_type.value == 1:
+            logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["events"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
+        card_id = self.filter.Filter(card_id)
+
+        if card_id >= 0:
+            # logging.debug(f'"info": "my event: {self.db["events"][card_id].get("zh-HANS", "None")}, {dist=}"')
+            logging.info(f'"type": "{self.task_type.name}", "card_id": {card_id}')
+        
+        if cfg.DEBUG_SAVE:
+            from PIL import Image, ImageOps
+            image = Image.frombuffer(
+                'RGBX', 
+                (self.feature_buffer.shape[1], self.feature_buffer.shape[0]), 
+                self.feature_buffer, 
+                'raw', 
+                'BGRX', 
+                0, 
+                1
+                )
+            image = image.convert('L')
+            image = ImageOps.equalize(image)
+            # image = Image.fromarray(buffer[:, :, 2::-1])
+            image.save(os.path.join(cfg.debug_dir, "save", f"{self.task_type}{self.frame_count}.png"))
+
+    def _ResizeFeatureBuffer(self, width, height):
+        feature_crop_l0 = int(self.crop_cfgs[0][0] * width)
+        feature_crop_t0 = int(self.crop_cfgs[0][1] * height)
+        feature_crop_w0 = int(self.crop_cfgs[0][2] * width)
+        feature_crop_h0 = int(self.crop_cfgs[0][3] * height)
+        feature_crop0 = CropBox(
+            feature_crop_l0,
+            feature_crop_t0,
+            feature_crop_l0 + feature_crop_w0,
+            feature_crop_t0 + feature_crop_h0,
+        )
+
+        feature_crop_l1 = int(self.crop_cfgs[1][0] * width)
+        feature_crop_t1 = int(self.crop_cfgs[1][1] * height)
+        feature_crop_w1 = int(self.crop_cfgs[1][2] * width)
+        feature_crop_h1 = int(self.crop_cfgs[1][3] * height)
+        feature_crop1 = CropBox(
+            feature_crop_l1,
+            feature_crop_t1,
+            feature_crop_l1 + feature_crop_w1,
+            feature_crop_t1 + feature_crop_h1,
+        )
+
+        feature_crop_l2 = int(self.crop_cfgs[2][0] * width)
+        feature_crop_t2 = int(self.crop_cfgs[2][1] * height)
+        feature_crop_w2 = feature_crop_w1
+        feature_crop_h2 = feature_crop_h0 - feature_crop_h1
+        feature_crop2 = CropBox(
+            feature_crop_l2,
+            feature_crop_t2,
+            feature_crop_l2 + feature_crop_w2,
+            feature_crop_t2 + feature_crop_h2,
+        )
+        self.feature_crops = [feature_crop0, feature_crop1, feature_crop2]
+
+        feature_buffer_width  = feature_crop0.width + feature_crop1.width
+        feature_buffer_height = feature_crop0.height
+        self.feature_buffer = np.zeros(
+            (feature_buffer_height, feature_buffer_width, 4), dtype=np.uint8)
+
+    def _UpdateFeatureBuffer(self):
+        # Get event card region
+        region_buffer = self.frame_buffer[
+            self.crop_box.top  : self.crop_box.bottom, 
+            self.crop_box.left : self.crop_box.right
+        ]
+
+        # Crop event card and get feature buffer
+        self.feature_buffer[:self.feature_crops[0].height, :self.feature_crops[0].width] = region_buffer[
+            self.feature_crops[0].top  : self.feature_crops[0].bottom, 
+            self.feature_crops[0].left : self.feature_crops[0].right
+        ]
+
+        self.feature_buffer[:self.feature_crops[1].height, self.feature_crops[0].width:] = region_buffer[
+            self.feature_crops[1].top  : self.feature_crops[1].bottom, 
+            self.feature_crops[1].left : self.feature_crops[1].right
+        ]
+
+        self.feature_buffer[self.feature_crops[1].height:, self.feature_crops[0].width:] = region_buffer[
+            self.feature_crops[2].top  : self.feature_crops[2].bottom, 
+            self.feature_crops[2].left : self.feature_crops[2].right
+        ]
