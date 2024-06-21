@@ -1,13 +1,13 @@
-from windows_capture import WindowsCapture, Frame, InternalCaptureControl
+import windows_capture
+from windows_capture import Frame, InternalCaptureControl
+
 import time
 import logging
 
-from PIL import Image
-
-from ..window_watcher import WindowWatcher
 from ..config import cfg
+from .base import CaptureBase
 
-class WindowsCaptureWatcher(WindowWatcher):
+class WindowsCapture(CaptureBase):
     def __init__(self, can_hide_border):
         super().__init__()
 
@@ -22,7 +22,7 @@ class WindowsCaptureWatcher(WindowWatcher):
 
     def OnStart(self, hwnd):
         # Every Error From on_closed and on_frame_arrived Will End Up Here
-        self.capture = WindowsCapture(
+        self.capture = windows_capture.WindowsCapture(
             cursor_capture=False,
             draw_border=self.draw_border,
             hwnd=hwnd,
@@ -30,6 +30,10 @@ class WindowsCaptureWatcher(WindowWatcher):
         self.capture.event(self.on_frame_arrived)
         self.capture.event(self.on_closed)
 
+    def OnClosed(self):
+        logging.debug('"info": "Window Capture Session Closed"')
+
+    def MainLoop(self):
         self.capture.start()
 
     def OnResize(self, window_width, window_height):
@@ -71,5 +75,4 @@ class WindowsCaptureWatcher(WindowWatcher):
     # Called When The Capture Item Closes Usually When The Window Closes, Capture
     # Session Will End After This Function Ends
     def on_closed(self):
-        logging.debug('"info": "Window Capture Session Closed"')
         self.OnClosed()

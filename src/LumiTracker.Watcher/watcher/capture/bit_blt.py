@@ -1,4 +1,3 @@
-import os
 import time
 import logging
 
@@ -6,14 +5,13 @@ import win32gui
 import win32ui
 import win32con
 
-from PIL import Image
 import numpy as np
 
 from ..config import cfg
+from .base import CaptureBase
 
-from ..window_watcher import WindowWatcher
 
-class BitBltWatcher(WindowWatcher):
+class BitBlt(CaptureBase):
     SUCCESS   = 0
     FAILED    = 1
     MINIMIZED = 2
@@ -34,31 +32,6 @@ class BitBltWatcher(WindowWatcher):
         self.mfc_dc  = win32ui.CreateDCFromHandle(self.hwnd_dc)
         self.save_dc = self.mfc_dc.CreateCompatibleDC()
 
-        delay = cfg.frame_interval
-        while True:
-            start_time = time.perf_counter()
-
-            # Capture frame
-            frame_buffer, status = self.CaptureWindow()
-            if status == BitBltWatcher.SUCCESS:
-                self.OnFrameArrived(frame_buffer)
-            elif status == BitBltWatcher.FAILED:
-                self.OnClosed()
-                break
-            elif status == BitBltWatcher.MINIMIZED:
-                pass
-            else:
-                raise NotImplementedError()
-
-            if cfg.DEBUG_SAVE:
-                # image.save(os.path.join(cfg.debug_dir, "save", f"bitblt.png"))
-                # exit(1)
-                pass
-
-            dt = time.perf_counter() - start_time
-            if dt < delay:
-                time.sleep(delay - dt)
-    
     def OnClosed(self):
         # Clean up
         self.DestroyBitmap()
@@ -77,6 +50,37 @@ class BitBltWatcher(WindowWatcher):
             win32gui.ReleaseDC(self.hwnd, self.hwnd_dc)
         except win32ui.error as e:
             logging.warning(f'"info": "Error releasing hwnd_dc, maybe the reason is the closed hwnd"')
+
+    def MainLoop(self):
+        delay = cfg.frame_interval
+        while True:
+            start_time = time.perf_counter()
+
+            # Capture frame
+            frame_buffer, status = self.CaptureWindow()
+            if status == BitBlt.SUCCESS:
+                self.OnFrameArrived(frame_buffer)
+            elif status == BitBlt.FAILED:
+                self.OnClosed()
+                break
+            elif status == BitBlt.MINIMIZED:
+                pass
+            else:
+                raise NotImplementedError()
+
+            if cfg.DEBUG_SAVE:
+                # image.save(os.path.join(cfg.debug_dir, "save", f"bitblt.png"))
+                # exit(1)
+                pass
+
+            dt = time.perf_counter() - start_time
+            if dt < delay:
+                time.sleep(delay - dt)
+    
+    def OnResize(self, client_width, client_height):
+        self.DestroyBitmap()
+        self.CreateBitmap(client_width, client_height)
+        self.frame_manager.Resize(client_width, client_height)
     
     def CreateBitmap(self, width, height):
         self.bitmap = win32ui.CreateBitmap()
@@ -91,11 +95,6 @@ class BitBltWatcher(WindowWatcher):
             return
         win32gui.DeleteObject(self.bitmap.GetHandle())
 
-    def OnResize(self, client_width, client_height):
-        self.DestroyBitmap()
-        self.CreateBitmap(client_width, client_height)
-        self.frame_manager.Resize(client_width, client_height)
-
     def CaptureWindow(self):
         try:
             (client_left, client_top, client_right, client_bot), offset = self.GetClientRect()
@@ -103,7 +102,7 @@ class BitBltWatcher(WindowWatcher):
             client_height = client_bot   - client_top
             if client_width == 0 or client_height == 0:
                 self.frame_manager.prev_log_time = time.perf_counter()
-                return (None, BitBltWatcher.MINIMIZED)
+                return (None, BitBlt.MINIMIZED)
 
             if client_width != self.width or client_height != self.height:
                 self.OnResize(client_width, client_height)
@@ -118,6 +117,6 @@ class BitBltWatcher(WindowWatcher):
             frame_buffer = np.frombuffer(bitmap_bits, dtype=np.uint8)
             frame_buffer = frame_buffer.reshape((client_height, client_width, 4))
 
-            return (frame_buffer, BitBltWatcher.SUCCESS)
+            return (frame_buffer, BitBlt.SUCCESS)
         except win32gui.error:
-            return (None, BitBltWatcher.FAILED)
+            return (None, BitBlt.FAILED)

@@ -1,2 +1,2 @@
-from .bit_blt import BitBltWatcher
-from .windows_capture import WindowsCaptureWatcher
+from .bit_blt import BitBlt
+from .windows_capture import WindowsCapture
