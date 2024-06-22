@@ -51,7 +51,7 @@ class FrameManager:
 
     def OnFrameArrived(self, frame_buffer):
         for task in self.tasks:
-            task.OnFrameArrived(frame_buffer)
+            task.OnFrameArrived(frame_buffer, self.frame_count)
 
         self.frame_count += 1
         cur_time = time.perf_counter()

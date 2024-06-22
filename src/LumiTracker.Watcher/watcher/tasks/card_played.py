@@ -3,8 +3,8 @@ from ..stream_filter import StreamFilter
 
 from ..config import cfg
 from ..position import POS
-from ..database import CropBox
-from ..database import ExtractFeatureFromBuffer
+from ..database import CropBox, ExtractFeature
+from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
 import numpy as np
@@ -51,11 +51,11 @@ class CardPlayedTask(TaskBase):
 
         self._ResizeFeatureBuffer(width, height)
 
-    def Tick(self):
-        self._UpdateFeatureBuffer()
+    def Tick(self, frame_count):
+        region_buffer = self._UpdateFeatureBuffer()
 
         # Extract feature
-        feature = ExtractFeatureFromBuffer(self.feature_buffer)
+        feature = ExtractFeature(self.feature_buffer)
         card_id, dist = self.db.SearchByFeature(feature, ann_name="event")
         
         if dist > cfg.threshold:
@@ -69,20 +69,9 @@ class CardPlayedTask(TaskBase):
             logging.info(f'"type": "{self.task_type.name}", "card_id": {card_id}')
         
         if cfg.DEBUG_SAVE:
-            from PIL import Image, ImageOps
-            image = Image.frombuffer(
-                'RGBX', 
-                (self.feature_buffer.shape[1], self.feature_buffer.shape[0]), 
-                self.feature_buffer, 
-                'raw', 
-                'BGRX', 
-                0, 
-                1
-                )
-            image = image.convert('L')
-            image = ImageOps.equalize(image)
-            # image = Image.fromarray(buffer[:, :, 2::-1])
-            image.save(os.path.join(cfg.debug_dir, "save", f"{self.task_type}{self.frame_count}.png"))
+            import cv2
+            image = cv2.cvtColor(self.feature_buffer, cv2.COLOR_BGRA2BGR)
+            SaveImage(image, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}{frame_count}.png"))
 
     def _ResizeFeatureBuffer(self, width, height):
         feature_crop_l0 = int(self.crop_cfgs[0][0] * width)
@@ -146,3 +135,5 @@ class CardPlayedTask(TaskBase):
             self.feature_crops[2].top  : self.feature_crops[2].bottom, 
             self.feature_crops[2].left : self.feature_crops[2].right
         ]
+
+        return region_buffer

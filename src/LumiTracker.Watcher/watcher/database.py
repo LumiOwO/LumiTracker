@@ -1,7 +1,6 @@
 from annoy import AnnoyIndex
-from PIL import Image, ImageOps
 import numpy as np
-import imagehash
+import cv2
 
 import logging
 import time
@@ -11,6 +10,94 @@ import os
 from pathlib import Path
 
 from .config import cfg
+
+def LoadImage(path):
+    return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+
+def SaveImage(image, path):
+    cv2.imencode(Path(path).suffix, image)[1].tofile(path)
+
+class ImageHash:
+    """
+    Hash encapsulation. Can be used for dictionary keys and comparisons.
+    Reference: https://github.com/JohannesBuchner/imagehash/blob/master/imagehash/__init__.py
+    """
+
+    def _binary_array_to_hex(arr):
+        """
+        internal function to make a hex string out of a binary array.
+        """
+        bit_string = ''.join(str(b) for b in 1 * arr.flatten())
+        width = int(np.ceil(len(bit_string) / 4))
+        return '{:0>{width}x}'.format(int(bit_string, 2), width=width)
+
+    def __init__(self, binary_array):
+        self.hash = binary_array
+
+    def __str__(self):
+        return ImageHash._binary_array_to_hex(self.hash.flatten())
+
+    def __repr__(self):
+        return repr(self.hash)
+
+    def __sub__(self, other):
+        # type: (ImageHash) -> int
+        if other is None:
+            raise TypeError('Other hash must not be None.')
+        if self.hash.size != other.hash.size:
+            raise TypeError('ImageHashes must be of the same shape.', self.hash.shape, other.hash.shape)
+        return np.count_nonzero(self.hash.flatten() != other.hash.flatten())
+
+    def __eq__(self, other):
+        # type: (object) -> bool
+        if other is None:
+            return False
+        return np.array_equal(self.hash.flatten(), other.hash.flatten())  # type: ignore
+
+    def __ne__(self, other):
+        # type: (object) -> bool
+        if other is None:
+            return False
+        return not np.array_equal(self.hash.flatten(), other.hash.flatten())  # type: ignore
+
+    def __hash__(self):
+        # this returns a 8 bit integer, intentionally shortening the information
+        return sum([2**(i % 8) for i, v in enumerate(self.hash.flatten()) if v])
+
+    def __len__(self):
+        # Returns the bit length of the hash
+        return self.hash.size
+
+def PHash(gray_image, hash_size=8, highfreq_factor=4):
+    """
+    Perceptual Hash computation.
+
+    Implementation follows http://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
+
+    Reference: https://github.com/JohannesBuchner/imagehash/blob/master/imagehash/__init__.py
+
+    image: gray image, dtype == float32
+    """
+    img_size = hash_size * highfreq_factor
+
+    resized_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
+    # from PIL import Image
+    # gray_image = Image.fromarray(gray_image)
+    # resized_image = gray_image.resize((img_size, img_size), Image.Resampling.LANCZOS)
+    # resized_image = np.asarray(resized_image)
+    
+    dct = cv2.dct(resized_image)
+    # print(f"cv2: {dct.shape}")
+    # import scipy.fftpack
+    # dct = scipy.fftpack.dct(scipy.fftpack.dct(resized_image, axis=0), axis=1)
+    # print(f"scipy: {dct.shape}")
+
+    dctlowfreq = dct[:hash_size, :hash_size]
+    med = np.median(dctlowfreq)
+    diff = dctlowfreq > med
+    
+    return ImageHash(diff)
+
 
 class CropBox:
     def __init__(self, left, top, right, bottom):
@@ -31,32 +118,27 @@ class CropBox:
         return f"CropBox(left={self.left}, top={self.top}, right={self.right}, bottom={self.bottom})"
 
 
-def ExtractFeature(image: Image):
+def ExtractFeature(image):
     # histogram equalization
-    image = image.convert('L')
-    image = ImageOps.equalize(image)
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
+    gray_image = cv2.equalizeHist(gray_image)
+    gray_image = gray_image.astype(np.float32) / 255.0
+
+    # from PIL import Image, ImageOps
+    # image = Image.fromarray(image)
+    # image = image.convert('L')
+    # gray_image = ImageOps.equalize(image)
+    # gray_image = np.asarray(gray_image)
+
 
     # perceptual hash
-    feature = imagehash.phash(image, hash_size=cfg.hash_size, highfreq_factor=1)
+    feature = PHash(gray_image, hash_size=cfg.hash_size, highfreq_factor=1)
     feature = feature.hash.flatten()
 
     return feature
 
-def ExtractFeatureFromBuffer(image_buffer: np.ndarray):
-    # image_buffer: (h, w, 4), BGRX
-    image = Image.frombuffer(
-        'RGBX', 
-        (image_buffer.shape[1], image_buffer.shape[0]), 
-        image_buffer, 
-        'raw', 
-        'BGRX', 
-        0, 
-        1
-        )
-    return ExtractFeature(image)
-
 def FeatureDistance(feature1, feature2):
-    return imagehash.ImageHash(feature1) - imagehash.ImageHash(feature2)
+    return ImageHash(feature1) - ImageHash(feature2)
 
 def HashToFeature(hash_str):
     binary_string = bin(int(hash_str, 16))[2:]
@@ -85,18 +167,25 @@ class Database:
     def _UpdateControls(self):
         controls = {}
 
-        start = Image.open(os.path.join(cfg.cards_dir, "controls", "control_GameStart.png")).convert("RGBA")
-        start_feature = ExtractFeature(start.convert("RGB"))
-        controls["GameStart"] = str(imagehash.ImageHash(start_feature))
+        start = LoadImage(os.path.join(cfg.cards_dir, "controls", "control_GameStart.png"))
+        start_feature = ExtractFeature(start)
+        controls["GameStart"] = str(ImageHash(start_feature))
+        print(controls["GameStart"])
 
-        game_round = Image.open(os.path.join(cfg.cards_dir, "controls", "control_Round.png")).convert("RGBA")
-        round_feature = ExtractFeature(game_round.convert("RGB"))
-        controls["GameRound"] = str(imagehash.ImageHash(round_feature))
+        game_round = LoadImage(os.path.join(cfg.cards_dir, "controls", "control_Round.png"))
+        round_feature = ExtractFeature(game_round)
+        controls["GameRound"] = str(ImageHash(round_feature))
         if cfg.DEBUG:
+            game_start_test_path = "temp/test/game_start_frame.png"
+            image = LoadImage(game_start_test_path)
+            feature = ExtractFeature(image)
+            dist = FeatureDistance(feature, start_feature)
+            print(f'"info": "{game_start_test_path}: {dist=}"')
+
             n_rounds = 14
             for i in range(n_rounds):
-                round_image = Image.open(os.path.join(cfg.debug_dir, f"crop{i + 1}.png")).convert("RGBA")
-                feature = ExtractFeature(round_image.convert("RGB"))
+                round_image = LoadImage(os.path.join(cfg.debug_dir, f"crop{i + 1}.png"))
+                feature = ExtractFeature(round_image)
                 dist = FeatureDistance(feature, round_feature)
                 logging.debug(f'"info": "round{i + 1}, {dist=}"')
 
@@ -107,9 +196,6 @@ class Database:
                     mode='r', newline='', encoding='utf-8') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             csv_data = [row for row in csv_reader]
-
-        border_filename = "tcg_border_bg.png"
-        border = Image.open(os.path.join(cfg.cards_dir, border_filename)).convert("RGBA")
 
         # left   = 70
         # width  = 100
@@ -145,24 +231,23 @@ class Database:
             image_file = f'event_{card_id}_{row["zh-HANS"]}.png'
 
             image_path = os.path.join(event_cards_dir, image_file)
-            image = Image.open(image_path)
+            image = LoadImage(image_path)
             if image is None:
                 logging.error(f'"info": "Failed to load image: {image_path}"')
                 exit(1)
         
-            # add border
-            image = image.convert("RGBA")
-            image = Image.alpha_composite(image, border)
-
             # create snapshot
             top    = int(row["snapshot_top"])
             left   = 12
             height = 150
-            crop_box = (left, top, 420 - left, top + height)
-            snapshot = image.crop(crop_box).convert("RGB")
+            crop_box = CropBox(left, top, 420 - left, top + height)
+            snapshot = image[
+                crop_box.top  : crop_box.bottom, 
+                crop_box.left : crop_box.right
+            ]
             snapshot_path = os.path.join(
                 cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
-            snapshot.save(snapshot_path)
+            SaveImage(snapshot, snapshot_path)
 
             # extract feature
             image_array = np.asarray(image)
@@ -171,17 +256,8 @@ class Database:
             task.frame_buffer = image_array
             task._UpdateFeatureBuffer()
 
-            feature_image = Image.frombuffer(
-                'RGBX', 
-                (task.feature_buffer.shape[1], task.feature_buffer.shape[0]), 
-                task.feature_buffer, 
-                'raw', 
-                'BGRX', 
-                0, 
-                1
-                )
-            feature = ExtractFeature(feature_image)
-            # feature_image.convert("RGB").save(snapshot_path)
+            feature = ExtractFeature(task.feature_buffer)
+            # SaveImage(task.feature_buffer, snapshot_path)
 
             features[card_id] = feature
             events[card_id]   = row
@@ -211,9 +287,8 @@ class Database:
         if cfg.DEBUG_SAVE:
             card_id = 211
             image_file = f'event_{card_id}_{events[card_id]["zh-HANS"]}.png'
-            image = Image.open(os.path.join(event_cards_dir, image_file))
-            image = Image.alpha_composite(image, border)
-            image.save(os.path.join(cfg.debug_dir, image_file))
+            image = LoadImage(os.path.join(event_cards_dir, image_file))
+            SaveImage(image, os.path.join(cfg.debug_dir, image_file))
             logging.debug(f'"info": "save {image_file} at {cfg.debug_dir}"')
 
         cfg.ann_index_len = len(features[0])
@@ -230,9 +305,11 @@ class Database:
             image_files = [file for file in files if (file.lower().endswith(".png") or file.lower().endswith(".jpg"))]
             image_files = sorted(image_files)
             for file in image_files:
-                image = Image.open(os.path.join(test_dir, file)).convert("RGBA")
+                image = LoadImage(os.path.join(test_dir, file))
                 begin_time = time.perf_counter()
 
+                if len(image.shape) == 2:
+                    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGRA)
                 my_feature = ExtractFeature(image)
                 my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=10, include_distances=True)
 

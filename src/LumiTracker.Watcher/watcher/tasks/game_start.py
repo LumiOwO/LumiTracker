@@ -3,8 +3,8 @@ from .base import TaskBase
 from ..config import cfg
 from ..position import POS
 from ..database import CropBox
-from ..database import ExtractFeatureFromBuffer
-from ..database import FeatureDistance, HashToFeature
+from ..database import ExtractFeature, FeatureDistance, HashToFeature
+from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
 import numpy as np
@@ -30,13 +30,13 @@ class GameStartTask(TaskBase):
         self.crop_box = CropBox(left, top, left + width, top + height)
         self.buffer   = np.zeros((height, width, 4), dtype=np.uint8)
 
-    def Tick(self):
+    def Tick(self, frame_count):
         self.buffer[:, :] = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
 
-        feature = ExtractFeatureFromBuffer(self.buffer)
+        feature = ExtractFeature(self.buffer)
         dist = FeatureDistance(feature, self.feature)
         start = (dist <= cfg.threshold)
         start = self.filter.Filter(start)
@@ -45,6 +45,4 @@ class GameStartTask(TaskBase):
             logging.debug(f'"info": "Game start, {dist=}"')
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:
-                from PIL import Image
-                image = Image.fromarray(self.buffer[:, :, 2::-1])
-                image.save(os.path.join(cfg.debug_dir, "save", f"game_start_frame.png"))
+                SaveImage(self.buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
