@@ -42,7 +42,7 @@ class GameStartTask(TaskBase):
         feature = ExtractFeature(self.buffer)
         ctrl_id, dist = self.db.SearchByFeature(feature, EAnnType.CTRLS)
         start = (dist <= cfg.strict_threshold) and (ctrl_id == ECtrlType.GAME_START.value)
-        start = self.filter.Filter(start)
+        start = self.filter.Filter(start, dist)
 
         if start:
             frame_manager.game_started = True

@@ -1,4 +1,5 @@
 from collections import deque, defaultdict
+from .config import cfg
 
 class SlidingWindow:
     def __init__(self, null_val, window_size):
@@ -7,31 +8,39 @@ class SlidingWindow:
 
         self.window      = deque(maxlen=window_size)
         self.counts      = defaultdict(int)
+        self.dist_sum    = defaultdict(int)
     
-    def UpdateWindow(self, value):
+    def UpdateWindow(self, value, dist):
         if len(self.window) == self.WINDOW_SIZE:
             self._PopLeft()
-        self.window.append(value)
+        self.window.append((value, dist))
 
         if value != self.NULL_VAL:
-            self.counts[value] += 1
+            self.counts[value]   += 1
+            self.dist_sum[value] += dist
 
     def _PopLeft(self):
-        removed_value = self.window.popleft()
-        if removed_value != self.NULL_VAL:
-            self.counts[removed_value] -= 1
-            if self.counts[removed_value] == 0:
-                del self.counts[removed_value]
+        value, dist = self.window.popleft()
+        if value != self.NULL_VAL:
+            self.counts[value]   -= 1
+            self.dist_sum[value] -= dist
+            if self.counts[value] == 0:
+                del self.counts[value]
+                del self.dist_sum[value]
 
     def GetMajority(self):
         if not self.counts:
             return self.NULL_VAL
 
         majority = max(self.counts, key=self.counts.get)
-        if self.counts[majority] < 3:
-            return self.NULL_VAL
-        else:
+        count = self.counts[majority]
+        if count > 5:
             return majority
+
+        if self.dist_sum[majority] <= cfg.strict_threshold * count:
+            return majority
+
+        return self.NULL_VAL
 
 
 class StreamFilter:
@@ -58,8 +67,8 @@ class StreamFilter:
         self.count    = 0 if value == self.NULL_VAL else 1
         self.signaled = False
 
-    def Filter(self, value):
-        self.window.UpdateWindow(value)
+    def Filter(self, value, dist):
+        self.window.UpdateWindow(value, dist)
         value = self.window.GetMajority()
 
         prev_signaled = self.signaled
