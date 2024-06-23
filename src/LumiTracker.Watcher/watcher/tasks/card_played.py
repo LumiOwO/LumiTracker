@@ -58,10 +58,10 @@ class CardPlayedTask(TaskBase):
         feature = ExtractFeature(self.feature_buffer)
         card_id, dist = self.db.SearchByFeature(feature, ann_name="event")
         
-        if self.task_type.value == 1:
-            logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["events"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
         if dist > cfg.threshold:
             card_id = -1
+        # if self.task_type.value == 1:
+        #     logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["events"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
         card_id = self.filter.Filter(card_id)
 
         if card_id >= 0:

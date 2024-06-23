@@ -70,7 +70,7 @@ class ImageHash:
         # Returns the bit length of the hash
         return self.hash.size
 
-def PHash(gray_image, hash_size=8, highfreq_factor=4):
+def PHash(gray_image, hash_size=8):
     """
     Perceptual Hash computation.
 
@@ -80,11 +80,11 @@ def PHash(gray_image, hash_size=8, highfreq_factor=4):
 
     image: gray image, dtype == float32
     """
-    img_size = hash_size * highfreq_factor
-
-    resized_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
+    # highfreq_factor = 4
+    # img_size = hash_size * highfreq_factor
+    # gray_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
     
-    dct = cv2.dct(resized_image)
+    dct = cv2.dct(gray_image)
 
     dctlowfreq = dct[:hash_size, :hash_size]
     med = np.median(dctlowfreq)

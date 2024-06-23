@@ -31,7 +31,7 @@
   "cards_dir": "cards",
   "hash_size": 10,
   "ann_index_len": 100,
-  "threshold": 20,
+  "threshold": 26,
   "ann_metric": "hamming",
   "ann_n_trees": 10,
   "lang": "zh-HANS",

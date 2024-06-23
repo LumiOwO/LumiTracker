@@ -24,10 +24,14 @@ class SlidingWindow:
                 del self.counts[removed_value]
 
     def GetMajority(self):
-        if self.counts:
-            return max(self.counts, key=self.counts.get)
-        else:
+        if not self.counts:
             return self.NULL_VAL
+
+        majority = max(self.counts, key=self.counts.get)
+        if self.counts[majority] < 3:
+            return self.NULL_VAL
+        else:
+            return majority
 
 
 class StreamFilter:
