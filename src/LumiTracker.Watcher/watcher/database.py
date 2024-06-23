@@ -343,8 +343,9 @@ class Database:
             ann = self.events_ann
         else:
             raise NotImplementedError()
-    
-        ids, dists = ann.get_nns_by_vector(feature, n=1, include_distances=True)
+
+        # !!!!! Must use a large n, or it may not find the optimal result !!!!!
+        ids, dists = ann.get_nns_by_vector(feature, n=20, include_distances=True)
         return ids[0], dists[0]
 
 
