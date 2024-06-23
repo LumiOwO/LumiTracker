@@ -8,3 +8,4 @@ pywin32==306
 numpy==1.26.4
 pillow==10.3.0
 json5==0.9.25
+opencv-python-headless==4.10.0.84

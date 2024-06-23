@@ -22,10 +22,10 @@ class GameStartTask(TaskBase):
     def OnResize(self, client_width, client_height, ratio_type):
         pos    = POS[ratio_type]
 
-        left   = int(client_width  * pos[self.task_type][0])
-        top    = int(client_height * pos[self.task_type][1])
-        width  = int(client_width  * pos[self.task_type][2])
-        height = int(client_height * pos[self.task_type][3])
+        left   = round(client_width  * pos[self.task_type][0])
+        top    = round(client_height * pos[self.task_type][1])
+        width  = round(client_width  * pos[self.task_type][2])
+        height = round(client_height * pos[self.task_type][3])
 
         self.crop_box = CropBox(left, top, left + width, top + height)
         self.buffer   = np.zeros((height, width, 4), dtype=np.uint8)

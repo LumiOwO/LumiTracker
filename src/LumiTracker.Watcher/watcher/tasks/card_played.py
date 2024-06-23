@@ -42,10 +42,10 @@ class CardPlayedTask(TaskBase):
 
         pos    = POS[ratio_type]
 
-        left   = int(client_width  * pos[self.task_type][0])
-        top    = int(client_height * pos[self.task_type][1])
-        width  = int(client_width  * pos[self.task_type][2])
-        height = int(client_height * pos[self.task_type][3])
+        left   = round(client_width  * pos[self.task_type][0])
+        top    = round(client_height * pos[self.task_type][1])
+        width  = round(client_width  * pos[self.task_type][2])
+        height = round(client_height * pos[self.task_type][3])
 
         self.crop_box = CropBox(left, top, left + width, top + height)
 
@@ -58,10 +58,10 @@ class CardPlayedTask(TaskBase):
         feature = ExtractFeature(self.feature_buffer)
         card_id, dist = self.db.SearchByFeature(feature, ann_name="event")
         
-        if dist > cfg.threshold:
-            card_id = -1
         if self.task_type.value == 1:
             logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["events"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
+        if dist > cfg.threshold:
+            card_id = -1
         card_id = self.filter.Filter(card_id)
 
         if card_id >= 0:
@@ -74,10 +74,10 @@ class CardPlayedTask(TaskBase):
             SaveImage(image, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}{frame_count}.png"))
 
     def _ResizeFeatureBuffer(self, width, height):
-        feature_crop_l0 = int(self.crop_cfgs[0][0] * width)
-        feature_crop_t0 = int(self.crop_cfgs[0][1] * height)
-        feature_crop_w0 = int(self.crop_cfgs[0][2] * width)
-        feature_crop_h0 = int(self.crop_cfgs[0][3] * height)
+        feature_crop_l0 = round(self.crop_cfgs[0][0] * width)
+        feature_crop_t0 = round(self.crop_cfgs[0][1] * height)
+        feature_crop_w0 = round(self.crop_cfgs[0][2] * width)
+        feature_crop_h0 = round(self.crop_cfgs[0][3] * height)
         feature_crop0 = CropBox(
             feature_crop_l0,
             feature_crop_t0,
@@ -85,10 +85,10 @@ class CardPlayedTask(TaskBase):
             feature_crop_t0 + feature_crop_h0,
         )
 
-        feature_crop_l1 = int(self.crop_cfgs[1][0] * width)
-        feature_crop_t1 = int(self.crop_cfgs[1][1] * height)
-        feature_crop_w1 = int(self.crop_cfgs[1][2] * width)
-        feature_crop_h1 = int(self.crop_cfgs[1][3] * height)
+        feature_crop_l1 = round(self.crop_cfgs[1][0] * width)
+        feature_crop_t1 = round(self.crop_cfgs[1][1] * height)
+        feature_crop_w1 = round(self.crop_cfgs[1][2] * width)
+        feature_crop_h1 = round(self.crop_cfgs[1][3] * height)
         feature_crop1 = CropBox(
             feature_crop_l1,
             feature_crop_t1,
@@ -96,8 +96,8 @@ class CardPlayedTask(TaskBase):
             feature_crop_t1 + feature_crop_h1,
         )
 
-        feature_crop_l2 = int(self.crop_cfgs[2][0] * width)
-        feature_crop_t2 = int(self.crop_cfgs[2][1] * height)
+        feature_crop_l2 = round(self.crop_cfgs[2][0] * width)
+        feature_crop_t2 = round(self.crop_cfgs[2][1] * height)
         feature_crop_w2 = feature_crop_w1
         feature_crop_h2 = feature_crop_h0 - feature_crop_h1
         feature_crop2 = CropBox(

@@ -81,6 +81,7 @@ def PHash(gray_image, hash_size=8, highfreq_factor=4):
     img_size = hash_size * highfreq_factor
 
     resized_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
+    # resized_image = gray_image
     # from PIL import Image
     # gray_image = Image.fromarray(gray_image)
     # resized_image = gray_image.resize((img_size, img_size), Image.Resampling.LANCZOS)
@@ -96,6 +97,76 @@ def PHash(gray_image, hash_size=8, highfreq_factor=4):
     med = np.median(dctlowfreq)
     diff = dctlowfreq > med
     
+    return ImageHash(diff)
+
+# def average_hash(image, hash_size=8, mean=numpy.mean):
+#     # type: (Image.Image, int, MeanFunc) -> ImageHash
+#     """
+#     Average Hash computation
+
+#     Implementation follows http://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
+
+#     Step by step explanation: https://web.archive.org/web/20171112054354/https://www.safaribooksonline.com/blog/2013/11/26/image-hashing-with-python/ # noqa: E501
+
+#     @image must be a PIL instance.
+#     @mean how to determine the average luminescence. can try numpy.median instead.
+#     """
+#     if hash_size < 2:
+#         raise ValueError('Hash size must be greater than or equal to 2')
+
+#     # reduce size and complexity, then covert to grayscale
+#     image = image.convert('L').resize((hash_size, hash_size), ANTIALIAS)
+
+#     # find average pixel value; 'pixels' is an array of the pixel values, ranging from 0 (black) to 255 (white)
+#     pixels = numpy.asarray(image)
+#     avg = mean(pixels)
+
+#     # create string of bits
+#     diff = pixels > avg
+#     # make a hash
+#     return ImageHash(diff)
+
+# def dhash(image, hash_size=8):
+#     # type: (Image.Image, int) -> ImageHash
+#     """
+#     Difference Hash computation.
+
+#     following http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html
+
+#     computes differences horizontally
+
+#     @image must be a PIL instance.
+#     """
+#     # resize(w, h), but numpy.array((h, w))
+#     if hash_size < 2:
+#         raise ValueError('Hash size must be greater than or equal to 2')
+
+#     image = image.convert('L').resize((hash_size + 1, hash_size), ANTIALIAS)
+#     pixels = numpy.asarray(image)
+#     # compute differences between columns
+#     diff = pixels[:, 1:] > pixels[:, :-1]
+#     return ImageHash(diff)
+
+
+def DHash(gray_image, hash_size=8):
+    # type: (Image.Image, int) -> ImageHash
+    """
+    Difference Hash computation.
+
+    following http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html
+
+    computes differences horizontally
+
+    @image must be a PIL instance.
+    """
+    # gray_image = cv2.resize(gray_image, (hash_size + 1, hash_size), interpolation=cv2.INTER_AREA)
+    # # compute differences between columns
+    # diff = gray_image[:, 1:] > gray_image[:, :-1]
+
+    gray_image = cv2.resize(gray_image, (hash_size, hash_size + 1), interpolation=cv2.INTER_AREA)
+    # compute differences between columns
+    diff = gray_image[1:, :] > gray_image[:-1, :]
+
     return ImageHash(diff)
 
 
@@ -117,11 +188,17 @@ class CropBox:
     def __str__(self):
         return f"CropBox(left={self.left}, top={self.top}, right={self.right}, bottom={self.bottom})"
 
+CLAHE = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(4, 4))
 
-def ExtractFeature(image):
+def Preprocess(image):
     # histogram equalization
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
-    gray_image = cv2.equalizeHist(gray_image)
+    gray_image = cv2.GaussianBlur(gray_image, (9, 9), 0)
+    # gray_image = cv2.Laplacian(gray_image, cv2.CV_64F)
+    # gray_image = cv2.equalizeHist(gray_image)
+    # gray_image = cv2.normalize(gray_image, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+
+    gray_image = CLAHE.apply(gray_image)
     gray_image = gray_image.astype(np.float32) / 255.0
 
     # from PIL import Image, ImageOps
@@ -129,10 +206,15 @@ def ExtractFeature(image):
     # image = image.convert('L')
     # gray_image = ImageOps.equalize(image)
     # gray_image = np.asarray(gray_image)
+    return gray_image
 
+
+def ExtractFeature(image):
+    gray_image = Preprocess(image)
 
     # perceptual hash
-    feature = PHash(gray_image, hash_size=cfg.hash_size, highfreq_factor=1)
+    feature = PHash(gray_image, hash_size=cfg.hash_size)
+    # feature = DHash(gray_image, hash_size=cfg.hash_size)
     feature = feature.hash.flatten()
 
     return feature
@@ -197,21 +279,21 @@ class Database:
             csv_reader = csv.DictReader(csv_file)
             csv_data = [row for row in csv_reader]
 
-        # left   = 70
+        # left   = 60
         # width  = 100
-        # top    = 320
+        # top    = 300
         # height = 300
         # crop_box0 = CropBox(left, top, left + width, top + height)
         # cfg.event_crop_box0 = ((crop_box0.left / 420, crop_box0.top / 720, crop_box0.width / 420, crop_box0.height / 720))
         # left   = 180
         # width  = 100
-        # top    = 220
+        # top    = 250
         # height = 200
         # crop_box1 = CropBox(left, top, left + width, top + height)
         # cfg.event_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.width / 420, crop_box1.height / 720))
         # left   = 250
         # width  = 100
-        # top    = 450
+        # top    = 480
         # height = 100
         # crop_box2 = CropBox(left, top, left + width, top + height)
         # cfg.event_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
@@ -249,15 +331,14 @@ class Database:
                 cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
             SaveImage(snapshot, snapshot_path)
 
-            # extract feature
-            image_array = np.asarray(image)
-            image_array = image_array[..., [2, 1, 0, 3]].copy() # rgba to bgra
-
-            task.frame_buffer = image_array
+            task.frame_buffer = image
             task._UpdateFeatureBuffer()
 
             feature = ExtractFeature(task.feature_buffer)
-            # SaveImage(task.feature_buffer, snapshot_path)
+            # gray_image = Preprocess(task.feature_buffer)
+            # if gray_image.dtype == np.float32:
+            #     gray_image *= 255
+            # SaveImage(gray_image, snapshot_path)
 
             features[card_id] = feature
             events[card_id]   = row
@@ -307,11 +388,11 @@ class Database:
             for file in image_files:
                 image = LoadImage(os.path.join(test_dir, file))
                 begin_time = time.perf_counter()
-
+                # print(image.shape, image.dtype)
                 if len(image.shape) == 2:
                     image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGRA)
                 my_feature = ExtractFeature(image)
-                my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=10, include_distances=True)
+                my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=20, include_distances=True)
 
                 dt = time.perf_counter() - begin_time
                 logging.debug(f'"info": {dt=}')
