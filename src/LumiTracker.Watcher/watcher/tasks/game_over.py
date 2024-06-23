@@ -12,7 +12,7 @@ import numpy as np
 import logging
 import os
 
-class GameStartTask(TaskBase):
+class GameOverTask(TaskBase):
     def __init__(self, db, task_type):
         super().__init__(db, task_type)
 
@@ -31,7 +31,7 @@ class GameStartTask(TaskBase):
         self.buffer   = np.zeros((height, width, 4), dtype=np.uint8)
 
     def Tick(self, frame_manager):
-        if frame_manager.game_started:
+        if not frame_manager.game_started:
             return
 
         self.buffer[:, :] = self.frame_buffer[
@@ -41,12 +41,13 @@ class GameStartTask(TaskBase):
 
         feature = ExtractFeature(self.buffer)
         ctrl_id, dist = self.db.SearchByFeature(feature, EAnnType.CTRLS)
-        start = (dist <= cfg.strict_threshold) and (ctrl_id == ECtrlType.GAME_START.value)
-        start = self.filter.Filter(start, dist)
+        over = (dist <= cfg.strict_threshold) and (
+            ctrl_id >= ECtrlType.GAME_OVER_FIRST.value) and (ctrl_id <= ECtrlType.GAME_OVER_LAST.value)
+        over = self.filter.Filter(over, dist)
 
-        if start:
-            frame_manager.game_started = True
-            logging.debug(f'"info": "Game start, {dist=}"')
+        if over:
+            frame_manager.game_started = False
+            logging.debug(f'"info": "Game over, {dist=}"')
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:
                 SaveImage(self.buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))

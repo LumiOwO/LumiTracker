@@ -70,6 +70,7 @@ class CardPlayedTask(TaskBase):
         card_id = self.filter.Filter(card_id, dist)
 
         if card_id >= 0:
+            logging.debug(f'"type": "{self.task_type.name}", "card_id": {card_id}, "name": {self.db["events"][card_id]["zh-HANS"]}')
             logging.info(f'"type": "{self.task_type.name}", "card_id": {card_id}')
         
         if cfg.DEBUG_SAVE:

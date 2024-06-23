@@ -241,6 +241,7 @@ namespace LumiTracker.Watcher
             GAME_START = 0,
             MY_EVENT,
             OP_EVENT,
+            GAME_OVER,
 
             // types for exception
             UNSUPPORTED_RATIO,

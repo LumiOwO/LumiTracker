@@ -6,6 +6,7 @@ POS = {
         ETaskType.GAME_START : ( 0.4470, 0.4400, 0.1045, 0.1110 ),
         ETaskType.MY_EVENT   : ( 0.1225, 0.1755, 0.1400, 0.4270 ),
         ETaskType.OP_EVENT   : ( 0.7380, 0.1755, 0.1400, 0.4270 ),
+        ETaskType.GAME_OVER  : ( 0.4220, 0.4640, 0.1555, 0.0690 ),
     },
     ERatioType.E16_10: {
         ETaskType.GAME_START : ( 0.4470, 0.4470, 0.1045, 0.0995 ),

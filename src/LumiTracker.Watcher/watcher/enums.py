@@ -4,6 +4,7 @@ class ETaskType(enum.Enum):
     GAME_START        = 0
     MY_EVENT          = enum.auto()
     OP_EVENT          = enum.auto()
+    GAME_OVER         = enum.auto()
 
     # types for exception
     UNSUPPORTED_RATIO = enum.auto()

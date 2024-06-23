@@ -28,13 +28,12 @@ namespace LumiTracker.Config
         public float[] event_crop_box2 { get; set; }
         public string assets_dir { get; set; }
         public string database_dir { get; set; }
-        public string events_ann_filename { get; set; }
-        public string rounds_ann_filename { get; set; }
         public string db_filename { get; set; }
         public string cards_dir { get; set; }
         public int hash_size { get; set; }
         public int ann_index_len { get; set; }
         public int threshold { get; set; }
+        public int strict_threshold { get; set; }
         public string ann_metric { get; set; }
         public int ann_n_trees { get; set; }
         public string lang { get; set; }
