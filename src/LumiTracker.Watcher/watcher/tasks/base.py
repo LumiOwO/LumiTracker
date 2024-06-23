@@ -6,12 +6,12 @@ class TaskBase:
         self.frame_buffer = None
         self.crop_box     = None
     
-    def OnFrameArrived(self, frame_buffer, frame_count):
+    def OnFrameArrived(self, frame_buffer, frame_manager):
         self.frame_buffer = frame_buffer
 
-        self.Tick(frame_count)
+        self.Tick(frame_manager)
     
-    def Tick(self, frame_count):
+    def Tick(self, frame_manager):
         raise NotImplementedError()
     
     def OnResize(self, client_width, client_height, ratio_type):

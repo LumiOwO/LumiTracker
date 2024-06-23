@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 
 from .config import cfg
+from .enums import ECtrlType, EAnnType
 
 def LoadImage(path):
     return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -188,7 +189,7 @@ def HashToFeature(hash_str):
 class Database:
     def __init__(self):
         self.data       = {}
-        self.events_ann = None
+        self.anns       = [None] * EAnnType.ANN_COUNT.value
         self.rounds_ann = None
 
         Path(cfg.database_dir).mkdir(parents=True, exist_ok=True)
@@ -202,31 +203,35 @@ class Database:
         self.data[key] = value
     
     def _UpdateControls(self):
-        controls = {}
+        n_controls = ECtrlType.CTRL_FEATURES_COUNT.value
+        features = [None] * n_controls
+        for i in range(n_controls):
+            image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
+            feature = ExtractFeature(image)
+            features[i] = feature
 
-        start = LoadImage(os.path.join(cfg.cards_dir, "controls", "control_GameStart.png"))
-        start_feature = ExtractFeature(start)
-        controls["GameStart"] = str(ImageHash(start_feature))
-        print(controls["GameStart"])
+        ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
+        for i in range(len(features)):
+            ann.add_item(i, features[i])
+        ann.build(cfg.ann_n_trees)
+        ann_filename = f"{EAnnType.CTRLS.name.lower()}.ann"
+        ann.save(os.path.join(cfg.database_dir, ann_filename))
+        self.anns[EAnnType.CTRLS.value] = ann
 
-        game_round = LoadImage(os.path.join(cfg.cards_dir, "controls", "control_Round.png"))
-        round_feature = ExtractFeature(game_round)
-        controls["GameRound"] = str(ImageHash(round_feature))
         if cfg.DEBUG:
             game_start_test_path = "temp/test/game_start_frame.png"
             image = LoadImage(game_start_test_path)
             feature = ExtractFeature(image)
-            dist = FeatureDistance(feature, start_feature)
-            print(f'"info": "{game_start_test_path}: {dist=}"')
+            ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
+            print(f'"info": "{game_start_test_path}: {dist=}, {ECtrlType(ctrl_id).name}"')
 
             n_rounds = 14
             for i in range(n_rounds):
                 round_image = LoadImage(os.path.join(cfg.debug_dir, f"crop{i + 1}.png"))
                 feature = ExtractFeature(round_image)
-                dist = FeatureDistance(feature, round_feature)
+                ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
                 logging.debug(f'"info": "round{i + 1}, {dist=}"')
 
-        self.data["controls"] = controls
 
     def _UpdateEventCards(self):
         with open(os.path.join(cfg.cards_dir, "events.csv"), 
@@ -323,13 +328,14 @@ class Database:
             SaveImage(image, os.path.join(cfg.debug_dir, image_file))
             logging.debug(f'"info": "save {image_file} at {cfg.debug_dir}"')
 
-        cfg.ann_index_len = len(features[0])
+        # cfg.ann_index_len = len(features[0])
         ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         for i in range(len(features)):
             ann.add_item(i, features[i])
         ann.build(cfg.ann_n_trees)
-        ann.save(os.path.join(cfg.database_dir, cfg.events_ann_filename))
-        self.events_ann = ann
+        ann_filename = f"{EAnnType.EVENTS.name.lower()}.ann"
+        ann.save(os.path.join(cfg.database_dir, ann_filename))
+        self.anns[EAnnType.EVENTS.value] = ann
 
         if cfg.DEBUG_SAVE:
             test_dir = os.path.join(cfg.debug_dir, "test")
@@ -364,17 +370,18 @@ class Database:
             json.dump(vars(cfg), f, indent=2, ensure_ascii=False)
 
     def Load(self):
-        self.events_ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
-        self.events_ann.load(os.path.join(cfg.database_dir, cfg.events_ann_filename))
+        n_anns = EAnnType.ANN_COUNT.value
+        for i in range(n_anns):
+            ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
+            ann_filename = f"{EAnnType(i).name.lower()}.ann"
+            ann.load(os.path.join(cfg.database_dir, ann_filename))
+            self.anns[i] = ann
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), encoding='utf-8') as f:
             self.data = json.load(f)
         
-    def SearchByFeature(self, feature, ann_name):
-        if ann_name == "event":
-            ann = self.events_ann
-        else:
-            raise NotImplementedError()
+    def SearchByFeature(self, feature, ann_type):
+        ann = self.anns[ann_type.value]
 
         # !!!!! Must use a large n, or it may not find the optimal result !!!!!
         ids, dists = ann.get_nns_by_vector(feature, n=20, include_distances=True)

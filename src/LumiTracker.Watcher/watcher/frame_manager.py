@@ -9,15 +9,21 @@ from .tasks import GameStartTask, CardPlayedTask
 
 class FrameManager:
     def __init__(self):
+        # database
         db = Database()
         db.Load()
         self.db = db
 
+        # tasks
         self.game_start_task = GameStartTask (db, ETaskType.GAME_START)
         self.my_event_task   = CardPlayedTask(db, ETaskType.MY_EVENT)
         self.op_event_task   = CardPlayedTask(db, ETaskType.OP_EVENT)
         self.tasks = [self.game_start_task, self.my_event_task, self.op_event_task]
 
+        # controls
+        self.game_started    = False
+
+        # logs
         self.prev_log_time   = time.perf_counter()
         self.prev_frame_time = self.prev_log_time
         self.frame_count     = 0
@@ -51,7 +57,7 @@ class FrameManager:
 
     def OnFrameArrived(self, frame_buffer):
         for task in self.tasks:
-            task.OnFrameArrived(frame_buffer, self.frame_count)
+            task.OnFrameArrived(frame_buffer, self)
 
         self.frame_count += 1
         cur_time = time.perf_counter()

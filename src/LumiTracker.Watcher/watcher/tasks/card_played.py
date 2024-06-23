@@ -1,6 +1,7 @@
 from .base import TaskBase
 from ..stream_filter import StreamFilter
 
+from ..enums import EAnnType
 from ..config import cfg
 from ..position import POS
 from ..database import CropBox, ExtractFeature
@@ -51,17 +52,20 @@ class CardPlayedTask(TaskBase):
 
         self._ResizeFeatureBuffer(width, height)
 
-    def Tick(self, frame_count):
+    def Tick(self, frame_manager):
+        if not frame_manager.game_started:
+            return
+
         region_buffer = self._UpdateFeatureBuffer()
 
         # Extract feature
         feature = ExtractFeature(self.feature_buffer)
-        card_id, dist = self.db.SearchByFeature(feature, ann_name="event")
+        card_id, dist = self.db.SearchByFeature(feature, EAnnType.EVENTS)
         
         if dist > cfg.threshold:
             card_id = -1
-        # if self.task_type.value == 1:
-        #     logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["events"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
+        if self.task_type.value == 1:
+            logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["events"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
         card_id = self.filter.Filter(card_id)
 
         if card_id >= 0:
@@ -71,7 +75,7 @@ class CardPlayedTask(TaskBase):
         if cfg.DEBUG_SAVE:
             import cv2
             image = cv2.cvtColor(self.feature_buffer, cv2.COLOR_BGRA2BGR)
-            SaveImage(image, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}{frame_count}.png"))
+            SaveImage(image, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}{frame_manager.frame_count}.png"))
 
     def _ResizeFeatureBuffer(self, width, height):
         feature_crop_l0 = round(self.crop_cfgs[0][0] * width)
