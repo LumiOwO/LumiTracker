@@ -129,6 +129,14 @@
     <value>启动</value>
     <comment/>
   </data>
+  <data name="Rank" xml:space="preserve">
+    <value>段位</value>
+    <comment/>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>加载中...</value>
+    <comment/>
+  </data>
   <data name="About" xml:space="preserve">
     <value>关于</value>
     <comment/>

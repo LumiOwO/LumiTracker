@@ -449,4 +449,5 @@ FodyWeavers.xsd
 /watcher/
 /innosetup
 *.zip
+*.7z
 .vscode

@@ -61,6 +61,8 @@ namespace LumiTracker
 
                 services.AddSingleton<StartPage>();
                 services.AddSingleton<StartViewModel>();
+                services.AddSingleton<RankPage>();
+                services.AddSingleton<RankViewModel>();
                 services.AddSingleton<AboutPage>();
                 services.AddSingleton<AboutViewModel>();
                 services.AddSingleton<SettingsPage>();

@@ -29,6 +29,8 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private NavigationViewItem? _startViewItem;
         [ObservableProperty]
+        private NavigationViewItem? _rankViewItem;
+        [ObservableProperty]
         private NavigationViewItem? _aboutViewItem;
 
         [ObservableProperty]
@@ -53,13 +55,19 @@ namespace LumiTracker.ViewModels.Windows
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Power24 },
                 TargetPageType = typeof(StartPage)
             };
+            RankViewItem = new NavigationViewItem()
+            {
+                Content = LocalizationSource.Instance["Rank"],
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Crown20 },
+                TargetPageType = typeof(RankPage)
+            };
             AboutViewItem = new NavigationViewItem()
             {
                 Content = LocalizationSource.Instance["About"],
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Info24 },
                 TargetPageType = typeof(AboutPage)
             };
-            MenuItems = new() { StartViewItem, AboutViewItem };
+            MenuItems = new() { StartViewItem, RankViewItem, AboutViewItem };
 
             SettingsViewItem = new NavigationViewItem()
             {
