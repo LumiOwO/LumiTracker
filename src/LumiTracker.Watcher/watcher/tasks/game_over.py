@@ -30,10 +30,10 @@ class GameOverTask(TaskBase):
         self.crop_box = CropBox(left, top, left + width, top + height)
         self.buffer   = np.zeros((height, width, 4), dtype=np.uint8)
 
-    def Tick(self, frame_manager):
-        if not frame_manager.game_started:
-            return
+    def _PreTick(self, frame_manager):
+        self.valid = frame_manager.game_started
 
+    def _Tick(self, frame_manager):
         self.buffer[:, :] = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right

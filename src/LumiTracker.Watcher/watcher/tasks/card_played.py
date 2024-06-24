@@ -52,10 +52,10 @@ class CardPlayedTask(TaskBase):
 
         self._ResizeFeatureBuffer(width, height)
 
-    def Tick(self, frame_manager):
-        if not frame_manager.game_started:
-            return
+    def _PreTick(self, frame_manager):
+        self.valid = frame_manager.game_started
 
+    def _Tick(self, frame_manager):
         region_buffer = self._UpdateFeatureBuffer()
 
         # Extract feature

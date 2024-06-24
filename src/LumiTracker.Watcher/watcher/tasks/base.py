@@ -5,13 +5,19 @@ class TaskBase:
 
         self.frame_buffer = None
         self.crop_box     = None
+        self.valid        = True
     
-    def OnFrameArrived(self, frame_buffer, frame_manager):
+    def PreTick(self, frame_manager, frame_buffer):
         self.frame_buffer = frame_buffer
-
-        self.Tick(frame_manager)
+        self._PreTick(frame_manager)
     
     def Tick(self, frame_manager):
+        self._Tick(frame_manager)
+
+    def _PreTick(self, frame_manager):
+        raise NotImplementedError()
+
+    def _Tick(self, frame_manager):
         raise NotImplementedError()
     
     def OnResize(self, client_width, client_height, ratio_type):

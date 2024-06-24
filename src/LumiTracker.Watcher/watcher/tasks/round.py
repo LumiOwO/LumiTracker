@@ -31,10 +31,10 @@ class RoundTask(TaskBase):
         self.crop_box = CropBox(left, top, left + width, top + height)
         self.buffer   = np.zeros((height, width, 4), dtype=np.uint8)
 
-    def Tick(self, frame_manager):
-        if not frame_manager.game_started:
-            return
+    def _PreTick(self, frame_manager):
+        self.valid = frame_manager.game_started
 
+    def _Tick(self, frame_manager):
         self.buffer[:, :] = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
@@ -70,8 +70,8 @@ class RoundTask(TaskBase):
         thres_w = round(threshold * buffer.shape[1])
         thres_h = round(threshold * buffer.shape[0])
         # Find the bounding box
-        x_min, y_min = float('inf'), float('inf')
-        x_max, y_max = float('-inf'), float('-inf')
+        x_min, y_min = 20000, 20000
+        x_max, y_max = -1, -1
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
             if w <= thres_w or h <= thres_h:
@@ -83,6 +83,10 @@ class RoundTask(TaskBase):
             x_max = max(x_max, x + w)
             y_max = max(y_max, y + h)
         
+        # ignore error box that is too small
+        if valid:
+            valid = (x_max - x_min >= cfg.hash_size) and (y_max - y_min >= cfg.hash_size)
+
         if valid:
             return buffer[y_min:y_max, x_min:x_max], True
         else:

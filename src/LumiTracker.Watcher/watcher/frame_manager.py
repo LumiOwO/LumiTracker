@@ -59,7 +59,11 @@ class FrameManager:
 
     def OnFrameArrived(self, frame_buffer):
         for task in self.tasks:
-            task.OnFrameArrived(frame_buffer, self)
+            task.PreTick(self, frame_buffer)
+
+        for task in self.tasks:
+            if task.valid:
+                task.Tick(self)
 
         self.frame_count += 1
         cur_time = time.perf_counter()
