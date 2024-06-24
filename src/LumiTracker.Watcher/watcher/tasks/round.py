@@ -51,7 +51,7 @@ class RoundTask(TaskBase):
         found = self.filter.Filter(found, dist)
 
         if found:
-            logging.debug(f'"info": "Found round text, {dist=}"')
+            logging.debug(f'"info": "Found round text, last dist in window = {dist}"')
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:
                 SaveImage(main_content, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
@@ -67,8 +67,8 @@ class RoundTask(TaskBase):
         contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         valid   = False
-        thres_w = round(threshold * buffer.shape[1])
-        thres_h = round(threshold * buffer.shape[0])
+        thres_w = max(round(threshold * buffer.shape[1]), cfg.hash_size)
+        thres_h = max(round(threshold * buffer.shape[0]), cfg.hash_size)
         # Find the bounding box
         x_min, y_min = 20000, 20000
         x_max, y_max = -1, -1
@@ -83,10 +83,6 @@ class RoundTask(TaskBase):
             x_max = max(x_max, x + w)
             y_max = max(y_max, y + h)
         
-        # ignore error box that is too small
-        if valid:
-            valid = (x_max - x_min >= cfg.hash_size) and (y_max - y_min >= cfg.hash_size)
-
         if valid:
             return buffer[y_min:y_max, x_min:x_max], True
         else:

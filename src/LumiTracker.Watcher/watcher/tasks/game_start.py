@@ -46,7 +46,7 @@ class GameStartTask(TaskBase):
 
         if start:
             frame_manager.game_started = True
-            logging.debug(f'"info": "Game start, {dist=}"')
+            logging.debug(f'"info": "Game start, last dist in window = {dist}"')
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:
                 SaveImage(self.buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
