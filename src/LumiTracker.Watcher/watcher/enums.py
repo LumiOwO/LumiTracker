@@ -5,6 +5,7 @@ class ETaskType(enum.Enum):
     MY_EVENT          = enum.auto()
     OP_EVENT          = enum.auto()
     GAME_OVER         = enum.auto()
+    ROUND             = enum.auto()
 
     # types for exception
     UNSUPPORTED_RATIO = enum.auto()
@@ -24,6 +25,11 @@ class ECtrlType(enum.Enum):
 
     GAME_OVER_FIRST = GAME_OVER_WIN_ZH_HANS
     GAME_OVER_LAST  = GAME_OVER_LOSE_ZH_HANS
+
+    ROUND_ZH_HANS   = enum.auto()
+
+    ROUND_FIRST     = ROUND_ZH_HANS
+    ROUND_LAST      = ROUND_ZH_HANS
 
     CTRL_FEATURES_COUNT = enum.auto()
 

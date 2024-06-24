@@ -205,10 +205,32 @@ class Database:
     def _UpdateControls(self):
         n_controls = ECtrlType.CTRL_FEATURES_COUNT.value
         features = [None] * n_controls
-        for i in range(n_controls):
+
+        # Game start
+        ctrl_id = ECtrlType.GAME_START.value
+        image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{ctrl_id}.png"))
+        feature = ExtractFeature(image)
+        features[ctrl_id] = feature
+
+        # Game over
+        ctrl_id_first = ECtrlType.GAME_OVER_FIRST.value
+        ctrl_id_last  = ECtrlType.GAME_OVER_LAST.value
+        for i in range(ctrl_id_first, ctrl_id_last + 1):
             image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
             feature = ExtractFeature(image)
             features[i] = feature
+
+        # Round
+        ctrl_id_first = ECtrlType.ROUND_FIRST.value
+        ctrl_id_last  = ECtrlType.ROUND_LAST.value
+        from .tasks import RoundTask
+        for i in range(ctrl_id_first, ctrl_id_last + 1):
+            image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
+            main_content, valid = RoundTask.CropMainContent(image)
+            feature = ExtractFeature(main_content)
+            features[i] = feature
+            if cfg.DEBUG_SAVE:
+                SaveImage(main_content, os.path.join(cfg.debug_dir, f"{ECtrlType(i).name.lower()}.png"))
 
         ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
         for i in range(len(features)):
@@ -228,7 +250,8 @@ class Database:
             n_rounds = 14
             for i in range(n_rounds):
                 round_image = LoadImage(os.path.join(cfg.debug_dir, f"crop{i + 1}.png"))
-                feature = ExtractFeature(round_image)
+                main_content, valid = RoundTask.CropMainContent(round_image)
+                feature = ExtractFeature(main_content)
                 ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
                 logging.debug(f'"info": "round{i + 1}, {dist=}"')
 

@@ -8,6 +8,7 @@ POS = {
         ETaskType.MY_EVENT   : ( 0.1225, 0.1755, 0.1400, 0.4270 ),
         ETaskType.OP_EVENT   : ( 0.7380, 0.1755, 0.1400, 0.4270 ),
         ETaskType.GAME_OVER  : ( 0.4220, 0.4640, 0.1555, 0.0690 ),
+        ETaskType.ROUND      : ( 0.4670, 0.5420, 0.0445, 0.0310 ),
     },
     # 1920 x 1200
     ERatioType.E16_10: {
