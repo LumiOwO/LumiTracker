@@ -28,19 +28,23 @@ namespace LumiTracker.Models
 
         private SpinLockedValue<Task> stopProcessWatcherTask = new (null);
 
-        public event OnGenshinWindowFoundCallback? GenshinWindowFound;
+        public event OnGenshinWindowFoundCallback?  GenshinWindowFound;
 
-        public event OnWindowWatcherStartCallback? WindowWatcherStart;
+        public event OnWindowWatcherStartCallback?  WindowWatcherStart;
 
-        public event OnWindowWatcherExitCallback?  WindowWatcherExit;
+        public event OnWindowWatcherExitCallback?   WindowWatcherExit;
 
-        public event OnGameStartedCallback? GameStarted;
+        public event OnGameStartedCallback?         GameStarted;
 
-        public event OnMyEventCardCallback? MyEventCard;
+        public event OnMyEventCardCallback?         MyEventCard;
 
-        public event OnOpEventCardCallback? OpEventCard;
+        public event OnOpEventCardCallback?         OpEventCard;
 
-        public event OnUnsupportedRatioCallback? UnsupportedRatio;
+        public event OnGameOverCallback?            GameOver;
+
+        public event OnRoundDetectedCallback?       RoundDetected;
+
+        public event OnUnsupportedRatioCallback?    UnsupportedRatio;
 
         public GameWatcher()
         {
@@ -76,9 +80,11 @@ namespace LumiTracker.Models
                 watcher.GenshinWindowFound += OnGenshinWindowFound;
                 watcher.WindowWatcherStart += OnWindowWatcherStart;
                 watcher.WindowWatcherExit  += OnWindowWatcherExit;
+                watcher.GameStarted        += OnGameStarted;
                 watcher.MyEventCard        += OnMyEventCard;
                 watcher.OpEventCard        += OnOpEventCard;
-                watcher.GameStarted        += OnGameStarted;
+                watcher.GameOver           += OnGameOver;
+                watcher.RoundDetected      += OnRoundDetected;
                 watcher.UnsupportedRatio   += OnUnsupportedRatio;
                 watcher.ExceptionHandler   += OnException;
                 processWatcher.Value = watcher;
@@ -138,6 +144,18 @@ namespace LumiTracker.Models
         {
             Configuration.Logger.LogDebug("OnOpEventCard");
             OpEventCard?.Invoke(card_id);
+        }
+
+        private void OnGameOver()
+        {
+            Configuration.Logger.LogDebug("OnGameOver");
+            GameOver?.Invoke();
+        }
+
+        private void OnRoundDetected(int round)
+        {
+            Configuration.Logger.LogDebug("OnRoundDetected");
+            RoundDetected?.Invoke(round);
         }
 
         private void OnUnsupportedRatio()

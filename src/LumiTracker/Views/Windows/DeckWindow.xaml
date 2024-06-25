@@ -31,13 +31,12 @@
     <Window.Resources>
         <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
         <SolidColorBrush x:Key="MainContentBackground"
-            Color="#282c34"
-            Opacity="0.9" />
+            Color="#e6282c34" />
         <SolidColorBrush x:Key="TabHeaderBackground"
-            Color="#ffffff"
-            Opacity="0.1" />
+            Color="#1affffff" />
 
         <DataTemplate x:Key="EventCardViewTemplate" DataType="{x:Type vm:EventCardView}">
             <Grid
@@ -115,26 +114,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ToggleButton 
-            Grid.Row="1"
-            x:Name="toggle" 
-            Content="{svs:Localization AppName}" 
-            HorizontalAlignment="Stretch"
-            Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.05}"
-            FontWeight="Bold" 
-            Checked="OnChecked"
-            Unchecked="OnUnchecked"
-            />
-        <ui:SymbolIcon 
-            Grid.Row="1"
-            Foreground="#333333"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            FontWeight="Bold"
-            Margin="0,0,6,0" 
-            IsHitTestVisible="False"
-            Symbol="{Binding ViewModel.ToggleButtonIcon}" />
-        
+        <!-- Popup -->        
         <Popup 
             Grid.Row="0"
             x:Name="DeckWindowPopup" 
@@ -153,16 +133,32 @@
                 </MultiBinding>
             </Popup.IsOpen>
 
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="Transparent" Offset="0"/>
+                        <GradientStop Color="Transparent" Offset="0.13"/>
+                        <GradientStop Color="{Binding Source={StaticResource MainContentBackground}, Path=Color}" Offset="0.13"/>
+                        <GradientStop Color="{Binding Source={StaticResource MainContentBackground}, Path=Color}" Offset="1"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+
+                <!-- Main Content-->            
             <TabControl 
+                Grid.Row="0"
                 Margin="0,8,0,0"
-                Background="{StaticResource MainContentBackground}" 
                 SelectionChanged="OnSelectionChanged"
                 x:Name="DeckWindowTabControl" 
                 >
 
                 <TabItem 
                     MinHeight="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.05}"
-                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.499}"
+                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
                     Background="{StaticResource TabHeaderBackground}"
                     >
                     <TabItem.Header>
@@ -203,7 +199,7 @@
                 
                 <TabItem 
                     MinHeight="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.05}"
-                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.499}"
+                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
                     Background="{StaticResource TabHeaderBackground}"
                     IsSelected="True"
                     >
@@ -245,8 +241,77 @@
                 </TabItem>
 
             </TabControl>
+
+            <!-- Round Text -->
+            <TextBlock
+                Grid.Row="1"
+                Margin="0, 5, 0, 5"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Visibility="{Binding ViewModel.GameStarted,
+                        Converter={StaticResource BooleanToVisibilityConverter},
+                        ConverterParameter=Hidden
+                        }"
+                FontSize="{Binding Height, 
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.015
+                        }"
+                >
+                <Run 
+                    Foreground="White"
+                    Text="{svs:Localization Round}"
+                    />
+                <Run 
+                    Foreground="#f9ca24" 
+                    FontWeight="Bold" 
+                    Text="{Binding ViewModel.Round}"
+                    />
+            </TextBlock>
+
+            <TextBlock
+                Grid.Row="1"
+                Margin="0, 5, 0, 5"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Visibility="{Binding ViewModel.GameNotStarted,
+                        Converter={StaticResource BooleanToVisibilityConverter},
+                        ConverterParameter=Hidden
+                        }"
+                FontSize="{Binding Height, 
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.015
+                        }"
+                >
+                <Run 
+                    Foreground="DarkGray"
+                    FontWeight="Light"
+                    Text="{svs:Localization GameNotStarted}"
+                />
+            </TextBlock>
+
+            </Grid>
         </Popup>
 
-        
+        <!-- Toggle -->
+        <ToggleButton 
+            Grid.Row="1"
+            x:Name="toggle" 
+            Content="{svs:Localization AppName}" 
+            HorizontalAlignment="Stretch"
+            Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.05}"
+            FontWeight="Bold" 
+            Checked="OnChecked"
+            Unchecked="OnUnchecked"
+            />
+        <ui:SymbolIcon 
+            Grid.Row="1"
+            Foreground="#333333"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            FontWeight="Bold"
+            Margin="0,0,6,0" 
+            IsHitTestVisible="False"
+            Symbol="{Binding ViewModel.ToggleButtonIcon}" />
+
     </Grid>
 </Window>

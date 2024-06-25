@@ -40,6 +40,15 @@ namespace LumiTracker.ViewModels.Windows
         HashSet<int> OpPlayedCardIDs = new ();
 
         [ObservableProperty]
+        private bool _gameStarted = false;
+
+        [ObservableProperty]
+        private bool _gameNotStarted = true;
+
+        [ObservableProperty]
+        private int _round = 0;
+
+        [ObservableProperty]
         private bool _isShowing = false;
 
         [ObservableProperty]
@@ -52,18 +61,23 @@ namespace LumiTracker.ViewModels.Windows
         public DeckWindowViewModel(GameWatcher gameWatcher)
         {
             _gameWatcher = gameWatcher;
-            _gameWatcher.GameStarted += OnGameStarted;
-            _gameWatcher.MyEventCard += OnMyEventCard;
-            _gameWatcher.OpEventCard += OnOpEventCard;
+
+            _gameWatcher.GameStarted      += OnGameStarted;
+            _gameWatcher.MyEventCard      += OnMyEventCard;
+            _gameWatcher.OpEventCard      += OnOpEventCard;
+            _gameWatcher.GameOver         += OnGameOver;
+            _gameWatcher.RoundDetected    += OnRoundDetected;
             _gameWatcher.UnsupportedRatio += OnUnsupportedRatio;
         }
 
-        private void OnGameStarted()
+        private void ResetRecordedData()
         {
-            MyEventCardsPlayed = new ();
-            MyPlayedCardIDs    = new ();
-            OpEventCardsPlayed = new ();
-            OpPlayedCardIDs    = new ();
+            MyEventCardsPlayed = new();
+            MyPlayedCardIDs    = new();
+            OpEventCardsPlayed = new();
+            OpPlayedCardIDs    = new();
+
+            Round = 0;
         }
 
         private void UpdatePlayedEventCard(
@@ -103,6 +117,13 @@ namespace LumiTracker.ViewModels.Windows
             }
         }
 
+        private void OnGameStarted()
+        {
+            ResetRecordedData();
+            GameStarted = true;
+            GameNotStarted = !GameStarted;
+        }
+
         private void OnMyEventCard(int card_id)
         {
             UpdatePlayedEventCard(card_id, MyEventCardsPlayed, MyPlayedCardIDs);
@@ -111,6 +132,18 @@ namespace LumiTracker.ViewModels.Windows
         private void OnOpEventCard(int card_id)
         {
             UpdatePlayedEventCard(card_id, OpEventCardsPlayed, OpPlayedCardIDs);
+        }
+
+        private void OnGameOver()
+        {
+            ResetRecordedData();
+            GameStarted = false;
+            GameNotStarted = !GameStarted;
+        }
+
+        private void OnRoundDetected(int round)
+        {
+            Round = round;
         }
 
         private void OnUnsupportedRatio()

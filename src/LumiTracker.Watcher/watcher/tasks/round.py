@@ -51,8 +51,10 @@ class RoundTask(TaskBase):
         found = self.filter.Filter(found, dist)
 
         if found:
+            frame_manager.round += 1
+
             logging.debug(f'"info": "Found round text, last dist in window = {dist}"')
-            logging.info(f'"type": "{self.task_type.name}"')
+            logging.info(f'"type": "{self.task_type.name}", "round": "{frame_manager.round}"')
             if cfg.DEBUG_SAVE:
                 SaveImage(main_content, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
 

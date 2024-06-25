@@ -24,6 +24,7 @@ class FrameManager:
 
         # controls
         self.game_started    = False
+        self.round           = 0
 
         # logs
         self.prev_log_time   = time.perf_counter()

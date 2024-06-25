@@ -240,4 +240,12 @@
     <value>Current resolution of game window is not supported.</value>
     <comment/>
   </data>
+  <data name="Round" xml:space="preserve">
+    <value>Round</value>
+    <comment/>
+  </data>
+  <data name="GameNotStarted" xml:space="preserve">
+    <value>Duel Not Started</value>
+    <comment/>
+  </data>
 </root>

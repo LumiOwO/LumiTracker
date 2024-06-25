@@ -46,6 +46,8 @@ class GameStartTask(TaskBase):
 
         if start:
             frame_manager.game_started = True
+            frame_manager.round        = 0
+
             logging.debug(f'"info": "Game start, last dist in window = {dist}"')
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:

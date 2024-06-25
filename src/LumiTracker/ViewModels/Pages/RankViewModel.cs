@@ -9,14 +9,14 @@ namespace LumiTracker.ViewModels.Pages
         private bool _isInitialized = false;
 
         [ObservableProperty]
-        private Visibility _webViewVisibility = Visibility.Hidden;
+        private bool _webViewVisible = false;
         [ObservableProperty]
-        private Visibility _loadingVisibility = Visibility.Visible;
+        private bool _loadingVisible = true;
 
         private void InitializeViewModel()
         {
-            LoadingVisibility = Visibility.Visible;
-            WebViewVisibility = Visibility.Visible;
+            LoadingVisible = true;
+            WebViewVisible = true;
             _isInitialized = true;
         }
 
@@ -28,21 +28,21 @@ namespace LumiTracker.ViewModels.Pages
             }
             else
             {
-                LoadingVisibility = Visibility.Visible;
+                LoadingVisible = true;
                 ShowWebViewDelayed().WaitAsync(TimeSpan.FromMinutes(1));
             }
         }
 
         public void OnNavigatedFrom() 
         {
-            WebViewVisibility = Visibility.Hidden;
+            WebViewVisible = false;
         }
 
         public async Task ShowWebViewDelayed()
         {
             await Task.Delay(500);
-            WebViewVisibility = Visibility.Visible;
-            LoadingVisibility = Visibility.Hidden;
+            WebViewVisible = true;
+            LoadingVisible = false;
         }
     }
 }

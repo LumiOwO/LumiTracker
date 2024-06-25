@@ -7,6 +7,7 @@
       xmlns:svs="clr-namespace:LumiTracker.Services"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+      xmlns:helpers="clr-namespace:LumiTracker.Helpers"
       mc:Ignorable="d" 
       d:DesignHeight="450" 
       d:DesignWidth="800"
@@ -15,12 +16,19 @@
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       Title="{svs:Localization Rank}">
 
+    <Page.Resources>
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
+
     <Grid>
         <TextBlock 
             Grid.Row="0"
             Margin="0,0,0,0" 
             Text="{svs:Localization Loading}" 
-            Visibility="{Binding ViewModel.LoadingVisibility}"
+            Visibility="{Binding ViewModel.LoadingVisible,
+                Converter={StaticResource BooleanToVisibilityConverter},
+                ConverterParameter=Collapsed
+                }"
             FontSize="15"
             />
         <wv2:WebView2 
@@ -31,8 +39,10 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             Margin="-22, -22, -20, 0"
-            Visibility="{Binding ViewModel.WebViewVisibility}"
-            Loaded="WebView_Loaded"
+            Visibility="{Binding ViewModel.WebViewVisible,
+                Converter={StaticResource BooleanToVisibilityConverter},
+                ConverterParameter=Collapsed
+                }"
             />
     </Grid>
 </Page>

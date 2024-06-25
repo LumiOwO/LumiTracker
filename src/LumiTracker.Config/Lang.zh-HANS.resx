@@ -240,4 +240,12 @@
     <value>当前游戏窗口的分辨率暂时不受支持。</value>
     <comment/>
   </data>
+  <data name="Round" xml:space="preserve">
+    <value>回合</value>
+    <comment/>
+  </data>
+  <data name="GameNotStarted" xml:space="preserve">
+    <value>对局未开始</value>
+    <comment/>
+  </data>
 </root>

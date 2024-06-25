@@ -36,6 +36,10 @@ namespace LumiTracker.Watcher
 
     public delegate void OnOpEventCardCallback(int card_id);
 
+    public delegate void OnGameOverCallback();
+
+    public delegate void OnRoundDetectedCallback(int round);
+
     public delegate void OnUnsupportedRatioCallback();
 
     public delegate void ExceptionHandlerCallback(Exception ex);
@@ -48,9 +52,11 @@ namespace LumiTracker.Watcher
         public event OnGenshinWindowFoundCallback? GenshinWindowFound;
         public event OnWindowWatcherStartCallback? WindowWatcherStart;
         public event OnWindowWatcherExitCallback?  WindowWatcherExit;
-        public event OnGameStartedCallback? GameStarted;
-        public event OnMyEventCardCallback? MyEventCard;
-        public event OnOpEventCardCallback? OpEventCard;
+        public event OnGameStartedCallback?        GameStarted;
+        public event OnMyEventCardCallback?        MyEventCard;
+        public event OnOpEventCardCallback?        OpEventCard;
+        public event OnGameOverCallback?           GameOver;
+        public event OnRoundDetectedCallback?      RoundDetected;
         public event OnUnsupportedRatioCallback? UnsupportedRatio;
         public event ExceptionHandlerCallback? ExceptionHandler;
 
@@ -242,6 +248,7 @@ namespace LumiTracker.Watcher
             MY_EVENT,
             OP_EVENT,
             GAME_OVER,
+            ROUND,
 
             // types for exception
             UNSUPPORTED_RATIO,
@@ -282,6 +289,15 @@ namespace LumiTracker.Watcher
                     {
                         int card_id = (int)message_data["card_id"]!;
                         OpEventCard?.Invoke(card_id);
+                    }
+                    else if (task_type == ETaskType.GAME_OVER)
+                    {
+                        GameOver?.Invoke();
+                    }
+                    else if (task_type == ETaskType.ROUND)
+                    {
+                        int round = (int)message_data["round"]!;
+                        RoundDetected?.Invoke(round);
                     }
                     else if (task_type == ETaskType.UNSUPPORTED_RATIO)
                     {

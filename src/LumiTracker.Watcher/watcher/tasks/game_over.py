@@ -47,6 +47,7 @@ class GameOverTask(TaskBase):
 
         if over:
             frame_manager.game_started = False
+
             logging.debug(f'"info": "Game over, last dist in window = {dist}"')
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:
