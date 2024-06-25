@@ -31,7 +31,7 @@ class GameStartTask(TaskBase):
         self.buffer   = np.zeros((height, width, 4), dtype=np.uint8)
 
     def _PreTick(self, frame_manager):
-        self.valid = not frame_manager.game_started
+        self.valid = True
 
     def _Tick(self, frame_manager):
         self.buffer[:, :] = self.frame_buffer[

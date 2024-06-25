@@ -62,12 +62,14 @@ namespace LumiTracker.ViewModels.Windows
         {
             _gameWatcher = gameWatcher;
 
-            _gameWatcher.GameStarted      += OnGameStarted;
-            _gameWatcher.MyEventCard      += OnMyEventCard;
-            _gameWatcher.OpEventCard      += OnOpEventCard;
-            _gameWatcher.GameOver         += OnGameOver;
-            _gameWatcher.RoundDetected    += OnRoundDetected;
-            _gameWatcher.UnsupportedRatio += OnUnsupportedRatio;
+            _gameWatcher.GameStarted       += OnGameStarted;
+            _gameWatcher.MyEventCard       += OnMyEventCard;
+            _gameWatcher.OpEventCard       += OnOpEventCard;
+            _gameWatcher.GameOver          += OnGameOver;
+            _gameWatcher.RoundDetected     += OnRoundDetected;
+            _gameWatcher.UnsupportedRatio  += OnUnsupportedRatio;
+
+            _gameWatcher.WindowWatcherExit += OnWindowWatcherExit;
         }
 
         private void ResetRecordedData()
@@ -152,6 +154,13 @@ namespace LumiTracker.ViewModels.Windows
                 $"{LocalizationSource.Instance["UnsupportedRatioWarning"]}\n{LocalizationSource.Instance["SupportedRatioInfo"]}", 
                 $"{LocalizationSource.Instance["AppName"]}", 
                 System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+        }
+
+        private void OnWindowWatcherExit()
+        {
+            ResetRecordedData();
+            GameStarted = false;
+            GameNotStarted = !GameStarted;
         }
 
     }
