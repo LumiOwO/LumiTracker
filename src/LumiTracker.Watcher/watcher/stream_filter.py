@@ -8,25 +8,24 @@ class SlidingWindow:
 
         self.window      = deque(maxlen=window_size)
         self.counts      = defaultdict(int)
-        self.dist_sum    = defaultdict(int)
+        self.is_strict   = defaultdict(bool)
     
     def UpdateWindow(self, value, dist):
         if len(self.window) == self.WINDOW_SIZE:
             self._PopLeft()
-        self.window.append((value, dist))
+        self.window.append(value)
 
         if value != self.NULL_VAL:
-            self.counts[value]   += 1
-            self.dist_sum[value] += dist
+            self.counts[value] += 1
+            self.is_strict[value] = (dist <= cfg.strict_threshold) or (self.is_strict[value])
 
     def _PopLeft(self):
-        value, dist = self.window.popleft()
+        value = self.window.popleft()
         if value != self.NULL_VAL:
             self.counts[value]   -= 1
-            self.dist_sum[value] -= dist
             if self.counts[value] == 0:
                 del self.counts[value]
-                del self.dist_sum[value]
+                del self.is_strict[value]
 
     def GetMajority(self):
         if not self.counts:
@@ -34,10 +33,9 @@ class SlidingWindow:
 
         majority = max(self.counts, key=self.counts.get)
         count = self.counts[majority]
-        if count > 5:
+        if count > 6:
             return majority
-
-        if self.dist_sum[majority] <= cfg.strict_threshold * count:
+        if (self.is_strict[majority]) and (count > 2):
             return majority
 
         return self.NULL_VAL
