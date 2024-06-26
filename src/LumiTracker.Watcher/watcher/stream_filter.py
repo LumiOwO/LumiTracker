@@ -35,7 +35,7 @@ class SlidingWindow:
         count = self.counts[majority]
         if count > 6:
             return majority
-        if (self.is_strict[majority]) and (count > 2):
+        if (self.is_strict[majority]) and (count > 0): # maybe tune this threshold
             return majority
 
         return self.NULL_VAL

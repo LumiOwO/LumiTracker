@@ -215,10 +215,14 @@ class Database:
         # Game over
         ctrl_id_first = ECtrlType.GAME_OVER_FIRST.value
         ctrl_id_last  = ECtrlType.GAME_OVER_LAST.value
+        from .tasks import GameOverTask
         for i in range(ctrl_id_first, ctrl_id_last + 1):
             image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
-            feature = ExtractFeature(image)
+            main_content, valid = GameOverTask.CropMainContent(image)
+            feature = ExtractFeature(main_content)
             features[i] = feature
+            if cfg.DEBUG_SAVE:
+                SaveImage(main_content, os.path.join(cfg.debug_dir, f"{ECtrlType(i).name.lower()}.png"))
 
         # Round
         ctrl_id_first = ECtrlType.ROUND_FIRST.value
@@ -247,10 +251,19 @@ class Database:
             ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
             print(f'"info": "{game_start_test_path}: {dist=}, {ECtrlType(ctrl_id).name}"')
 
+            # Game over test
+            image = LoadImage(os.path.join(cfg.debug_dir, f"GameOverTest.png"))
+            main_content, valid = GameOverTask.CropMainContent(image)
+            feature = ExtractFeature(main_content)
+            ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
+            logging.debug(f'"info": "GameOverTest, {dist=}, {ECtrlType(ctrl_id).name}"')
+            SaveImage(main_content, os.path.join(cfg.debug_dir, f"GameOverTest_MainContent.png"))
+
+            # Rounds test
             n_rounds = 14
             for i in range(n_rounds):
-                round_image = LoadImage(os.path.join(cfg.debug_dir, f"crop{i + 1}.png"))
-                main_content, valid = RoundTask.CropMainContent(round_image)
+                image = LoadImage(os.path.join(cfg.debug_dir, f"crop{i + 1}.png"))
+                main_content, valid = RoundTask.CropMainContent(image)
                 feature = ExtractFeature(main_content)
                 ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
                 logging.debug(f'"info": "round{i + 1}, {dist=}"')

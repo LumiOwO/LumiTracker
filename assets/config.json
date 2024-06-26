@@ -30,7 +30,7 @@
   "hash_size": 10,
   "ann_index_len": 100,
   "threshold": 24,
-  "strict_threshold": 18,
+  "strict_threshold": 20,
   "ann_metric": "hamming",
   "ann_n_trees": 10,
   "lang": "zh-HANS",

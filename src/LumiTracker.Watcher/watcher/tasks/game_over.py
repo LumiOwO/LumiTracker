@@ -11,6 +11,7 @@ from ..stream_filter import StreamFilter
 import numpy as np
 import logging
 import os
+import cv2
 
 class GameOverTask(TaskBase):
     def __init__(self, db, task_type):
@@ -39,7 +40,11 @@ class GameOverTask(TaskBase):
             self.crop_box.left : self.crop_box.right
         ]
 
-        feature = ExtractFeature(self.buffer)
+        main_content, valid = GameOverTask.CropMainContent(self.buffer)
+        if not valid:
+            return
+
+        feature = ExtractFeature(main_content)
         ctrl_id, dist = self.db.SearchByFeature(feature, EAnnType.CTRLS)
         over = (dist <= cfg.strict_threshold) and (
             ctrl_id >= ECtrlType.GAME_OVER_FIRST.value) and (ctrl_id <= ECtrlType.GAME_OVER_LAST.value)
@@ -52,3 +57,31 @@ class GameOverTask(TaskBase):
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:
                 SaveImage(self.buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
+
+    def CropMainContent(buffer):
+        # Convert to grayscale
+        gray = cv2.cvtColor(buffer, cv2.COLOR_BGRA2GRAY)
+
+        # Apply thresholding to create a binary image
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        # Identify rows that contain any number of 255s
+        foreground_rows = np.any(binary == 255, axis=1).astype(int)
+
+        # Find boundaries of consecutive ranges
+        foreground_rows = np.concatenate(([0], foreground_rows, [0]))
+        diff = np.diff(foreground_rows)
+        start_indices = np.where(diff == 1)[0]
+        end_indices   = np.where(diff == -1)[0]
+        if start_indices.size == 0:
+            return None, False
+        
+        # Get the maximum length range
+        lengths = end_indices - start_indices
+        max_index = np.argmax(lengths)
+        start = start_indices[max_index] # no need to +1 since we insert a 0 at the beginning
+        end   = end_indices[max_index]
+        if end - start <= cfg.hash_size:
+            return None, False
+
+        return buffer[start:end, :], True
