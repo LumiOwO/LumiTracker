@@ -95,6 +95,10 @@ namespace LumiTracker.ViewModels.Pages
                     cfg.theme = "Dark";
 
                     break;
+
+                // TODO: Follow system
+                //SystemThemeWatcher.Watch(this);
+
             }
             Configuration.Save();
         }

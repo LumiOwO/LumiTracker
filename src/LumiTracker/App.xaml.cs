@@ -123,12 +123,6 @@ namespace LumiTracker
             {
                 case SessionSwitchReason.SessionLock:
                     // Screen locked, application might be suspended
-                    // refresh theme
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
-                        ApplicationThemeManager.Apply(curTheme);
-                    });
                     break;
                 case SessionSwitchReason.SessionUnlock:
                     // Screen unlocked, application might be resumed

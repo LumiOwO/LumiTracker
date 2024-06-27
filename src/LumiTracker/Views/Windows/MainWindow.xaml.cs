@@ -46,8 +46,6 @@ namespace LumiTracker.Views.Windows
             ViewModel            = viewModel;
             DataContext          = this;
 
-            SystemThemeWatcher.Watch(this);
-
             InitializeComponent();
             SetPageService(pageService);
             _pageService = pageService;
