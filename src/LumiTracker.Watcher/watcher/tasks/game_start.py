@@ -17,7 +17,6 @@ class GameStartTask(TaskBase):
         super().__init__(db, task_type)
 
         self.filter  = StreamFilter(null_val=False)
-        self.buffer  = None
     
     def OnResize(self, client_width, client_height, ratio_type):
         pos    = POS[ratio_type]
@@ -28,18 +27,17 @@ class GameStartTask(TaskBase):
         height = round(client_height * pos[self.task_type][3])
 
         self.crop_box = CropBox(left, top, left + width, top + height)
-        self.buffer   = np.zeros((height, width, 4), dtype=np.uint8)
 
     def _PreTick(self, frame_manager):
         self.valid = True
 
     def _Tick(self, frame_manager):
-        self.buffer[:, :] = self.frame_buffer[
+        buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
 
-        feature = ExtractFeature(self.buffer)
+        feature = ExtractFeature(buffer)
         ctrl_id, dist = self.db.SearchByFeature(feature, EAnnType.CTRLS)
         start = (dist <= cfg.strict_threshold) and (ctrl_id == ECtrlType.GAME_START.value)
         start = self.filter.Filter(start, dist)
@@ -51,4 +49,4 @@ class GameStartTask(TaskBase):
             logging.debug(f'"info": "Game start, last dist in window = {dist}"')
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:
-                SaveImage(self.buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
+                SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))

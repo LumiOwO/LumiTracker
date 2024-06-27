@@ -18,7 +18,6 @@ class GameOverTask(TaskBase):
         super().__init__(db, task_type)
 
         self.filter  = StreamFilter(null_val=False)
-        self.buffer  = None
     
     def OnResize(self, client_width, client_height, ratio_type):
         pos    = POS[ratio_type]
@@ -29,18 +28,17 @@ class GameOverTask(TaskBase):
         height = round(client_height * pos[self.task_type][3])
 
         self.crop_box = CropBox(left, top, left + width, top + height)
-        self.buffer   = np.zeros((height, width, 4), dtype=np.uint8)
 
     def _PreTick(self, frame_manager):
         self.valid = frame_manager.game_started
 
     def _Tick(self, frame_manager):
-        self.buffer[:, :] = self.frame_buffer[
+        buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
 
-        main_content, valid = GameOverTask.CropMainContent(self.buffer)
+        main_content, valid = GameOverTask.CropMainContent(buffer)
         if not valid:
             return
 
@@ -56,7 +54,7 @@ class GameOverTask(TaskBase):
             logging.debug(f'"info": "Game over, last dist in window = {dist}"')
             logging.info(f'"type": "{self.task_type.name}"')
             if cfg.DEBUG_SAVE:
-                SaveImage(self.buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
+                SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
 
     def CropMainContent(buffer):
         # Convert to grayscale
@@ -66,13 +64,14 @@ class GameOverTask(TaskBase):
         _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
         # Identify rows that contain any number of 255s
-        foreground_rows = np.any(binary == 255, axis=1).astype(int)
+        foreground_rows = np.any(binary == 255, axis=1).astype(np.uint8)
 
         # Find boundaries of consecutive ranges
-        foreground_rows = np.concatenate(([0], foreground_rows, [0]))
+        pivot = np.array([0], dtype=np.uint8)
+        foreground_rows = np.concatenate((pivot, foreground_rows, pivot))
         diff = np.diff(foreground_rows)
         start_indices = np.where(diff == 1)[0]
-        end_indices   = np.where(diff == -1)[0]
+        end_indices   = np.where(diff == 255)[0]
         if start_indices.size == 0:
             return None, False
         
