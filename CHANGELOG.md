@@ -1,3 +1,8 @@
+# \[[v1.0.2](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.0.2)\] - 2024.06.28
+- 修复料理牌识别错误的问题
+- 增加回合数记录功能
+- 内置段位查询页面
+
 # \[[v1.0.1](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.0.1)\] - 2024.06.14
 - 修复部分Win10的闪退问题
 - 增强卡面识别的鲁棒性

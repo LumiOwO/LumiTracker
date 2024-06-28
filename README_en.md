@@ -15,14 +15,15 @@
   - [ ] Elemental Tuned cards
   - [ ] Created cards placed into the deck
 - [ ] Import deck before the match, display remaining cards in the deck during the match
-- [ ] Show Ranking
+- [x] Show Ranking
+- [x] Record current round
 - [ ] Damage calculation
 
 ---
 
 - [ ] Multi-language support
 - [ ] In-app updates
-- [ ] Support for Genshin Impact Cloud Game
+- [x] Support for Genshin Impact Cloud Game
 
 ## System Requirements
 
