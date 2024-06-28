@@ -39,17 +39,24 @@ class SlidingWindow:
             return majority
 
         return self.NULL_VAL
+    
+    def Reset(self):
+        self.window    = deque(maxlen=self.WINDOW_SIZE)
+        self.counts    = defaultdict(int)
+        self.is_strict = defaultdict(bool)
 
 
 class StreamFilter:
-    def __init__(self, null_val, window_size=40, valid_count=15):
+    def __init__(self, null_val, window_size=40, valid_count=15, cooldown=10):
         self.NULL_VAL    = null_val
         self.VALID_COUNT = valid_count
+        self.COOLDOWN    = cooldown
 
         self.window      = SlidingWindow(null_val, window_size)
         self.value       = null_val
         self.count       = 0
         self.signaled    = False
+        self.cooldown    = 0
 
     def ReadSameValue(self):
         if self.value == self.NULL_VAL:
@@ -64,8 +71,25 @@ class StreamFilter:
         self.value    = value
         self.count    = 0 if value == self.NULL_VAL else 1
         self.signaled = False
+    
+    def Cooldown(self, value):
+        if value == self.value:
+            self.cooldown = self.COOLDOWN
+            return
+
+        self.cooldown -= 1
+        if self.cooldown == 0:
+            # reset
+            self.value       = self.NULL_VAL
+            self.count       = 0
+            self.signaled    = False
+            self.window.Reset()
 
     def Filter(self, value, dist):
+        if self.cooldown > 0:
+            self.Cooldown(value)
+            return self.NULL_VAL
+
         self.window.UpdateWindow(value, dist)
         value = self.window.GetMajority()
 
@@ -81,6 +105,7 @@ class StreamFilter:
 
         # read
         if (not prev_signaled) and (self.signaled):
+            self.cooldown = self.COOLDOWN
             return self.value
         else:
             return self.NULL_VAL

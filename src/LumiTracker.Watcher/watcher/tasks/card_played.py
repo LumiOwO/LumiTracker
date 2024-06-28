@@ -65,7 +65,7 @@ class CardPlayedTask(TaskBase):
         if dist > cfg.threshold:
             card_id = -1
         if cfg.DEBUG:
-            # if (self.task_type.value == 1) and (card_id != -1):
+            # if (self.task_type.value == 1) and True: #(card_id != -1):
             if (True) and (card_id != -1):
                 logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["events"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
         card_id = self.filter.Filter(card_id, dist)
