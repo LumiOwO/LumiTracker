@@ -58,7 +58,8 @@ namespace LumiTracker.ViewModels.Windows
         private SymbolRegular _toggleButtonIcon = SymbolRegular.ChevronUp48;
 
         private GameWatcher _gameWatcher;
-        public DeckWindowViewModel(GameWatcher gameWatcher)
+        // TODO: remove deck test
+        public DeckWindowViewModel(GameWatcher gameWatcher, Deck deck)
         {
             _gameWatcher = gameWatcher;
 

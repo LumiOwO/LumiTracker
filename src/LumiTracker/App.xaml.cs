@@ -69,6 +69,7 @@ namespace LumiTracker
                 services.AddSingleton<SettingsViewModel>();
 
                 services.AddSingleton<GameWatcher>();
+                services.AddSingleton<Deck>();
 
             }).Build();
 
