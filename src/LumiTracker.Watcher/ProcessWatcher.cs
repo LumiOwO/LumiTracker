@@ -32,9 +32,9 @@ namespace LumiTracker.Watcher
 
     public delegate void OnGameStartedCallback();
 
-    public delegate void OnMyEventCardCallback(int card_id);
+    public delegate void OnMyActionCardPlayedCallback(int card_id);
 
-    public delegate void OnOpEventCardCallback(int card_id);
+    public delegate void OnOpActionCardPlayedCallback(int card_id);
 
     public delegate void OnGameOverCallback();
 
@@ -53,12 +53,12 @@ namespace LumiTracker.Watcher
         public event OnWindowWatcherStartCallback? WindowWatcherStart;
         public event OnWindowWatcherExitCallback?  WindowWatcherExit;
         public event OnGameStartedCallback?        GameStarted;
-        public event OnMyEventCardCallback?        MyEventCard;
-        public event OnOpEventCardCallback?        OpEventCard;
+        public event OnMyActionCardPlayedCallback? MyActionCardPlayed;
+        public event OnOpActionCardPlayedCallback? OpActionCardPlayed;
         public event OnGameOverCallback?           GameOver;
         public event OnRoundDetectedCallback?      RoundDetected;
-        public event OnUnsupportedRatioCallback? UnsupportedRatio;
-        public event ExceptionHandlerCallback? ExceptionHandler;
+        public event OnUnsupportedRatioCallback?   UnsupportedRatio;
+        public event ExceptionHandlerCallback?     ExceptionHandler;
 
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -245,8 +245,8 @@ namespace LumiTracker.Watcher
         public enum ETaskType
         {
             GAME_START = 0,
-            MY_EVENT,
-            OP_EVENT,
+            MY_PLAYED,
+            OP_PLAYED,
             GAME_OVER,
             ROUND,
 
@@ -280,15 +280,15 @@ namespace LumiTracker.Watcher
                     {
                         GameStarted?.Invoke();
                     }
-                    else if (task_type == ETaskType.MY_EVENT)
+                    else if (task_type == ETaskType.MY_PLAYED)
                     {
                         int card_id = (int)message_data["card_id"]!;
-                        MyEventCard?.Invoke(card_id);
+                        MyActionCardPlayed?.Invoke(card_id);
                     }
-                    else if (task_type == ETaskType.OP_EVENT)
+                    else if (task_type == ETaskType.OP_PLAYED)
                     {
                         int card_id = (int)message_data["card_id"]!;
-                        OpEventCard?.Invoke(card_id);
+                        OpActionCardPlayed?.Invoke(card_id);
                     }
                     else if (task_type == ETaskType.GAME_OVER)
                     {

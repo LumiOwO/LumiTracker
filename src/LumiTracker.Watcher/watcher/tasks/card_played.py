@@ -19,7 +19,7 @@ class CardPlayedTask(TaskBase):
         self.filter         = StreamFilter(null_val=-1)
         self.feature_buffer = None
         self.feature_crops  = []
-        self.crop_cfgs      = (cfg.event_crop_box0, cfg.event_crop_box1, cfg.event_crop_box2)
+        self.crop_cfgs      = (cfg.action_crop_box0, cfg.action_crop_box1, cfg.action_crop_box2)
     
     def OnResize(self, client_width, client_height, ratio_type):
         # ////////////////////////////////
@@ -60,18 +60,18 @@ class CardPlayedTask(TaskBase):
 
         # Extract feature
         feature = ExtractFeature(self.feature_buffer)
-        card_id, dist = self.db.SearchByFeature(feature, EAnnType.EVENTS)
+        card_id, dist = self.db.SearchByFeature(feature, EAnnType.ACTIONS)
         
         if dist > cfg.threshold:
             card_id = -1
         if cfg.DEBUG:
             # if (self.task_type.value == 1) and True: #(card_id != -1):
             if (True) and (card_id != -1):
-                logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["events"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
+                logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["actions"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
         card_id = self.filter.Filter(card_id, dist)
 
         if card_id >= 0:
-            logging.debug(f'"type": "{self.task_type.name}", "card_id": {card_id}, "name": {self.db["events"][card_id]["zh-HANS"]}')
+            logging.debug(f'"type": "{self.task_type.name}", "card_id": {card_id}, "name": {self.db["actions"][card_id]["zh-HANS"]}')
             logging.info(f'"type": "{self.task_type.name}", "card_id": {card_id}')
         
         if cfg.DEBUG_SAVE:
@@ -120,13 +120,13 @@ class CardPlayedTask(TaskBase):
             (feature_buffer_height, feature_buffer_width, 4), dtype=np.uint8)
 
     def _UpdateFeatureBuffer(self):
-        # Get event card region
+        # Get action card region
         region_buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
 
-        # Crop event card and get feature buffer
+        # Crop action card and get feature buffer
         self.feature_buffer[:self.feature_crops[0].height, :self.feature_crops[0].width] = region_buffer[
             self.feature_crops[0].top  : self.feature_crops[0].bottom, 
             self.feature_crops[0].left : self.feature_crops[0].right

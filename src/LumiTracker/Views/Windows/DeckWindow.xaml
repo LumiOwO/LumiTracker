@@ -38,7 +38,7 @@
         <SolidColorBrush x:Key="TabHeaderBackground"
             Color="#1affffff" />
 
-        <DataTemplate x:Key="EventCardViewTemplate" DataType="{x:Type vm:EventCardView}">
+        <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type vm:ActionCardView}">
             <Grid
                 HorizontalAlignment="Stretch"
                 Margin="2, -5, 0, -5">
@@ -189,8 +189,8 @@
                         MaxWidth="{Binding Width}"
                         Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.35}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
-                        ItemsSource="{Binding ViewModel.MyEventCardsPlayed, Mode=TwoWay}"
-                        ItemTemplate="{StaticResource EventCardViewTemplate}"
+                        ItemsSource="{Binding ViewModel.MyActionCardsPlayed, Mode=TwoWay}"
+                        ItemTemplate="{StaticResource ActionCardViewTemplate}"
                         PreviewMouseDown="OnPreviewMouseDown"
                         MouseEnter="OnMouseEnter"
                         MouseLeave="OnMouseLeave"
@@ -232,8 +232,8 @@
                         MaxWidth="{Binding Width}"
                         Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.35}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
-                        ItemsSource="{Binding ViewModel.OpEventCardsPlayed, Mode=TwoWay}"
-                        ItemTemplate="{StaticResource EventCardViewTemplate}"
+                        ItemsSource="{Binding ViewModel.OpActionCardsPlayed, Mode=TwoWay}"
+                        ItemTemplate="{StaticResource ActionCardViewTemplate}"
                         PreviewMouseDown="OnPreviewMouseDown"
                         MouseEnter="OnMouseEnter"
                         MouseLeave="OnMouseLeave"

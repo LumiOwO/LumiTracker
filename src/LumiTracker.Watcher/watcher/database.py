@@ -269,18 +269,18 @@ class Database:
                 logging.debug(f'"info": "round{i + 1}, {dist=}"')
 
 
-    def _UpdateEventCards(self):
-        with open(os.path.join(cfg.cards_dir, "events.csv"), 
+    def _UpdateActionCards(self):
+        with open(os.path.join(cfg.cards_dir, "actions.csv"), 
                     mode='r', newline='', encoding='utf-8') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             csv_data = [row for row in csv_reader]
-        num_events = len(csv_data)
+        num_actions = len(csv_data)
         
         with open(os.path.join(cfg.cards_dir, "tokens.csv"), 
                     mode='r', newline='', encoding='utf-8') as tokens_file:
             tokens_reader = csv.DictReader(tokens_file)
             for row in tokens_reader:
-                row["id"] = int(row["id"]) + num_events
+                row["id"] = int(row["id"]) + num_actions
                 csv_data.append(row)
 
         # left   = 70
@@ -288,19 +288,19 @@ class Database:
         # top    = 320
         # height = 300
         # crop_box0 = CropBox(left, top, left + width, top + height)
-        # cfg.event_crop_box0 = ((crop_box0.left / 420, crop_box0.top / 720, crop_box0.width / 420, crop_box0.height / 720))
+        # cfg.action_crop_box0 = ((crop_box0.left / 420, crop_box0.top / 720, crop_box0.width / 420, crop_box0.height / 720))
         # left   = 180
         # width  = 100
         # top    = 220
         # height = 200
         # crop_box1 = CropBox(left, top, left + width, top + height)
-        # cfg.event_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.width / 420, crop_box1.height / 720))
+        # cfg.action_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.width / 420, crop_box1.height / 720))
         # left   = 250
         # width  = 100
         # top    = 450
         # height = 100
         # crop_box2 = CropBox(left, top, left + width, top + height)
-        # cfg.event_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
+        # cfg.action_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
 
         # do not call Tick() when updating database 
         from .tasks import CardPlayedTask
@@ -308,18 +308,18 @@ class Database:
         task._ResizeFeatureBuffer(420, 720)
         task.crop_box = CropBox(0, 0, 420, 720)
 
-        event_cards_dir = os.path.join(cfg.cards_dir, "events")
+        action_cards_dir = os.path.join(cfg.cards_dir, "actions")
         n_images = len(csv_data)
-        events   = [None] * n_images
+        actions  = [None] * n_images
         features = [None] * n_images
         for image_idx, row in enumerate(csv_data):
             card_id = int(row["id"])
-            if image_idx < num_events:
-                image_file = f'event_{card_id}_{row["zh-HANS"]}.png'
+            if image_idx < num_actions:
+                image_file = f'action_{card_id}_{row["zh-HANS"]}.png'
             else:
-                image_file = f'tokens/token_{card_id - num_events}_{row["zh-HANS"]}.png'
+                image_file = f'tokens/token_{card_id - num_actions}_{row["zh-HANS"]}.png'
 
-            image_path = os.path.join(event_cards_dir, image_file)
+            image_path = os.path.join(action_cards_dir, image_file)
             image = LoadImage(image_path)
             if image is None:
                 logging.error(f'"info": "Failed to load image: {image_path}"')
@@ -335,7 +335,7 @@ class Database:
                 crop_box.left : crop_box.right
             ]
             snapshot_path = os.path.join(
-                cfg.assets_dir, "snapshots", "events", f"{card_id}.jpg")
+                cfg.assets_dir, "snapshots", "actions", f"{card_id}.jpg")
             SaveImage(snapshot, snapshot_path)
 
             task.frame_buffer = image
@@ -345,7 +345,7 @@ class Database:
             # gray_image = Preprocess(task.feature_buffer)
             # SaveImage(gray_image, snapshot_path)
 
-            event = {
+            action = {
                 "id": card_id,
                 "type": row["type"],
                 "zh-HANS": row["zh-HANS"],
@@ -353,7 +353,7 @@ class Database:
             }
 
             features[card_id] = feature
-            events[card_id]   = event
+            actions[card_id]  = action
 
         if cfg.DEBUG:
             n = len(features)
@@ -365,13 +365,13 @@ class Database:
                     dist = FeatureDistance(features[i], features[j])
                     min_dist = min(dist, min_dist)
                     if dist <= cfg.threshold:
-                        close_dists[dist].append(f'{i}{events[i]["zh-HANS"]} <-----> {j}{events[j]["zh-HANS"]}') 
+                        close_dists[dist].append(f'{i}{actions[i]["zh-HANS"]} <-----> {j}{actions[j]["zh-HANS"]}') 
             
             close_dists = {key: close_dists[key] for key in sorted(close_dists)}
             logging.warning(f'{json.dumps(close_dists, indent=2, ensure_ascii=False)}')
             logging.warning(f'{min_dist=}')
 
-        logging.info(f'"info": "Loaded {len(features)} images from {event_cards_dir}"')
+        logging.info(f'"info": "Loaded {len(features)} images from {action_cards_dir}"')
 
         # share code
         with open(os.path.join(cfg.cards_dir, "share_code.csv"), 
@@ -389,15 +389,15 @@ class Database:
                 "is_character": int(row["is_character"]) == 1,
                 "internal_id": internal_id,
             }
-            events[internal_id]["share_id"] = share_id
+            actions[internal_id]["share_id"] = share_id
 
         self.data["share_id_info"] = share_id_info
-        self.data["events"] = events
+        self.data["actions"] = actions
 
         if cfg.DEBUG_SAVE:
             card_id = 211
-            image_file = f'event_{card_id}_{events[card_id]["zh-HANS"]}.png'
-            image = LoadImage(os.path.join(event_cards_dir, image_file))
+            image_file = f'action_{card_id}_{actions[card_id]["zh-HANS"]}.png'
+            image = LoadImage(os.path.join(action_cards_dir, image_file))
             SaveImage(image, os.path.join(cfg.debug_dir, image_file))
             logging.debug(f'"info": "save {image_file} at {cfg.debug_dir}"')
 
@@ -406,9 +406,9 @@ class Database:
         for i in range(len(features)):
             ann.add_item(i, features[i])
         ann.build(cfg.ann_n_trees)
-        ann_filename = f"{EAnnType.EVENTS.name.lower()}.ann"
+        ann_filename = f"{EAnnType.ACTIONS.name.lower()}.ann"
         ann.save(os.path.join(cfg.database_dir, ann_filename))
-        self.anns[EAnnType.EVENTS.value] = ann
+        self.anns[EAnnType.ACTIONS.value] = ann
 
         if cfg.DEBUG_SAVE:
             test_dir = os.path.join(cfg.debug_dir, "test")
@@ -428,13 +428,13 @@ class Database:
                 logging.debug(f'"info": {dt=}')
                 logging.debug(f'"info": {my_ids=}')
                 logging.debug(f'"info": {my_dists=}')
-                found_name = events[my_ids[0]]['zh-HANS'] if my_dists[0] <= cfg.threshold else "None"
+                found_name = actions[my_ids[0]]['zh-HANS'] if my_dists[0] <= cfg.threshold else "None"
                 logging.debug(f'"info": "{file}: {found_name}"')
 
 
     def _Update(self):
         self._UpdateControls()
-        self._UpdateEventCards()
+        self._UpdateActionCards()
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:
             json.dump(self.data, f, indent=2, ensure_ascii=False)

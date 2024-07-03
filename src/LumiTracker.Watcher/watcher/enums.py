@@ -2,8 +2,8 @@ import enum
 
 class ETaskType(enum.Enum):
     GAME_START        = 0
-    MY_EVENT          = enum.auto()
-    OP_EVENT          = enum.auto()
+    MY_PLAYED         = enum.auto()
+    OP_PLAYED         = enum.auto()
     GAME_OVER         = enum.auto()
     ROUND             = enum.auto()
 
@@ -34,7 +34,7 @@ class ECtrlType(enum.Enum):
     CTRL_FEATURES_COUNT = enum.auto()
 
 class EAnnType(enum.Enum):
-    EVENTS    = 0
+    ACTIONS   = 0
     CTRLS     = enum.auto()
 
     ANN_COUNT = enum.auto()

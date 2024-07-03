@@ -16,11 +16,11 @@ class FrameManager:
 
         # tasks
         self.game_start_task = GameStartTask (db, ETaskType.GAME_START)
-        self.my_event_task   = CardPlayedTask(db, ETaskType.MY_EVENT)
-        self.op_event_task   = CardPlayedTask(db, ETaskType.OP_EVENT)
+        self.my_played_task  = CardPlayedTask(db, ETaskType.MY_PLAYED)
+        self.op_played_task  = CardPlayedTask(db, ETaskType.OP_PLAYED)
         self.game_over_task  = GameOverTask  (db, ETaskType.GAME_OVER)
         self.round_task      = RoundTask     (db, ETaskType.ROUND)
-        self.tasks = [self.game_start_task, self.my_event_task, self.op_event_task, self.game_over_task, self.round_task]
+        self.tasks = [self.game_start_task, self.my_played_task, self.op_played_task, self.game_over_task, self.round_task]
 
         # controls
         self.game_started    = False

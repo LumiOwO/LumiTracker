@@ -36,9 +36,9 @@ namespace LumiTracker.Models
 
         public event OnGameStartedCallback?         GameStarted;
 
-        public event OnMyEventCardCallback?         MyEventCard;
+        public event OnMyActionCardPlayedCallback?  MyActionCardPlayed;
 
-        public event OnOpEventCardCallback?         OpEventCard;
+        public event OnOpActionCardPlayedCallback?  OpActionCardPlayed;
 
         public event OnGameOverCallback?            GameOver;
 
@@ -81,8 +81,8 @@ namespace LumiTracker.Models
                 watcher.WindowWatcherStart += OnWindowWatcherStart;
                 watcher.WindowWatcherExit  += OnWindowWatcherExit;
                 watcher.GameStarted        += OnGameStarted;
-                watcher.MyEventCard        += OnMyEventCard;
-                watcher.OpEventCard        += OnOpEventCard;
+                watcher.MyActionCardPlayed += OnMyActionCardPlayed;
+                watcher.OpActionCardPlayed += OnOpActionCardPlayed;
                 watcher.GameOver           += OnGameOver;
                 watcher.RoundDetected      += OnRoundDetected;
                 watcher.UnsupportedRatio   += OnUnsupportedRatio;
@@ -134,16 +134,16 @@ namespace LumiTracker.Models
             GameStarted?.Invoke();
         }
 
-        private void OnMyEventCard(int card_id)
+        private void OnMyActionCardPlayed(int card_id)
         {
-            Configuration.Logger.LogDebug("OnMyEventCard");
-            MyEventCard?.Invoke(card_id);
+            Configuration.Logger.LogDebug("OnMyActionCard");
+            MyActionCardPlayed?.Invoke(card_id);
         }
 
-        private void OnOpEventCard(int card_id)
+        private void OnOpActionCardPlayed(int card_id)
         {
-            Configuration.Logger.LogDebug("OnOpEventCard");
-            OpEventCard?.Invoke(card_id);
+            Configuration.Logger.LogDebug("OnOpActionCard");
+            OpActionCardPlayed?.Invoke(card_id);
         }
 
         private void OnGameOver()

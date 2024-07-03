@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace LumiTracker.ViewModels.Windows
 {
-    public partial class EventCardView : ObservableObject
+    public partial class ActionCardView : ObservableObject
     {
         [ObservableProperty]
         public int _count;
@@ -19,24 +19,24 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         public string _snapshotUri;
 
-        public EventCardView(int card_id) 
+        public ActionCardView(int card_id) 
         {
-            var cardInfo  = Configuration.Database["events"]![card_id]!;
+            var cardInfo  = Configuration.Database["actions"]![card_id]!;
             _cardID       = card_id;
             _cardName     = cardInfo["zh-HANS"]!.ToString(); // TODO: localization
             _count        = 1;
-            _snapshotUri  = $"pack://siteoforigin:,,,/assets/snapshots/events/{card_id}.jpg";
+            _snapshotUri  = $"pack://siteoforigin:,,,/assets/snapshots/actions/{card_id}.jpg";
         }
     }
 
     public partial class DeckWindowViewModel : ObservableObject
     {
         [ObservableProperty]
-        private ObservableCollection<EventCardView> _myEventCardsPlayed = new ();
+        private ObservableCollection<ActionCardView> _myActionCardsPlayed = new ();
         HashSet<int> MyPlayedCardIDs = new ();
 
         [ObservableProperty]
-        private ObservableCollection<EventCardView> _opEventCardsPlayed = new ();
+        private ObservableCollection<ActionCardView> _opActionCardsPlayed = new ();
         HashSet<int> OpPlayedCardIDs = new ();
 
         [ObservableProperty]
@@ -63,39 +63,39 @@ namespace LumiTracker.ViewModels.Windows
         {
             _gameWatcher = gameWatcher;
 
-            _gameWatcher.GameStarted       += OnGameStarted;
-            _gameWatcher.MyEventCard       += OnMyEventCard;
-            _gameWatcher.OpEventCard       += OnOpEventCard;
-            _gameWatcher.GameOver          += OnGameOver;
-            _gameWatcher.RoundDetected     += OnRoundDetected;
-            _gameWatcher.UnsupportedRatio  += OnUnsupportedRatio;
+            _gameWatcher.GameStarted        += OnGameStarted;
+            _gameWatcher.MyActionCardPlayed += OnMyActionCardPlayed;
+            _gameWatcher.OpActionCardPlayed += OnOpActionCardPlayed;
+            _gameWatcher.GameOver           += OnGameOver;
+            _gameWatcher.RoundDetected      += OnRoundDetected;
+            _gameWatcher.UnsupportedRatio   += OnUnsupportedRatio;
 
-            _gameWatcher.WindowWatcherExit += OnWindowWatcherExit;
+            _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
         }
 
         private void ResetRecordedData()
         {
-            MyEventCardsPlayed = new();
-            MyPlayedCardIDs    = new();
-            OpEventCardsPlayed = new();
-            OpPlayedCardIDs    = new();
+            MyActionCardsPlayed = new();
+            MyPlayedCardIDs     = new();
+            OpActionCardsPlayed = new();
+            OpPlayedCardIDs     = new();
 
             Round = 0;
         }
 
-        private void UpdatePlayedEventCard(
+        private void UpdatePlayedActionCard(
             int card_id, 
-            ObservableCollection<EventCardView> EventCardsPlayed, 
+            ObservableCollection<ActionCardView> ActionCardsPlayed, 
             HashSet<int> PlayedCardIDs)
         {
             if (PlayedCardIDs.Contains(card_id))
             {
                 int found_idx = -1;
-                for (int i = 0; i < EventCardsPlayed.Count; i++)
+                for (int i = 0; i < ActionCardsPlayed.Count; i++)
                 {
-                    if (EventCardsPlayed[i].CardID == card_id)
+                    if (ActionCardsPlayed[i].CardID == card_id)
                     {
-                        EventCardsPlayed[i].Count++;
+                        ActionCardsPlayed[i].Count++;
                         found_idx = i;
                         break;
                     }
@@ -105,7 +105,7 @@ namespace LumiTracker.ViewModels.Windows
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        EventCardsPlayed.Move(found_idx, 0);
+                        ActionCardsPlayed.Move(found_idx, 0);
                     });
                 }
             }
@@ -115,7 +115,7 @@ namespace LumiTracker.ViewModels.Windows
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    EventCardsPlayed.Insert(0, new EventCardView(card_id));
+                    ActionCardsPlayed.Insert(0, new ActionCardView(card_id));
                 });
             }
         }
@@ -127,14 +127,14 @@ namespace LumiTracker.ViewModels.Windows
             GameNotStarted = !GameStarted;
         }
 
-        private void OnMyEventCard(int card_id)
+        private void OnMyActionCardPlayed(int card_id)
         {
-            UpdatePlayedEventCard(card_id, MyEventCardsPlayed, MyPlayedCardIDs);
+            UpdatePlayedActionCard(card_id, MyActionCardsPlayed, MyPlayedCardIDs);
         }
 
-        private void OnOpEventCard(int card_id)
+        private void OnOpActionCardPlayed(int card_id)
         {
-            UpdatePlayedEventCard(card_id, OpEventCardsPlayed, OpPlayedCardIDs);
+            UpdatePlayedActionCard(card_id, OpActionCardsPlayed, OpPlayedCardIDs);
         }
 
         private void OnGameOver()
