@@ -274,6 +274,14 @@ class Database:
                     mode='r', newline='', encoding='utf-8') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             csv_data = [row for row in csv_reader]
+        num_events = len(csv_data)
+        
+        with open(os.path.join(cfg.cards_dir, "tokens.csv"), 
+                    mode='r', newline='', encoding='utf-8') as tokens_file:
+            tokens_reader = csv.DictReader(tokens_file)
+            for row in tokens_reader:
+                row["id"] = int(row["id"]) + num_events
+                csv_data.append(row)
 
         # left   = 70
         # width  = 100
@@ -304,9 +312,12 @@ class Database:
         n_images = len(csv_data)
         events   = [None] * n_images
         features = [None] * n_images
-        for row in csv_data:
+        for image_idx, row in enumerate(csv_data):
             card_id = int(row["id"])
-            image_file = f'event_{card_id}_{row["zh-HANS"]}.png'
+            if image_idx < num_events:
+                image_file = f'event_{card_id}_{row["zh-HANS"]}.png'
+            else:
+                image_file = f'tokens/token_{card_id - num_events}_{row["zh-HANS"]}.png'
 
             image_path = os.path.join(event_cards_dir, image_file)
             image = LoadImage(image_path)
@@ -334,8 +345,15 @@ class Database:
             # gray_image = Preprocess(task.feature_buffer)
             # SaveImage(gray_image, snapshot_path)
 
+            event = {
+                "id": card_id,
+                "type": row["type"],
+                "zh-HANS": row["zh-HANS"],
+                "en-US": row["en-US"],
+            }
+
             features[card_id] = feature
-            events[card_id]   = row
+            events[card_id]   = event
 
         if cfg.DEBUG:
             n = len(features)
@@ -353,8 +371,27 @@ class Database:
             logging.warning(f'{json.dumps(close_dists, indent=2, ensure_ascii=False)}')
             logging.warning(f'{min_dist=}')
 
-
         logging.info(f'"info": "Loaded {len(features)} images from {event_cards_dir}"')
+
+        # share code
+        with open(os.path.join(cfg.cards_dir, "share_code.csv"), 
+                    mode='r', newline='', encoding='utf-8') as share_code_file:
+            share_code_reader = csv.DictReader(share_code_file)
+            share_code_data = [row for row in share_code_reader]
+        share_id_info = [{
+                "is_character": False,
+                "internal_id": -1,
+            }] + [None] * len(share_code_data)
+        for row in share_code_data:
+            share_id = int(row["share_id"])
+            internal_id = int(row["internal_id"])
+            share_id_info[share_id] = {
+                "is_character": int(row["is_character"]) == 1,
+                "internal_id": internal_id,
+            }
+            events[internal_id]["share_id"] = share_id
+
+        self.data["share_id_info"] = share_id_info
         self.data["events"] = events
 
         if cfg.DEBUG_SAVE:
