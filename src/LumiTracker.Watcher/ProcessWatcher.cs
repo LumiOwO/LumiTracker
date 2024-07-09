@@ -249,6 +249,14 @@ namespace LumiTracker.Watcher
             OP_PLAYED,
             GAME_OVER,
             ROUND,
+            MY_DRAWN,
+            OP_DRAWN, // placeholder, not used yet
+            MY_DISCARD,
+            OP_DISCARD,
+            MY_CREATE_DECK,
+            OP_CREATE_DECK,
+            MY_CREATE_HAND, // Furina
+            OP_CREATE_HAND,
 
             // types for exception
             UNSUPPORTED_RATIO,

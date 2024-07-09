@@ -1,10 +1,7 @@
 class TaskBase:
-    def __init__(self, db, task_type):
+    def __init__(self, db):
         self.db           = db
-        self.task_type    = task_type
-
         self.frame_buffer = None
-        self.crop_box     = None
         self.valid        = True
     
     def PreTick(self, frame_manager, frame_buffer):

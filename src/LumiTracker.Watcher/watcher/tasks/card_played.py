@@ -1,9 +1,9 @@
 from .base import TaskBase
 from ..stream_filter import StreamFilter
 
-from ..enums import EAnnType
+from ..enums import EAnnType, ETaskType, ERegionType
 from ..config import cfg
-from ..position import POS
+from ..regions import REGIONS
 from ..database import CropBox, ExtractFeature
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
@@ -13,13 +13,15 @@ import logging
 import os
 
 class CardPlayedTask(TaskBase):
-    def __init__(self, db, task_type):
-        super().__init__(db, task_type)
+    def __init__(self, db, is_op):
+        super().__init__(db)
         
         self.filter         = StreamFilter(null_val=-1)
         self.feature_buffer = None
         self.feature_crops  = []
         self.crop_cfgs      = (cfg.action_crop_box0, cfg.action_crop_box1, cfg.action_crop_box2)
+        self.task_type      = ETaskType.OP_PLAYED if is_op else ETaskType.MY_PLAYED
+        self.crop_box       = None  # init when resize
     
     def OnResize(self, client_width, client_height, ratio_type):
         # ////////////////////////////////
@@ -40,13 +42,12 @@ class CardPlayedTask(TaskBase):
         # //    |---------|---------|
         # //
         # ////////////////////////////////
-
-        pos    = POS[ratio_type]
-
-        left   = round(client_width  * pos[self.task_type][0])
-        top    = round(client_height * pos[self.task_type][1])
-        width  = round(client_width  * pos[self.task_type][2])
-        height = round(client_height * pos[self.task_type][3])
+        region_type = ERegionType.OP_PLAYED if self.task_type == ETaskType.OP_PLAYED else ERegionType.MY_PLAYED
+        box    = REGIONS[ratio_type][region_type]
+        left   = round(client_width  * box[0])
+        top    = round(client_height * box[1])
+        width  = round(client_width  * box[2])
+        height = round(client_height * box[3])
 
         self.crop_box = CropBox(left, top, left + width, top + height)
 

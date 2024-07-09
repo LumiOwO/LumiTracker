@@ -3,8 +3,7 @@ import logging
 
 from .config import cfg
 from .database import Database
-from .position import ERatioType
-from .enums import ETaskType
+from .enums import ETaskType, ERatioType
 from .tasks import GameStartTask, CardPlayedTask, GameOverTask, RoundTask
 
 class FrameManager:
@@ -15,11 +14,11 @@ class FrameManager:
         self.db = db
 
         # tasks
-        self.game_start_task = GameStartTask (db, ETaskType.GAME_START)
-        self.my_played_task  = CardPlayedTask(db, ETaskType.MY_PLAYED)
-        self.op_played_task  = CardPlayedTask(db, ETaskType.OP_PLAYED)
-        self.game_over_task  = GameOverTask  (db, ETaskType.GAME_OVER)
-        self.round_task      = RoundTask     (db, ETaskType.ROUND)
+        self.game_start_task = GameStartTask(db)
+        self.my_played_task  = CardPlayedTask(db, is_op=False)
+        self.op_played_task  = CardPlayedTask(db, is_op=True)
+        self.game_over_task  = GameOverTask(db)
+        self.round_task      = RoundTask(db)
         self.tasks = [self.game_start_task, self.my_played_task, self.op_played_task, self.game_over_task, self.round_task]
 
         # controls

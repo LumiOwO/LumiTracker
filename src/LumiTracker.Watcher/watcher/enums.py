@@ -6,9 +6,27 @@ class ETaskType(enum.Enum):
     OP_PLAYED         = enum.auto()
     GAME_OVER         = enum.auto()
     ROUND             = enum.auto()
+    MY_DRAWN          = enum.auto()
+    OP_DRAWN          = enum.auto() # placeholder, not used yet
+    MY_DISCARD        = enum.auto()
+    OP_DISCARD        = enum.auto()
+    MY_CREATE_DECK    = enum.auto()
+    OP_CREATE_DECK    = enum.auto()
+    MY_CREATE_HAND    = enum.auto() # Furina
+    OP_CREATE_HAND    = enum.auto()
 
     # types for exception
     UNSUPPORTED_RATIO = enum.auto()
+
+class ERegionType(enum.Enum):
+    GAME_START = 0
+    MY_PLAYED  = enum.auto()
+    OP_PLAYED  = enum.auto()
+    GAME_OVER  = enum.auto()
+    ROUND      = enum.auto()
+    CENTER     = enum.auto()
+    MY_DECK    = enum.auto()
+    OP_DECK    = enum.auto()
 
 class ERatioType(enum.Enum):
     E16_9  = 0
