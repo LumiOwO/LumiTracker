@@ -224,16 +224,10 @@ class ActionCardHandler:
         feature = ExtractFeature(self.feature_buffer)
         card_id, dist = db.SearchByFeature(feature, EAnnType.ACTIONS)
         
-        if dist > cfg.threshold:
-            card_id = -1
-        
         return card_id, dist
     
-    def OnResize(self, client_width, client_height, box):
-        left   = round(client_width  * box[0])
-        top    = round(client_height * box[1])
-        width  = round(client_width  * box[2])
-        height = round(client_height * box[3])
+    def OnResize(self, box):
+        left, top, width, height = box
         self.crop_box = CropBox(left, top, left + width, top + height)
 
         self._ResizeFeatureCrops(width, height)

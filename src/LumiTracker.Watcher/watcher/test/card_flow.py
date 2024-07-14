@@ -76,5 +76,5 @@ def video():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    # image()
-    video()
+    image()
+    # video()

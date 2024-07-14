@@ -23,13 +23,19 @@ class CardPlayedTask(TaskBase):
     def OnResize(self, client_width, client_height, ratio_type):
         region_type = ERegionType.OP_PLAYED if self.task_type == ETaskType.OP_PLAYED else ERegionType.MY_PLAYED
         box = REGIONS[ratio_type][region_type]
-        self.card_handler.OnResize(client_width, client_height, box)
+        left   = round(client_width  * box[0])
+        top    = round(client_height * box[1])
+        width  = round(client_width  * box[2])
+        height = round(client_height * box[3])
+        self.card_handler.OnResize((left, top, width, height))
 
     def _PreTick(self, frame_manager):
         self.valid = frame_manager.game_started
 
     def _Tick(self, frame_manager):
         card_id, dist = self.card_handler.Update(self.frame_buffer, self.db)
+        if dist > cfg.threshold:
+            card_id = -1
         if cfg.DEBUG:
             # if (self.task_type.value == 1) and True: #(card_id != -1):
             if (True) and (card_id != -1):
