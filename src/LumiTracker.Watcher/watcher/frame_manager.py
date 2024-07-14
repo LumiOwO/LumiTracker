@@ -4,7 +4,7 @@ import logging
 from .config import cfg
 from .database import Database
 from .enums import ETaskType, ERatioType
-from .tasks import GameStartTask, CardPlayedTask, GameOverTask, RoundTask
+from .tasks import GameStartTask, CardPlayedTask, GameOverTask, RoundTask, CardFlowTask
 
 class FrameManager:
     def __init__(self):
@@ -19,7 +19,8 @@ class FrameManager:
         self.op_played_task  = CardPlayedTask(db, is_op=True)
         self.game_over_task  = GameOverTask(db)
         self.round_task      = RoundTask(db)
-        self.tasks = [self.game_start_task, self.my_played_task, self.op_played_task, self.game_over_task, self.round_task]
+        self.card_flow_task  = CardFlowTask(db)
+        self.tasks = [self.game_start_task, self.my_played_task, self.op_played_task, self.game_over_task, self.round_task, self.card_flow_task]
 
         # controls
         self.game_started    = False
