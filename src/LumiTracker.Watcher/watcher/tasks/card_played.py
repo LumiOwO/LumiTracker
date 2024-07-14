@@ -4,7 +4,7 @@ from ..stream_filter import StreamFilter
 from ..enums import EAnnType, ETaskType, ERegionType
 from ..config import cfg
 from ..regions import REGIONS
-from ..database import ActionCardHandler
+from ..database import ActionCardHandler, CropBox
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
@@ -27,7 +27,7 @@ class CardPlayedTask(TaskBase):
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
         height = round(client_height * box[3])
-        self.card_handler.OnResize((left, top, width, height))
+        self.card_handler.OnResize(CropBox(left, top, left + width, top + height))
 
     def _PreTick(self, frame_manager):
         self.valid = frame_manager.game_started

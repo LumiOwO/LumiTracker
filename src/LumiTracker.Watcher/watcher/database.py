@@ -226,11 +226,10 @@ class ActionCardHandler:
         
         return card_id, dist
     
-    def OnResize(self, box):
-        left, top, width, height = box
-        self.crop_box = CropBox(left, top, left + width, top + height)
+    def OnResize(self, crop_box):
+        self.crop_box = crop_box
 
-        self._ResizeFeatureCrops(width, height)
+        self._ResizeFeatureCrops(crop_box.width, crop_box.height)
 
         feature_buffer_width  = self.feature_crops[0].width + self.feature_crops[1].width
         feature_buffer_height = self.feature_crops[0].height

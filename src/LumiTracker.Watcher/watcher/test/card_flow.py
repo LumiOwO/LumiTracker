@@ -6,6 +6,7 @@ from ..frame_manager import FrameManager
 
 import logging
 import os
+import sys
 import cv2
 import numpy as np
 
@@ -28,18 +29,17 @@ def image():
     task.frame_buffer = image
     task.Tick(frame_manager)
 
-    # dst = task.buffer
-    dst = cv2.cvtColor(task.thresh, cv2.COLOR_GRAY2BGRA)
-    for box in task.bounding_boxes:
-        x, y, w, h = box
-        cv2.rectangle(dst, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    dst = task.center_buffer
+    # dst = cv2.cvtColor(task.thresh, cv2.COLOR_GRAY2BGRA)
+    for box in task.bboxes:
+        cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 255, 0), 2)
     
     plt.imshow(cv2.cvtColor(dst, cv2.COLOR_BGR2RGB))
     plt.show()
 
 
 def video():
-    input_video_path = 'temp/2024-07-14 21-52-39.mp4'
+    input_video_path = 'temp/2024-07-14 18-09-30.mp4'
     output_video_path = 'temp/card_flow_output_video.mp4'
     cap = cv2.VideoCapture(input_video_path)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -55,18 +55,23 @@ def video():
     task = frame_manager.card_flow_task
     task.OnResize(width, height, ERatioType.E16_9)
 
+    cnt = 0
     while True:
+        print(cnt)
+        cnt += 1
+
         ret, frame = cap.read()
         if not ret:
             break
 
-        task.frame_buffer = frame
+        task.frame_buffer = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
         task.Tick(frame_manager)
 
-        for box in task.bounding_boxes:
-            x, y, w, h = box
-            x += task.crop_box.left
-            y += task.crop_box.top
+        for box in task.bboxes:
+            x = box.left + task.center_crop.left
+            y = box.top  + task.center_crop.top
+            w = box.width
+            h = box.height
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         
         out.write(frame)
@@ -76,5 +81,8 @@ def video():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    image()
-    # video()
+    test_func = sys.argv[1]
+    if test_func == "image":
+        image()
+    elif test_func == "video":
+        video()
