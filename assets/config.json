@@ -29,7 +29,7 @@
   "cards_dir": "cards",
   "hash_size": 10,
   "ann_index_len": 100,
-  "threshold": 26,
+  "threshold": 24,
   "strict_threshold": 20,
   "ann_metric": "hamming",
   "ann_n_trees": 10,
