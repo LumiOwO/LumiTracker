@@ -72,6 +72,32 @@ class CardFlowTask(TaskBase):
 
         # Thresholding
         _, thresh = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)
+        # cross_kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+        # thresh = cv2.erode(thresh, None, iterations=1)
+
+        # # Calculate the Euclidean distance from the target color
+        # lab = cv2.cvtColor(self.center_buffer, cv2.COLOR_BGR2Lab).astype(np.int32)
+        # # bgr = self.center_buffer
+        # threshold = 50
+        # target_color1 = [232, 222, 197]
+        # target_color2 = [240, 224, 146]
+        # target_color1 = cv2.cvtColor(np.uint8([[target_color1]]), cv2.COLOR_RGB2Lab)[0][0]
+        # target_color2 = cv2.cvtColor(np.uint8([[target_color2]]), cv2.COLOR_RGB2Lab)[0][0]
+        # distance1 = np.sum(np.abs(lab[..., :3] - target_color1[:3]), axis=2)
+        # mask1 = np.uint8(distance1 < threshold) * 255
+        # distance2 = np.sum(np.abs(lab[..., :3] - target_color2[:3]), axis=2)
+        # mask2 = np.uint8(distance2 < threshold) * 255
+        # thresh = cv2.bitwise_or(mask1, mask2)
+        # # thresh = mask2
+
+        # # Apply Gaussian blur to reduce noise
+        # blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        # # Apply Canny edge detection
+        # edges = cv2.Canny(blurred, 50, 300)
+        # # Dilate the edges to emphasize thick borders
+        # # dilated = cv2.dilate(edges, None, iterations=2)
+        # # thresh = dilated
+        # thresh = edges
 
         # Find contours
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -80,10 +106,12 @@ class CardFlowTask(TaskBase):
         bboxes = []
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if h < self.center_crop.height * 0.65 or h > self.center_crop.height * 0.7:
+            if h < self.center_crop.height * 0.65:
                 continue
-            if abs(w / h - 420 / 720) > 0.1:
-                continue
+            # ratio = w / h
+            # if ratio < 0.55 or ratio > 0.75:
+            #     continue
+            bboxes.append(CropBox(x, y, x + w, y + h))
             
             # use right-bottom as anchor
             right  = x + w
@@ -92,11 +120,12 @@ class CardFlowTask(TaskBase):
             top    = bottom - self.action_card_h
             if left < 0 or top < 0:
                 continue
-            bboxes.append(CropBox(left, top, right, bottom))
+            # bboxes.append(CropBox(left, top, right, bottom))
         
         if cfg.DEBUG:
             self.thresh = thresh
             self.bboxes = bboxes
+            self.gray = gray
 
         num_bboxes = len(bboxes)
         if num_bboxes > 1:

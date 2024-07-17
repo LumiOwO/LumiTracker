@@ -18,7 +18,7 @@ def image():
     frame_manager = FrameManager()
     task = frame_manager.card_flow_task
 
-    image_path = 'temp/Snipaste_2024-07-14_15-25-51.png'
+    image_path = 'temp/Snipaste_2024-07-14_22-40-29.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -29,8 +29,8 @@ def image():
     task.frame_buffer = image
     task.Tick(frame_manager)
 
-    dst = task.center_buffer
-    # dst = cv2.cvtColor(task.thresh, cv2.COLOR_GRAY2BGRA)
+    # dst = task.center_buffer
+    dst = cv2.cvtColor(task.thresh, cv2.COLOR_GRAY2BGRA)
     for box in task.bboxes:
         cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 255, 0), 2)
     
