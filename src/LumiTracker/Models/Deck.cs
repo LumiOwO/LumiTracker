@@ -20,7 +20,7 @@ namespace LumiTracker.Models
         public Deck()
         {
             // TODO: remove test
-            LoadDeck("jl0ddrubjx09dxKblS0NgRWcls39gyScmV6tj0+dma7tl1OdmT4dmFadml6dm16dmm2N");
+            LoadDeck("GLGxC4wQGMHRDI4QGNHxDZAQGeERDpIQGfExD5QRGQFREJYREBGREQkRECGhEgoREDAA");
         }
 
         public void LoadDeck(string shareCode)

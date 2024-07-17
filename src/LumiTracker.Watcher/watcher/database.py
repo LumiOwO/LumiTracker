@@ -385,11 +385,13 @@ class Database:
         for row in share_code_data:
             share_id = int(row["share_id"])
             internal_id = int(row["internal_id"])
+            is_character = (int(row["is_character"]) == 1)
             share_id_info[share_id] = {
-                "is_character": int(row["is_character"]) == 1,
+                "is_character": is_character,
                 "internal_id": internal_id,
             }
-            actions[internal_id]["share_id"] = share_id
+            if not is_character:
+                actions[internal_id]["share_id"] = share_id
 
         self.data["share_id_info"] = share_id_info
         self.data["actions"] = actions

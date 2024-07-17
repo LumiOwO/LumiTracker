@@ -1579,6 +1579,54 @@
     {
       "is_character": false,
       "internal_id": 301
+    },
+    {
+      "is_character": true,
+      "internal_id": 92
+    },
+    {
+      "is_character": true,
+      "internal_id": 93
+    },
+    {
+      "is_character": true,
+      "internal_id": 94
+    },
+    {
+      "is_character": false,
+      "internal_id": 302
+    },
+    {
+      "is_character": false,
+      "internal_id": 303
+    },
+    {
+      "is_character": false,
+      "internal_id": 304
+    },
+    {
+      "is_character": false,
+      "internal_id": 305
+    },
+    {
+      "is_character": false,
+      "internal_id": 306
+    },
+    {
+      "is_character": false,
+      "internal_id": 307
+    },
+    {
+      "is_character": false,
+      "internal_id": 308
+    },
+    {
+      "is_character": false,
+      "internal_id": 309
+    },
+    {
+      "is_character": false,
+      "internal_id": 310
     }
   ],
   "actions": [
@@ -2007,224 +2055,224 @@
       "type": "event",
       "zh-HANS": "魔导绪论",
       "en-US": "魔导绪论",
-      "share_id": 277
+      "share_id": 121
     },
     {
       "id": 61,
       "type": "event",
       "zh-HANS": "祭礼残章",
       "en-US": "祭礼残章",
-      "share_id": 278
+      "share_id": 122
     },
     {
       "id": 62,
       "type": "event",
       "zh-HANS": "天空之卷",
       "en-US": "天空之卷",
-      "share_id": 279
+      "share_id": 123
     },
     {
       "id": 63,
       "type": "event",
       "zh-HANS": "千夜浮梦",
       "en-US": "千夜浮梦",
-      "share_id": 280
+      "share_id": 124
     },
     {
       "id": 64,
       "type": "event",
       "zh-HANS": "盈满之实",
       "en-US": "盈满之实",
-      "share_id": 281
+      "share_id": 125
     },
     {
       "id": 65,
       "type": "event",
       "zh-HANS": "鸦羽弓",
       "en-US": "鸦羽弓",
-      "share_id": 282
+      "share_id": 126
     },
     {
       "id": 66,
       "type": "event",
       "zh-HANS": "祭礼弓",
       "en-US": "祭礼弓",
-      "share_id": 283
+      "share_id": 127
     },
     {
       "id": 67,
       "type": "event",
       "zh-HANS": "天空之翼",
       "en-US": "天空之翼",
-      "share_id": 284
+      "share_id": 128
     },
     {
       "id": 68,
       "type": "event",
       "zh-HANS": "阿莫斯之弓",
       "en-US": "阿莫斯之弓",
-      "share_id": 285
+      "share_id": 129
     },
     {
       "id": 69,
       "type": "event",
       "zh-HANS": "终末嗟叹之诗",
       "en-US": "终末嗟叹之诗",
-      "share_id": 286
+      "share_id": 130
     },
     {
       "id": 70,
       "type": "event",
       "zh-HANS": "王下近侍",
       "en-US": "王下近侍",
-      "share_id": 287
+      "share_id": 131
     },
     {
       "id": 71,
       "type": "event",
       "zh-HANS": "白铁大剑",
       "en-US": "白铁大剑",
-      "share_id": 319
+      "share_id": 132
     },
     {
       "id": 72,
       "type": "event",
       "zh-HANS": "祭礼大剑",
       "en-US": "祭礼大剑",
-      "share_id": 320
+      "share_id": 133
     },
     {
       "id": 73,
       "type": "event",
       "zh-HANS": "狼的末路",
       "en-US": "狼的末路",
-      "share_id": 321
+      "share_id": 134
     },
     {
       "id": 74,
       "type": "event",
       "zh-HANS": "天空之傲",
       "en-US": "天空之傲",
-      "share_id": 322
+      "share_id": 135
     },
     {
       "id": 75,
       "type": "event",
       "zh-HANS": "钟剑",
       "en-US": "钟剑",
-      "share_id": 334
+      "share_id": 136
     },
     {
       "id": 76,
       "type": "event",
       "zh-HANS": "白缨枪",
       "en-US": "白缨枪",
-      "share_id": 335
+      "share_id": 137
     },
     {
       "id": 77,
       "type": "event",
       "zh-HANS": "千岩长枪",
       "en-US": "千岩长枪",
-      "share_id": 336
+      "share_id": 138
     },
     {
       "id": 78,
       "type": "event",
       "zh-HANS": "天空之脊",
       "en-US": "天空之脊",
-      "share_id": 337
+      "share_id": 139
     },
     {
       "id": 79,
       "type": "event",
       "zh-HANS": "贯虹之槊",
       "en-US": "贯虹之槊",
-      "share_id": 348
+      "share_id": 140
     },
     {
       "id": 80,
       "type": "event",
       "zh-HANS": "薙草之稻光",
       "en-US": "薙草之稻光",
-      "share_id": 349
+      "share_id": 141
     },
     {
       "id": 81,
       "type": "event",
       "zh-HANS": "贯月矢",
       "en-US": "贯月矢",
-      "share_id": 350
+      "share_id": 142
     },
     {
       "id": 82,
       "type": "event",
       "zh-HANS": "旅行剑",
       "en-US": "旅行剑",
-      "share_id": 351
+      "share_id": 143
     },
     {
       "id": 83,
       "type": "event",
       "zh-HANS": "祭礼剑",
       "en-US": "祭礼剑",
-      "share_id": 363
+      "share_id": 144
     },
     {
       "id": 84,
       "type": "event",
       "zh-HANS": "风鹰剑",
       "en-US": "风鹰剑",
-      "share_id": 364
+      "share_id": 145
     },
     {
       "id": 85,
       "type": "event",
       "zh-HANS": "天空之刃",
       "en-US": "天空之刃",
-      "share_id": 365
+      "share_id": 146
     },
     {
       "id": 86,
       "type": "event",
       "zh-HANS": "西风剑",
       "en-US": "西风剑",
-      "share_id": 366
+      "share_id": 147
     },
     {
       "id": 87,
       "type": "event",
       "zh-HANS": "冒险家头带",
       "en-US": "冒险家头带",
-      "share_id": 367
+      "share_id": 148
     },
     {
       "id": 88,
       "type": "event",
       "zh-HANS": "幸运儿银冠",
       "en-US": "幸运儿银冠",
-      "share_id": 368
+      "share_id": 149
     },
     {
       "id": 89,
       "type": "event",
       "zh-HANS": "游医的方巾",
       "en-US": "游医的方巾",
-      "share_id": 369
+      "share_id": 150
     },
     {
       "id": 90,
       "type": "event",
       "zh-HANS": "赌徒的耳环",
       "en-US": "赌徒的耳环",
-      "share_id": 370
+      "share_id": 151
     },
     {
       "id": 91,
       "type": "event",
       "zh-HANS": "教官的帽子",
       "en-US": "教官的帽子",
-      "share_id": 371
+      "share_id": 152
     },
     {
       "id": 92,
@@ -3699,68 +3747,149 @@
     {
       "id": 302,
       "type": "event",
+      "zh-HANS": "尖兵协同战法",
+      "en-US": "尖兵协同战法",
+      "share_id": 398
+    },
+    {
+      "id": 303,
+      "type": "event",
+      "zh-HANS": "不明流通渠道",
+      "en-US": "不明流通渠道",
+      "share_id": 399
+    },
+    {
+      "id": 304,
+      "type": "event",
+      "zh-HANS": "冰雅刺剑",
+      "en-US": "冰雅刺剑",
+      "share_id": 400
+    },
+    {
+      "id": 305,
+      "type": "event",
+      "zh-HANS": "「究极霸王超级魔剑」",
+      "en-US": "「究极霸王超级魔剑」",
+      "share_id": 401
+    },
+    {
+      "id": 306,
+      "type": "event",
+      "zh-HANS": "勘探钻机",
+      "en-US": "勘探钻机",
+      "share_id": 402
+    },
+    {
+      "id": 307,
+      "type": "event",
+      "zh-HANS": "角斗士的凯旋",
+      "en-US": "角斗士的凯旋",
+      "share_id": 403
+    },
+    {
+      "id": 308,
+      "type": "event",
+      "zh-HANS": "瑟琳",
+      "en-US": "瑟琳",
+      "share_id": 404
+    },
+    {
+      "id": 309,
+      "type": "event",
+      "zh-HANS": "「看到那小子挣钱···」",
+      "en-US": "「看到那小子挣钱···」",
+      "share_id": 405
+    },
+    {
+      "id": 310,
+      "type": "event",
+      "zh-HANS": "噔噔！",
+      "en-US": "噔噔！",
+      "share_id": 406
+    },
+    {
+      "id": 311,
+      "type": "event",
       "zh-HANS": "雷楔",
       "en-US": "雷楔"
     },
     {
-      "id": 303,
+      "id": 312,
       "type": "event",
       "zh-HANS": "太郎丸的存款",
       "en-US": "太郎丸的存款"
     },
     {
-      "id": 304,
+      "id": 313,
       "type": "event",
       "zh-HANS": "「清洁工作」",
       "en-US": "「清洁工作」"
     },
     {
-      "id": 305,
+      "id": 314,
       "type": "event",
       "zh-HANS": "海底宝藏",
       "en-US": "海底宝藏"
     },
     {
-      "id": 306,
+      "id": 315,
       "type": "event",
       "zh-HANS": "圣俗杂座",
       "en-US": "圣俗杂座"
     },
     {
-      "id": 307,
+      "id": 316,
       "type": "event",
       "zh-HANS": "噬骸能量块",
       "en-US": "噬骸能量块"
     },
     {
-      "id": 308,
+      "id": 317,
       "type": "event",
       "zh-HANS": "唤醒眷属",
       "en-US": "唤醒眷属"
     },
     {
-      "id": 309,
+      "id": 318,
       "type": "event",
       "zh-HANS": "禁忌知识",
       "en-US": "禁忌知识"
     },
     {
-      "id": 310,
+      "id": 319,
       "type": "event",
       "zh-HANS": "幻戏倒计时：2",
       "en-US": "幻戏倒计时：2"
     },
     {
-      "id": 311,
+      "id": 320,
       "type": "event",
       "zh-HANS": "幻戏倒计时：1",
       "en-US": "幻戏倒计时：1"
     },
     {
-      "id": 312,
+      "id": 321,
       "type": "event",
       "zh-HANS": "幻戏开始！",
       "en-US": "幻戏开始！"
+    },
+    {
+      "id": 322,
+      "type": "event",
+      "zh-HANS": "超量装药弹头",
+      "en-US": "超量装药弹头"
+    },
+    {
+      "id": 323,
+      "type": "event",
+      "zh-HANS": "裂晶弹片",
+      "en-US": "裂晶弹片"
+    },
+    {
+      "id": 324,
+      "type": "event",
+      "zh-HANS": "美露莘的声援",
+      "en-US": "美露莘的声援"
     }
   ]
 }
