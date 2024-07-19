@@ -40,6 +40,7 @@ namespace LumiTracker.Config
         public string closing_behavior { get; set; }
         public string theme { get; set; }
         public string client_type { get; set; }
+        public bool show_ui_outside { get; set; }
     }
 
 

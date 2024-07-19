@@ -31,6 +31,7 @@
     <Window.Resources>
         <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+        <helpers:SizeWithRatioVariableConverter x:Key="SizeWithRatioVariableConverter" />
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
         <SolidColorBrush x:Key="MainContentBackground"
@@ -133,22 +134,37 @@
                 </MultiBinding>
             </Popup.IsOpen>
 
+            <Popup.Height>
+                <MultiBinding Converter="{StaticResource SizeWithRatioVariableConverter}">
+                    <Binding Path="Height" />
+                    <Binding Path="ViewModel.PopupHeightRatio" />
+                </MultiBinding>
+            </Popup.Height>
+
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
                 <Grid.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="Transparent" Offset="0"/>
-                        <GradientStop Color="Transparent" Offset="0.13"/>
-                        <GradientStop Color="{Binding Source={StaticResource MainContentBackground}, Path=Color}" Offset="0.13"/>
-                        <GradientStop Color="{Binding Source={StaticResource MainContentBackground}, Path=Color}" Offset="1"/>
+                        <GradientStop 
+                            Color="Transparent" 
+                            Offset="0"/>
+                        <GradientStop 
+                            Color="Transparent" 
+                            Offset="{Binding Path=ViewModel.BackgroundGradientStopRatio}"/>
+                        <GradientStop 
+                            Color="{Binding Source={StaticResource MainContentBackground}, Path=Color}" 
+                            Offset="{Binding Path=ViewModel.BackgroundGradientStopRatio}"/>
+                        <GradientStop 
+                            Color="{Binding Source={StaticResource MainContentBackground}, Path=Color}" 
+                            Offset="1"/>
                     </LinearGradientBrush>
                 </Grid.Background>
 
-                <!-- Main Content-->            
+            <!-- Main Content-->            
             <TabControl 
                 Grid.Row="0"
                 Margin="0,8,0,0"
@@ -187,7 +203,7 @@
                         Grid.Column="0"
                         ScrollViewer.VerticalScrollBarVisibility="{Binding ViewModel.VerticalScrollBarVisibility}"
                         MaxWidth="{Binding Width}"
-                        Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.35}"
+                        d:Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.35}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
                         ItemsSource="{Binding ViewModel.MyActionCardsPlayed, Mode=TwoWay}"
                         ItemTemplate="{StaticResource ActionCardViewTemplate}"
@@ -230,7 +246,7 @@
                         Grid.Column="0"
                         ScrollViewer.VerticalScrollBarVisibility="{Binding ViewModel.VerticalScrollBarVisibility}"
                         MaxWidth="{Binding Width}"
-                        Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.35}"
+                        d:Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.35}"
                         d:ItemsSource="{d:SampleData ItemCount=2}"
                         ItemsSource="{Binding ViewModel.OpActionCardsPlayed, Mode=TwoWay}"
                         ItemTemplate="{StaticResource ActionCardViewTemplate}"

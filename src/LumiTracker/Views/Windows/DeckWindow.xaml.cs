@@ -1,5 +1,5 @@
 ﻿using LumiTracker.Helpers;
-using LumiTracker.Services;
+using LumiTracker.Config;
 using LumiTracker.ViewModels.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows.Controls;
@@ -18,6 +18,7 @@ namespace LumiTracker.Views.Windows
         void HideWindow();
         void AttachTo(IntPtr hwnd);
         void Detach();
+        void SetbOutside(bool bOutside);
     }
 
     public partial class DeckWindow : IDeckWindow
@@ -37,7 +38,7 @@ namespace LumiTracker.Views.Windows
 
         public void AttachTo(IntPtr hwnd)
         {
-            _snapper = new WindowSnapper(this, hwnd);
+            _snapper = new WindowSnapper(this, hwnd, Configuration.Data.show_ui_outside);
             _snapper.Attach();
         }
         public void Detach()
@@ -55,6 +56,13 @@ namespace LumiTracker.Views.Windows
         {
             Hide();
             ViewModel.IsShowing = false;
+        }
+
+        public void SetbOutside(bool bOutside)
+        {
+            _snapper?.SetbOutside(bOutside);
+            ViewModel.PopupHeightRatio = bOutside ? 1.0 : 0.4;
+            ViewModel.BackgroundGradientStopRatio = bOutside ? 0.055 : 0.14;
         }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
