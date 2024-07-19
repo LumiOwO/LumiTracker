@@ -40,4 +40,36 @@ namespace LumiTracker.Helpers
             throw new NotImplementedException();
         }
     }
+
+    public class MultiBooleanAndToVisibilityConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length == 0 || !values.All(v => v is bool) || !(parameter is string invisibleType))
+                return false;
+
+            bool isVisible = values.Cast<bool>().All(b => b);
+            if (isVisible)
+            {
+                return Visibility.Visible;
+            }
+            else if (invisibleType == "Collapsed")
+            {
+                return Visibility.Collapsed;
+            }
+            else if (invisibleType == "Hidden")
+            {
+                return Visibility.Hidden;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

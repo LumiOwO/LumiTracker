@@ -33,9 +33,7 @@ namespace LumiTracker.ViewModels.Windows
     {
         // ui
         [ObservableProperty]
-        private double _popupHeightRatio = 0.0;
-        [ObservableProperty]
-        private double _backgroundGradientStopRatio = 0.0;
+        private double _mainContentHeightRatio = 0.0;
 
         // data
         [ObservableProperty]

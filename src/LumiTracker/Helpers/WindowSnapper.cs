@@ -214,22 +214,18 @@ namespace LumiTracker.Helpers
             if (_bOutside)
             {
                 _src_window.Width  = clientRect.Width  / scale * 0.18;
-                _src_window.Height = clientRect.Height / scale;
+                _src_window.Height = bounds.Height     / scale;
                 _src_window.Left   = clientLeftTop.x   / scale + clientRect.Width  / scale;
                 _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
             }
             else
             {
                 _src_window.Width  = clientRect.Width  / scale * 0.18;
-                _src_window.Height = clientRect.Height / scale;
+                _src_window.Height = bounds.Height     / scale;
                 _src_window.Left   = clientLeftTop.x   / scale;
                 _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
             }
 
-            // Refresh popup, force the Popup to recalculate its position
-            var offset = _src_window.DeckWindowPopup.HorizontalOffset;
-            _src_window.DeckWindowPopup.HorizontalOffset = offset + 1;
-            _src_window.DeckWindowPopup.HorizontalOffset = offset;
 
             _lastBounds = bounds;
         }

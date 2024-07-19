@@ -61,8 +61,16 @@ namespace LumiTracker.Views.Windows
         public void SetbOutside(bool bOutside)
         {
             _snapper?.SetbOutside(bOutside);
-            ViewModel.PopupHeightRatio = bOutside ? 1.0 : 0.4;
-            ViewModel.BackgroundGradientStopRatio = bOutside ? 0.055 : 0.14;
+            ViewModel.MainContentHeightRatio = bOutside ? 1.0 : 0.45;
+            if (bOutside)
+            {
+                toggle.IsChecked = true;
+                toggle.Visibility = toggleIcon.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                toggle.Visibility = toggleIcon.Visibility = Visibility.Visible;
+            }
         }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
