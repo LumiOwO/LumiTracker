@@ -248,4 +248,8 @@
     <value>Duel Not Started</value>
     <comment/>
   </data>
+  <data name="ShowUIOutside" xml:space="preserve">
+    <value>Display UI outside the window</value>
+    <comment/>
+  </data>
 </root>

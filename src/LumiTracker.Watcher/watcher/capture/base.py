@@ -2,12 +2,29 @@ import win32gui
 import win32api
 import ctypes
 
+from ..config import cfg
 from ..frame_manager import FrameManager
+
+import ctypes
+
+kernel32 = ctypes.WinDLL('kernel32')
+kernel32.Sleep.argtypes = [ctypes.c_ulong]
+kernel32.Sleep.restype = None
+
+winmm = ctypes.WinDLL('winmm')
+winmm.timeBeginPeriod.argtypes = [ctypes.c_uint]
+winmm.timeBeginPeriod.restype = ctypes.c_uint
+winmm.timeEndPeriod.argtypes = [ctypes.c_uint]
+winmm.timeEndPeriod.restype = ctypes.c_uint
 
 class CaptureBase:
     def __init__(self):
-        self.hwnd          = 0
-        self.frame_manager = None
+        self.hwnd           = 0
+        self.frame_manager  = None
+        self.frame_interval = 1.0 / cfg.frame_limit
+
+        # set timer resolution to 1 ms
+        winmm.timeBeginPeriod(1)
 
     def Start(self, hwnd):
         self.hwnd = hwnd
@@ -32,6 +49,12 @@ class CaptureBase:
         # frame_buffer: 4-channels, BGRX
         self.frame_manager.OnFrameArrived(frame_buffer)
 
+    def WaitForFrameRateLimit(self, elapsed_time):
+        # use Windows native api to get accurate sleep interval
+        # should call winmm.timeBeginPeriod() to set timer resolution
+        dt = self.frame_interval - elapsed_time
+        if dt > 0:
+            kernel32.Sleep(int(dt * 1000))
 
     def GetClientRect(self):
         # Get window rect

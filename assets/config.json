@@ -4,7 +4,7 @@
   "debug_dir": "temp",
   "LOG_INTERVAL": 3,
   "proc_watch_interval": 1,
-  "frame_interval": 0.014,
+  "frame_limit": 50,
   "action_crop_box0": [
     0.16666667,
     0.44444445,
@@ -29,12 +29,13 @@
   "cards_dir": "cards",
   "hash_size": 10,
   "ann_index_len": 100,
-  "threshold": 26,
+  "threshold": 24,
   "strict_threshold": 20,
   "ann_metric": "hamming",
   "ann_n_trees": 10,
   "lang": "zh-HANS",
   "closing_behavior": "Minimize",
   "theme": "Dark",
-  "client_type": "YuanShen"
+  "client_type": "YuanShen",
+  "show_ui_outside": false
 }

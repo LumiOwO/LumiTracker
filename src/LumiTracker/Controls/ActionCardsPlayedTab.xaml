@@ -1,0 +1,167 @@
+﻿<UserControl x:Class="LumiTracker.Controls.ActionCardsPlayedTab"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:local="clr-namespace:LumiTracker.Views.Windows"
+            xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+            xmlns:vm="clr-namespace:LumiTracker.ViewModels.Windows"
+            xmlns:helpers="clr-namespace:LumiTracker.Helpers"
+            xmlns:svs="clr-namespace:LumiTracker.Services"
+            xmlns:ctrls="clr-namespace:LumiTracker.Controls"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            mc:Ignorable="d" 
+            d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
+        <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+        <helpers:SizeWithRatioVariableConverter x:Key="SizeWithRatioVariableConverter" />
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <helpers:MultiBooleanAndToVisibilityConverter x:Key="MultiBooleanAndToVisibilityConverter" />
+
+        <SolidColorBrush 
+            x:Key="MainContentBackground"
+            Color="#e6282c34" />
+        <SolidColorBrush 
+            x:Key="TabHeaderBackground"
+            Color="#1affffff" />
+
+        <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type vm:ActionCardView}">
+            <Grid
+                HorizontalAlignment="Stretch"
+                Margin="2, -5, 0, -5">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border 
+                    Grid.Column="0" 
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    >
+                    <Border.OpacityMask>
+                        <LinearGradientBrush StartPoint="1,0.5" EndPoint="0,0.5">
+                            <GradientStop Color="#bf000000" Offset="0.4" />
+                            <GradientStop Color="Transparent" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.OpacityMask>
+                    <Image 
+                        Source="{Binding SnapshotUri, Mode=OneWay}" 
+                        Stretch="UniformToFill"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Center"
+                        Height="{Binding Height, 
+                            RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.030
+                            }"
+                    />
+                </Border>
+                <TextBlock
+                    Grid.Column="0"
+                    Margin="5,0,0,0"
+                    Foreground="White"
+                    FontWeight="Medium"
+                    VerticalAlignment="Center"
+                    FontSize="{Binding Height, 
+                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.016
+                        }"
+                    Text="{Binding CardName, Mode=OneWay}" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="7,2,4,0"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Foreground="#f9ca24"
+                    FontSize="{Binding Height, 
+                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.018
+                        }"
+                Text="{Binding Count, Mode=OneWay}" />
+            </Grid>
+        </DataTemplate>
+
+        <Style TargetType="ListViewItem">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid 
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:ActionCardsPlayedTab}}"
+        Background="{StaticResource MainContentBackground}"
+        >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ui:ListView
+            Grid.Row="0"
+            ScrollViewer.VerticalScrollBarVisibility="{Binding ViewModel.VerticalScrollBarVisibility}"
+            MaxWidth="{Binding WindowWidth}"
+            ItemsSource="{Binding ActionCardsPlayed}"
+            ItemTemplate="{StaticResource ActionCardViewTemplate}"
+            PreviewMouseDown="OnPreviewMouseDown"
+            MouseEnter="OnMouseEnter"
+            MouseLeave="OnMouseLeave"
+        />
+
+        <!-- Round Text -->
+        <TextBlock
+            Grid.Row="1"
+            Margin="0, 5, 0, 5"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Stretch"
+            Visibility="{Binding ViewModel.GameStarted,
+                    Converter={StaticResource BooleanToVisibilityConverter},
+                    ConverterParameter=Hidden
+                    }"
+            FontSize="{Binding WindowHeight, 
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.012
+                    }"
+            >
+            <Run 
+                Foreground="White"
+                Text="{svs:Localization Round}"
+                />
+            <Run 
+                Foreground="#f9ca24" 
+                FontWeight="Bold" 
+                Text="{Binding ViewModel.Round}"
+                />
+        </TextBlock>
+
+        <TextBlock
+            Grid.Row="1"
+            Margin="0, 5, 0, 5"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Stretch"
+            Visibility="{Binding ViewModel.GameNotStarted,
+                    Converter={StaticResource BooleanToVisibilityConverter},
+                    ConverterParameter=Hidden
+                    }"
+            FontSize="{Binding WindowHeight, 
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.012
+                    }"
+            >
+            <Run 
+                Foreground="DarkGray"
+                FontWeight="Light"
+                Text="{svs:Localization GameNotStarted}"
+            />
+        </TextBlock>
+    </Grid>
+</UserControl>

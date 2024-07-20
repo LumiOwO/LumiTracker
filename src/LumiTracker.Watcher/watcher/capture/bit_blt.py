@@ -52,7 +52,6 @@ class BitBlt(CaptureBase):
             logging.warning(f'"info": "Error releasing hwnd_dc, maybe the reason is the closed hwnd"')
 
     def MainLoop(self):
-        delay = cfg.frame_interval
         while True:
             start_time = time.perf_counter()
 
@@ -74,8 +73,7 @@ class BitBlt(CaptureBase):
                 pass
 
             dt = time.perf_counter() - start_time
-            if dt < delay:
-                time.sleep(delay - dt)
+            self.WaitForFrameRateLimit(elapsed_time=dt)
     
     def OnResize(self, client_width, client_height):
         self.DestroyBitmap()

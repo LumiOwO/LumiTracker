@@ -248,4 +248,8 @@
     <value>对局未开始</value>
     <comment/>
   </data>
+  <data name="ShowUIOutside" xml:space="preserve">
+    <value>记牌器界面显示在窗口外侧</value>
+    <comment/>
+  </data>
 </root>

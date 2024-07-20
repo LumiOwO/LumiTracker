@@ -1,5 +1,5 @@
 ﻿using LumiTracker.Helpers;
-using LumiTracker.Services;
+using LumiTracker.Config;
 using LumiTracker.ViewModels.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows.Controls;
@@ -18,6 +18,7 @@ namespace LumiTracker.Views.Windows
         void HideWindow();
         void AttachTo(IntPtr hwnd);
         void Detach();
+        void SetbOutside(bool bOutside);
     }
 
     public partial class DeckWindow : IDeckWindow
@@ -37,7 +38,7 @@ namespace LumiTracker.Views.Windows
 
         public void AttachTo(IntPtr hwnd)
         {
-            _snapper = new WindowSnapper(this, hwnd);
+            _snapper = new WindowSnapper(this, hwnd, Configuration.Data.show_ui_outside);
             _snapper.Attach();
         }
         public void Detach()
@@ -48,13 +49,37 @@ namespace LumiTracker.Views.Windows
 
         public void ShowWindow()
         {
-            Show();
-            ViewModel.IsShowing = true;
+            if (!ViewModel.IsShowing)
+            {
+                Show();
+                ViewModel.IsShowing = true;
+            }
         }
         public void HideWindow()
         {
-            Hide();
-            ViewModel.IsShowing = false;
+            if (ViewModel.IsShowing)
+            {
+                Hide();
+                ViewModel.IsShowing = false;
+            }
+        }
+
+        public void SetbOutside(bool bOutside)
+        {
+            _snapper?.SetbOutside(bOutside);
+            if (bOutside)
+            {
+                toggle.IsChecked = true;
+                toggle.Visibility = toggleIcon.Visibility = Visibility.Collapsed;
+                ViewModel.MainContentHeightRatio = 1.0;
+                Topmost = false;
+            }
+            else
+            {
+                toggle.Visibility = toggleIcon.Visibility = Visibility.Visible;
+                ViewModel.MainContentHeightRatio = 0.45;
+                Topmost = true;
+            }
         }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)

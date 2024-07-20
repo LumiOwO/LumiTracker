@@ -32,6 +32,9 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private Brush _gameWatcherStateBrush = Brushes.DarkGray;
 
+        [ObservableProperty]
+        private bool _showUIOutside = false;
+
         public StartViewModel(IDeckWindow deckWindow, GameWatcher gameWatcher)
         {
             _deckWindow  = deckWindow;
@@ -42,6 +45,8 @@ namespace LumiTracker.ViewModels.Pages
         {
             Enum.TryParse(Configuration.Data.client_type, out EClientType clientType);
             CurrentClientType = clientType;
+            ShowUIOutside = Configuration.Data.show_ui_outside;
+            _deckWindow.SetbOutside(ShowUIOutside);
 
             _gameWatcher.GenshinWindowFound += OnGenshinWindowFound;
             _gameWatcher.WindowWatcherStart += OnWindowWatcherStart;
@@ -119,6 +124,17 @@ namespace LumiTracker.ViewModels.Pages
             Configuration.Save();
 
             _gameWatcher.ChangeGameClient(processName);
+        }
+
+        [RelayCommand]
+        public void OnShowUIOutsideCheckBoxToggled()
+        {
+            ShowUIOutside = !ShowUIOutside;
+            _deckWindow.SetbOutside(ShowUIOutside);
+
+            Configuration.Data.show_ui_outside = ShowUIOutside;
+            Configuration.Save();
+
         }
     }
 }

@@ -31,6 +31,11 @@ namespace LumiTracker.ViewModels.Windows
 
     public partial class DeckWindowViewModel : ObservableObject
     {
+        // ui
+        [ObservableProperty]
+        private double _mainContentHeightRatio = 0.0;
+
+        // data
         [ObservableProperty]
         private ObservableCollection<ActionCardView> _myActionCardsPlayed = new ();
         HashSet<int> MyPlayedCardIDs = new ();

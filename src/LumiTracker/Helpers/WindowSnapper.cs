@@ -52,6 +52,11 @@ namespace LumiTracker.Helpers
             public int Right { get; set; }
             public int Bottom { get; set; }
 
+            public Rect()
+            {
+                Left = 0; Top = 0; Right = 0; Bottom = 0;
+            }
+
             public int Height
             {
                 get { return Bottom - Top; }
@@ -112,20 +117,20 @@ namespace LumiTracker.Helpers
 
         private DispatcherTimer _timer;
         private Rect            _lastBounds;
+        private IntPtr          _lastForeground;
         private DeckWindow      _src_window;
         private IntPtr          _src_hwnd;
         private IntPtr          _dst_hwnd;
+        private bool            _bOutside;
 
-        public WindowSnapper(DeckWindow window, IntPtr hwnd)
+        public WindowSnapper(DeckWindow window, IntPtr hwnd, bool bOutside)
         {
-            _src_window = window;
-            _src_hwnd   = new WindowInteropHelper(window).Handle;
-            _dst_hwnd   = hwnd;
-
-            _lastBounds.Left   = 0;
-            _lastBounds.Top    = 0;
-            _lastBounds.Right  = 0;
-            _lastBounds.Bottom = 0;
+            _lastBounds     = new Rect();
+            _lastForeground = 0;
+            _src_window     = window;
+            _src_hwnd       = new WindowInteropHelper(window).Handle;
+            _dst_hwnd       = hwnd;
+            _bOutside       = bOutside;
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
@@ -143,6 +148,16 @@ namespace LumiTracker.Helpers
             _timer.Stop();
         }
 
+        public void SetbOutside(bool bOutside)
+        {
+            if (_bOutside != bOutside)
+            {
+                _bOutside = bOutside;
+                // force update
+                _lastBounds = new Rect();
+            }
+        }
+
         private void Tick()
         {
             var bounds = GetWindowBounds(_dst_hwnd);
@@ -155,9 +170,19 @@ namespace LumiTracker.Helpers
             //Configuration.Logger.LogDebug($"_src_window.Height: {_src_window.Height}");
 
             var foregroundHwnd = GetForegroundWindow();
-            if (_src_hwnd != foregroundHwnd)
+            if (_bOutside)
             {
-                if (_dst_hwnd != foregroundHwnd)
+                _src_window.ShowWindow();
+                if (foregroundHwnd != _lastForeground && foregroundHwnd == _dst_hwnd)
+                {
+                    // Set to topmost once
+                    _src_window.Topmost = true;
+                    _src_window.Topmost = false;
+                }
+            }
+            else
+            {
+                if (foregroundHwnd != _src_hwnd && foregroundHwnd != _dst_hwnd)
                 {
                     _src_window.HideWindow();
                 }
@@ -166,6 +191,8 @@ namespace LumiTracker.Helpers
                     _src_window.ShowWindow();
                 }
             }
+
+            _lastForeground = foregroundHwnd;
         }
 
         private void SnapToWindow(Rect bounds)
@@ -198,15 +225,21 @@ namespace LumiTracker.Helpers
             Configuration.Logger.LogDebug($"PhysicalHeight={PhysicalHeight}, LogicalHeight={LogicalHeight}, scale={scale}");
 
             // Snap to target window
-            _src_window.Width  = clientRect.Width  / scale * 0.2;
-            _src_window.Height = clientRect.Height / scale;
-            _src_window.Left   = clientLeftTop.x / scale;
-            _src_window.Top    = clientLeftTop.y / scale + clientRect.Height / scale - _src_window.Height;
+            if (_bOutside)
+            {
+                _src_window.Width  = clientRect.Width  / scale * 0.18;
+                _src_window.Height = bounds.Height     / scale;
+                _src_window.Left   = clientLeftTop.x   / scale + clientRect.Width  / scale;
+                _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
+            }
+            else
+            {
+                _src_window.Width  = clientRect.Width  / scale * 0.18;
+                _src_window.Height = bounds.Height     / scale;
+                _src_window.Left   = clientLeftTop.x   / scale;
+                _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
+            }
 
-            // Refresh popup, force the Popup to recalculate its position
-            var offset = _src_window.DeckWindowPopup.HorizontalOffset;
-            _src_window.DeckWindowPopup.HorizontalOffset = offset + 1;
-            _src_window.DeckWindowPopup.HorizontalOffset = offset;
 
             _lastBounds = bounds;
         }
