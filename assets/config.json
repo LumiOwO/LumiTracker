@@ -1,5 +1,5 @@
 {
-  "DEBUG": true,
+  "DEBUG": false,
   "DEBUG_SAVE": false,
   "debug_dir": "temp",
   "LOG_INTERVAL": 3,
@@ -37,5 +37,5 @@
   "closing_behavior": "Minimize",
   "theme": "Dark",
   "client_type": "YuanShen",
-  "show_ui_outside": true
+  "show_ui_outside": false
 }

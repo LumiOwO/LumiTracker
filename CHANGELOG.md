@@ -1,3 +1,7 @@
+# \[[v1.0.3](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.0.3)\] - 2024.07.20
+- 增加4.8版本卡牌
+- 新增选项：允许记牌器界面显示在游戏窗口外侧
+
 # \[[v1.0.2](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.0.2)\] - 2024.06.28
 - 修复料理牌识别错误的问题
 - 增加回合数记录功能
