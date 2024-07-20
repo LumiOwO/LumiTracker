@@ -22,7 +22,7 @@ namespace LumiTracker.Config
         public string debug_dir { get; set; }
         public int LOG_INTERVAL { get; set; }
         public int proc_watch_interval { get; set; }
-        public float frame_interval { get; set; }
+        public int frame_limit { get; set; }
         public float[] action_crop_box0 { get; set; }
         public float[] action_crop_box1 { get; set; }
         public float[] action_crop_box2 { get; set; }

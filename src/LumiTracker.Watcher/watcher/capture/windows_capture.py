@@ -64,11 +64,8 @@ class WindowsCapture(CaptureBase):
 
         self.OnFrameArrived(frame.frame_buffer)
 
-        # limit the speed in case of too fast
-        INTERVAL = cfg.frame_interval
         dt = time.perf_counter() - self.prev_frame_time
-        if dt < INTERVAL:
-            time.sleep(INTERVAL - dt)
+        self.WaitForFrameRateLimit(elapsed_time=dt)
         cur_time = time.perf_counter()
         self.prev_frame_time = cur_time
 
