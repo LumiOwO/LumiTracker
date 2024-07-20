@@ -117,6 +117,7 @@ namespace LumiTracker.Helpers
 
         private DispatcherTimer _timer;
         private Rect            _lastBounds;
+        private IntPtr          _lastForeground;
         private DeckWindow      _src_window;
         private IntPtr          _src_hwnd;
         private IntPtr          _dst_hwnd;
@@ -124,11 +125,12 @@ namespace LumiTracker.Helpers
 
         public WindowSnapper(DeckWindow window, IntPtr hwnd, bool bOutside)
         {
-            _lastBounds = new Rect();
-            _src_window = window;
-            _src_hwnd   = new WindowInteropHelper(window).Handle;
-            _dst_hwnd   = hwnd;
-            _bOutside   = bOutside;
+            _lastBounds     = new Rect();
+            _lastForeground = 0;
+            _src_window     = window;
+            _src_hwnd       = new WindowInteropHelper(window).Handle;
+            _dst_hwnd       = hwnd;
+            _bOutside       = bOutside;
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
@@ -167,14 +169,20 @@ namespace LumiTracker.Helpers
             //Configuration.Logger.LogDebug($"_lastBounds: {_lastBounds.Width}, {_lastBounds.Height}");
             //Configuration.Logger.LogDebug($"_src_window.Height: {_src_window.Height}");
 
+            var foregroundHwnd = GetForegroundWindow();
             if (_bOutside)
             {
                 _src_window.ShowWindow();
+                if (foregroundHwnd != _lastForeground && foregroundHwnd == _dst_hwnd)
+                {
+                    // Set to topmost once
+                    _src_window.Topmost = true;
+                    _src_window.Topmost = false;
+                }
             }
             else
             {
-                var foregroundHwnd = GetForegroundWindow();
-                if (_src_hwnd != foregroundHwnd && _dst_hwnd != foregroundHwnd)
+                if (foregroundHwnd != _src_hwnd && foregroundHwnd != _dst_hwnd)
                 {
                     _src_window.HideWindow();
                 }
@@ -183,6 +191,8 @@ namespace LumiTracker.Helpers
                     _src_window.ShowWindow();
                 }
             }
+
+            _lastForeground = foregroundHwnd;
         }
 
         private void SnapToWindow(Rect bounds)
