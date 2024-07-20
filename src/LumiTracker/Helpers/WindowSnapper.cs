@@ -128,7 +128,7 @@ namespace LumiTracker.Helpers
             _src_window = window;
             _src_hwnd   = new WindowInteropHelper(window).Handle;
             _dst_hwnd   = hwnd;
-            _bOutside = bOutside;
+            _bOutside   = bOutside;
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
@@ -167,10 +167,14 @@ namespace LumiTracker.Helpers
             //Configuration.Logger.LogDebug($"_lastBounds: {_lastBounds.Width}, {_lastBounds.Height}");
             //Configuration.Logger.LogDebug($"_src_window.Height: {_src_window.Height}");
 
-            var foregroundHwnd = GetForegroundWindow();
-            if (_src_hwnd != foregroundHwnd)
+            if (_bOutside)
             {
-                if (_dst_hwnd != foregroundHwnd)
+                _src_window.ShowWindow();
+            }
+            else
+            {
+                var foregroundHwnd = GetForegroundWindow();
+                if (_src_hwnd != foregroundHwnd && _dst_hwnd != foregroundHwnd)
                 {
                     _src_window.HideWindow();
                 }

@@ -23,4 +23,22 @@ namespace LumiTracker.Helpers
             throw new NotImplementedException();
         }
     }
+
+    public class BooleanNotConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(value is bool val))
+            {
+                throw new NotImplementedException();
+            }
+
+            return !val;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

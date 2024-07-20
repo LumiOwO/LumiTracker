@@ -12,7 +12,6 @@
     xmlns:ctrls="clr-namespace:LumiTracker.Controls"
     mc:Ignorable="d"
     Title="DeckWindow" 
-    Topmost="True" 
     ShowInTaskbar="False"
     WindowStyle="None"
     AllowsTransparency="True"
@@ -35,6 +34,7 @@
         <helpers:SizeWithRatioVariableConverter x:Key="SizeWithRatioVariableConverter" />
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <helpers:MultiBooleanAndToVisibilityConverter x:Key="MultiBooleanAndToVisibilityConverter" />
+        <helpers:BooleanNotConverter x:Key="BooleanNotConverter" />
 
         <SolidColorBrush x:Key="MainContentBackground"
             Color="#e6282c34" />

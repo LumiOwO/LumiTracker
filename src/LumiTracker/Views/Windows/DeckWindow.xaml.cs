@@ -49,27 +49,36 @@ namespace LumiTracker.Views.Windows
 
         public void ShowWindow()
         {
-            Show();
-            ViewModel.IsShowing = true;
+            if (!ViewModel.IsShowing)
+            {
+                Show();
+                ViewModel.IsShowing = true;
+            }
         }
         public void HideWindow()
         {
-            Hide();
-            ViewModel.IsShowing = false;
+            if (ViewModel.IsShowing)
+            {
+                Hide();
+                ViewModel.IsShowing = false;
+            }
         }
 
         public void SetbOutside(bool bOutside)
         {
             _snapper?.SetbOutside(bOutside);
-            ViewModel.MainContentHeightRatio = bOutside ? 1.0 : 0.45;
             if (bOutside)
             {
                 toggle.IsChecked = true;
                 toggle.Visibility = toggleIcon.Visibility = Visibility.Collapsed;
+                ViewModel.MainContentHeightRatio = 1.0;
+                Topmost = false;
             }
             else
             {
                 toggle.Visibility = toggleIcon.Visibility = Visibility.Visible;
+                ViewModel.MainContentHeightRatio = 0.45;
+                Topmost = true;
             }
         }
 
