@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -244,18 +244,20 @@ namespace LumiTracker.Watcher
 
         public enum ETaskType
         {
-            GAME_START = 0,
+            NONE = 0,
+
+            GAME_START,
             MY_PLAYED,
             OP_PLAYED,
             GAME_OVER,
             ROUND,
             MY_DRAWN,
-            OP_DRAWN, // placeholder, not used yet
+            OP_DRAWN,       // placeholder, not used yet
             MY_DISCARD,
             OP_DISCARD,
             MY_CREATE_DECK,
             OP_CREATE_DECK,
-            MY_CREATE_HAND, // Furina
+            MY_CREATE_HAND, // eg. Furina
             OP_CREATE_HAND,
 
             // types for exception

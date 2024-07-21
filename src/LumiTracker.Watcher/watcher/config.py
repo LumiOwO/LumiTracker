@@ -24,3 +24,21 @@ import logging
 logging.basicConfig(level=logging.DEBUG if cfg.DEBUG else logging.INFO,
                     format='{"level":"%(levelname)s", "data":{%(message)s}}')
 logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
+
+def _Log(log_func, message_dict, **kwargs):
+    if message_dict is None:
+        message_dict = {}
+    message_dict.update(kwargs)
+    log_func(json5.dumps(message_dict, ensure_ascii=False))
+
+def LogDebug(message_dict=None, **kwargs):
+    _Log(logging.debug, message_dict, **kwargs)
+
+def LogInfo(message_dict=None, **kwargs):
+    _Log(logging.info, message_dict, **kwargs)
+
+def LogWarning(message_dict=None, **kwargs):
+    _Log(logging.warning, message_dict, **kwargs)
+
+def LogError(message_dict=None, **kwargs):
+    _Log(logging.error, message_dict, **kwargs)

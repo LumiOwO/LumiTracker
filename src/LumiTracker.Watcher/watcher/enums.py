@@ -1,7 +1,9 @@
 import enum
 
 class ETaskType(enum.Enum):
-    GAME_START        = 0
+    NONE              = 0
+
+    GAME_START        = enum.auto()
     MY_PLAYED         = enum.auto()
     OP_PLAYED         = enum.auto()
     GAME_OVER         = enum.auto()
@@ -12,7 +14,7 @@ class ETaskType(enum.Enum):
     OP_DISCARD        = enum.auto()
     MY_CREATE_DECK    = enum.auto()
     OP_CREATE_DECK    = enum.auto()
-    MY_CREATE_HAND    = enum.auto() # Furina
+    MY_CREATE_HAND    = enum.auto() # eg. Furina
     OP_CREATE_HAND    = enum.auto()
 
     # types for exception
