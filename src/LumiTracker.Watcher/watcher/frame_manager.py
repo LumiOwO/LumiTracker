@@ -1,7 +1,7 @@
 import time
 import logging
 
-from .config import cfg
+from .config import cfg, LogDebug, LogInfo, LogWarning
 from .database import Database
 from .enums import ETaskType, ERatioType
 from .tasks import GameStartTask, CardPlayedTask, GameOverTask, RoundTask, CardFlowTask
@@ -51,8 +51,12 @@ class FrameManager:
         elif abs( ratio - 12 / 5 ) < EPSILON:
             ratio_type = ERatioType.E12_5
         else:
-            logging.info(f'"type": "{ETaskType.UNSUPPORTED_RATIO}", "client_width": {client_width}, "client_height": {client_height}')
-            logging.warning(f'"info": "Current resolution is {client_width}x{client_height} with {ratio=}, which is not supported now."')
+            LogWarning(
+                info=f"Current resolution is {client_width}x{client_height} with {ratio=}, which is not supported now.",
+                type=ETaskType.UNSUPPORTED_RATIO, 
+                client_width=client_width, 
+                client_height=client_height,
+                )
             ratio_type = ERatioType.E16_9 # default
         
         for task in self.tasks:
@@ -71,9 +75,9 @@ class FrameManager:
 
         if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
             fps = self.frame_count / (cur_time - self.prev_log_time)
-            logging.debug(f'"info": "FPS: {fps}"')
+            LogDebug(info=f"FPS: {fps}")
             if (not self.first_log) and (fps < self.min_fps):
-                logging.warning(f'"info": "Min FPS = {fps}"')
+                LogWarning(info=f"Min FPS = {fps}")
                 self.min_fps = fps
 
             self.frame_count   = 0

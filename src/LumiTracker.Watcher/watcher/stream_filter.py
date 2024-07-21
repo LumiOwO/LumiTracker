@@ -101,8 +101,6 @@ class StreamFilter:
         else:
             self.ReadDifferentValue(value)
 
-        # logging.debug(self.count, self.value)
-
         # read
         if (not prev_signaled) and (self.signaled):
             self.cooldown = self.COOLDOWN

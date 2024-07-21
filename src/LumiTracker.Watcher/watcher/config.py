@@ -22,7 +22,7 @@ cfg = dict_to_simplenamespace(_data)
 
 import logging
 logging.basicConfig(level=logging.DEBUG if cfg.DEBUG else logging.INFO,
-                    format='{"level":"%(levelname)s", "data":{%(message)s}}')
+                    format='{"level":"%(levelname)s", "data":%(message)s}')
 logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
 
 def _Log(log_func, message_dict, **kwargs):

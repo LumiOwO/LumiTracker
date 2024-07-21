@@ -7,7 +7,7 @@ import win32con
 
 import numpy as np
 
-from ..config import cfg
+from ..config import cfg, LogWarning
 from .base import CaptureBase
 
 
@@ -39,17 +39,17 @@ class BitBlt(CaptureBase):
         try:
             self.save_dc.DeleteDC()
         except win32ui.error as e:
-            logging.warning(f'"info": "Error deleting save_dc, maybe the reason is the closed hwnd"')
+            LogWarning(info=f"Error deleting save_dc, maybe the reason is the closed hwnd")
     
         try:
             self.mfc_dc.DeleteDC()
         except win32ui.error as e:
-            logging.warning(f'"info": "Error deleting mfc_dc, maybe the reason is the closed hwnd"')
+            LogWarning(info=f"Error deleting mfc_dc, maybe the reason is the closed hwnd")
 
         try:
             win32gui.ReleaseDC(self.hwnd, self.hwnd_dc)
         except win32ui.error as e:
-            logging.warning(f'"info": "Error releasing hwnd_dc, maybe the reason is the closed hwnd"')
+            LogWarning(info=f"Error releasing hwnd_dc, maybe the reason is the closed hwnd")
 
     def MainLoop(self):
         while True:

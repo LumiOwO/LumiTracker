@@ -2,7 +2,7 @@ import win32gui
 import win32api
 import ctypes
 
-from ..config import cfg
+from ..config import cfg, LogDebug
 from ..frame_manager import FrameManager
 
 import ctypes
@@ -90,5 +90,5 @@ class CaptureBase:
 
         # Calculate scale factor
         scale = float(physicalHeight) / logicalHeight
-        # logging.debug(f"{physicalHeight=}, {logicalHeight=}, {scale=}, {hMonitor.handle=}")
+        # LogDebug(f"{physicalHeight=}, {logicalHeight=}, {scale=}, {hMonitor.handle=}")
         return scale

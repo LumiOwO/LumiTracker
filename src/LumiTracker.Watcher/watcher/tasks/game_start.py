@@ -1,7 +1,7 @@
 from .base import TaskBase
 
 from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
-from ..config import cfg
+from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..database import CropBox
 from ..database import ExtractFeature
@@ -47,7 +47,9 @@ class GameStartTask(TaskBase):
             frame_manager.game_started = True
             frame_manager.round        = 0
 
-            logging.debug(f'"info": "Game start, last dist in window = {dist}"')
-            logging.info(f'"type": "{self.task_type.name}"')
+            LogInfo(
+                info=f"Game start, last dist in window = {dist}",
+                type=self.task_type.name,
+                )
             if cfg.DEBUG_SAVE:
                 SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))

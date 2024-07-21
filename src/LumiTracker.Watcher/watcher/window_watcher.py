@@ -2,7 +2,7 @@ import sys
 import logging
 import ctypes
 
-from .config import cfg
+from .config import cfg, LogDebug, LogError
 
 class WindowWatcher:
     def __init__(self):
@@ -14,7 +14,7 @@ class WindowWatcher:
         try:
             ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
         except Exception as e:
-            logging.error(f'"info": "Error setting DPI awareness: {e}"')
+            LogError(info=f"Error setting DPI awareness: {e}")
 
         self.hwnd = hwnd
         self.capture = capture
@@ -27,7 +27,12 @@ if __name__ == '__main__':
     capture_type    = sys.argv[2]
     can_hide_border = int(sys.argv[3])
 
-    logging.debug(f'"info": "WindowWatcher start, {hwnd=}, {capture_type=}, {can_hide_border=}"')
+    LogDebug(
+        info="WindowWatcher start",
+        hwnd=hwnd, 
+        capture_type=capture_type, 
+        can_hide_border=can_hide_border,
+        )
 
     if capture_type == "BitBlt":
         from .capture import BitBlt

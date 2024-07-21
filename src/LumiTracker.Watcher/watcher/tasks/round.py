@@ -1,7 +1,7 @@
 from .base import TaskBase
 
 from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
-from ..config import cfg
+from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..database import CropBox
 from ..database import ExtractFeature
@@ -52,8 +52,11 @@ class RoundTask(TaskBase):
         if found:
             frame_manager.round += 1
 
-            logging.debug(f'"info": "Found round text, last dist in window = {dist}"')
-            logging.info(f'"type": "{self.task_type.name}", "round": "{frame_manager.round}"')
+            LogInfo(
+                info=f"Found round text, last dist in window = {dist}",
+                type=self.task_type.name, 
+                round=frame_manager.round,
+                )
             if cfg.DEBUG_SAVE:
                 SaveImage(main_content, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
 

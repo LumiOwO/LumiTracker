@@ -4,7 +4,7 @@ from windows_capture import Frame, InternalCaptureControl
 import time
 import logging
 
-from ..config import cfg
+from ..config import cfg, LogDebug
 from .base import CaptureBase
 
 class WindowsCapture(CaptureBase):
@@ -31,7 +31,7 @@ class WindowsCapture(CaptureBase):
         self.capture.event(self.on_closed)
 
     def OnClosed(self):
-        logging.debug('"info": "Window Capture Session Closed"')
+        LogDebug(info=f"Window Capture Session Closed")
 
     def MainLoop(self):
         self.capture.start()
@@ -47,9 +47,7 @@ class WindowsCapture(CaptureBase):
         (client_left, client_top, client_right, client_bottom), self.border_size = self.GetClientRect()
         self.client_size = (client_right - client_left, client_bottom - client_top)
 
-        # logging.debug(self.window_size)
-        # logging.debug(self.client_size)
-        # logging.debug(self.border_size)
+        # LogDebug(window_size=self.window_size, client_size=self.client_size, border_size=self.border_size)
 
         self.frame_manager.Resize(self.client_size[0], self.client_size[1])
 

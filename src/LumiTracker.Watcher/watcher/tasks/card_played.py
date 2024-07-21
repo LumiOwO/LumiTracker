@@ -2,7 +2,7 @@ from .base import TaskBase
 from ..stream_filter import StreamFilter
 
 from ..enums import EAnnType, ETaskType, ERegionType
-from ..config import cfg
+from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..database import ActionCardHandler, CropBox
 from ..database import SaveImage
@@ -39,12 +39,15 @@ class CardPlayedTask(TaskBase):
         if cfg.DEBUG:
             # if (self.task_type.value == 1) and True: #(card_id != -1):
             if (True) and (card_id != -1):
-                logging.debug(f'"info": "{dist=}, {self.task_type.name}: {self.db["actions"][card_id]["zh-HANS"] if card_id >= 0 else "None"}"')
+                LogDebug(info=f'{dist=}, {self.task_type.name}: {self.db["actions"][card_id]["zh-HANS"] if card_id >= 0 else "None"}')
         card_id = self.filter.Filter(card_id, dist)
 
         if card_id >= 0:
-            logging.debug(f'"type": "{self.task_type.name}", "card_id": {card_id}, "name": {self.db["actions"][card_id]["zh-HANS"]}')
-            logging.info(f'"type": "{self.task_type.name}", "card_id": {card_id}')
+            LogInfo(
+                type=self.task_type.name,
+                card_id=card_id,
+                name=self.db["actions"][card_id]["zh-HANS"],
+                )
         
         if cfg.DEBUG_SAVE:
             import cv2

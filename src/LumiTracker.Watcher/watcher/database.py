@@ -9,7 +9,7 @@ import csv
 import os
 from pathlib import Path
 
-from .config import cfg
+from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
 from .enums import ECtrlType, EAnnType
 
 def LoadImage(path):
@@ -365,7 +365,7 @@ class Database:
             main_content, valid = GameOverTask.CropMainContent(image)
             feature = ExtractFeature(main_content)
             ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
-            logging.debug(f'"info": "GameOverTest, {dist=}, {ECtrlType(ctrl_id).name}"')
+            LogDebug(info=f"GameOverTest, {dist=}, {ECtrlType(ctrl_id).name}")
             SaveImage(main_content, os.path.join(cfg.debug_dir, f"GameOverTest_MainContent.png"))
 
             # Rounds test
@@ -375,7 +375,7 @@ class Database:
                 main_content, valid = RoundTask.CropMainContent(image)
                 feature = ExtractFeature(main_content)
                 ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
-                logging.debug(f'"info": "round{i + 1}, {dist=}"')
+                LogDebug(info=f"round{i + 1}, {dist=}")
 
 
     def _UpdateActionCards(self):
@@ -431,7 +431,7 @@ class Database:
             image_path = os.path.join(action_cards_dir, image_file)
             image = LoadImage(image_path)
             if image is None:
-                logging.error(f'"info": "Failed to load image: {image_path}"')
+                LogError(info=f"Failed to load image: {image_path}")
                 exit(1)
         
             # create snapshot
@@ -477,10 +477,12 @@ class Database:
                         close_dists[dist].append(f'{i}{actions[i]["zh-HANS"]} <-----> {j}{actions[j]["zh-HANS"]}') 
             
             close_dists = {key: close_dists[key] for key in sorted(close_dists)}
-            logging.warning(f'{json.dumps(close_dists, indent=2, ensure_ascii=False)}')
-            logging.warning(f'{min_dist=}')
+            LogWarning(
+                close_dists=f'{json.dumps(close_dists, indent=2, ensure_ascii=False)}', 
+                min_dist=min_dist,
+                )
 
-        logging.info(f'"info": "Loaded {len(features)} images from {action_cards_dir}"')
+        LogInfo(info=f"Loaded {len(features)} images from {action_cards_dir}")
 
         # share code
         with open(os.path.join(cfg.cards_dir, "share_code.csv"), 
@@ -510,7 +512,7 @@ class Database:
             image_file = f'action_{card_id}_{actions[card_id]["zh-HANS"]}.png'
             image = LoadImage(os.path.join(action_cards_dir, image_file))
             SaveImage(image, os.path.join(cfg.debug_dir, image_file))
-            logging.debug(f'"info": "save {image_file} at {cfg.debug_dir}"')
+            LogDebug(info=f"save {image_file} at {cfg.debug_dir}")
 
         # cfg.ann_index_len = len(features[0])
         ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
@@ -536,11 +538,11 @@ class Database:
                 my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=20, include_distances=True)
 
                 dt = time.perf_counter() - begin_time
-                logging.debug(f'"info": {dt=}')
-                logging.debug(f'"info": {my_ids=}')
-                logging.debug(f'"info": {my_dists=}')
                 found_name = actions[my_ids[0]]['zh-HANS'] if my_dists[0] <= cfg.threshold else "None"
-                logging.debug(f'"info": "{file}: {found_name}"')
+                LogDebug(
+                    info=f"{file}: {found_name}", 
+                    dt=dt, my_ids=my_ids, my_dists=my_dists
+                    )
 
 
     def _Update(self):
