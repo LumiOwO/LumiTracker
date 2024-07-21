@@ -25,7 +25,7 @@ class ERegionType(enum.Enum):
     GAME_OVER  = enum.auto()
     ROUND      = enum.auto()
     CENTER     = enum.auto()
-    FLOW_CARDS = enum.auto()
+    FLOW_ANCHOR= enum.auto()
     MY_DECK    = enum.auto()
     OP_DECK    = enum.auto()
 

@@ -9,8 +9,8 @@ REGIONS = {
         ERegionType.OP_PLAYED  : ( 0.7380, 0.1755, 0.1400, 0.4270 ),
         ERegionType.GAME_OVER  : ( 0.4220, 0.4240, 0.1555, 0.1190 ),
         ERegionType.ROUND      : ( 0.4670, 0.5420, 0.0445, 0.0310 ),
-        ERegionType.CENTER     : ( 0.1000, 0.2600, 0.8000, 0.4800 ),
-        ERegionType.FLOW_CARDS : ( 0.1080, 0.3300, 0.0000, 0.0000 ), # center_card_w, center_card_h, ___, ___ 
+        ERegionType.CENTER     : ( 0.1000, 0.4600, 0.8000, 0.0800 ),
+        ERegionType.FLOW_ANCHOR: ( 0.0000, 0.3350, 0.1060, 0.3280 ), # left determined by bbox
     },
     # 1920 x 1200
     ERatioType.E16_10: {

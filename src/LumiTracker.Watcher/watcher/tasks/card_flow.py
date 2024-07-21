@@ -21,27 +21,22 @@ class CardFlowTask(TaskBase):
         # self.filter        = StreamFilter(null_val=False)
         self.center_buffer = None
         self.center_crop   = None
-        self.action_card_w = 0
-        self.action_card_h = 0
+        self.flow_anchor   = None
 
-        # self.MAX_CARDS     = 6
-        # self.card_handlers = []
-        # for _ in range(self.MAX_CARDS):
-        #     self.card_handlers.append(ActionCardHandler())
-    
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.CENTER]        # left, top, width, height
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
         height = round(client_height * box[3])
-        self.center_crop   = CropBox(left, top, left + width, top + height)
+        self.center_crop = CropBox(left, top, left + width, top + height)
 
-        sizes  = REGIONS[ratio_type][ERegionType.FLOW_CARDS]    # center_card_w, center_card_h, ___, ___ 
-        self.action_card_w = round(client_width  * sizes[0])
-        self.action_card_h = round(client_height * sizes[1])
-        ___  = round(client_width  * sizes[2])
-        ___  = round(client_height * sizes[3])
+        box    = REGIONS[ratio_type][ERegionType.FLOW_ANCHOR] 
+        left   = round(client_width  * box[0])
+        top    = round(client_height * box[1])
+        width  = round(client_width  * box[2])
+        height = round(client_height * box[3])
+        self.flow_anchor = CropBox(left, top, left + width, top + height)
 
     def _PreTick(self, frame_manager):
         self.valid = frame_manager.game_started
@@ -55,15 +50,23 @@ class CardFlowTask(TaskBase):
 
         bboxes = self.DetectCenterBoundingBoxes()
         debugs = []
+        debug_bboxes = []
         for box in bboxes:
+            box.left   = box.left + self.center_crop.left
+            box.top    = self.flow_anchor.top
+            box.right  = box.left + self.flow_anchor.width
+            box.bottom = box.top  + self.flow_anchor.height
+            debug_bboxes.append(box)
+
             card_handler = ActionCardHandler()
             card_handler.OnResize(box)
-            card_id, dist = card_handler.Update(self.center_buffer, self.db)
+            card_id, dist = card_handler.Update(self.frame_buffer, self.db)
             if dist > cfg.threshold:
                 card_id = -1
             debugs.append((self.db["actions"][card_id]["zh-HANS"] if card_id >= 0 else "None", dist))
         if debugs:
             logging.debug(f"{debugs=}")
+            self.bboxes = debug_bboxes
     
 
     def DetectCenterBoundingBoxes(self):
@@ -71,7 +74,7 @@ class CardFlowTask(TaskBase):
         gray = cv2.cvtColor(self.center_buffer, cv2.COLOR_BGR2GRAY)
 
         # Thresholding
-        _, thresh = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)
+        _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
         # cross_kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
         # thresh = cv2.erode(thresh, None, iterations=1)
 
@@ -103,35 +106,60 @@ class CardFlowTask(TaskBase):
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Filter and draw bounding boxes around the detected cards
-        bboxes = []
+        FILTER_H = self.center_crop.height * 0.5
+        filtered_bboxes = []
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if h < self.center_crop.height * 0.65:
+            if h < FILTER_H:
                 continue
             # ratio = w / h
             # if ratio < 0.55 or ratio > 0.75:
             #     continue
-            bboxes.append(CropBox(x, y, x + w, y + h))
+            filtered_bboxes.append(CropBox(x, y, x + w, y + h))
             
-            # use right-bottom as anchor
-            right  = x + w
-            bottom = y + h
-            left   = right  - self.action_card_w
-            top    = bottom - self.action_card_h
-            if left < 0 or top < 0:
-                continue
+            # # use right-bottom as anchor
+            # right  = x + w
+            # bottom = y + h
+            # left   = right  - self.action_card_w
+            # top    = bottom - self.action_card_h
+            # if left < 0 or top < 0:
+            #     continue
             # bboxes.append(CropBox(left, top, right, bottom))
+        if not filtered_bboxes:
+            return []
         
-        if cfg.DEBUG:
-            self.thresh = thresh
-            self.bboxes = bboxes
-            self.gray = gray
+        # sort the boxes
+        if len(filtered_bboxes) > 1:
+            filtered_bboxes.sort(key=lambda box: box.left)
+        
+        # merge bboxes
+        MERGED_W_MIN = self.center_crop.width  * 0.1
+        MERGED_W_MAX = self.center_crop.width  * 0.2
+        MERGED_H_MIN = self.center_crop.height * 0.95
+        MERGE_DIST   = self.center_crop.width  * 0.15
+        def ValidMergedBox(bbox):
+            return bbox.width > MERGED_W_MIN and bbox.width < MERGED_W_MAX and bbox.height > MERGED_H_MIN
+
+        current_bbox = filtered_bboxes[0]
+        bboxes = []
+        for bbox in filtered_bboxes[1:]:
+            dist = bbox.left - current_bbox.left
+            if dist < MERGE_DIST:
+                current_bbox.Merge(bbox)
+            else:
+                # filter noise
+                if ValidMergedBox(current_bbox):
+                    bboxes.append(current_bbox)
+                current_bbox = bbox
+        if ValidMergedBox(current_bbox):
+            bboxes.append(current_bbox)
 
         num_bboxes = len(bboxes)
-        if num_bboxes > 1:
-            # sort by right
-            bboxes.sort(key=lambda box: box.right)
-
+        if num_bboxes == 1:
+            center_x = bboxes[0].left + bboxes[0].width / 2
+            if abs(center_x / self.center_crop.width - 0.5) > 0.1:
+                bboxes = []
+        elif num_bboxes > 1:
             # check distance between cards
             prev_dist = bboxes[1].right - bboxes[0].right
             for i in range(2, num_bboxes):
@@ -141,5 +169,10 @@ class CardFlowTask(TaskBase):
                     bboxes = []
                     break
                 prev_dist = dist
+
+        if cfg.DEBUG:
+            self.thresh = thresh
+            self.bboxes = bboxes
+            self.gray = gray
 
         return bboxes

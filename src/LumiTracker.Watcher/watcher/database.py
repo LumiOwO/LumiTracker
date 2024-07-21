@@ -148,6 +148,12 @@ class CropBox:
     def __str__(self):
         return f"CropBox(left={self.left}, top={self.top}, right={self.right}, bottom={self.bottom})"
 
+    def Merge(self, other):
+        self.left   = min(self.left  , other.left)
+        self.top    = min(self.top   , other.top)
+        self.right  = max(self.right , other.right)
+        self.bottom = max(self.bottom, other.bottom)
+
 
 CLAHE = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(4, 4))
 
