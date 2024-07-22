@@ -16,11 +16,13 @@ import cv2
 class RoundTask(TaskBase):
     def __init__(self, db):
         super().__init__(db)
-
-        self.filter    = StreamFilter(null_val=False)
         self.task_type = ETaskType.ROUND
         self.crop_box  = None  # init when resize
-    
+        self.Reset()
+
+    def Reset(self):
+        self.filter    = StreamFilter(null_val=False)
+
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.ROUND]
         left   = round(client_width  * box[0])

@@ -15,11 +15,13 @@ import os
 class CardPlayedTask(TaskBase):
     def __init__(self, db, is_op):
         super().__init__(db)
-        
-        self.filter         = StreamFilter(null_val=-1)
         self.task_type      = ETaskType.OP_PLAYED if is_op else ETaskType.MY_PLAYED
         self.card_handler   = ActionCardHandler()
+        self.Reset()
     
+    def Reset(self):
+        self.filter         = StreamFilter(null_val=-1)
+
     def OnResize(self, client_width, client_height, ratio_type):
         region_type = ERegionType.OP_PLAYED if self.task_type == ETaskType.OP_PLAYED else ERegionType.MY_PLAYED
         box = REGIONS[ratio_type][region_type]

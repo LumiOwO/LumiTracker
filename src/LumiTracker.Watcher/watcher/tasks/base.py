@@ -19,3 +19,6 @@ class TaskBase:
     
     def OnResize(self, client_width, client_height, ratio_type):
         raise NotImplementedError()
+    
+    def Reset(self):
+        raise NotImplementedError()

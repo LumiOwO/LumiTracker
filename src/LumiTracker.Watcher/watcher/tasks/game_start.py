@@ -15,11 +15,13 @@ import os
 class GameStartTask(TaskBase):
     def __init__(self, db):
         super().__init__(db)
-
-        self.filter    = StreamFilter(null_val=False)
         self.task_type = ETaskType.GAME_START
         self.crop_box  = None  # init when resize
+        self.Reset()
     
+    def Reset(self):
+        self.filter    = StreamFilter(null_val=False)
+
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.GAME_START]
         left   = round(client_width  * box[0])
@@ -43,6 +45,7 @@ class GameStartTask(TaskBase):
         start = (dist <= cfg.strict_threshold) and (ctrl_id == ECtrlType.GAME_START.value)
         start = self.filter.Filter(start, dist)
 
+        frame_manager.reset_tasks = start
         if start:
             frame_manager.game_started = True
             frame_manager.round        = 0

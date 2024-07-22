@@ -16,10 +16,12 @@ import cv2
 class GameOverTask(TaskBase):
     def __init__(self, db):
         super().__init__(db)
-
-        self.filter    = StreamFilter(null_val=False)
         self.task_type = ETaskType.GAME_OVER
         self.crop_box  = None  # init when resize
+        self.Reset()
+
+    def Reset(self):
+        self.filter    = StreamFilter(null_val=False)
     
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.GAME_OVER]

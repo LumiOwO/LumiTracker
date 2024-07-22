@@ -17,7 +17,13 @@ import time
 class CardFlowTask(TaskBase):
     def __init__(self, db):
         super().__init__(db)
-
+        self.center_crop   = None
+        self.flow_anchor   = None
+        self.my_deck_crop  = None
+        self.op_deck_crop  = None
+        self.Reset()
+    
+    def Reset(self):
         # round 0, five cards to detect
         self.round0 = SimpleNamespace()
         self.round0.cards   = [-1 for _ in range(5)]
@@ -32,14 +38,8 @@ class CardFlowTask(TaskBase):
         
         self.signaled_num_cards = 0
         self.signaled_timestamp = 0 
-
         self.my_deck_queue = deque()
         self.op_deck_queue = deque()
-
-        self.center_crop   = None
-        self.flow_anchor   = None
-        self.my_deck_crop  = None
-        self.op_deck_crop  = None
 
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.CENTER]        # left, top, width, height

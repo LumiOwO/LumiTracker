@@ -25,6 +25,7 @@ class FrameManager:
         # controls
         self.game_started    = False
         self.round           = 0
+        self.reset_tasks     = False
 
         # logs
         self.prev_log_time   = time.perf_counter()
@@ -63,10 +64,18 @@ class FrameManager:
             task.OnResize(client_width, client_height, ratio_type)
 
     def OnFrameArrived(self, frame_buffer):
-        for task in self.tasks:
+        # always tick game start task
+        self.game_start_task.PreTick(self, frame_buffer)
+        if self.game_start_task.valid:
+            self.game_start_task.Tick(self)
+        
+        # tick others
+        for task in self.tasks[1:]:
+            if self.reset_tasks:
+                task.Reset()
             task.PreTick(self, frame_buffer)
 
-        for task in self.tasks:
+        for task in self.tasks[1:]:
             if task.valid:
                 task.Tick(self)
 
