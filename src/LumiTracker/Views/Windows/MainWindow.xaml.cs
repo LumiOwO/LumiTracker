@@ -1,24 +1,18 @@
 ﻿using LumiTracker.ViewModels.Windows;
 using LumiTracker.Watcher;
-using System.Globalization;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
 using LumiTracker.Config;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using LumiTracker.Services;
+using LumiTracker.Controls;
 using LumiTracker.Views.Pages;
-using System.Windows.Navigation;
-using LumiTracker.ViewModels.Pages;
-using System.Windows.Controls;
-using System.Windows;
-using Windows.System;
-using Wpf.Ui.Tray.Controls;
-using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using Wpf.Ui.Extensions;
+using Microsoft.Extensions.Options;
+using System.Threading;
 
 namespace LumiTracker.Views.Windows
 {
@@ -30,10 +24,15 @@ namespace LumiTracker.Views.Windows
 
         private readonly IPageService _pageService;
 
+        private readonly IContentDialogService _contentDialogService;
+
+        private Task? _ShowClosingDialog = null;
+
         public MainWindow(
-            MainWindowViewModel  viewModel,
-            IPageService         pageService,
-            INavigationService   navigationService
+            MainWindowViewModel   viewModel,
+            IPageService          pageService,
+            INavigationService    navigationService,
+            IContentDialogService contentDialogService
         )
         {
             SourceInitialized += MainWindow_SourceInitialized;
@@ -42,15 +41,18 @@ namespace LumiTracker.Views.Windows
             ContentRendered   += MainWindow_ContentRendered;
             Closing           += MainWindow_Closing;
 
-            ShowActivated        = false;
-            ViewModel            = viewModel;
-            DataContext          = this;
+            ShowActivated = false;
+            ViewModel     = viewModel;
+            DataContext   = this;
 
             InitializeComponent();
-            SetPageService(pageService);
-            _pageService = pageService;
 
+            SetPageService(pageService);
             navigationService.SetNavigationControl(RootNavigation);
+            contentDialogService.SetDialogHost(RootContentDialog);
+
+            _pageService = pageService;
+            _contentDialogService = contentDialogService;
 
             TrayIcon.Menu!.DataContext = this;
         }
@@ -105,10 +107,70 @@ namespace LumiTracker.Views.Windows
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
+            e.Cancel = true; // Cancel the default close operation
+
+            if (_ShowClosingDialog != null)
+            {
+                return;
+            }
+
+            var closingDialog = new ClosingDialog();
+            closingDialog.DataContext = this;
+            _ShowClosingDialog = OnShowClosingDialog(closingDialog);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            // Make sure that closing this window will begin the process of closing the application.
+            Application.Current.Shutdown();
+        }
+
+        [RelayCommand]
+        private async Task OnShowClosingDialog(object content)
+        {
+            try
+            {
+                Configuration.Logger.LogDebug("OnShowClosingDialog");
+                ContentDialogResult result = await _contentDialogService.ShowSimpleDialogAsync(
+                    new SimpleContentDialogCreateOptions()
+                    {
+                        Title = "Save your work?",
+                        Content = content,
+                        PrimaryButtonText = "Save",
+                        //SecondaryButtonText = "Don't Save",
+                        CloseButtonText = "Cancel",
+                    }
+                );
+
+                string dialogResultText = result switch
+                {
+                    ContentDialogResult.Primary => "User saved their work",
+                    ContentDialogResult.Secondary => "User did not save their work",
+                    _ => "User cancelled the dialog"
+                };
+                Configuration.Logger.LogDebug(dialogResultText);
+
+                // Handle the result here, e.g., save work if Primary button was clicked
+
+                if (result == ContentDialogResult.Primary)
+                {
+                    TryToCloseWindow();
+                }
+            }
+            finally
+            {
+                // Ensure the task variable is reset to null
+                _ShowClosingDialog = null;
+            }
+        }
+
+        private void TryToCloseWindow()
+        {
             string behavior = Configuration.Data.closing_behavior;
             if (behavior == "Minimize")
             {
-                e.Cancel      = true; // Cancel the default close operation
                 ShowInTaskbar = false;
                 //WindowState   = WindowState.Minimized;
 
@@ -118,16 +180,8 @@ namespace LumiTracker.Views.Windows
             }
             else if (behavior == "Quit")
             {
-                e.Cancel      = false;
+                Application.Current.Shutdown();
             }
-        }
-
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-
-            // Make sure that closing this window will begin the process of closing the application.
-            Application.Current.Shutdown();
         }
 
         INavigationView INavigationWindow.GetNavigation()

@@ -48,6 +48,7 @@ namespace LumiTracker
 
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
+                services.AddSingleton<IContentDialogService, ContentDialogService>();
 
                 // Localization
                 services.AddSingleton<ILocalizationService, LocalizationService>();
@@ -177,7 +178,7 @@ namespace LumiTracker
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Just exit
             }
