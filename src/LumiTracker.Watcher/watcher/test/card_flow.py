@@ -17,8 +17,9 @@ import matplotlib.pyplot as plt
 def image():
     frame_manager = FrameManager()
     task = frame_manager.card_flow_task
+    frame_manager.round = 1
 
-    image_path = 'temp/Snipaste_2024-07-21_19-05-35.png'
+    image_path = 'temp/Snipaste_2024-07-14_22-08-36.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -30,7 +31,7 @@ def image():
     task.Tick(frame_manager)
 
     dst = task.frame_buffer
-    # dst = cv2.cvtColor(task.deck_thresh, cv2.COLOR_GRAY2BGRA)
+    # dst = cv2.cvtColor(task.my_deck_edges, cv2.COLOR_GRAY2BGRA)
     for box in task.bboxes:
         cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 255, 0), 2)
         # print(box)

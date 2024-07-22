@@ -222,32 +222,6 @@ class CardFlowTask(TaskBase):
 
         # Thresholding
         _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
-        # cross_kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-        # thresh = cv2.erode(thresh, None, iterations=1)
-
-        # # Calculate the Euclidean distance from the target color
-        # lab = cv2.cvtColor(center_buffer, cv2.COLOR_BGR2Lab).astype(np.int32)
-        # # bgr = center_buffer
-        # threshold = 50
-        # target_color1 = [232, 222, 197]
-        # target_color2 = [240, 224, 146]
-        # target_color1 = cv2.cvtColor(np.uint8([[target_color1]]), cv2.COLOR_RGB2Lab)[0][0]
-        # target_color2 = cv2.cvtColor(np.uint8([[target_color2]]), cv2.COLOR_RGB2Lab)[0][0]
-        # distance1 = np.sum(np.abs(lab[..., :3] - target_color1[:3]), axis=2)
-        # mask1 = np.uint8(distance1 < threshold) * 255
-        # distance2 = np.sum(np.abs(lab[..., :3] - target_color2[:3]), axis=2)
-        # mask2 = np.uint8(distance2 < threshold) * 255
-        # thresh = cv2.bitwise_or(mask1, mask2)
-        # # thresh = mask2
-
-        # # Apply Gaussian blur to reduce noise
-        # blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        # # Apply Canny edge detection
-        # edges = cv2.Canny(blurred, 50, 300)
-        # # Dilate the edges to emphasize thick borders
-        # # dilated = cv2.dilate(edges, None, iterations=2)
-        # # thresh = dilated
-        # thresh = edges
 
         # Find contours
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -264,14 +238,6 @@ class CardFlowTask(TaskBase):
             #     continue
             filtered_bboxes.append(CropBox(x, y, x + w, y + h))
             
-            # # use right-bottom as anchor
-            # right  = x + w
-            # bottom = y + h
-            # left   = right  - self.action_card_w
-            # top    = bottom - self.action_card_h
-            # if left < 0 or top < 0:
-            #     continue
-            # bboxes.append(CropBox(left, top, right, bottom))
         if not filtered_bboxes:
             return []
         
@@ -345,38 +311,11 @@ class CardFlowTask(TaskBase):
         # Convert to grayscale
         gray = cv2.cvtColor(deck_buffer, cv2.COLOR_BGR2GRAY)
 
-        # # Thresholding
-        # _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
-        # # cross_kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-        # # thresh = cv2.erode(thresh, None, iterations=1)
-
-        # # Calculate the Euclidean distance from the target color
-        # lab = cv2.cvtColor(center_buffer, cv2.COLOR_BGR2Lab).astype(np.int32)
-        # # bgr = center_buffer
-        # threshold = 50
-        # target_color1 = [232, 222, 197]
-        # target_color2 = [240, 224, 146]
-        # target_color1 = cv2.cvtColor(np.uint8([[target_color1]]), cv2.COLOR_RGB2Lab)[0][0]
-        # target_color2 = cv2.cvtColor(np.uint8([[target_color2]]), cv2.COLOR_RGB2Lab)[0][0]
-        # distance1 = np.sum(np.abs(lab[..., :3] - target_color1[:3]), axis=2)
-        # mask1 = np.uint8(distance1 < threshold) * 255
-        # distance2 = np.sum(np.abs(lab[..., :3] - target_color2[:3]), axis=2)
-        # mask2 = np.uint8(distance2 < threshold) * 255
-        # thresh = cv2.bitwise_or(mask1, mask2)
-        # # thresh = mask2
-
-        # Apply Gaussian blur to reduce noise
-        # blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        blurred = gray
         # Apply Canny edge detection
-        edges = cv2.Canny(blurred, 50, 150)
-        # Dilate the edges to emphasize thick borders
-        # dilated = cv2.dilate(edges, None, iterations=2)
-        # thresh = dilated
-        thresh = edges
+        edges = cv2.Canny(gray, 50, 150)
 
         # Find contours
-        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         FILTER_H     = deck_crop.height * 0.5
         FILTER_W_MIN = deck_crop.width  * 0.4
@@ -390,25 +329,15 @@ class CardFlowTask(TaskBase):
             if ratio < 1.5:
                 continue
             bboxes.append(CropBox(x, y, x + w, y + h))
-            
-            # # use right-bottom as anchor
-            # right  = x + w
-            # bottom = y + h
-            # left   = right  - self.action_card_w
-            # top    = bottom - self.action_card_h
-            # if left < 0 or top < 0:
-            #     continue
-            # bboxes.append(CropBox(left, top, right, bottom))
-
 
         if cfg.DEBUG:
             if not is_op:
                 self.my_deck_buffer = deck_buffer
-                self.my_deck_thresh = thresh
+                self.my_deck_edges  = edges
                 self.my_deck_bboxes = bboxes
             else:
                 self.op_deck_buffer = deck_buffer
-                self.op_deck_thresh = thresh
+                self.op_deck_edges  = edges
                 self.op_deck_bboxes = bboxes
         
         return True if bboxes else False
