@@ -16,6 +16,7 @@ using LumiTracker.Config;
 using LumiTracker.Models;
 using Wpf.Ui.Appearance;
 using Microsoft.Win32;
+using System.IO.Pipes;
 
 namespace LumiTracker
 {
@@ -89,11 +90,28 @@ namespace LumiTracker
             return _host.Services.GetService(typeof(T)) as T;
         }
 
+        private static Mutex? mutex = null;
+
         /// <summary>
         /// Occurs when the application is loading.
         /// </summary>
         private void OnStartup(object sender, StartupEventArgs e)
         {
+            // Ensure Singleton
+            string appName = Assembly.GetExecutingAssembly().GetName().Name!;
+            bool createdNew;
+            mutex = new Mutex(true, appName, out createdNew);
+            if (!createdNew)
+            {
+                // Application is already running
+                SignalFirstInstance();
+                Application.Current.Shutdown();
+                return;
+            }
+
+            // Start listening for pipe messages asynchronously
+            Task.Run(() => ListenForPipeMessagesAsync());
+
             _host.Start();
         }
 
@@ -144,6 +162,58 @@ namespace LumiTracker
                     // Other session switch reasons
                     break;
             }
+        }
+
+        private void SignalFirstInstance()
+        {
+            try
+            {
+                using (NamedPipeClientStream client = new NamedPipeClientStream(".", "Pipe_" + Assembly.GetExecutingAssembly().GetName().Name, PipeDirection.Out))
+                {
+                    client.Connect(1000); // Try to connect for 1 second
+                    using (StreamWriter writer = new StreamWriter(client))
+                    {
+                        writer.WriteLine("Activate");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Just exit
+            }
+        }
+
+        private async Task ListenForPipeMessagesAsync()
+        {
+            while (true)
+            {
+                using (NamedPipeServerStream server = new NamedPipeServerStream("Pipe_" + Assembly.GetExecutingAssembly().GetName().Name, PipeDirection.In))
+                {
+                    await server.WaitForConnectionAsync();
+
+                    using (StreamReader reader = new StreamReader(server))
+                    {
+                        string? message = await reader.ReadLineAsync();
+                        if (message != null && message == "Activate")
+                        {
+                            Dispatcher.Invoke(() => BringToFront());
+                        }
+                    }
+                }
+            }
+        }
+
+        private void BringToFront()
+        {
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow.WindowState == WindowState.Minimized)
+            {
+                mainWindow.WindowState = WindowState.Normal;
+            }
+            mainWindow.Activate();
+            mainWindow.Topmost = true;  // set topmost
+            mainWindow.Topmost = false; // remove topmost
+            mainWindow.Focus();         // set focus
         }
     }
 }
