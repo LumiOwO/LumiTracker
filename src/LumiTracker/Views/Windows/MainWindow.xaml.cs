@@ -166,6 +166,7 @@ namespace LumiTracker.Views.Windows
                 // Handle the result here, e.g., save work if Primary button was clicked
                 if (PressedOK)
                 {
+                    await Task.Delay(100); // Wait a while for saving
                     TryToCloseWindow();
                 }
             }

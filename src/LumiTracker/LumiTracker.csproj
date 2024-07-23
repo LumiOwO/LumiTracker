@@ -53,6 +53,9 @@
     <RemoveDir Directories="$(PublishDir)assets" Condition="Exists('$(PublishDir)assets')" />
     <Exec Command="xcopy /E /I /Y $(TargetDir)assets $(PublishDir)assets &gt; nul" />
     <Message Text="Copy of 'assets' directory to publish folder completed successfully." Importance="high" />
+
+    <Exec Command="$(SolutionDir)python\python.exe -E $(SolutionDir)python\publish_reset_config.py $(PublishDir)" />
+    <Message Text="Reset published config.json successfully." Importance="high" />
     
   </Target>
 
