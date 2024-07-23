@@ -114,9 +114,16 @@ namespace LumiTracker.Views.Windows
                 return;
             }
 
-            var closingDialog = new ClosingDialog();
-            closingDialog.DataContext = this;
-            _ShowClosingDialog = OnShowClosingDialog(closingDialog);
+            if (Configuration.Data.show_closing_dialog)
+            {
+                var closingDialog = new ClosingDialog();
+                closingDialog.DataContext = this;
+                _ShowClosingDialog = OnShowClosingDialog(closingDialog);
+            }
+            else
+            {
+                TryToCloseWindow();
+            }
         }
 
         protected override void OnClosed(EventArgs e)
@@ -127,34 +134,37 @@ namespace LumiTracker.Views.Windows
             Application.Current.Shutdown();
         }
 
-        [RelayCommand]
-        private async Task OnShowClosingDialog(object content)
+        private async Task OnShowClosingDialog(ClosingDialog content)
         {
             try
             {
-                Configuration.Logger.LogDebug("OnShowClosingDialog");
+                // Init
+                content.MinimizeButton.IsChecked     = (Configuration.Data.closing_behavior == "Minimize");
+                content.QuitButton.IsChecked         = !content.MinimizeButton.IsChecked;
+                content.NotShowAgainButton.IsChecked = false;
+
+                // Show Closing dialog
                 ContentDialogResult result = await _contentDialogService.ShowSimpleDialogAsync(
                     new SimpleContentDialogCreateOptions()
                     {
-                        Title = "Save your work?",
-                        Content = content,
-                        PrimaryButtonText = "Save",
-                        //SecondaryButtonText = "Don't Save",
-                        CloseButtonText = "Cancel",
+                        Content           = content,
+                        Title             = LocalizationSource.Instance["ClosingDialogTitle"],
+                        PrimaryButtonText = LocalizationSource.Instance["OK"],
+                        CloseButtonText   = LocalizationSource.Instance["Cancel"],
                     }
                 );
+                bool PressedOK = (result == ContentDialogResult.Primary);
 
-                string dialogResultText = result switch
+                // Save to config
+                Configuration.Data.closing_behavior = (content.MinimizeButton.IsChecked ?? false) ? "Minimize" : "Quit";
+                if (PressedOK && (content.NotShowAgainButton.IsChecked ?? false))
                 {
-                    ContentDialogResult.Primary => "User saved their work",
-                    ContentDialogResult.Secondary => "User did not save their work",
-                    _ => "User cancelled the dialog"
-                };
-                Configuration.Logger.LogDebug(dialogResultText);
+                    Configuration.Data.show_closing_dialog = false;
+                }
+                Configuration.Save();
 
                 // Handle the result here, e.g., save work if Primary button was clicked
-
-                if (result == ContentDialogResult.Primary)
+                if (PressedOK)
                 {
                     TryToCloseWindow();
                 }

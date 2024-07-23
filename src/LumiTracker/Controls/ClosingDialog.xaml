@@ -1,19 +1,48 @@
 ﻿<UserControl x:Class="LumiTracker.Controls.ClosingDialog"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:LumiTracker.Controls"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel Orientation="Vertical">
-        <Button
-        Content="Show" />
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            xmlns:helpers="clr-namespace:LumiTracker.Helpers"
+            xmlns:ctrls="clr-namespace:LumiTracker.Controls"
+            xmlns:svs="clr-namespace:LumiTracker.Services"
+            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+            mc:Ignorable="d">
+    <UserControl.Resources>
+        <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+    </UserControl.Resources>
+   
+    <StackPanel 
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:ClosingDialog}}"
+        Orientation="Vertical" 
+        VerticalAlignment="Top"
+        HorizontalAlignment="Left"
+        Margin="0, 0, 0, -50"
+        Width="200"
+        Height="Auto">
+        
+        <RadioButton
+            Margin="0,0,0,0"
+            x:Name="MinimizeButton"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Content="{svs:Localization ClosingBehavior_Minimize}"
+            GroupName="closingBehaviorSelect"
+            />
+        <RadioButton
+            Margin="0,0,0,0"
+            x:Name="QuitButton"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Content="{svs:Localization ClosingBehavior_Quit}"
+            GroupName="closingBehaviorSelect"
+            />
 
-        <TextBlock
-        Margin="15,0,0,0"
-        VerticalAlignment="Center"
-        FontSize="14"
-        Text="TextText" />
+        <CheckBox
+            Margin="0, 20, 0, 0"
+            x:Name="NotShowAgainButton"
+            Height="Auto"
+            Content="{svs:Localization NotShowAgain}"
+            />
     </StackPanel>
 </UserControl>

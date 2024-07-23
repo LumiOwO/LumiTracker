@@ -37,5 +37,6 @@
   "closing_behavior": "Minimize",
   "theme": "Dark",
   "client_type": "YuanShen",
-  "show_ui_outside": false
+  "show_ui_outside": false,
+  "show_closing_dialog": false
 }

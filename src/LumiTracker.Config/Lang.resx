@@ -158,7 +158,7 @@
     <comment/>
   </data>
   <data name="ClosingBehavior_Minimize" xml:space="preserve">
-    <value>Minimize</value>
+    <value>Minimize to system tray</value>
     <comment/>
   </data>
   <data name="Theme" xml:space="preserve">
@@ -250,6 +250,22 @@
   </data>
   <data name="ShowUIOutside" xml:space="preserve">
     <value>Display UI outside the window</value>
+    <comment/>
+  </data>
+  <data name="NotShowAgain" xml:space="preserve">
+    <value>Don't show this again</value>
+    <comment/>
+  </data>
+  <data name="ClosingDialogTitle" xml:space="preserve">
+    <value>Exit Application</value>
+    <comment/>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+    <comment/>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
     <comment/>
   </data>
 </root>
