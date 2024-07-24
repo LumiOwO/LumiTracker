@@ -7,6 +7,7 @@ import time
 import json
 import csv
 import os
+import shutil
 from pathlib import Path
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
@@ -200,12 +201,10 @@ class ActionCardHandler:
 
         self.frame_buffer   = None
         self.crop_box       = None  # init when resize
-    
-    def Update(self, frame_buffer, db):
-        self.frame_buffer = frame_buffer
 
+    def ExtractCardFeature(self):
         # Get action card region
-        region_buffer = frame_buffer[
+        region_buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
@@ -228,6 +227,12 @@ class ActionCardHandler:
 
         # Extract feature
         feature = ExtractFeature(self.feature_buffer)
+        return feature
+
+    def Update(self, frame_buffer, db):
+        self.frame_buffer = frame_buffer
+
+        feature = self.ExtractCardFeature()
         card_id, dist = db.SearchByFeature(feature, EAnnType.ACTIONS)
         
         return card_id, dist
@@ -378,7 +383,7 @@ class Database:
                 LogDebug(info=f"round{i + 1}, {dist=}")
 
 
-    def _UpdateActionCards(self):
+    def _UpdateActionCards(self, save_image_assets):
         with open(os.path.join(cfg.cards_dir, "actions.csv"), 
                     mode='r', newline='', encoding='utf-8') as csv_file:
             csv_reader = csv.DictReader(csv_file)
@@ -411,11 +416,8 @@ class Database:
         # crop_box2 = CropBox(left, top, left + width, top + height)
         # cfg.action_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
 
-        # do not call Tick() when updating database 
-        from .tasks import CardPlayedTask
-        task = CardPlayedTask(None, None)
-        task._ResizeFeatureBuffer(420, 720)
-        task.crop_box = CropBox(0, 0, 420, 720)
+        handler = ActionCardHandler()
+        handler.OnResize(CropBox(0, 0, 420, 720))
 
         action_cards_dir = os.path.join(cfg.cards_dir, "actions")
         n_images = len(csv_data)
@@ -434,25 +436,22 @@ class Database:
                 LogError(info=f"Failed to load image: {image_path}")
                 exit(1)
         
-            # create snapshot
-            top    = int(row["snapshot_top"])
-            left   = 12
-            height = 150
-            crop_box = CropBox(left, top, 420 - left, top + height)
-            snapshot = image[
-                crop_box.top  : crop_box.bottom, 
-                crop_box.left : crop_box.right
-            ]
-            snapshot_path = os.path.join(
-                cfg.assets_dir, "snapshots", "actions", f"{card_id}.jpg")
-            SaveImage(snapshot, snapshot_path)
+            if save_image_assets:
+                # create snapshot
+                top    = int(row["snapshot_top"])
+                left   = 12
+                height = 150
+                crop_box = CropBox(left, top, 420 - left, top + height)
+                snapshot = image[
+                    crop_box.top  : crop_box.bottom, 
+                    crop_box.left : crop_box.right
+                ]
+                snapshot_path = os.path.join(
+                    cfg.assets_dir, "snapshots", "actions", f"{card_id}.jpg")
+                SaveImage(snapshot, snapshot_path)
 
-            task.frame_buffer = image
-            task._UpdateFeatureBuffer()
-
-            feature = ExtractFeature(task.feature_buffer)
-            # gray_image = Preprocess(task.feature_buffer)
-            # SaveImage(gray_image, snapshot_path)
+            handler.frame_buffer = image
+            feature = handler.ExtractCardFeature()
 
             action = {
                 "id": card_id,
@@ -478,33 +477,12 @@ class Database:
             
             close_dists = {key: close_dists[key] for key in sorted(close_dists)}
             LogWarning(
-                close_dists=f'{json.dumps(close_dists, indent=2, ensure_ascii=False)}', 
+                indent=2,
                 min_dist=min_dist,
+                close_dists=close_dists, 
                 )
 
         LogInfo(info=f"Loaded {len(features)} images from {action_cards_dir}")
-
-        # share code
-        with open(os.path.join(cfg.cards_dir, "share_code.csv"), 
-                    mode='r', newline='', encoding='utf-8') as share_code_file:
-            share_code_reader = csv.DictReader(share_code_file)
-            share_code_data = [row for row in share_code_reader]
-        share_id_info = [{
-                "is_character": False,
-                "internal_id": -1,
-            }] + [None] * len(share_code_data)
-        for row in share_code_data:
-            share_id = int(row["share_id"])
-            internal_id = int(row["internal_id"])
-            is_character = (int(row["is_character"]) == 1)
-            share_id_info[share_id] = {
-                "is_character": is_character,
-                "internal_id": internal_id,
-            }
-            if not is_character:
-                actions[internal_id]["share_id"] = share_id
-
-        self.data["share_id_info"] = share_id_info
         self.data["actions"] = actions
 
         if cfg.DEBUG_SAVE:
@@ -534,7 +512,12 @@ class Database:
                 # print(image.shape, image.dtype)
                 if len(image.shape) == 2:
                     image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGRA)
-                my_feature = ExtractFeature(image)
+                height, width = image.shape[:2]
+                
+                handler = ActionCardHandler()
+                handler.OnResize(CropBox(0, 0, width, height))
+                handler.frame_buffer = image
+                my_feature = handler.ExtractCardFeature()
                 my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=20, include_distances=True)
 
                 dt = time.perf_counter() - begin_time
@@ -544,13 +527,47 @@ class Database:
                     dt=dt, my_ids=my_ids, my_dists=my_dists
                     )
 
+    def _UpdateCharacters(self, save_image_assets):
+        with open(os.path.join(cfg.cards_dir, "characters.csv"), 
+                    mode='r', newline='', encoding='utf-8') as csv_file:
+            reader = csv.DictReader(csv_file)
+            data = [row for row in reader]
 
-    def _Update(self):
+        if save_image_assets:
+            for row in data:
+                src_file = os.path.join(
+                    cfg.cards_dir, "avatars", f'avatar_{row["id"]}_{row["zh-HANS"]}.png'
+                    )
+                dst_file = os.path.join(
+                    cfg.assets_dir, "snapshots", "avatars", f'{row["id"]}.png'
+                    )
+                shutil.copy(src_file, dst_file)
+
+    def _UpdateShareCode(self):
+        with open(os.path.join(cfg.cards_dir, "share_code.csv"), 
+                    mode='r', newline='', encoding='utf-8') as share_code_file:
+            share_code_reader = csv.DictReader(share_code_file)
+            share_code_data = [row for row in share_code_reader]
+        share_id_info = [0] + [None] * len(share_code_data)
+        for row in share_code_data:
+            share_id = int(row["share_id"])
+            internal_id = int(row["internal_id"])
+            is_character = (int(row["is_character"]) == 1)
+            if is_character:
+                share_id_info[share_id] = -(internal_id + 1)
+            else:
+                share_id_info[share_id] = internal_id + 1
+
+        self.data["share_id_info"] = share_id_info
+
+    def _Update(self, save_image_assets):
         self._UpdateControls()
-        self._UpdateActionCards()
+        self._UpdateActionCards(save_image_assets)
+        self._UpdateCharacters(save_image_assets)
+        self._UpdateShareCode()
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:
-            json.dump(self.data, f, indent=2, ensure_ascii=False)
+            json.dump(self.data, f, indent=None, ensure_ascii=False)
         
         with open("assets/config.json", 'w') as f:
             json.dump(vars(cfg), f, indent=2, ensure_ascii=False)
@@ -575,5 +592,8 @@ class Database:
 
 
 if __name__ == '__main__':
+    import sys
+    save_image_assets = (sys.argv[1] == "image")
+
     db = Database()
-    db._Update()
+    db._Update(save_image_assets)

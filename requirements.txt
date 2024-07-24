@@ -4,5 +4,4 @@ annoy==1.17.0
 windows-capture==1.2.0
 pywin32==306
 numpy==1.26.4
-json5==0.9.25
 opencv-python-headless==4.10.0.84
