@@ -237,15 +237,18 @@ namespace LumiTracker.Models
             {
                 int byteIndex = bitIndex >> 3;  // bitIndex / 8;
                 int bitOffset = bitIndex & 0x7; // bitIndex % 8;
+                // Cast to int, in case of uint8 overflow
+                int curByte   = swapped[byteIndex];
+                int nextByte  = swapped[byteIndex + 1];
 
                 int value = 0;
                 if (bitOffset == 0)
                 {
-                    value = (swapped[byteIndex] << 4 | swapped[byteIndex + 1] >> 4) & 0xFFF;
+                    value = (curByte << 4 | nextByte >> 4) & 0xfff;
                 }
                 else
                 {
-                    value = ((swapped[byteIndex] & 0x0F) << 8 | swapped[byteIndex + 1]) & 0xFFF;
+                    value = ((curByte & 0x0f) << 8 | nextByte) & 0xfff;
                 }
 
                 result[i] = value;
