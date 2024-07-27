@@ -447,7 +447,7 @@ class Database:
                     crop_box.left : crop_box.right
                 ]
                 snapshot_path = os.path.join(
-                    cfg.assets_dir, "snapshots", "actions", f"{card_id}.jpg")
+                    cfg.assets_dir, "images", "snapshots", f"{card_id}.jpg")
                 SaveImage(snapshot, snapshot_path)
 
             handler.frame_buffer = image
@@ -539,7 +539,7 @@ class Database:
                     cfg.cards_dir, "avatars", f'avatar_{row["id"]}_{row["zh-HANS"]}.png'
                     )
                 dst_file = os.path.join(
-                    cfg.assets_dir, "snapshots", "avatars", f'{row["id"]}.png'
+                    cfg.assets_dir, "images", "avatars", f'{row["id"]}.png'
                     )
                 shutil.copy(src_file, dst_file)
 

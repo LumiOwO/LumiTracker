@@ -27,7 +27,7 @@ namespace LumiTracker.ViewModels.Windows
             var cardInfo = Configuration.Database["actions"]![card_id]!;
             Count        = 1;
             CardName     = cardInfo[Configuration.Data.lang]!.ToString();
-            SnapshotUri  = $"pack://siteoforigin:,,,/assets/snapshots/actions/{card_id}.jpg";
+            SnapshotUri  = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
         }
     }
 

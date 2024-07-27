@@ -451,4 +451,4 @@ FodyWeavers.xsd
 *.zip
 *.7z
 .vscode
-/assets/snapshots
+/assets/images
