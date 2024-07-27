@@ -11,7 +11,7 @@ import shutil
 from pathlib import Path
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
-from .enums import ECtrlType, EAnnType
+from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType
 
 def LoadImage(path):
     return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -453,11 +453,21 @@ class Database:
             handler.frame_buffer = image
             feature = handler.ExtractCardFeature()
 
+            costs = []
+            if "," in row["cost"]:
+                # currently only talent for A
+                # TODO: deal with all types of costs
+                cost_values = [int(val) for val in row["cost"].split(",")]
+                costs.append(( cost_values[0], ECostType[row["element"]].value ))
+                costs.append(( cost_values[1], ECostType.Any.value ))
+            else:
+                costs.append(( int(row["cost"]), ECostType[row["element"]].value ))
+
             action = {
-                "id": card_id,
-                "type": row["type"],
-                "zh-HANS": row["zh-HANS"],
-                "en-US": row["en-US"],
+                "zh-HANS" : row["zh-HANS"],
+                "en-US"   : row["en-US"],
+                "type"    : EActionCardType[row["type"]].value,
+                "costs"   : costs,
             }
 
             features[card_id] = feature
@@ -532,9 +542,21 @@ class Database:
                     mode='r', newline='', encoding='utf-8') as csv_file:
             reader = csv.DictReader(csv_file)
             data = [row for row in reader]
+        num_characters = len(data)
 
-        if save_image_assets:
-            for row in data:
+        talent_to_character = {}
+        characters = [None] * num_characters
+        for i, row in enumerate(data):
+            character = {
+                "zh-HANS"    : row["zh-HANS"],
+                "element"    : EElementType[row["element"]].value,
+                "is_monster" : True if row["is_monster"] == "1" else False,
+            }
+            characters[i] = character
+            talent_id = int(row["talent_id"])
+            talent_to_character[talent_id] = int(row["id"])
+
+            if save_image_assets:
                 src_file = os.path.join(
                     cfg.cards_dir, "avatars", f'avatar_{row["id"]}_{row["zh-HANS"]}.png'
                     )
@@ -543,28 +565,44 @@ class Database:
                     )
                 shutil.copy(src_file, dst_file)
 
-    def _UpdateShareCode(self):
+        self.data["characters"] = characters
+        self.data["talent_to_character"] = talent_to_character
+
+    def _UpdateExtraInfos(self):
+        # share code
         with open(os.path.join(cfg.cards_dir, "share_code.csv"), 
                     mode='r', newline='', encoding='utf-8') as share_code_file:
             share_code_reader = csv.DictReader(share_code_file)
             share_code_data = [row for row in share_code_reader]
-        share_id_info = [0] + [None] * len(share_code_data)
+        share_to_internal = [0] + [None] * len(share_code_data)
         for row in share_code_data:
             share_id = int(row["share_id"])
             internal_id = int(row["internal_id"])
             is_character = (int(row["is_character"]) == 1)
             if is_character:
-                share_id_info[share_id] = -(internal_id + 1)
+                share_to_internal[share_id] = -(internal_id + 1)
             else:
-                share_id_info[share_id] = internal_id + 1
+                share_to_internal[share_id] = internal_id + 1
 
-        self.data["share_id_info"] = share_id_info
+        self.data["share_to_internal"] = share_to_internal
+
+        # artifacts
+        with open(os.path.join(cfg.cards_dir, "artifacts.csv"), 
+                    mode='r', newline='', encoding='utf-8') as artifacts_file:
+            artifacts_reader = csv.DictReader(artifacts_file)
+            artifacts_data = [row for row in artifacts_reader]
+        artifacts_order = {}
+        for i, row in enumerate(artifacts_data):
+            internal_id = int(row["internal_id"])
+            artifacts_order[internal_id] = i
+
+        self.data["artifacts_order"] = artifacts_order
 
     def _Update(self, save_image_assets):
         self._UpdateControls()
         self._UpdateActionCards(save_image_assets)
         self._UpdateCharacters(save_image_assets)
-        self._UpdateShareCode()
+        self._UpdateExtraInfos()
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:
             json.dump(self.data, f, indent=None, ensure_ascii=False)
@@ -593,7 +631,7 @@ class Database:
 
 if __name__ == '__main__':
     import sys
-    save_image_assets = (sys.argv[1] == "image")
+    save_image_assets = (len(sys.argv) > 1 and sys.argv[1] == "image")
 
     db = Database()
     db._Update(save_image_assets)

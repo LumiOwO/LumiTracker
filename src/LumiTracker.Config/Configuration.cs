@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
 
@@ -44,29 +38,7 @@ namespace LumiTracker.Config
         public bool show_closing_dialog { get; set; }
     }
 
-
-
-
     #endregion ConfigData
-
-    public enum ELanguage
-    {
-        zh_HANS,
-        en_US,
-    }
-
-    public enum EClosingBehavior
-    {
-        Quit,
-        Minimize,
-    }
-
-    public enum EClientType
-    {
-        YuanShen,
-        Global,
-        Cloud,
-    }
 
     public class Configuration
     {

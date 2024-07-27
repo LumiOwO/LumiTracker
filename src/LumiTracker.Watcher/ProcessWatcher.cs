@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -240,28 +240,6 @@ namespace LumiTracker.Watcher
 
             logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
             WindowWatcherExit?.Invoke();
-        }
-
-        public enum ETaskType
-        {
-            NONE = 0,
-
-            GAME_START,
-            MY_PLAYED,
-            OP_PLAYED,
-            GAME_OVER,
-            ROUND,
-            MY_DRAWN,
-            OP_DRAWN,       // placeholder, not used yet
-            MY_DISCARD,
-            OP_DISCARD,
-            MY_CREATE_DECK,
-            OP_CREATE_DECK,
-            MY_CREATE_HAND, // eg. Furina
-            OP_CREATE_HAND,
-
-            // types for exception
-            UNSUPPORTED_RATIO,
         }
 
         private void WindowWatcherEventHandler(object sender, DataReceivedEventArgs e)

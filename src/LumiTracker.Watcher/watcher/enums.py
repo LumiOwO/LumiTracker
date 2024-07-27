@@ -59,3 +59,40 @@ class EAnnType(enum.Enum):
     CTRLS     = enum.auto()
 
     ANN_COUNT = enum.auto()
+
+class EActionCardType(enum.Enum):
+    Talent       = 0
+    Token        = enum.auto()
+    Catalyst     = enum.auto()
+    Bow          = enum.auto()
+    Claymore     = enum.auto()
+    Polearm      = enum.auto()
+    Sword        = enum.auto()
+    Artifact     = enum.auto()
+    Location     = enum.auto()
+    Companion    = enum.auto()
+    Item         = enum.auto()
+    ArcaneLegend = enum.auto()
+    Resonance    = enum.auto()
+    Event        = enum.auto()
+    Food         = enum.auto()
+
+class EElementType(enum.Enum):
+    Cryo    = 0
+    Hydro   = enum.auto()
+    Pyro    = enum.auto()
+    Electro = enum.auto()
+    Anemo   = enum.auto()
+    Geo     = enum.auto()
+    Dendro  = enum.auto()
+
+class ECostType(enum.Enum):
+    Cryo    = EElementType.Cryo.value
+    Hydro   = EElementType.Hydro.value
+    Pyro    = EElementType.Pyro.value
+    Electro = EElementType.Electro.value
+    Anemo   = EElementType.Anemo.value
+    Geo     = EElementType.Geo.value
+    Dendro  = EElementType.Dendro.value
+    Same    = enum.auto()
+    Any     = enum.auto()
