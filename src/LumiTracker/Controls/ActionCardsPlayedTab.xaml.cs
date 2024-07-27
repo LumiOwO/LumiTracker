@@ -16,6 +16,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Wpf.Ui.Controls;
 
+using CardList = Swordfish.NET.Collections.ConcurrentObservableSortedDictionary<
+    int, LumiTracker.ViewModels.Windows.ActionCardView>;
+
 namespace LumiTracker.Controls
 {
     /// <summary>
@@ -33,11 +36,11 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty ActionCardsPlayedProperty = DependencyProperty.Register(
-            "ActionCardsPlayed", typeof(ObservableCollection<ActionCardView>), typeof(ActionCardsPlayedTab), new PropertyMetadata(null));
+            "ActionCardsPlayed", typeof(CardList), typeof(ActionCardsPlayedTab), new PropertyMetadata(null));
 
-        public ObservableCollection<ActionCardView> ActionCardsPlayed
+        public CardList ActionCardsPlayed
         {
-            get { return (GetValue(ActionCardsPlayedProperty) as ObservableCollection<ActionCardView>)!; }
+            get { return (GetValue(ActionCardsPlayedProperty) as CardList)!; }
             set { SetValue(ActionCardsPlayedProperty, value); }
         }
 

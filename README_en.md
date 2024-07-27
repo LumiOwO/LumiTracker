@@ -54,3 +54,4 @@ Please try running the program as an administrator.
 - [WPF UI](https://github.com/lepoco/wpfui)
 - [Fluent UI System Icons](https://github.com/microsoft/fluentui-system-icons)
 - [Inno Setup](https://jrsoftware.org/isinfo.php)
+- [Swordfish.NET.CollectionsV3](https://github.com/stewienj/SwordfishCollections)

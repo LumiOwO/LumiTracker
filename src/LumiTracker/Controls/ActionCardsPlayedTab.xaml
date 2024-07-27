@@ -51,7 +51,7 @@
                         </LinearGradientBrush>
                     </Border.OpacityMask>
                     <Image 
-                        Source="{Binding SnapshotUri, Mode=OneWay}" 
+                        Source="{Binding Value.SnapshotUri, Mode=OneWay}" 
                         Stretch="UniformToFill"
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Center"
@@ -73,7 +73,7 @@
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.016
                         }"
-                    Text="{Binding CardName, Mode=OneWay}" />
+                    Text="{Binding Value.CardName, Mode=OneWay}" />
                 <TextBlock
                     Grid.Column="1"
                     Margin="7,2,4,0"
@@ -86,7 +86,7 @@
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.018
                         }"
-                Text="{Binding Count, Mode=OneWay}" />
+                Text="{Binding Value.Count, Mode=OneWay}" />
             </Grid>
         </DataTemplate>
 
@@ -110,7 +110,7 @@
             Grid.Row="0"
             ScrollViewer.VerticalScrollBarVisibility="{Binding ViewModel.VerticalScrollBarVisibility}"
             MaxWidth="{Binding WindowWidth}"
-            ItemsSource="{Binding ActionCardsPlayed}"
+            ItemsSource="{Binding ActionCardsPlayed.CollectionView}"
             ItemTemplate="{StaticResource ActionCardViewTemplate}"
             PreviewMouseDown="OnPreviewMouseDown"
             MouseEnter="OnMouseEnter"

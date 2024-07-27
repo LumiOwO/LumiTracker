@@ -4,28 +4,30 @@ using Wpf.Ui.Controls;
 using LumiTracker.Config;
 using LumiTracker.Models;
 using System.Windows.Controls;
+using Swordfish.NET.Collections;
 
+using CardList = Swordfish.NET.Collections.ConcurrentObservableSortedDictionary<
+    int, LumiTracker.ViewModels.Windows.ActionCardView>;
+using CardListTimestamps = System.Collections.Generic.Dictionary<
+    int, System.DateTime>;
 
 namespace LumiTracker.ViewModels.Windows
 {
     public partial class ActionCardView : ObservableObject
     {
         [ObservableProperty]
-        public int _count;
+        public int     _count;
         [ObservableProperty]
-        public int _cardID;
+        public string  _cardName;
         [ObservableProperty]
-        public string _cardName;
-        [ObservableProperty]
-        public string _snapshotUri;
+        public string  _snapshotUri;
 
         public ActionCardView(int card_id) 
         {
-            var cardInfo  = Configuration.Database["actions"]![card_id]!;
-            _cardID       = card_id;
-            _cardName     = cardInfo["zh-HANS"]!.ToString(); // TODO: localization
-            _count        = 1;
-            _snapshotUri  = $"pack://siteoforigin:,,,/assets/snapshots/actions/{card_id}.jpg";
+            var cardInfo = Configuration.Database["actions"]![card_id]!;
+            Count        = 1;
+            CardName     = cardInfo[Configuration.Data.lang]!.ToString();
+            SnapshotUri  = $"pack://siteoforigin:,,,/assets/snapshots/actions/{card_id}.jpg";
         }
     }
 
@@ -35,14 +37,23 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private double _mainContentHeightRatio = 0.0;
 
-        // data
         [ObservableProperty]
-        private ObservableCollection<ActionCardView> _myActionCardsPlayed = new ();
-        HashSet<int> MyPlayedCardIDs = new ();
+        private ScrollBarVisibility _VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
 
         [ObservableProperty]
-        private ObservableCollection<ActionCardView> _opActionCardsPlayed = new ();
-        HashSet<int> OpPlayedCardIDs = new ();
+        private SymbolRegular _toggleButtonIcon = SymbolRegular.ChevronUp48;
+
+        [ObservableProperty]
+        private bool _isShowing = false;
+
+        // data
+        [ObservableProperty]
+        private CardList _myActionCardsPlayed = new ();
+        private CardListTimestamps MyActionCardsPlayedTimestamps = new();
+
+        [ObservableProperty]
+        private CardList _opActionCardsPlayed = new ();
+        private CardListTimestamps OpActionCardsPlayedTimestamps = new();
 
         [ObservableProperty]
         private bool _gameStarted = false;
@@ -53,17 +64,8 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private int _round = 0;
 
-        [ObservableProperty]
-        private bool _isShowing = false;
-
-        [ObservableProperty]
-        private ScrollBarVisibility _VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
-
-        [ObservableProperty]
-        private SymbolRegular _toggleButtonIcon = SymbolRegular.ChevronUp48;
-
         private GameWatcher _gameWatcher;
-        // TODO: remove deck test
+
         public DeckWindowViewModel(GameWatcher gameWatcher, Deck deck)
         {
             _gameWatcher = gameWatcher;
@@ -76,51 +78,55 @@ namespace LumiTracker.ViewModels.Windows
             _gameWatcher.UnsupportedRatio   += OnUnsupportedRatio;
 
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
+
+            ResetRecordedData();
+        }
+
+        private CardList CreateCardList(bool is_op)
+        {
+            CardListTimestamps timestamps = is_op ? OpActionCardsPlayedTimestamps : MyActionCardsPlayedTimestamps;
+            IComparer<int> comparer = Comparer<int>.Create((a, b) =>
+            {
+                DateTime a_timestamp = timestamps[a];
+                DateTime b_timestamp = timestamps[b];
+                int res = a_timestamp.CompareTo(b_timestamp);
+                // Descending
+                return -res;
+            });
+            return new CardList(comparer);
         }
 
         private void ResetRecordedData()
         {
-            MyActionCardsPlayed = new();
-            MyPlayedCardIDs     = new();
-            OpActionCardsPlayed = new();
-            OpPlayedCardIDs     = new();
-
+            MyActionCardsPlayedTimestamps = new ();
+            OpActionCardsPlayedTimestamps = new ();
+            MyActionCardsPlayed = CreateCardList(is_op: false);
+            OpActionCardsPlayed = CreateCardList(is_op: true);
             Round = 0;
         }
 
-        private void UpdatePlayedActionCard(
-            int card_id, 
-            ObservableCollection<ActionCardView> ActionCardsPlayed, 
-            HashSet<int> PlayedCardIDs)
+        private void UpdatePlayedActionCard(int card_id, bool is_op)
         {
-            if (PlayedCardIDs.Contains(card_id))
-            {
-                int found_idx = -1;
-                for (int i = 0; i < ActionCardsPlayed.Count; i++)
-                {
-                    if (ActionCardsPlayed[i].CardID == card_id)
-                    {
-                        ActionCardsPlayed[i].Count++;
-                        found_idx = i;
-                        break;
-                    }
-                }
+            CardList ActionCardsPlayed = is_op ? OpActionCardsPlayed : MyActionCardsPlayed;
+            CardListTimestamps timestamps = is_op ? OpActionCardsPlayedTimestamps : MyActionCardsPlayedTimestamps;
 
-                if (found_idx != 0)
+            if (ActionCardsPlayed.TryGetValue(card_id, out ActionCardView cardView))
+            {
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        ActionCardsPlayed.Move(found_idx, 0);
-                    });
-                }
+                    ActionCardsPlayed.Remove(card_id);
+                    timestamps.Remove(card_id);
+                    cardView.Count++;
+                    timestamps.Add(card_id, DateTime.Now);
+                    ActionCardsPlayed.Add(card_id, cardView);
+                });
             }
             else
             {
-                PlayedCardIDs.Add(card_id);
-
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    ActionCardsPlayed.Insert(0, new ActionCardView(card_id));
+                    timestamps.Add(card_id, DateTime.Now);
+                    ActionCardsPlayed.Add(card_id, new ActionCardView(card_id));
                 });
             }
         }
@@ -134,12 +140,12 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnMyActionCardPlayed(int card_id)
         {
-            UpdatePlayedActionCard(card_id, MyActionCardsPlayed, MyPlayedCardIDs);
+            UpdatePlayedActionCard(card_id, is_op: false);
         }
 
         private void OnOpActionCardPlayed(int card_id)
         {
-            UpdatePlayedActionCard(card_id, OpActionCardsPlayed, OpPlayedCardIDs);
+            UpdatePlayedActionCard(card_id, is_op: true);
         }
 
         private void OnGameOver()
