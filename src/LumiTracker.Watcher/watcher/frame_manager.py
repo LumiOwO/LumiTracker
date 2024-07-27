@@ -52,9 +52,8 @@ class FrameManager:
         elif abs( ratio - 12 / 5 ) < EPSILON:
             ratio_type = ERatioType.E12_5
         else:
-            LogWarning(
-                info=f"Current resolution is {client_width}x{client_height} with {ratio=}, which is not supported now.",
-                type=ETaskType.UNSUPPORTED_RATIO, 
+            LogInfo(
+                type=ETaskType.UNSUPPORTED_RATIO.name, 
                 client_width=client_width, 
                 client_height=client_height,
                 )

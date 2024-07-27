@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="LumiTracker.Controls.ActionCardsPlayedTab"
+﻿<UserControl x:Class="LumiTracker.Controls.CardListTab"
             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             xmlns:local="clr-namespace:LumiTracker.Views.Windows"
             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-            xmlns:vm="clr-namespace:LumiTracker.ViewModels.Windows"
+            xmlns:models="clr-namespace:LumiTracker.Models"
             xmlns:helpers="clr-namespace:LumiTracker.Helpers"
             xmlns:svs="clr-namespace:LumiTracker.Services"
             xmlns:ctrls="clr-namespace:LumiTracker.Controls"
@@ -26,7 +26,7 @@
             x:Key="TabHeaderBackground"
             Color="#1affffff" />
 
-        <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type vm:ActionCardView}">
+        <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <Grid
                 HorizontalAlignment="Stretch"
                 Margin="2, -5, 0, -5">
@@ -98,7 +98,7 @@
     </UserControl.Resources>
 
     <Grid 
-        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:ActionCardsPlayedTab}}"
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:CardListTab}}"
         Background="{StaticResource MainContentBackground}"
         >
         <Grid.RowDefinitions>
@@ -110,7 +110,7 @@
             Grid.Row="0"
             ScrollViewer.VerticalScrollBarVisibility="{Binding ViewModel.VerticalScrollBarVisibility}"
             MaxWidth="{Binding WindowWidth}"
-            ItemsSource="{Binding ActionCardsPlayed.CollectionView}"
+            ItemsSource="{Binding CardList.Data.CollectionView}"
             ItemTemplate="{StaticResource ActionCardViewTemplate}"
             PreviewMouseDown="OnPreviewMouseDown"
             MouseEnter="OnMouseEnter"

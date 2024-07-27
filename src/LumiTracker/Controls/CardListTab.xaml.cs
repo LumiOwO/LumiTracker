@@ -1,33 +1,18 @@
 ﻿using LumiTracker.ViewModels.Windows;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using LumiTracker.Models;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Wpf.Ui.Controls;
-
-using CardList = Swordfish.NET.Collections.ConcurrentObservableSortedDictionary<
-    int, LumiTracker.ViewModels.Windows.ActionCardView>;
 
 namespace LumiTracker.Controls
 {
     /// <summary>
     /// Interaction logic for PlayedCardsTabItem.xaml
     /// </summary>
-    public partial class ActionCardsPlayedTab : UserControl
+    public partial class CardListTab : UserControl
     {
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
-            "ViewModel", typeof(DeckWindowViewModel), typeof(ActionCardsPlayedTab), new PropertyMetadata(null));
+            "ViewModel", typeof(DeckWindowViewModel), typeof(CardListTab), new PropertyMetadata(null));
 
         public DeckWindowViewModel ViewModel
         {
@@ -35,17 +20,17 @@ namespace LumiTracker.Controls
             set { SetValue(ViewModelProperty, value); }
         }
 
-        public static readonly DependencyProperty ActionCardsPlayedProperty = DependencyProperty.Register(
-            "ActionCardsPlayed", typeof(CardList), typeof(ActionCardsPlayedTab), new PropertyMetadata(null));
+        public static readonly DependencyProperty CardListProperty = DependencyProperty.Register(
+            "CardList", typeof(CardList), typeof(CardListTab), new PropertyMetadata(null));
 
-        public CardList ActionCardsPlayed
+        public CardList CardList
         {
-            get { return (GetValue(ActionCardsPlayedProperty) as CardList)!; }
-            set { SetValue(ActionCardsPlayedProperty, value); }
+            get { return (GetValue(CardListProperty) as CardList)!; }
+            set { SetValue(CardListProperty, value); }
         }
 
         public static readonly DependencyProperty WindowHeightProperty = DependencyProperty.Register(
-            "WindowHeight", typeof(double), typeof(ActionCardsPlayedTab), new PropertyMetadata(null));
+            "WindowHeight", typeof(double), typeof(CardListTab), new PropertyMetadata(null));
 
         public double WindowHeight
         {
@@ -54,7 +39,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty WindowWidthProperty = DependencyProperty.Register(
-            "WindowWidth", typeof(double), typeof(ActionCardsPlayedTab), new PropertyMetadata(null));
+            "WindowWidth", typeof(double), typeof(CardListTab), new PropertyMetadata(null));
 
         public double WindowWidth
         {
@@ -62,7 +47,7 @@ namespace LumiTracker.Controls
             set { SetValue(WindowWidthProperty, value); }
         }
 
-        public ActionCardsPlayedTab()
+        public CardListTab()
         {
             InitializeComponent();
         }

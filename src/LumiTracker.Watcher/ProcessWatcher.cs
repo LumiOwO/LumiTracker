@@ -189,7 +189,7 @@ namespace LumiTracker.Watcher
             }
             catch (Exception ex)
             {
-                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {ex.Message}\n{ex.StackTrace}");
+                Configuration.Logger.LogError($"[ProcessWatcher] {ex.ToString()}");
                 ExceptionHandler?.Invoke(ex);
             }
         }
@@ -261,8 +261,7 @@ namespace LumiTracker.Watcher
                     string task_type_name = message_data["type"]!.ToString();
                     if (!Enum.TryParse(task_type_name, out ETaskType task_type))
                     {
-                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] Unknown task type: {task_type_name}");
-                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {message}");
+                        Configuration.Logger.LogWarning($"[ProcessWatcher] Unknown task type: {task_type_name}\n{message}");
                     }
                     else if (task_type == ETaskType.GAME_START)
                     {
@@ -270,12 +269,12 @@ namespace LumiTracker.Watcher
                     }
                     else if (task_type == ETaskType.MY_PLAYED)
                     {
-                        int card_id = (int)message_data["card_id"]!;
+                        int card_id = message_data["card_id"]!.ToObject<int>();
                         MyActionCardPlayed?.Invoke(card_id);
                     }
                     else if (task_type == ETaskType.OP_PLAYED)
                     {
-                        int card_id = (int)message_data["card_id"]!;
+                        int card_id = message_data["card_id"]!.ToObject<int>();
                         OpActionCardPlayed?.Invoke(card_id);
                     }
                     else if (task_type == ETaskType.GAME_OVER)
@@ -284,32 +283,40 @@ namespace LumiTracker.Watcher
                     }
                     else if (task_type == ETaskType.ROUND)
                     {
-                        int round = (int)message_data["round"]!;
+                        int round = message_data["round"]!.ToObject<int>();
                         RoundDetected?.Invoke(round);
                     }
                     else if (task_type == ETaskType.UNSUPPORTED_RATIO)
                     {
+                        int client_width  = message_data["client_width" ]!.ToObject<int>();
+                        int client_height = message_data["client_height"]!.ToObject<int>();
+                        float ratio = 1.0f * client_width / client_height;
+                        Configuration.Logger.LogWarning(
+                            $"[ProcessWatcher] Current resolution is {client_width} x {client_height} with ratio = {ratio}, which is not supported now.");
                         UnsupportedRatio?.Invoke();
                     }
                     else
                     {
-                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] Enum {task_type_name} defined but not handled");
-                        Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {message}");
+                        Configuration.Logger.LogWarning($"[ProcessWatcher] Enum {task_type_name} defined but not handled: {task_type_name}\n{message}");
                     }
                 }
-                else if (message_level == "WARNING" || message_level == "ERROR")
+                else if (message_level == "WARNING")
                 {
-                    Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {message}");
+                    Configuration.Logger.LogWarning($"[ProcessWatcher] {message}");
+                }
+                else if (message_level == "ERROR")
+                {
+                    Configuration.Logger.LogError($"[ProcessWatcher] {message}");
                 }
             }
             catch (JsonReaderException ex)
             {
-                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [python] {e.Data}");
+                Configuration.Logger.LogError($"[python] {e.Data}");
                 ExceptionHandler?.Invoke(ex);
             }
             catch (Exception ex)
             {
-                Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [ProcessWatcher] {ex.Message}\n{ex.StackTrace}");
+                Configuration.Logger.LogError($"[ProcessWatcher] {ex.ToString()}");
                 ExceptionHandler?.Invoke(ex);
             }
         }

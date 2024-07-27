@@ -1,36 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using Wpf.Ui.Controls;
+﻿using Wpf.Ui.Controls;
 
 using LumiTracker.Config;
 using LumiTracker.Models;
 using System.Windows.Controls;
-using Swordfish.NET.Collections;
-
-using CardList = Swordfish.NET.Collections.ConcurrentObservableSortedDictionary<
-    int, LumiTracker.ViewModels.Windows.ActionCardView>;
-using CardListTimestamps = System.Collections.Generic.Dictionary<
-    int, System.DateTime>;
 
 namespace LumiTracker.ViewModels.Windows
 {
-    public partial class ActionCardView : ObservableObject
-    {
-        [ObservableProperty]
-        public int     _count;
-        [ObservableProperty]
-        public string  _cardName;
-        [ObservableProperty]
-        public string  _snapshotUri;
-
-        public ActionCardView(int card_id) 
-        {
-            var cardInfo = Configuration.Database["actions"]![card_id]!;
-            Count        = 1;
-            CardName     = cardInfo[Configuration.Data.lang]!.ToString();
-            SnapshotUri  = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
-        }
-    }
-
     public partial class DeckWindowViewModel : ObservableObject
     {
         // ui
@@ -49,12 +24,14 @@ namespace LumiTracker.ViewModels.Windows
         // data
         [ObservableProperty]
         private CardList _myActionCardsPlayed = new ();
-        private CardListTimestamps MyActionCardsPlayedTimestamps = new();
 
         [ObservableProperty]
         private CardList _opActionCardsPlayed = new ();
-        private CardListTimestamps OpActionCardsPlayedTimestamps = new();
 
+        [ObservableProperty]
+        private DeckModel? _deckModel;
+
+        // controls
         [ObservableProperty]
         private bool _gameStarted = false;
 
@@ -66,7 +43,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private GameWatcher _gameWatcher;
 
-        public DeckWindowViewModel(GameWatcher gameWatcher, Deck deck)
+        public DeckWindowViewModel(GameWatcher gameWatcher)
         {
             _gameWatcher = gameWatcher;
 
@@ -79,56 +56,22 @@ namespace LumiTracker.ViewModels.Windows
 
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
 
-            ResetRecordedData();
-        }
+            _deckModel = new DeckModel("GLGxC4wQGMHRDI4QGNHxDZAQGeERDpIQGfExD5QRGQFREJYREBGREQkRECGhEgoREDAA");
 
-        private CardList CreateCardList(bool is_op)
-        {
-            CardListTimestamps timestamps = is_op ? OpActionCardsPlayedTimestamps : MyActionCardsPlayedTimestamps;
-            IComparer<int> comparer = Comparer<int>.Create((a, b) =>
-            {
-                DateTime a_timestamp = timestamps[a];
-                DateTime b_timestamp = timestamps[b];
-                int res = a_timestamp.CompareTo(b_timestamp);
-                // Descending
-                return -res;
-            });
-            return new CardList(comparer);
+            ResetRecordedData();
         }
 
         private void ResetRecordedData()
         {
-            MyActionCardsPlayedTimestamps = new ();
-            OpActionCardsPlayedTimestamps = new ();
-            MyActionCardsPlayed = CreateCardList(is_op: false);
-            OpActionCardsPlayed = CreateCardList(is_op: true);
+            MyActionCardsPlayed = new CardList(CardList.SortType.TimestampDescending);
+            OpActionCardsPlayed = new CardList(CardList.SortType.TimestampDescending);
             Round = 0;
         }
 
         private void UpdatePlayedActionCard(int card_id, bool is_op)
         {
             CardList ActionCardsPlayed = is_op ? OpActionCardsPlayed : MyActionCardsPlayed;
-            CardListTimestamps timestamps = is_op ? OpActionCardsPlayedTimestamps : MyActionCardsPlayedTimestamps;
-
-            if (ActionCardsPlayed.TryGetValue(card_id, out ActionCardView cardView))
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    ActionCardsPlayed.Remove(card_id);
-                    timestamps.Remove(card_id);
-                    cardView.Count++;
-                    timestamps.Add(card_id, DateTime.Now);
-                    ActionCardsPlayed.Add(card_id, cardView);
-                });
-            }
-            else
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    timestamps.Add(card_id, DateTime.Now);
-                    ActionCardsPlayed.Add(card_id, new ActionCardView(card_id));
-                });
-            }
+            ActionCardsPlayed.Add(card_id);
         }
 
         private void OnGameStarted()

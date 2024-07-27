@@ -6,6 +6,63 @@ using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.Config
 {
+    public class FileLogger : ILogger
+    {
+        private readonly StreamWriter _writer;
+        private readonly LogLevel _minLevel;
+
+        public FileLogger(StreamWriter writer, LogLevel minLevel)
+        {
+            _writer = writer;
+            _minLevel = minLevel;
+        }
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return logLevel >= _minLevel;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            if (!IsEnabled(logLevel))
+            {
+                return;
+            }
+
+            string message = formatter(state, exception);
+            _writer.WriteLine($"{DateTime.Now} [{logLevel}] {message}");
+            if (exception != null)
+            {
+                _writer.WriteLine($"{DateTime.Now} [{logLevel}] {exception.ToString()}");
+            }
+        }
+    }
+
+    public class FileLoggerProvider : ILoggerProvider
+    {
+        private readonly StreamWriter _writer;
+        private readonly LogLevel _minLevel;
+
+        public FileLoggerProvider(StreamWriter writer, LogLevel minLevel)
+        {
+            _writer = writer;
+            _minLevel = minLevel;
+        }
+
+        public ILogger CreateLogger(string categoryName)
+        {
+            return new FileLogger(_writer, _minLevel);
+        }
+
+        public void Dispose()
+        {
+            _writer?.Dispose();
+        }
+    }
+
+
     #region ConfigData
 
     // Created by Visual Studio "Paste Special > Paste JSON As Classes"
@@ -61,16 +118,18 @@ namespace LumiTracker.Config
             _data = LoadConfig();
             _db = LoadDatabase();
 
+            Directory.CreateDirectory("log");
+            _errorWriter = new StreamWriter("log/error.log", false) { AutoFlush = true };
+
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder
                     .AddConsole()
-                    .SetMinimumLevel(_data.DEBUG ? LogLevel.Debug : LogLevel.Information);
+                    .AddProvider(new FileLoggerProvider(_errorWriter, LogLevel.Warning))
+                    .SetMinimumLevel(_data.DEBUG ? LogLevel.Debug : LogLevel.Information)
+                    ;
             });
             _logger = loggerFactory.CreateLogger<Configuration>();
-
-            Directory.CreateDirectory("log");
-            _errorWriter = new StreamWriter("log/error.log", false) { AutoFlush = true };
         }
 
         private static ConfigData LoadConfig()
@@ -121,14 +180,6 @@ namespace LumiTracker.Config
             get
             {
                 return Instance._logger;
-            }
-        }
-
-        public static StreamWriter ErrorWriter
-        {
-            get
-            {
-                return Instance._errorWriter;
             }
         }
 

@@ -71,7 +71,6 @@ namespace LumiTracker
                 services.AddSingleton<SettingsViewModel>();
 
                 services.AddSingleton<GameWatcher>();
-                services.AddSingleton<Deck>();
 
             }).Build();
 
@@ -132,7 +131,7 @@ namespace LumiTracker
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
-            Configuration.ErrorWriter.WriteLine($"[{DateTime.Now}] [App] {e.Exception.Message} \n{e.Exception.StackTrace}");
+            Configuration.Logger.LogError($"[App] {e.Exception.ToString()}");
             MessageBox.Show($"App error occurred: {e.Exception.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 

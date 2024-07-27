@@ -97,9 +97,9 @@
                             />
                     </TabItem.Header>
                     <!--Content-->
-                    <ctrls:ActionCardsPlayedTab
+                    <ctrls:CardListTab
                         ViewModel="{Binding Path=ViewModel}"
-                        ActionCardsPlayed="{Binding Path=ViewModel.MyActionCardsPlayed}"
+                        CardList="{Binding Path=ViewModel.MyActionCardsPlayed}"
                         WindowHeight="{Binding Height}"
                         WindowWidth="{Binding Width}"
                         />
@@ -119,9 +119,31 @@
                             />
                     </TabItem.Header>
                     <!--Content-->
-                    <ctrls:ActionCardsPlayedTab
+                    <ctrls:CardListTab
                         ViewModel="{Binding Path=ViewModel}"
-                        ActionCardsPlayed="{Binding Path=ViewModel.OpActionCardsPlayed}"
+                        CardList="{Binding Path=ViewModel.OpActionCardsPlayed}"
+                        WindowHeight="{Binding Height}"
+                        WindowWidth="{Binding Width}"
+                    />
+                </TabItem>
+
+                <TabItem 
+                    Height="Auto"
+                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
+                    Background="{StaticResource TabHeaderBackground}"
+                    IsSelected="True"
+                    >
+                    <!--Header-->
+                    <TabItem.Header>
+                        <ctrls:DeckWindowTabHeader
+                            Icon="TargetArrow24"
+                            Text="{svs:Localization Settings}"
+                            />
+                    </TabItem.Header>
+                    <!--Content-->
+                    <ctrls:CardListTab
+                        ViewModel="{Binding Path=ViewModel}"
+                        CardList="{Binding Path=ViewModel.DeckModel.Deck}"
                         WindowHeight="{Binding Height}"
                         WindowWidth="{Binding Width}"
                     />
