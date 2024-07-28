@@ -9,6 +9,7 @@ using System.Windows.Navigation;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
+using LumiTracker.Controls;
 
 namespace LumiTracker.Views.Windows
 {
@@ -82,17 +83,23 @@ namespace LumiTracker.Views.Windows
             }
         }
 
+        private void OnTabControlLoaded(object sender, RoutedEventArgs e)
+        {
+            DeckWindowTabControl.SelectedItem = MyDeckTab;
+        }
+
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             foreach (TabItem tabItem in DeckWindowTabControl.Items)
             {
+                var header = (tabItem.Header as DeckWindowTabHeader)!;
                 if (tabItem.IsSelected)
                 {
-                    tabItem.Opacity = 1;
+                    header.Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
                 }
                 else
                 {
-                    tabItem.Opacity = 0.3;
+                    header.Foreground = new SolidColorBrush(Color.FromArgb(200, 200, 200, 200));
                 }
             }
         }

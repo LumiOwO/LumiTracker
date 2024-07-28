@@ -36,10 +36,8 @@
         <helpers:MultiBooleanAndToVisibilityConverter x:Key="MultiBooleanAndToVisibilityConverter" />
         <helpers:BooleanNotConverter x:Key="BooleanNotConverter" />
 
-        <SolidColorBrush x:Key="MainContentBackground"
-            Color="#e6282c34" />
         <SolidColorBrush x:Key="TabHeaderBackground"
-            Color="#1affffff" />
+            Color="#6aaaaaaa" />
 
     </Window.Resources>
 
@@ -80,14 +78,40 @@
             <TabControl 
                 Grid.Row="0"
                 Margin="0,8,0,0"
+                Loaded="OnTabControlLoaded" 
                 SelectionChanged="OnSelectionChanged"
                 x:Name="DeckWindowTabControl" 
                 >
-                
+
+                <!-- My Deck -->
                 <TabItem 
                     Height="Auto"
-                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
+                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.3333}"
                     Background="{StaticResource TabHeaderBackground}"
+                    x:Name="MyDeckTab"
+                    >
+                    <!--Header-->
+                    <TabItem.Header>
+                        <ctrls:DeckWindowTabHeader
+                            Icon="PlayingCards20"
+                            Text="{svs:Localization MyDeck}"
+                            />
+                    </TabItem.Header>
+                    <!--Content-->
+                    <ctrls:DeckWindowCardListTab
+                        ViewModel="{Binding Path=ViewModel}"
+                        CardList="{Binding Path=ViewModel.DeckModel.Deck}"
+                        WindowHeight="{Binding Height}"
+                        WindowWidth="{Binding Width}"
+                        />
+                </TabItem>
+
+                <!-- My Played -->
+                <TabItem 
+                    Height="Auto"
+                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.3333}"
+                    Background="{StaticResource TabHeaderBackground}"
+                    x:Name="MyPlayedTab"
                     >
                     <!--Header-->
                     <TabItem.Header>
@@ -97,7 +121,7 @@
                             />
                     </TabItem.Header>
                     <!--Content-->
-                    <ctrls:CardListTab
+                    <ctrls:DeckWindowCardListTab
                         ViewModel="{Binding Path=ViewModel}"
                         CardList="{Binding Path=ViewModel.MyActionCardsPlayed}"
                         WindowHeight="{Binding Height}"
@@ -105,11 +129,12 @@
                         />
                 </TabItem>
 
+                <!-- Op Played -->
                 <TabItem 
                     Height="Auto"
-                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
+                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.3333}"
                     Background="{StaticResource TabHeaderBackground}"
-                    IsSelected="True"
+                    x:Name="OpPlayedTab"
                     >
                     <!--Header-->
                     <TabItem.Header>
@@ -119,31 +144,9 @@
                             />
                     </TabItem.Header>
                     <!--Content-->
-                    <ctrls:CardListTab
+                    <ctrls:DeckWindowCardListTab
                         ViewModel="{Binding Path=ViewModel}"
                         CardList="{Binding Path=ViewModel.OpActionCardsPlayed}"
-                        WindowHeight="{Binding Height}"
-                        WindowWidth="{Binding Width}"
-                    />
-                </TabItem>
-
-                <TabItem 
-                    Height="Auto"
-                    Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.5}"
-                    Background="{StaticResource TabHeaderBackground}"
-                    IsSelected="True"
-                    >
-                    <!--Header-->
-                    <TabItem.Header>
-                        <ctrls:DeckWindowTabHeader
-                            Icon="TargetArrow24"
-                            Text="{svs:Localization Settings}"
-                            />
-                    </TabItem.Header>
-                    <!--Content-->
-                    <ctrls:CardListTab
-                        ViewModel="{Binding Path=ViewModel}"
-                        CardList="{Binding Path=ViewModel.DeckModel.Deck}"
                         WindowHeight="{Binding Height}"
                         WindowWidth="{Binding Width}"
                     />

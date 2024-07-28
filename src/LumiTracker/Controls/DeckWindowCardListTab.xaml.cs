@@ -9,10 +9,10 @@ namespace LumiTracker.Controls
     /// <summary>
     /// Interaction logic for PlayedCardsTabItem.xaml
     /// </summary>
-    public partial class CardListTab : UserControl
+    public partial class DeckWindowCardListTab : UserControl
     {
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
-            "ViewModel", typeof(DeckWindowViewModel), typeof(CardListTab), new PropertyMetadata(null));
+            "ViewModel", typeof(DeckWindowViewModel), typeof(DeckWindowCardListTab), new PropertyMetadata(null));
 
         public DeckWindowViewModel ViewModel
         {
@@ -21,7 +21,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty CardListProperty = DependencyProperty.Register(
-            "CardList", typeof(CardList), typeof(CardListTab), new PropertyMetadata(null));
+            "CardList", typeof(CardList), typeof(DeckWindowCardListTab), new PropertyMetadata(null));
 
         public CardList CardList
         {
@@ -30,7 +30,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty WindowHeightProperty = DependencyProperty.Register(
-            "WindowHeight", typeof(double), typeof(CardListTab), new PropertyMetadata(null));
+            "WindowHeight", typeof(double), typeof(DeckWindowCardListTab), new PropertyMetadata(null));
 
         public double WindowHeight
         {
@@ -39,7 +39,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty WindowWidthProperty = DependencyProperty.Register(
-            "WindowWidth", typeof(double), typeof(CardListTab), new PropertyMetadata(null));
+            "WindowWidth", typeof(double), typeof(DeckWindowCardListTab), new PropertyMetadata(null));
 
         public double WindowWidth
         {
@@ -47,7 +47,7 @@ namespace LumiTracker.Controls
             set { SetValue(WindowWidthProperty, value); }
         }
 
-        public CardListTab()
+        public DeckWindowCardListTab()
         {
             InitializeComponent();
         }

@@ -268,4 +268,8 @@
     <value>取消</value>
     <comment/>
   </data>
+  <data name="MyDeck" xml:space="preserve">
+    <value>我的牌库</value>
+    <comment/>
+  </data>
 </root>

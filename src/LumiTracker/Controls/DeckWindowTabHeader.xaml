@@ -20,16 +20,15 @@
             FontSize="{Binding Height, 
                 RelativeSource={RelativeSource AncestorType={x:Type Window}},
                 Converter={StaticResource SizeWithRatioConverter}, 
-                ConverterParameter=0.018
+                ConverterParameter=0.016
                 }"
-            FontWeight="Bold"
             Margin="2,0,4,0" 
             Symbol="{Binding Icon}" />
         <TextBlock 
             FontSize="{Binding Height, 
                 RelativeSource={RelativeSource AncestorType={x:Type Window}},
                 Converter={StaticResource SizeWithRatioConverter}, 
-                ConverterParameter=0.018
+                ConverterParameter=0.016
                 }"
             FontWeight="Bold"
             Text="{Binding Text}" />

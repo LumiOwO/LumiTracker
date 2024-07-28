@@ -268,4 +268,8 @@
     <value>Cancel</value>
     <comment/>
   </data>
+  <data name="MyDeck" xml:space="preserve">
+    <value>My Deck</value>
+    <comment/>
+  </data>
 </root>

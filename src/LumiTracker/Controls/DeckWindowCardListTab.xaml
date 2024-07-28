@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="LumiTracker.Controls.CardListTab"
+﻿<UserControl x:Class="LumiTracker.Controls.DeckWindowCardListTab"
             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -22,9 +22,6 @@
         <SolidColorBrush 
             x:Key="MainContentBackground"
             Color="#e6282c34" />
-        <SolidColorBrush 
-            x:Key="TabHeaderBackground"
-            Color="#1affffff" />
 
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <Grid
@@ -100,7 +97,7 @@
                 <!-- name -->
                 <TextBlock
                     Grid.Column="1"
-                    Margin="5,0,0,2"
+                    Margin="5,0,0,0"
                     Foreground="White"
                     FontWeight="Medium"
                     VerticalAlignment="Center"
@@ -135,7 +132,7 @@
     </UserControl.Resources>
 
     <Grid 
-        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:CardListTab}}"
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:DeckWindowCardListTab}}"
         Background="{StaticResource MainContentBackground}"
         >
         <Grid.RowDefinitions>
@@ -146,6 +143,7 @@
         <ui:ListView
             Grid.Row="0"
             ScrollViewer.VerticalScrollBarVisibility="{Binding ViewModel.VerticalScrollBarVisibility}"
+            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
             MaxWidth="{Binding WindowWidth}"
             ItemsSource="{Binding CardList.Data.CollectionView}"
             ItemTemplate="{StaticResource ActionCardViewTemplate}"
