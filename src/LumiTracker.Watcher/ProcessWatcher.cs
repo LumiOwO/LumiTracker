@@ -40,6 +40,12 @@ namespace LumiTracker.Watcher
 
     public delegate void OnRoundDetectedCallback(int round);
 
+    public delegate void OnMyCardsDrawnCallback(int[] card_ids);
+
+    public delegate void OnMyCardsCreateDeckCallback(int[] card_ids);
+
+    public delegate void OnOpCardsCreateDeckCallback(int[] card_ids);
+
     public delegate void OnUnsupportedRatioCallback();
 
     public delegate void ExceptionHandlerCallback(Exception ex);
@@ -57,6 +63,9 @@ namespace LumiTracker.Watcher
         public event OnOpActionCardPlayedCallback? OpActionCardPlayed;
         public event OnGameOverCallback?           GameOver;
         public event OnRoundDetectedCallback?      RoundDetected;
+        public event OnMyCardsDrawnCallback?       MyCardsDrawn;
+        public event OnMyCardsCreateDeckCallback?  MyCardsCreateDeck;
+        public event OnOpCardsCreateDeckCallback?  OpCardsCreateDeck;
         public event OnUnsupportedRatioCallback?   UnsupportedRatio;
         public event ExceptionHandlerCallback?     ExceptionHandler;
 
@@ -285,6 +294,21 @@ namespace LumiTracker.Watcher
                     {
                         int round = message_data["round"]!.ToObject<int>();
                         RoundDetected?.Invoke(round);
+                    }
+                    else if (task_type == ETaskType.MY_DRAWN)
+                    {
+                        int[] cards = message_data["cards"]!.ToObject<int[]>()!;
+                        MyCardsDrawn?.Invoke(cards);
+                    }
+                    else if (task_type == ETaskType.MY_CREATE_DECK)
+                    {
+                        int[] cards = message_data["cards"]!.ToObject<int[]>()!;
+                        MyCardsCreateDeck?.Invoke(cards);
+                    }
+                    else if (task_type == ETaskType.OP_CREATE_DECK)
+                    {
+                        int[] cards = message_data["cards"]!.ToObject<int[]>()!;
+                        OpCardsCreateDeck?.Invoke(cards);
                     }
                     else if (task_type == ETaskType.UNSUPPORTED_RATIO)
                     {

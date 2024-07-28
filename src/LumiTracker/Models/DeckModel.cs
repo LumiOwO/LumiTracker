@@ -18,6 +18,8 @@ namespace LumiTracker.Models
         private  string  _snapshotUri;
         [ObservableProperty]
         private  int     _count;
+        [ObservableProperty]
+        private  double  _opacity;
 
         public ActionCardView(int card_id, int count = 1)
         {
@@ -32,6 +34,12 @@ namespace LumiTracker.Models
             CardName     = cardName;
             SnapshotUri  = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
             Count        = count;
+            Opacity      = 1.0;
+        }
+
+        partial void OnCountChanged(int oldValue, int newValue)
+        {
+            Opacity = (Count == 0) ? 0.3 : 1.0;
         }
     }
 
@@ -202,16 +210,15 @@ namespace LumiTracker.Models
     public partial class DeckModel : ObservableObject
     {
         [ObservableProperty]
-        private ObservableCollection<AvatarView> _avatars;
+        private ObservableCollection<AvatarView> _avatars = new();
 
         [ObservableProperty]
-        private CardList _deck;
+        private CardList _deck = new CardList();
+
+        public DeckModel() { }
 
         public DeckModel(string shareCode)
         {
-            Deck    = new CardList();
-            Avatars = new();
-
             int[]? cards = DecodeShareCode(shareCode);
             if (cards == null)
             {

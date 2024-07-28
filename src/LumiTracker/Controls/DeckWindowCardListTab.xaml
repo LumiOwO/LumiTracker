@@ -25,6 +25,7 @@
 
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <Grid
+                Opacity="{Binding Value.Opacity, Mode=OneWay}"
                 HorizontalAlignment="Stretch"
                 Margin="2, -5, 0, -5">
 

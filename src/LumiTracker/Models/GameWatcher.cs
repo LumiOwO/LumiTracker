@@ -44,6 +44,12 @@ namespace LumiTracker.Models
 
         public event OnRoundDetectedCallback?       RoundDetected;
 
+        public event OnMyCardsDrawnCallback?        MyCardsDrawn;
+
+        public event OnMyCardsCreateDeckCallback?   MyCardsCreateDeck;
+
+        public event OnOpCardsCreateDeckCallback?   OpCardsCreateDeck;
+
         public event OnUnsupportedRatioCallback?    UnsupportedRatio;
 
         public GameWatcher()
@@ -85,6 +91,9 @@ namespace LumiTracker.Models
                 watcher.OpActionCardPlayed += OnOpActionCardPlayed;
                 watcher.GameOver           += OnGameOver;
                 watcher.RoundDetected      += OnRoundDetected;
+                watcher.MyCardsDrawn       += OnMyCardsDrawn;
+                watcher.MyCardsCreateDeck  += OnMyCardsCreateDeck;
+                watcher.OpCardsCreateDeck  += OnOpCardsCreateDeck;
                 watcher.UnsupportedRatio   += OnUnsupportedRatio;
                 watcher.ExceptionHandler   += OnException;
                 processWatcher.Value = watcher;
@@ -156,6 +165,24 @@ namespace LumiTracker.Models
         {
             Configuration.Logger.LogDebug("OnRoundDetected");
             RoundDetected?.Invoke(round);
+        }
+
+        private void OnMyCardsDrawn(int[] card_ids)
+        {
+            Configuration.Logger.LogDebug("OnMyCardsDrawn");
+            MyCardsDrawn?.Invoke(card_ids);
+        }
+
+        private void OnMyCardsCreateDeck(int[] card_ids)
+        {
+            Configuration.Logger.LogDebug("OnMyCardsCreateDeck");
+            MyCardsCreateDeck?.Invoke(card_ids);
+        }
+
+        private void OnOpCardsCreateDeck(int[] card_ids)
+        {
+            Configuration.Logger.LogDebug("OnOpCardsCreateDeck");
+            OpCardsCreateDeck?.Invoke(card_ids);
         }
 
         private void OnUnsupportedRatio()

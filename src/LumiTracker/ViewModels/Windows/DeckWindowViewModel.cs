@@ -29,7 +29,7 @@ namespace LumiTracker.ViewModels.Windows
         private CardList _opActionCardsPlayed = new ();
 
         [ObservableProperty]
-        private DeckModel? _deckModel;
+        private DeckModel _deckModel = new ();
 
         // controls
         [ObservableProperty]
@@ -52,11 +52,14 @@ namespace LumiTracker.ViewModels.Windows
             _gameWatcher.OpActionCardPlayed += OnOpActionCardPlayed;
             _gameWatcher.GameOver           += OnGameOver;
             _gameWatcher.RoundDetected      += OnRoundDetected;
+            _gameWatcher.MyCardsDrawn       += OnMyCardsDrawn;
+            _gameWatcher.MyCardsCreateDeck  += OnMyCardsCreateDeck;
+            _gameWatcher.OpCardsCreateDeck  += OnOpCardsCreateDeck;
             _gameWatcher.UnsupportedRatio   += OnUnsupportedRatio;
 
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
 
-            _deckModel = new DeckModel("GLGxC4wQGMHRDI4QGNHxDZAQGeERDpIQGfExD5QRGQFREJYREBGREQkRECGhEgoREDAA");
+            _deckModel = new DeckModel("F0AhxHEMF5AB2XoNF5GwWaMVCpAx3jMPFECB9EgPGGERCIEQGIFBioQYGKFRCoUQDKAA");
 
             ResetRecordedData();
         }
@@ -101,6 +104,21 @@ namespace LumiTracker.ViewModels.Windows
         private void OnRoundDetected(int round)
         {
             Round = round;
+        }
+
+        private void OnMyCardsDrawn(int[] card_ids)
+        {
+            DeckModel.Deck.Remove(card_ids, keep_zero: true);
+        }
+
+        private void OnMyCardsCreateDeck(int[] card_ids)
+        {
+            DeckModel.Deck.Add(card_ids);
+        }
+
+        private void OnOpCardsCreateDeck(int[] card_ids)
+        {
+
         }
 
         private void OnUnsupportedRatio()
