@@ -85,7 +85,10 @@
 
                 <!-- My Deck -->
                 <TabItem 
-                    Height="Auto"
+                    Height="{Binding Height, 
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.042
+                        }"
                     Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.3333}"
                     Background="{StaticResource TabHeaderBackground}"
                     x:Name="MyDeckTab"
@@ -108,7 +111,10 @@
 
                 <!-- My Played -->
                 <TabItem 
-                    Height="Auto"
+                    Height="{Binding Height, 
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.042
+                        }"
                     Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.3333}"
                     Background="{StaticResource TabHeaderBackground}"
                     x:Name="MyPlayedTab"
@@ -131,7 +137,10 @@
 
                 <!-- Op Played -->
                 <TabItem 
-                    Height="Auto"
+                    Height="{Binding Height, 
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.042
+                        }"
                     Width="{Binding Path=Width, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.3333}"
                     Background="{StaticResource TabHeaderBackground}"
                     x:Name="OpPlayedTab"

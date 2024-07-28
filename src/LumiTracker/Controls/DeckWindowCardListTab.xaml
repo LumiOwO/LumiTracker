@@ -27,7 +27,11 @@
             <Grid
                 Opacity="{Binding Value.Opacity, Mode=OneWay}"
                 HorizontalAlignment="Stretch"
-                Margin="2, -5, 0, -5">
+                Width="{Binding Width, 
+                    RelativeSource={RelativeSource AncestorType={x:Type Window}}
+                    }"
+                Margin="0, -5, 0, -5"
+                >
 
                 <Grid.RowDefinitions>
                     <RowDefinition 
@@ -79,6 +83,8 @@
                 <!-- snapshot -->
                 <Border 
                     Grid.Column="1" 
+                    Grid.ColumnSpan="2"
+                    Margin="0, 0, 32, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     >
@@ -90,7 +96,7 @@
                     </Border.OpacityMask>
                     <Image 
                         Source="{Binding Value.SnapshotUri, Mode=OneWay}" 
-                        Stretch="UniformToFill"
+                        Stretch="Uniform"
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Center"
                     />
@@ -101,6 +107,9 @@
                     Margin="5,0,0,0"
                     Foreground="White"
                     FontWeight="Medium"
+                    TextWrapping="NoWrap"
+                    TextTrimming="CharacterEllipsis"
+                    HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     FontSize="{Binding Height, 
                         RelativeSource={RelativeSource AncestorType={x:Type Window}},
@@ -111,7 +120,7 @@
                 <!-- count -->
                 <TextBlock
                     Grid.Column="2"
-                    Margin="7,0,4,0"
+                    Margin="12,1,12,0"
                     FontWeight="Bold"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
