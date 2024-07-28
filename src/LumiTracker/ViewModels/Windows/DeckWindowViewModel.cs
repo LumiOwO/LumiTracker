@@ -4,6 +4,8 @@ using LumiTracker.Config;
 using LumiTracker.Models;
 using System.Windows.Controls;
 
+#pragma warning disable CS8618
+
 namespace LumiTracker.ViewModels.Windows
 {
     public partial class DeckWindowViewModel : ObservableObject
@@ -23,13 +25,13 @@ namespace LumiTracker.ViewModels.Windows
 
         // data
         [ObservableProperty]
-        private CardList _myActionCardsPlayed = new ();
+        private CardList _myActionCardsPlayed;
 
         [ObservableProperty]
-        private CardList _opActionCardsPlayed = new ();
+        private CardList _opActionCardsPlayed;
 
         [ObservableProperty]
-        private DeckModel _deckModel = new ();
+        private DeckModel _deckModel;
 
         // controls
         [ObservableProperty]
@@ -37,6 +39,10 @@ namespace LumiTracker.ViewModels.Windows
 
         [ObservableProperty]
         private bool _gameNotStarted = true;
+        partial void OnGameStartedChanged(bool oldValue, bool newValue)
+        {
+            GameNotStarted = !GameStarted;
+        }
 
         [ObservableProperty]
         private int _round = 0;
@@ -59,16 +65,23 @@ namespace LumiTracker.ViewModels.Windows
 
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
 
-            _deckModel = new DeckModel("F0AhxHEMF5AB2XoNF5GwWaMVCpAx3jMPFECB9EgPGGERCIEQGIFBioQYGKFRCoUQDKAA");
-
-            ResetRecordedData();
+            Reset(gameStart: false);
         }
 
-        private void ResetRecordedData()
+        private void Reset(bool gameStart)
         {
             MyActionCardsPlayed = new CardList(CardList.SortType.TimestampDescending);
             OpActionCardsPlayed = new CardList(CardList.SortType.TimestampDescending);
             Round = 0;
+            GameStarted = gameStart;
+            if (gameStart)
+            {
+                DeckModel = new DeckModel("F0AhxHEMF5AB2XoNF5GwWaMVCpAx3jMPFECB9EgPGGERCIEQGIFBioQYGKFRCoUQDKAA");
+            }
+            else
+            {
+                DeckModel = new ();
+            }
         }
 
         private void UpdatePlayedActionCard(int card_id, bool is_op)
@@ -79,9 +92,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnGameStarted()
         {
-            ResetRecordedData();
-            GameStarted = true;
-            GameNotStarted = !GameStarted;
+            Reset(gameStart: true);
         }
 
         private void OnMyActionCardPlayed(int card_id)
@@ -96,9 +107,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnGameOver()
         {
-            ResetRecordedData();
-            GameStarted = false;
-            GameNotStarted = !GameStarted;
+            Reset(gameStart: false);
         }
 
         private void OnRoundDetected(int round)
@@ -131,9 +140,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnWindowWatcherExit()
         {
-            ResetRecordedData();
-            GameStarted = false;
-            GameNotStarted = !GameStarted;
+            Reset(gameStart: false);
         }
 
     }
