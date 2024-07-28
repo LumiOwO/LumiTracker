@@ -87,12 +87,19 @@ class EElementType(enum.Enum):
     Dendro  = enum.auto()
 
 class ECostType(enum.Enum):
-    Cryo    = EElementType.Cryo.value
-    Hydro   = EElementType.Hydro.value
-    Pyro    = EElementType.Pyro.value
-    Electro = EElementType.Electro.value
-    Anemo   = EElementType.Anemo.value
-    Geo     = EElementType.Geo.value
-    Dendro  = EElementType.Dendro.value
-    Same    = enum.auto()
-    Any     = enum.auto()
+    Cryo          = EElementType.Cryo.value
+    Hydro         = EElementType.Hydro.value
+    Pyro          = EElementType.Pyro.value
+    Electro       = EElementType.Electro.value
+    Anemo         = EElementType.Anemo.value
+    Geo           = EElementType.Geo.value
+    Dendro        = EElementType.Dendro.value
+    Same          = enum.auto()
+    Any           = enum.auto()
+    CryoAttack    = enum.auto()
+    HydroAttack   = enum.auto()
+    PyroAttack    = enum.auto()
+    ElectroAttack = enum.auto()
+    AnemoAttack   = enum.auto()
+    GeoAttack     = enum.auto()
+    DendroAttack  = enum.auto()

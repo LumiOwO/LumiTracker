@@ -60,6 +60,13 @@
         Dendro  = EElementType.Dendro,
         Same,
         Any,
+        CryoAttack,
+        HydroAttack,
+        PyroAttack,
+        ElectroAttack,
+        AnemoAttack,
+        GeoAttack,
+        DendroAttack,
     }
 
     public enum ETaskType : int

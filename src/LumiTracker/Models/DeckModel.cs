@@ -2,27 +2,36 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Swordfish.NET.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using static LumiTracker.Models.CardList;
 
 namespace LumiTracker.Models
 {
     public partial class ActionCardView : ObservableObject
     {
         [ObservableProperty]
-        public int    _count;
+        private  int     _cost;
         [ObservableProperty]
-        public string _cardName;
+        private  string  _costTypeUri;
         [ObservableProperty]
-        public string _snapshotUri;
+        private  string  _cardName;
+        [ObservableProperty]
+        private  string  _snapshotUri;
+        [ObservableProperty]
+        private  int     _count;
 
-        public ActionCardView(int card_id)
+        public ActionCardView(int card_id, int count = 1)
         {
-            var info    = Configuration.Database["actions"]![card_id]!;
-            Count       = 1;
-            CardName    = info[Configuration.Data.lang]!.ToString();
-            SnapshotUri = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
+            var info = Configuration.Database["actions"]![card_id]!;
+            var cardName = info[Configuration.Data.lang]!.ToString();
+            var jCost    = info["cost"]!;
+            var cost     = jCost[0]!.ToObject<int>();
+            var costType = jCost[1]!.ToObject<ECostType>();
+
+            Cost         = cost;
+            CostTypeUri  = $"pack://siteoforigin:,,,/assets/images/costs/{costType.ToString()}.png";
+            CardName     = cardName;
+            SnapshotUri  = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
+            Count        = count;
         }
     }
 

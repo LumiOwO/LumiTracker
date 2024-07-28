@@ -453,21 +453,20 @@ class Database:
             handler.frame_buffer = image
             feature = handler.ExtractCardFeature()
 
-            costs = []
+            cost_type = row["element"]
+            # special case: talent for Attack
             if "," in row["cost"]:
-                # currently only talent for A
-                # TODO: deal with all types of costs
-                cost_values = [int(val) for val in row["cost"].split(",")]
-                costs.append(( cost_values[0], ECostType[row["element"]].value ))
-                costs.append(( cost_values[1], ECostType.Any.value ))
+                cost_type += "Attack"
+                cost = sum([int(val) for val in row["cost"].split(",")])
             else:
-                costs.append(( int(row["cost"]), ECostType[row["element"]].value ))
+                cost = int(row["cost"])
+            cost_type = ECostType[cost_type].value
 
             action = {
                 "zh-HANS" : row["zh-HANS"],
                 "en-US"   : row["en-US"],
                 "type"    : EActionCardType[row["type"]].value,
-                "costs"   : costs,
+                "cost"    : (cost, cost_type),
             }
 
             features[card_id] = feature
@@ -597,6 +596,17 @@ class Database:
             artifacts_order[internal_id] = i
 
         self.data["artifacts_order"] = artifacts_order
+
+        # cost images
+        if save_image_assets:
+            for name in ECostType.__members__:
+                src_file = os.path.join(
+                    cfg.cards_dir, "costs", f'{name}.png'
+                    )
+                dst_file = os.path.join(
+                    cfg.assets_dir, "images", "costs", f'{name}.png'
+                    )
+                shutil.copy(src_file, dst_file)
 
     def _Update(self, save_image_assets):
         self._UpdateControls()
