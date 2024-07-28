@@ -85,50 +85,116 @@ namespace LumiTracker.Models
 
         public void Add(int card_id)
         {
-            if (Data.TryGetValue(card_id, out ActionCardView cardView))
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Data.Remove(card_id);
-                    Timestamps.Remove(card_id);
-                    cardView.Count++;
-                    Timestamps.Add(card_id, DateTime.Now);
-                    Data.Add(card_id, cardView);
-                });
-            }
-            else
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Timestamps.Add(card_id, DateTime.Now);
-                    Data.Add(card_id, new ActionCardView(card_id));
-                });
-            }
+            Add([card_id]);
         }
 
         public void Remove(int card_id, bool keep_zero)
         {
-            if (!Data.TryGetValue(card_id, out ActionCardView cardView))
+            Remove([card_id], keep_zero);
+        }
+
+        public void Add(int[] card_ids)
+        {
+            var pairsToUpdate = new Dictionary<int, ActionCardView>();
+            var keysToRemove  = new HashSet<int>();
+            foreach (var card_id in card_ids)
             {
-                Configuration.Logger.LogWarning($"[CardList.Remove] Card id {card_id} is not in the deck.");
-                return;
-            }
-            if (cardView.Count == 0)
-            {
-                Configuration.Logger.LogWarning($"[CardList.Remove] Count of card id {card_id} is 0.");
-                return;
+                ActionCardView cardView;
+                if (pairsToUpdate.TryGetValue(card_id, out cardView!))
+                {
+                    cardView.Count += 1;
+                }
+                else if (Data.TryGetValue(card_id, out cardView!))
+                {
+                    cardView.Count += 1;
+                    keysToRemove.Add(card_id);
+                    pairsToUpdate.Add(card_id, cardView);
+                }
+                else
+                {
+                    pairsToUpdate.Add(card_id, new ActionCardView(card_id));
+                }
             }
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Data.Remove(card_id);
-                Timestamps.Remove(card_id);
-                cardView.Count--;
-                if (keep_zero)
+                Data.RemoveRange(keysToRemove);
+                foreach (var key in keysToRemove)
                 {
-                    Timestamps.Add(card_id, DateTime.Now);
-                    Data.Add(card_id, cardView);
+                    Timestamps.Remove(key);
                 }
+
+                var timestamp = DateTime.Now;
+                foreach (var key in pairsToUpdate.Keys)
+                {
+                    Timestamps.Add(key, timestamp);
+                }
+                Data.AddRange(pairsToUpdate);
+            });
+        }
+
+        public void Remove(int[] card_ids, bool keep_zero)
+        {
+            var pairsToUpdate = new Dictionary<int, ActionCardView>();
+            var keysToRemove  = new HashSet<int>();
+            foreach (var card_id in card_ids)
+            {
+                ActionCardView cardView;
+                if (pairsToUpdate.TryGetValue(card_id, out cardView!))
+                {
+                    if (cardView.Count == 0)
+                    {
+                        Configuration.Logger.LogWarning($"[CardList.Remove] Count of card id {card_id} is 0.");
+                    }
+                    else
+                    {
+                        cardView.Count -= 1;
+                        if (cardView.Count == 0 && !keep_zero)
+                        {
+                            pairsToUpdate.Remove(card_id);
+                        }
+                    }
+                }
+                else if (Data.TryGetValue(card_id, out cardView!))
+                {
+                    if (cardView.Count == 0)
+                    {
+                        Configuration.Logger.LogWarning($"[CardList.Remove] Count of card id {card_id} is 0.");
+                    }
+                    else
+                    {
+                        cardView.Count -= 1;
+                        if (cardView.Count == 0 && !keep_zero)
+                        {
+                            keysToRemove.Add(card_id);
+                        }
+                        else
+                        {
+                            keysToRemove.Add(card_id);
+                            pairsToUpdate.Add(card_id, cardView);
+                        }
+                    }
+                }
+                else
+                {
+                    Configuration.Logger.LogWarning($"[CardList.Remove] Card id {card_id} is not in the deck.");
+                }
+            }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Data.RemoveRange(keysToRemove);
+                foreach (var key in keysToRemove)
+                {
+                    Timestamps.Remove(key);
+                }
+
+                var timestamp = DateTime.Now;
+                foreach (var key in pairsToUpdate.Keys)
+                {
+                    Timestamps.Add(key, timestamp);
+                }
+                Data.AddRange(pairsToUpdate);
             });
         }
     }
@@ -157,11 +223,7 @@ namespace LumiTracker.Models
             {
                 Avatars.Add(new AvatarView(cards[i]));
             }
-            for (int i = 0; i < 30; i++)
-            {
-                int card_id = cards[i + 3];
-                Deck.Add(card_id);
-            }
+            Deck.Add(cards[3..]);
         }
 
         public static int[]? DecodeShareCode(string shareCode)
