@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 #pragma warning disable CS8618
 
@@ -67,27 +68,80 @@ namespace LumiTracker.Config
     {
         private static readonly Lazy<Configuration> _lazyInstance = new Lazy<Configuration>(() => new Configuration());
 
-        private JObject _data;
-
         private JObject _db;
+
+        private JObject _defaultConfig;
+
+        private JObject _userConfig;
 
         private ILogger _logger;
 
         private StreamWriter _errorWriter;
 
-        private static readonly string configFilePath = "assets/config.json";
+        // Directories
+        private static readonly string ExeDir = Path.GetDirectoryName(
+            Assembly.GetExecutingAssembly().Location
+        )!;
 
-        private static readonly string dbFilePath = "assets/database/db.json";
+        private static readonly string DocumentsDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            "LumiTracker"
+        );
+
+        private static readonly string ConfigDir = Path.Combine(
+            DocumentsDir,
+            "config"
+        );
+
+        private static readonly string LogDir = Path.Combine(
+            DocumentsDir,
+            "log"
+        );
+
+        // Files
+        private static readonly string DbFilePath = Path.Combine(
+            ExeDir,
+            "assets",
+            "database",
+            "db.json"
+        );
+
+        private static readonly string DefaultConfigPath = Path.Combine(
+            ExeDir,
+            "assets",
+            "config.json"
+        );
+
+        private static readonly string UserConfigPath = Path.Combine(
+            ConfigDir,
+            "config.json"
+        );
+
+        private static readonly string LogFilePath = Path.Combine(
+            LogDir,
+            "error.log"
+        );
 
         private Configuration()
         {
-            _data = LoadConfig();
-            _db = LoadDatabase();
+            _db             = LoadJObject(DbFilePath);
+            _defaultConfig  = LoadJObject(DefaultConfigPath);
+            if (File.Exists(UserConfigPath))
+            {
+                _userConfig = LoadJObject(UserConfigPath);
+            }
+            else
+            {
+                _userConfig = new JObject();
+            }
 
-            Directory.CreateDirectory("log");
-            _errorWriter = new StreamWriter("log/error.log", false) { AutoFlush = true };
+            if (!Directory.Exists(LogDir))
+            {
+                Directory.CreateDirectory(LogDir);
+            }
+            _errorWriter = new StreamWriter(LogFilePath, false) { AutoFlush = true };
 
-            bool DEBUG = _data["DEBUG"]!.ToObject<bool>();
+            bool DEBUG = _defaultConfig["DEBUG"]!.ToObject<bool>();
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder
@@ -99,22 +153,14 @@ namespace LumiTracker.Config
             _logger = loggerFactory.CreateLogger<Configuration>();
         }
 
-        private static JObject LoadConfig()
+        private static JObject LoadJObject(string path)
         {
-            string jsonString = File.ReadAllText(configFilePath);
-            var settings = new JsonLoadSettings
+            string jsonString = File.ReadAllText(path);
+            return JObject.Parse(jsonString, new JsonLoadSettings
             {
                 CommentHandling = CommentHandling.Ignore,
                 LineInfoHandling = LineInfoHandling.Load
-            };
-
-            return JObject.Parse(jsonString, settings);
-        }
-
-        private static JObject LoadDatabase()
-        {
-            string jsonString = File.ReadAllText(dbFilePath);
-            return JObject.Parse(jsonString);
+            });
         }
 
         private static Configuration Instance
@@ -125,11 +171,19 @@ namespace LumiTracker.Config
             }
         }
 
-        private static JObject Data
+        private static JObject DefaultConfig
         {
             get
             {
-                return Instance._data;
+                return Instance._defaultConfig;
+            }
+        }
+
+        private static JObject UserConfig
+        {
+            get
+            {
+                return Instance._userConfig;
             }
         }
 
@@ -151,12 +205,17 @@ namespace LumiTracker.Config
 
         public static T Get<T>(string key)
         {
-            return Data[key]!.ToObject<T>()!;
+            JToken? value;
+            if (!UserConfig.TryGetValue(key, out value))
+            {
+                value = DefaultConfig[key]!;
+            }
+            return value!.ToObject<T>()!;
         }
 
         public static void Set<T>(string key, T value, bool auto_save = true)
         {
-            Data[key] = JToken.FromObject(value!);
+            UserConfig[key] = JToken.FromObject(value!);
             if (auto_save)
             {
                 Save();
@@ -165,10 +224,19 @@ namespace LumiTracker.Config
 
         public static bool Save()
         {
+            if (UserConfig.Count == 0)
+            {
+                return true;
+            }
+
+            if (!Directory.Exists(ConfigDir))
+            {
+                Directory.CreateDirectory(ConfigDir);
+            }
             try
             {
-                string json = JsonConvert.SerializeObject(Data, Formatting.Indented);
-                File.WriteAllText(configFilePath, json);
+                string json = JsonConvert.SerializeObject(UserConfig, Formatting.Indented);
+                File.WriteAllText(UserConfigPath, json);
                 return true;
             }
             catch (Exception e)
