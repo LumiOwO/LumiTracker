@@ -94,15 +94,13 @@ namespace LumiTracker.ViewModels.Windows
             TrayMenuItems = new() { HomeTrayMenuItem, QuitTrayMenuItem };
 
             // refresh language
-            var cfg = Configuration.Data;
             ILocalizationService localizationService = (
                 _serviceProvider.GetService(typeof(ILocalizationService)) as ILocalizationService
             )!;
-            localizationService.ChangeLanguage(cfg.lang);
+            localizationService.ChangeLanguage(Configuration.Get<string>("lang"));
 
             // refresh theme
-            Enum.TryParse(cfg.theme, out ApplicationTheme curTheme);
-            ApplicationThemeManager.Apply(curTheme);
+            ApplicationThemeManager.Apply(Configuration.Get<ApplicationTheme>("theme"));
         }
     }
 }

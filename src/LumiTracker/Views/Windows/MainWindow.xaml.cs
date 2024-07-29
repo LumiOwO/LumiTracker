@@ -113,8 +113,8 @@ namespace LumiTracker.Views.Windows
             {
                 return;
             }
-
-            if (Configuration.Data.show_closing_dialog)
+            
+            if (Configuration.Get<bool>("show_closing_dialog"))
             {
                 var closingDialog = new ClosingDialog();
                 closingDialog.DataContext = this;
@@ -139,7 +139,7 @@ namespace LumiTracker.Views.Windows
             try
             {
                 // Init
-                content.MinimizeButton.IsChecked     = (Configuration.Data.closing_behavior == "Minimize");
+                content.MinimizeButton.IsChecked     = (Configuration.Get<EClosingBehavior>("closing_behavior") == EClosingBehavior.Minimize);
                 content.QuitButton.IsChecked         = !content.MinimizeButton.IsChecked;
                 content.NotShowAgainButton.IsChecked = false;
 
@@ -156,10 +156,12 @@ namespace LumiTracker.Views.Windows
                 bool PressedOK = (result == ContentDialogResult.Primary);
 
                 // Save to config
-                Configuration.Data.closing_behavior = (content.MinimizeButton.IsChecked ?? false) ? "Minimize" : "Quit";
+                Configuration.Set("closing_behavior", 
+                    (content.MinimizeButton.IsChecked ?? false) ? "Minimize" : "Quit", 
+                    auto_save: false);
                 if (PressedOK && (content.NotShowAgainButton.IsChecked ?? false))
                 {
-                    Configuration.Data.show_closing_dialog = false;
+                    Configuration.Set("show_closing_dialog", false, auto_save: false);
                 }
                 Configuration.Save();
 
@@ -179,8 +181,8 @@ namespace LumiTracker.Views.Windows
 
         private void TryToCloseWindow()
         {
-            string behavior = Configuration.Data.closing_behavior;
-            if (behavior == "Minimize")
+            EClosingBehavior behavior = Configuration.Get<EClosingBehavior>("closing_behavior");
+            if (behavior == EClosingBehavior.Minimize)
             {
                 ShowInTaskbar = false;
                 //WindowState   = WindowState.Minimized;
@@ -189,7 +191,7 @@ namespace LumiTracker.Views.Windows
                 const int SC_MINIMIZE   = 0xF020;
                 SendMessage(hwnd, WM_SYSCOMMAND, (IntPtr)SC_MINIMIZE, IntPtr.Zero);
             }
-            else if (behavior == "Quit")
+            else if (behavior == EClosingBehavior.Quit)
             {
                 Application.Current.Shutdown();
             }

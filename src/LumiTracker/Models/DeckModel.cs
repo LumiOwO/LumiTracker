@@ -24,7 +24,7 @@ namespace LumiTracker.Models
         public ActionCardView(int card_id, int count = 1)
         {
             var info = Configuration.Database["actions"]![card_id]!;
-            var cardName = info[Configuration.Data.lang]!.ToString();
+            var cardName = info[Configuration.Get<string>("lang")]!.ToString();
             var jCost    = info["cost"]!;
             var cost     = jCost[0]!.ToObject<int>();
             var costType = jCost[1]!.ToObject<ECostType>();

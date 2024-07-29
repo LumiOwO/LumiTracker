@@ -2,7 +2,7 @@
   "DEBUG": true,
   "DEBUG_SAVE": false,
   "debug_dir": "temp",
-  "LOG_INTERVAL": 3,
+  "LOG_INTERVAL": 10,
   "proc_watch_interval": 1,
   "frame_limit": 50,
   "action_crop_box0": [
@@ -29,7 +29,7 @@
   "cards_dir": "cards",
   "hash_size": 10,
   "ann_index_len": 100,
-  "threshold": 24,
+  "threshold": 26,
   "strict_threshold": 20,
   "ann_metric": "hamming",
   "ann_n_trees": 10,
@@ -37,6 +37,7 @@
   "closing_behavior": "Minimize",
   "theme": "Dark",
   "client_type": "YuanShen",
-  "show_ui_outside": false,
-  "show_closing_dialog": false
+  "show_ui_outside": true,
+  "show_closing_dialog": false,
+  "share_code": "FpGxlG4ZFkHRWncOF+Bw7o0PCCDh8i4QEjHgA5cQCVFwir0YC6HQC8UQDMFQEMkRDAAA"
 }

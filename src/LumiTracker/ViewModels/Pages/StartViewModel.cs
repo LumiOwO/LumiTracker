@@ -43,16 +43,15 @@ namespace LumiTracker.ViewModels.Pages
 
         public void Init()
         {
-            Enum.TryParse(Configuration.Data.client_type, out EClientType clientType);
-            CurrentClientType = clientType;
-            ShowUIOutside = Configuration.Data.show_ui_outside;
+            CurrentClientType = Configuration.Get<EClientType>("client_type");
+            ShowUIOutside     = Configuration.Get<bool>("show_ui_outside");
             _deckWindow.SetbOutside(ShowUIOutside);
 
             _gameWatcher.GenshinWindowFound += OnGenshinWindowFound;
             _gameWatcher.WindowWatcherStart += OnWindowWatcherStart;
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
 
-            _gameWatcher.Start(GetProcessName(clientType));
+            _gameWatcher.Start(GetProcessName(CurrentClientType));
         }
 
         private string GetProcessName(EClientType clientType)
@@ -120,8 +119,7 @@ namespace LumiTracker.ViewModels.Pages
             string processName = GetProcessName(CurrentClientType);
             Configuration.Logger.LogDebug(processName);
 
-            Configuration.Data.client_type = CurrentClientType.ToString();
-            Configuration.Save();
+            Configuration.Set("client_type", CurrentClientType.ToString());
 
             _gameWatcher.ChangeGameClient(processName);
         }
@@ -132,9 +130,7 @@ namespace LumiTracker.ViewModels.Pages
             ShowUIOutside = !ShowUIOutside;
             _deckWindow.SetbOutside(ShowUIOutside);
 
-            Configuration.Data.show_ui_outside = ShowUIOutside;
-            Configuration.Save();
-
+            Configuration.Set("show_ui_outside", ShowUIOutside);
         }
     }
 }

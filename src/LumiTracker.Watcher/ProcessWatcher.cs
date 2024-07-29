@@ -52,9 +52,6 @@ namespace LumiTracker.Watcher
 
     public class ProcessWatcher : IAsyncDisposable
     {
-        private readonly ILogger logger;
-        private ConfigData cfg;
-
         public event OnGenshinWindowFoundCallback? GenshinWindowFound;
         public event OnWindowWatcherStartCallback? WindowWatcherStart;
         public event OnWindowWatcherExitCallback?  WindowWatcherExit;
@@ -78,10 +75,9 @@ namespace LumiTracker.Watcher
         [DllImport("user32.dll")]
         private static extern bool IsWindow(IntPtr hWnd);
 
-        public ProcessWatcher(ILogger logger, ConfigData cfg)
+        public ProcessWatcher()
         {
-            this.logger = logger;
-            this.cfg    = cfg;
+
         }
 
         public WindowInfo FindProcessWindow(string processName)
@@ -91,20 +87,20 @@ namespace LumiTracker.Watcher
             var processes = GetProcessByName(processName);
             if (processes.Count == 0)
             {
-                logger.LogInformation($"No process found with name: {processName}");
+                Configuration.Logger.LogInformation($"No process found with name: {processName}");
                 return res;
             }
 
             if (processes.Count > 1)
             {
-                logger.LogWarning($"Found multiple processes with name: {processName}, using the first one");
+                Configuration.Logger.LogWarning($"Found multiple processes with name: {processName}, using the first one");
             }
             var proc = processes[0];
 
             var info = GetMainWindowInfo(proc);
             if (info.hwnd == 0)
             {
-                logger.LogInformation($"No windows found for process '{processName}' (PID: {proc.Id})");
+                Configuration.Logger.LogInformation($"No windows found for process '{processName}' (PID: {proc.Id})");
                 return res;
             }
             GenshinWindowFound?.Invoke();
@@ -112,11 +108,11 @@ namespace LumiTracker.Watcher
             var foregroundHwnd = GetForegroundWindow();
             if (info.hwnd != foregroundHwnd)
             {
-                logger.LogInformation($"Window for process '{processName}' (PID: {proc.Id}) is not foreground");
+                Configuration.Logger.LogInformation($"Window for process '{processName}' (PID: {proc.Id}) is not foreground");
                 return res;
             }
 
-            logger.LogInformation($"Window title for process '{processName}' (PID: {proc.Id}): {info.title}");
+            Configuration.Logger.LogInformation($"Window title for process '{processName}' (PID: {proc.Id}): {info.title}");
             
             res = info;
             return res;
@@ -144,7 +140,7 @@ namespace LumiTracker.Watcher
                     info.hwnd  = hwnd;
                     info.title = GetWindowText(hwnd);
                 }
-                logger.LogInformation($"###Main window: hwnd={info.hwnd}, title={info.title}");
+                Configuration.Logger.LogInformation($"###Main window: hwnd={info.hwnd}, title={info.title}");
             }
 
             return info;
@@ -183,7 +179,7 @@ namespace LumiTracker.Watcher
         {
             try
             {
-                int interval = cfg.proc_watch_interval * 1000;
+                int interval = Configuration.Get<int>("proc_watch_interval") * 1000;
                 while (!ShouldCancel.Value)
                 {
                     var info = FindProcessWindow(processName);
@@ -205,7 +201,7 @@ namespace LumiTracker.Watcher
 
         public async Task StartWindowWatcher(WindowInfo info, string processName, int interval)
         {
-            logger.LogInformation($"Begin to start window watcher");
+            Configuration.Logger.LogInformation($"Begin to start window watcher");
 
             string captureType = "BitBlt"; // default 
             if (processName == "Genshin Impact Cloud Game.exe")
@@ -231,7 +227,7 @@ namespace LumiTracker.Watcher
 
             if (!process.Start())
             {
-                logger.LogError("Failed to start subprocess.");
+                Configuration.Logger.LogError("Failed to start subprocess.");
                 return;
             }
             ChildProcessTracker.AddProcess(process);
@@ -247,7 +243,7 @@ namespace LumiTracker.Watcher
                 await Task.Delay(interval);
             }
 
-            logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
+            Configuration.Logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
             WindowWatcherExit?.Invoke();
         }
 
@@ -256,7 +252,7 @@ namespace LumiTracker.Watcher
             try
             {
                 if (e.Data == null) return;
-                if (Configuration.Data.DEBUG)
+                if (Configuration.Get<bool>("DEBUG"))
                 {
                     Console.WriteLine(e.Data);
                 }
@@ -351,10 +347,7 @@ namespace LumiTracker.Watcher
     {
         public static void Main(string[] args)
         {
-            var logger = Configuration.Logger;
-            var cfg = Configuration.Data;
-
-            var processWatcher = new ProcessWatcher(logger, cfg);
+            var processWatcher = new ProcessWatcher();
             processWatcher.Start("YuanShen.exe");
         }
     }

@@ -76,7 +76,7 @@ namespace LumiTracker.ViewModels.Windows
             GameStarted = gameStart;
             if (gameStart)
             {
-                DeckModel = new DeckModel("F0AhxHEMF5AB2XoNF5GwWaMVCpAx3jMPFECB9EgPGGERCIEQGIFBioQYGKFRCoUQDKAA");
+                DeckModel = new DeckModel(Configuration.Get<string>("share_code"));
             }
             else
             {

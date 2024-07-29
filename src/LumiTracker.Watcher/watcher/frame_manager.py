@@ -84,7 +84,7 @@ class FrameManager:
         if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
             fps = self.frame_count / (cur_time - self.prev_log_time)
             LogDebug(info=f"FPS: {fps}")
-            if (not self.first_log) and (fps < self.min_fps):
+            if (not self.first_log) and (self.min_fps - fps >= 5):
                 LogWarning(info=f"Min FPS = {fps}")
                 self.min_fps = fps
 

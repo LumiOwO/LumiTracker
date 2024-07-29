@@ -38,12 +38,10 @@ namespace LumiTracker.ViewModels.Pages
 
         private void InitializeViewModel()
         {
-            Enum.TryParse(Configuration.Data.lang.Replace('-', '_'), out ELanguage curLang);
-            CurrentLanguage = curLang;
-            Enum.TryParse(Configuration.Data.closing_behavior, out EClosingBehavior curBehavior);
-            CurrentClosingBehavior = curBehavior;
-            Enum.TryParse(Configuration.Data.theme, out ApplicationTheme curTheme);
-            CurrentTheme = curTheme;
+            Enum.TryParse(Configuration.Get<string>("lang").Replace('-', '_'), out ELanguage curLang);
+            CurrentLanguage        = curLang;
+            CurrentClosingBehavior = Configuration.Get<EClosingBehavior>("closing_behavior");
+            CurrentTheme           = Configuration.Get<ApplicationTheme>("theme");
 
             _isInitialized = true;
         }
@@ -56,8 +54,7 @@ namespace LumiTracker.ViewModels.Pages
             
             _localizationService.ChangeLanguage(lang);
 
-            Configuration.Data.lang = lang;
-            Configuration.Save();
+            Configuration.Set("lang", lang);
         }
 
         [RelayCommand]
@@ -66,14 +63,12 @@ namespace LumiTracker.ViewModels.Pages
             Enum.TryParse(closing_behavior, out EClosingBehavior curBehavior);
             CurrentClosingBehavior = curBehavior;
 
-            Configuration.Data.closing_behavior = closing_behavior;
-            Configuration.Save();
+            Configuration.Set("closing_behavior", closing_behavior);
         }
 
         [RelayCommand]
         private void OnChangeTheme(string parameter)
         {
-            var cfg = Configuration.Data;
             switch (parameter)
             {
                 case "theme_light":
@@ -82,7 +77,7 @@ namespace LumiTracker.ViewModels.Pages
 
                     ApplicationThemeManager.Apply(ApplicationTheme.Light);
                     CurrentTheme = ApplicationTheme.Light;
-                    cfg.theme = "Light";
+                    Configuration.Set("theme", "Light");
 
                     break;
 
@@ -92,7 +87,7 @@ namespace LumiTracker.ViewModels.Pages
 
                     ApplicationThemeManager.Apply(ApplicationTheme.Dark);
                     CurrentTheme = ApplicationTheme.Dark;
-                    cfg.theme = "Dark";
+                    Configuration.Set("theme", "Dark");
 
                     break;
 
@@ -100,7 +95,6 @@ namespace LumiTracker.ViewModels.Pages
                 //SystemThemeWatcher.Watch(this);
 
             }
-            Configuration.Save();
         }
 
         

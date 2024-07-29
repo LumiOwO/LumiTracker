@@ -71,10 +71,7 @@ namespace LumiTracker.Models
 
         private async Task MainLoop()
         {
-            var logger = Configuration.Logger;
-            var cfg    = Configuration.Data;
-
-            int interval = cfg.proc_watch_interval * 1000;
+            int interval = Configuration.Get<int>("proc_watch_interval") * 1000;
             while (true)
             {
                 while (processWatcher.Value != null)
@@ -82,7 +79,7 @@ namespace LumiTracker.Models
                     await Task.Delay(interval);
                 }
 
-                ProcessWatcher watcher = new(logger, cfg);
+                ProcessWatcher watcher = new ();
                 watcher.GenshinWindowFound += OnGenshinWindowFound;
                 watcher.WindowWatcherStart += OnWindowWatcherStart;
                 watcher.WindowWatcherExit  += OnWindowWatcherExit;

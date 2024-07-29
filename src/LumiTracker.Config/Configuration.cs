@@ -63,45 +63,11 @@ namespace LumiTracker.Config
     }
 
 
-    #region ConfigData
-
-    // Created by Visual Studio "Paste Special > Paste JSON As Classes"
-    public class ConfigData
-    {
-        public bool DEBUG { get; set; }
-        public bool DEBUG_SAVE { get; set; }
-        public string debug_dir { get; set; }
-        public int LOG_INTERVAL { get; set; }
-        public int proc_watch_interval { get; set; }
-        public int frame_limit { get; set; }
-        public float[] action_crop_box0 { get; set; }
-        public float[] action_crop_box1 { get; set; }
-        public float[] action_crop_box2 { get; set; }
-        public string assets_dir { get; set; }
-        public string database_dir { get; set; }
-        public string db_filename { get; set; }
-        public string cards_dir { get; set; }
-        public int hash_size { get; set; }
-        public int ann_index_len { get; set; }
-        public int threshold { get; set; }
-        public int strict_threshold { get; set; }
-        public string ann_metric { get; set; }
-        public int ann_n_trees { get; set; }
-        public string lang { get; set; }
-        public string closing_behavior { get; set; }
-        public string theme { get; set; }
-        public string client_type { get; set; }
-        public bool show_ui_outside { get; set; }
-        public bool show_closing_dialog { get; set; }
-    }
-
-    #endregion ConfigData
-
     public class Configuration
     {
         private static readonly Lazy<Configuration> _lazyInstance = new Lazy<Configuration>(() => new Configuration());
 
-        private ConfigData _data;
+        private JObject _data;
 
         private JObject _db;
 
@@ -121,18 +87,19 @@ namespace LumiTracker.Config
             Directory.CreateDirectory("log");
             _errorWriter = new StreamWriter("log/error.log", false) { AutoFlush = true };
 
+            bool DEBUG = _data["DEBUG"]!.ToObject<bool>();
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder
                     .AddConsole()
                     .AddProvider(new FileLoggerProvider(_errorWriter, LogLevel.Warning))
-                    .SetMinimumLevel(_data.DEBUG ? LogLevel.Debug : LogLevel.Information)
+                    .SetMinimumLevel(DEBUG ? LogLevel.Debug : LogLevel.Information)
                     ;
             });
             _logger = loggerFactory.CreateLogger<Configuration>();
         }
 
-        private static ConfigData LoadConfig()
+        private static JObject LoadConfig()
         {
             string jsonString = File.ReadAllText(configFilePath);
             var settings = new JsonLoadSettings
@@ -141,8 +108,7 @@ namespace LumiTracker.Config
                 LineInfoHandling = LineInfoHandling.Load
             };
 
-            var jObject = JObject.Parse(jsonString, settings);
-            return jObject.ToObject<ConfigData>()!;
+            return JObject.Parse(jsonString, settings);
         }
 
         private static JObject LoadDatabase()
@@ -159,7 +125,7 @@ namespace LumiTracker.Config
             }
         }
 
-        public static ConfigData Data
+        private static JObject Data
         {
             get
             {
@@ -180,6 +146,20 @@ namespace LumiTracker.Config
             get
             {
                 return Instance._logger;
+            }
+        }
+
+        public static T Get<T>(string key)
+        {
+            return Data[key]!.ToObject<T>()!;
+        }
+
+        public static void Set<T>(string key, T value, bool auto_save = true)
+        {
+            Data[key] = JToken.FromObject(value!);
+            if (auto_save)
+            {
+                Save();
             }
         }
 
