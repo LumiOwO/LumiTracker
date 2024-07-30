@@ -51,6 +51,7 @@ namespace LumiTracker.Services
 
             // Refresh main window menu items
             _mainWindowViewModel.StartViewItem!.Content    = LocalizationSource.Instance["Start"];
+            _mainWindowViewModel.DeckViewItem!.Content     = LocalizationSource.Instance["DeckPageTitle"];
             _mainWindowViewModel.RankViewItem!.Content     = LocalizationSource.Instance["Rank"];
             _mainWindowViewModel.AboutViewItem!.Content    = LocalizationSource.Instance["About"];
 
