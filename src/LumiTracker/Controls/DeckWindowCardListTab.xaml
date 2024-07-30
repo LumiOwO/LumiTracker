@@ -50,6 +50,7 @@
                         ConverterParameter=0.018
                         }"
                 CountVisibility="Visible"
+                SnapshotMargin="0, 0, 32, 0"
                 />
         </DataTemplate>
 

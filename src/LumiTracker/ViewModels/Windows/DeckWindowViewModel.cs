@@ -3,6 +3,7 @@
 using LumiTracker.Config;
 using LumiTracker.Models;
 using System.Windows.Controls;
+using LumiTracker.ViewModels.Pages;
 
 #pragma warning disable CS8618
 
@@ -49,9 +50,12 @@ namespace LumiTracker.ViewModels.Windows
 
         private GameWatcher _gameWatcher;
 
-        public DeckWindowViewModel(GameWatcher gameWatcher)
+        private DeckViewModel _deckViewModel;
+
+        public DeckWindowViewModel(GameWatcher gameWatcher, DeckViewModel deckViewModel)
         {
-            _gameWatcher = gameWatcher;
+            _gameWatcher   = gameWatcher;
+            _deckViewModel = deckViewModel;
 
             _gameWatcher.GameStarted        += OnGameStarted;
             _gameWatcher.MyActionCardPlayed += OnMyActionCardPlayed;

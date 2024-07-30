@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:LumiTracker.Views.Pages"
+      xmlns:pages="clr-namespace:LumiTracker.ViewModels.Pages"
       xmlns:svs="clr-namespace:LumiTracker.Services"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:helpers="clr-namespace:LumiTracker.Helpers"
@@ -20,6 +20,15 @@
     <Page.Resources>
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+
+        <Style TargetType="ListView">
+            <Setter Property="BorderBrush" Value="#5aaaaaaa"/>
+            <Setter Property="BorderThickness" Value="0.7"/>
+        </Style>
+
+        <SolidColorBrush 
+            x:Key="MainContentBackground"
+            Color="#e6282c34" />
 
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <ctrls:ActionCardViewListItem
@@ -50,15 +59,95 @@
                     ConverterParameter=0.030
                     }"
                 CountVisibility="Hidden"
+                SnapshotMargin="0, 0, 0, 0"
             />
+        </DataTemplate>
+
+        <DataTemplate x:Key="AvatarViewTemplate" DataType="{x:Type pages:AvatarView}">
+            <Grid
+                Margin="5,0,5,0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                >
+                <Ellipse 
+                    Grid.Row="0"
+                    Fill="#242b34" 
+                    Stroke="#b19974" 
+                    StrokeThickness="3" 
+                    HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch"
+                    />
+
+                <Image 
+                    Grid.Row="0"
+                    Visibility="{Binding AvatarImageVisibility, Mode=OneWay}"
+                    Margin="3,3,3,3"
+                    Source="{Binding AvatarUri, Mode=OneWay}" 
+                    Stretch="Uniform"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    />
+                <!-- Placeholder Circle -->
+                <Ellipse 
+                    Grid.Row="0"
+                    Visibility="{Binding PlaceholderVisibility, Mode=OneWay}"
+                    Margin="3,3,3,3"
+                    Fill="#242b34"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    />
+            </Grid>
         </DataTemplate>
     </Page.Resources>
 
-    <Grid>
-        <ListView 
+    <Grid
+        Margin="-22, -22, -20, 0"
+        >
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Avatars -->
+        <ItemsControl
+            Margin="0, 0, 5, 0"
+            Grid.Column="0"
+            Grid.Row="0"
+            ItemsSource="{Binding ViewModel.Avatars}"
+            ItemTemplate="{StaticResource AvatarViewTemplate}"
+            >
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <!-- Controls -->
+        <!--<Grid
+            Grid.Column="0"
+            Grid.Row="1"
+            >
+        </Grid>-->
+
+        <!-- Cards -->
+        <ListView
+            Grid.Column="1"
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            x:Name="CardListView"
+            Padding="0, 2, 0, 2"
+            ScrollViewer.VerticalScrollBarVisibility="Hidden"
+            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
             ItemsSource="{Binding ViewModel.CurrentDeck}"
             ItemTemplate="{StaticResource ActionCardViewTemplate}"
-            Background="Transparent"
+            Background="{StaticResource MainContentBackground}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch">
 

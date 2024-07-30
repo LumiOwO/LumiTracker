@@ -73,6 +73,15 @@ namespace LumiTracker.Controls
             set { SetValue(CountFontSizeProperty, value); }
         }
 
+        public static readonly DependencyProperty SnapshotMarginProperty = DependencyProperty.Register(
+            "SnapshotMargin", typeof(Thickness), typeof(ActionCardViewListItem), new PropertyMetadata(new Thickness(0)));
+
+        public Thickness SnapshotMargin
+        {
+            get { return (Thickness)GetValue(SnapshotMarginProperty); }
+            set { SetValue(SnapshotMarginProperty, value); }
+        }
+
         public ActionCardViewListItem()
         {
             InitializeComponent();

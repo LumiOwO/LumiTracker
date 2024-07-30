@@ -10,12 +10,32 @@ namespace LumiTracker.ViewModels.Pages
     public partial class AvatarView : ObservableObject
     {
         [ObservableProperty]
-        public string _avatarUri;
+        public string _avatarUri = "pack://siteoforigin:,,,/assets/images/avatars/0.png";
+
+        [ObservableProperty]
+        public Visibility _avatarImageVisibility = Visibility.Hidden;
+
+        [ObservableProperty]
+        public Visibility _placeholderVisibility = Visibility.Visible;
+        partial void OnAvatarImageVisibilityChanged(Visibility oldValue, Visibility newValue)
+        {
+            if (newValue == Visibility.Collapsed || newValue == Visibility.Hidden)
+            {
+                PlaceholderVisibility = Visibility.Visible;
+            }
+            else
+            {
+                PlaceholderVisibility = Visibility.Collapsed;
+            }
+        }
+
+        public AvatarView() { }
 
         public AvatarView(int character_id)
         {
             var info = Configuration.Database["characters"]![character_id]!;
-            AvatarUri = $"pack://siteoforigin:,,,/assets/images/avatars/{character_id}.jpg";
+            AvatarUri = $"pack://siteoforigin:,,,/assets/images/avatars/{character_id}.png";
+            AvatarImageVisibility = Visibility.Visible;
         }
     }
 
@@ -23,7 +43,7 @@ namespace LumiTracker.ViewModels.Pages
     public partial class DeckViewModel : ObservableObject, INavigationAware
     {
         [ObservableProperty]
-        private ObservableCollection<AvatarView> _avatars = new ();
+        private ObservableCollection<AvatarView> _avatars = new () { new AvatarView(), new AvatarView(), new AvatarView() };
 
         [ObservableProperty]
         private ObservableCollection<ActionCardView> _currentDeck = new ();
@@ -37,6 +57,16 @@ namespace LumiTracker.ViewModels.Pages
                 Configuration.Logger.LogWarning($"Invalid share code: {shareCode}");
                 return;
             }
+
+            ///////////////////////
+            // Avatars
+            for (int i = 0; i < 3; i++)
+            {
+                Avatars[i] = new AvatarView(cards[i]);
+            }
+
+            ///////////////////////
+            // Current Deck
 
             // Sort in case of non-standard order
             Array.Sort(cards, 3, 30, 
@@ -54,7 +84,7 @@ namespace LumiTracker.ViewModels.Pages
 
             foreach (int card_id in transposed)
             {
-                _currentDeck.Add(new ActionCardView(card_id));
+                CurrentDeck.Add(new ActionCardView(card_id));
             }
         }
 
