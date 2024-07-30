@@ -31,7 +31,7 @@ namespace LumiTracker.ViewModels.Windows
         private CardList _opActionCardsPlayed;
 
         [ObservableProperty]
-        private DeckModel _deckModel;
+        private CardList _myDeck;
 
         // controls
         [ObservableProperty]
@@ -76,11 +76,11 @@ namespace LumiTracker.ViewModels.Windows
             GameStarted = gameStart;
             if (gameStart)
             {
-                DeckModel = new DeckModel(Configuration.Get<string>("share_code"));
+                MyDeck = new CardList(Configuration.Get<string>("share_code"));
             }
             else
             {
-                DeckModel = new ();
+                MyDeck = new ();
             }
         }
 
@@ -117,12 +117,12 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnMyCardsDrawn(int[] card_ids)
         {
-            DeckModel.Deck.Remove(card_ids, keep_zero: true);
+            MyDeck.Remove(card_ids, keep_zero: true);
         }
 
         private void OnMyCardsCreateDeck(int[] card_ids)
         {
-            DeckModel.Deck.Add(card_ids);
+            MyDeck.Add(card_ids);
         }
 
         private void OnOpCardsCreateDeck(int[] card_ids)

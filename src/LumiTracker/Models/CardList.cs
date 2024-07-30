@@ -43,18 +43,6 @@ namespace LumiTracker.Models
         }
     }
 
-    public partial class AvatarView : ObservableObject
-    {
-        [ObservableProperty]
-        public string _avatarUri;
-
-        public AvatarView(int character_id)
-        {
-            var info = Configuration.Database["characters"]![character_id]!;
-            AvatarUri = $"pack://siteoforigin:,,,/assets/images/avatars/{character_id}.jpg";
-        }
-    }
-
     public partial class CardList : ObservableObject
     {
         public enum SortType
@@ -222,33 +210,6 @@ namespace LumiTracker.Models
                 }
                 Data.AddRange(pairsToUpdate);
             });
-        }
-    }
-
-    public partial class DeckModel : ObservableObject
-    {
-        [ObservableProperty]
-        private ObservableCollection<AvatarView> _avatars = new();
-
-        [ObservableProperty]
-        private CardList _deck = new CardList();
-
-        public DeckModel() { }
-
-        public DeckModel(string shareCode)
-        {
-            int[]? cards = DeckUtils.DecodeShareCode(shareCode);
-            if (cards == null)
-            {
-                Configuration.Logger.LogWarning($"Invalid share code: {shareCode}");
-                return;
-            }
-
-            for (int i = 0; i < 3; i++)
-            {
-                Avatars.Add(new AvatarView(cards[i]));
-            }
-            Deck.Add(cards[3..]);
         }
     }
 }

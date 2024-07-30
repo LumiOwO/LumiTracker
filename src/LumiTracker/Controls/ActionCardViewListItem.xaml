@@ -1,0 +1,99 @@
+﻿<UserControl x:Class="LumiTracker.Controls.ActionCardViewListItem"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            xmlns:ctrls="clr-namespace:LumiTracker.Controls"
+            mc:Ignorable="d" 
+            d:DesignHeight="450" d:DesignWidth="800">
+    <Grid
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:ActionCardViewListItem}}"
+        Opacity="{Binding Value.Opacity, Mode=OneWay}"
+        HorizontalAlignment="Stretch"
+        Width="{Binding ItemWidth}"
+        Margin="0, -5, 0, -5"
+        >
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding ItemHeight}" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- dice image -->
+        <Image 
+            Source="{Binding Value.CostTypeUri, Mode=OneWay}" 
+            Margin="0,0,0,0"
+            Stretch="UniformToFill"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Center"
+            />
+        <!-- cost -->
+        <TextBlock
+            Grid.Column="0"
+            Margin="0,0,0,0"
+            FontWeight="Bold"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Foreground="White"
+            FontSize="{Binding CostFontSize}"
+            Text="{Binding Value.Cost, Mode=OneWay}" >
+            <TextBlock.Effect>
+                <DropShadowEffect 
+                    ShadowDepth="2"
+                    Color="Black"
+                    Opacity="1"
+                    BlurRadius="5"/>
+            </TextBlock.Effect>
+        </TextBlock>
+
+
+        <!-- snapshot -->
+        <Border 
+            Grid.Column="1" 
+            Grid.ColumnSpan="2"
+            Margin="0, 0, 32, 0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            >
+            <Border.OpacityMask>
+                <LinearGradientBrush StartPoint="1,0.5" EndPoint="0,0.5">
+                    <GradientStop Color="#bf000000" Offset="0.4" />
+                    <GradientStop Color="Transparent" Offset="1" />
+                </LinearGradientBrush>
+            </Border.OpacityMask>
+            <Image 
+                Source="{Binding Value.SnapshotUri, Mode=OneWay}" 
+                Stretch="Uniform"
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Center"
+            />
+        </Border>
+        <!-- name -->
+        <TextBlock
+            Grid.Column="1"
+            Margin="5,0,0,0"
+            Foreground="White"
+            FontWeight="Medium"
+            TextWrapping="NoWrap"
+            TextTrimming="CharacterEllipsis"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            FontSize="{Binding NameFontSize}"
+            Text="{Binding Value.CardName, Mode=OneWay}" />
+        <!-- count -->
+        <TextBlock
+            Grid.Column="2"
+            Visibility="{Binding CountVisibility}"
+            Margin="12,1,12,0"
+            FontWeight="Bold"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Foreground="#f9ca24"
+            FontSize="{Binding CountFontSize}"
+            Text="{Binding Value.Count, Mode=OneWay}" />
+    </Grid>
+</UserControl>

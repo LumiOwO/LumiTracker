@@ -103,7 +103,7 @@
                     <!--Content-->
                     <ctrls:DeckWindowCardListTab
                         ViewModel="{Binding Path=ViewModel}"
-                        CardList="{Binding Path=ViewModel.DeckModel.Deck}"
+                        CardList="{Binding Path=ViewModel.MyDeck}"
                         WindowHeight="{Binding Height}"
                         WindowWidth="{Binding Width}"
                         />

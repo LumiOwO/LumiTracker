@@ -24,114 +24,33 @@
             Color="#e6282c34" />
 
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
-            <Grid
-                Opacity="{Binding Value.Opacity, Mode=OneWay}"
-                HorizontalAlignment="Stretch"
-                Width="{Binding Width, 
-                    RelativeSource={RelativeSource AncestorType={x:Type Window}}
-                    }"
-                Margin="0, -5, 0, -5"
-                >
-
-                <Grid.RowDefinitions>
-                    <RowDefinition 
-                        Height="{Binding Height, 
-                            RelativeSource={RelativeSource AncestorType={x:Type Window}},
-                            Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.034
-                            }"
-                        />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- dice image -->
-                <Image 
-                    Source="{Binding Value.CostTypeUri, Mode=OneWay}" 
-                    Margin="0,0,0,0"
-                    Stretch="UniformToFill"
-                    VerticalAlignment="Stretch"
-                    HorizontalAlignment="Center"
-                    />
-                <!-- cost -->
-                <TextBlock
-                    Grid.Column="0"
-                    Margin="0,0,0,0"
-                    FontWeight="Bold"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Foreground="White"
-                    FontSize="{Binding Height, 
+            <ctrls:ActionCardViewListItem
+                Value="{Binding Value, Mode=OneWay}"
+                ItemWidth="{Binding Width, 
+                        RelativeSource={RelativeSource AncestorType={x:Type Window}}
+                        }"
+                ItemHeight="{Binding Height, 
+                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.034
+                        }"
+                CostFontSize="{Binding Height, 
                         RelativeSource={RelativeSource AncestorType={x:Type Window}},
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.016
                         }"
-                    Text="{Binding Value.Cost, Mode=OneWay}" >
-                    <TextBlock.Effect>
-                        <DropShadowEffect 
-                            ShadowDepth="2"
-                            Color="Black"
-                            Opacity="1"
-                            BlurRadius="5"/>
-                    </TextBlock.Effect>
-                </TextBlock>
-
-                
-                <!-- snapshot -->
-                <Border 
-                    Grid.Column="1" 
-                    Grid.ColumnSpan="2"
-                    Margin="0, 0, 32, 0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    >
-                    <Border.OpacityMask>
-                        <LinearGradientBrush StartPoint="1,0.5" EndPoint="0,0.5">
-                            <GradientStop Color="#bf000000" Offset="0.4" />
-                            <GradientStop Color="Transparent" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.OpacityMask>
-                    <Image 
-                        Source="{Binding Value.SnapshotUri, Mode=OneWay}" 
-                        Stretch="Uniform"
-                        VerticalAlignment="Stretch"
-                        HorizontalAlignment="Center"
-                    />
-                </Border>
-                <!-- name -->
-                <TextBlock
-                    Grid.Column="1"
-                    Margin="5,0,0,0"
-                    Foreground="White"
-                    FontWeight="Medium"
-                    TextWrapping="NoWrap"
-                    TextTrimming="CharacterEllipsis"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    FontSize="{Binding Height, 
+                NameFontSize="{Binding Height, 
                         RelativeSource={RelativeSource AncestorType={x:Type Window}},
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.016
                         }"
-                    Text="{Binding Value.CardName, Mode=OneWay}" />
-                <!-- count -->
-                <TextBlock
-                    Grid.Column="2"
-                    Margin="12,1,12,0"
-                    FontWeight="Bold"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Foreground="#f9ca24"
-                    FontSize="{Binding Height, 
+                CountFontSize="{Binding Height, 
                         RelativeSource={RelativeSource AncestorType={x:Type Window}},
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.018
                         }"
-                    Text="{Binding Value.Count, Mode=OneWay}" />
-            </Grid>
+                CountVisibility="Visible"
+                />
         </DataTemplate>
 
         <Style TargetType="ListViewItem">

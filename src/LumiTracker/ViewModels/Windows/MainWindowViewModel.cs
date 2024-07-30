@@ -29,6 +29,8 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private NavigationViewItem? _startViewItem;
         [ObservableProperty]
+        private NavigationViewItem? _deckViewItem;
+        [ObservableProperty]
         private NavigationViewItem? _rankViewItem;
         [ObservableProperty]
         private NavigationViewItem? _aboutViewItem;
@@ -55,6 +57,12 @@ namespace LumiTracker.ViewModels.Windows
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Power24 },
                 TargetPageType = typeof(StartPage)
             };
+            DeckViewItem = new NavigationViewItem()
+            {
+                Content = LocalizationSource.Instance["DeckPageTitle"],
+                Icon = new SymbolIcon { Symbol = SymbolRegular.TextBulletListLtr24 },
+                TargetPageType = typeof(DeckPage)
+            };
             RankViewItem = new NavigationViewItem()
             {
                 Content = LocalizationSource.Instance["Rank"],
@@ -67,7 +75,7 @@ namespace LumiTracker.ViewModels.Windows
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Info24 },
                 TargetPageType = typeof(AboutPage)
             };
-            MenuItems = new() { StartViewItem, RankViewItem, AboutViewItem };
+            MenuItems = new() { StartViewItem, DeckViewItem, RankViewItem, AboutViewItem };
 
             SettingsViewItem = new NavigationViewItem()
             {

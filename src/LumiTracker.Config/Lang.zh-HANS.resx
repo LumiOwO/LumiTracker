@@ -272,4 +272,8 @@
     <value>我的牌库</value>
     <comment/>
   </data>
+  <data name="DeckPageTitle" xml:space="preserve">
+    <value>牌组</value>
+    <comment/>
+  </data>
 </root>
