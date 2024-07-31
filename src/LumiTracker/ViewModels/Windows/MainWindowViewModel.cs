@@ -10,6 +10,7 @@ using Wpf.Ui;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace LumiTracker.ViewModels.Windows
 {
@@ -46,6 +47,14 @@ namespace LumiTracker.ViewModels.Windows
         public MainWindowViewModel(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+
+            // refresh theme
+            ApplicationThemeManager.Apply(Configuration.Get<ApplicationTheme>("theme"));
+            // Overwrite accent color
+            ApplicationAccentColorManager.Apply(
+                Color.FromArgb(0xff, 0x1c, 0xdd, 0xe9),
+                ApplicationTheme.Dark
+            );
         }
 
         public void Init(ICommand TrayMenuItemClicked)
@@ -106,9 +115,6 @@ namespace LumiTracker.ViewModels.Windows
                 _serviceProvider.GetService(typeof(ILocalizationService)) as ILocalizationService
             )!;
             localizationService.ChangeLanguage(Configuration.Get<string>("lang"));
-
-            // refresh theme
-            ApplicationThemeManager.Apply(Configuration.Get<ApplicationTheme>("theme"));
         }
     }
 }

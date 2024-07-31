@@ -26,26 +26,39 @@
             Text="{svs:Localization About}" />
 
         <TextBlock 
-            Margin="20,10,0,2" 
+            Margin="5,20,0,2" 
             Text="{svs:Localization FreeDeclaration}" 
-            FontSize="15"
+            FontSize="18"
             FontWeight="Bold"
             />
 
+        <ui:HyperlinkButton
+            Margin="-1, 40, 0, 0"
+            Padding="5"
+            Content="说明文档"
+            NavigateUri="https://github.com/LumiOwO/LumiTracker"
+            ToolTip="https://github.com/LumiOwO/LumiTracker" />
+
+        <ui:HyperlinkButton
+            Margin="-1, 0, 0, 0"
+            Padding="5"
+            Content="Bilibili"
+            NavigateUri="https://space.bilibili.com/234035154"
+            ToolTip="https://space.bilibili.com/234035154" />
+
+        <ui:HyperlinkButton
+            Margin="-1, 0, 0, 0"
+            Padding="5"
+            Content="Github"
+            NavigateUri="https://github.com/LumiOwO/LumiTracker"
+            ToolTip="https://github.com/LumiOwO/LumiTracker" />
+
         <TextBlock 
-            Margin="0,60,0,0" 
+            Margin="5,20,0,0" 
             FontSize="12"
             Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
-
         <TextBlock 
-            Margin="0,10,0,0" 
-            FontSize="12">
-            <Run FontWeight="Bold">Github: </Run>
-            <Run>https://github.com/LumiOwO/LumiTracker</Run>
-        </TextBlock>
-
-        <TextBlock 
-            Margin="0,10,0,0" 
+            Margin="5,10,0,0" 
             FontSize="12">
             <Run>Copyright © 2024 LumiOwO </Run>
         </TextBlock>

@@ -239,21 +239,27 @@
             </Grid.ColumnDefinitions>
             
             <!-- Deck List -->
-            <ListView
-                Grid.Column="0"
-                x:Name="UserDeckListView"
-                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                ItemsSource="{Binding ViewModel.UserDeckList.DeckInfos}"
-                ItemTemplate="{StaticResource DeckInfoTemplate}"
+            <Border 
+                BorderBrush="#5aaaaaaa" 
+                BorderThickness="0.7"
                 Background="{StaticResource MainContentBackground}"
-                Height="{Binding ActualHeight,
-                    RelativeSource={RelativeSource AncestorType={x:Type Grid}},
-                    Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=0.98
-                    }"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Top">
-            </ListView>
+                >
+                <ui:ListView
+                    Grid.Column="0"
+                    x:Name="UserDeckListView"
+                    Margin="0, 0, 0, 2"
+                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                    ItemsSource="{Binding ViewModel.UserDeckList.DeckInfos}"
+                    ItemTemplate="{StaticResource DeckInfoTemplate}"
+                    Height="{Binding ActualHeight,
+                        RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.98
+                        }"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top">
+                </ui:ListView>
+            </Border>
 
             <!-- Buttons -->
             <ItemsControl
