@@ -69,12 +69,14 @@ namespace LumiTracker.ViewModels.Pages
         public string Text { get; }
         public SymbolRegular Icon { get; }
         public ICommand ClickCommand { get; }
+        public ControlAppearance Appearance { get; }
 
-        public ControlButton(string text, SymbolRegular icon, ICommand command)
+        public ControlButton(string text, SymbolRegular icon, ICommand command, ControlAppearance appearance)
         {
             Text = text; 
             Icon = icon;
             ClickCommand = command;
+            Appearance = appearance;
         }
     }
 
@@ -103,11 +105,16 @@ namespace LumiTracker.ViewModels.Pages
             // Init buttons
             Buttons = new ObservableCollection<ControlButton>
             {
-                new ControlButton ( "设为出战牌组", SymbolRegular.Checkmark24, Button1ClickCommand ),
-                new ControlButton ( "编辑牌组名称",        SymbolRegular.Pen24, Button1ClickCommand ),
-                new ControlButton ( "重新导入牌组",      SymbolRegular.ArrowSync24, Button1ClickCommand ),
-                new ControlButton ( "添加牌组",      SymbolRegular.AddCircle24, Button1ClickCommand ),
-                new ControlButton ( "删除牌组",      SymbolRegular.Delete24, Button1ClickCommand ),
+                new ControlButton ( 
+                    "设为出战牌组", SymbolRegular.Checkmark24, Button1ClickCommand, ControlAppearance.Info),
+                new ControlButton ( 
+                    "编辑牌组名称",        SymbolRegular.Pen24, Button1ClickCommand, ControlAppearance.Secondary ),
+                new ControlButton ( 
+                    "重新导入牌组",      SymbolRegular.ArrowSync24, Button1ClickCommand, ControlAppearance.Secondary ),
+                new ControlButton ( 
+                    "添加牌组",      SymbolRegular.AddCircle24, Button1ClickCommand, ControlAppearance.Secondary ),
+                new ControlButton ( 
+                    "删除牌组",      SymbolRegular.Delete24, Button1ClickCommand, ControlAppearance.Danger ),
             };
 
             /////////////////////////

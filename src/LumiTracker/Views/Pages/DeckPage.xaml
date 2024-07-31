@@ -139,6 +139,7 @@
 
         <DataTemplate x:Key="ControlButtonTemplate" DataType="{x:Type pages:ControlButton}">
             <ui:Button 
+                Appearance="{Binding Appearance}"
                 Margin="0, 0, 0, 20"
                 Width="{Binding ActualWidth,
                     RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
@@ -146,6 +147,7 @@
                     ConverterParameter=0.75
                     }"
                 Command="{Binding ClickCommand}">
+
                 <Grid
                     Margin="0, 1, 0, 1"
                     HorizontalAlignment="Center"
@@ -165,6 +167,7 @@
                         Symbol="{Binding Icon}"
                         />
                     <TextBlock 
+                        FontWeight="Bold"
                         Grid.Column="1"
                         FontSize="{Binding ActualHeight,
                             RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
@@ -286,6 +289,7 @@
             Padding="0, 2, 0, 2"
             ScrollViewer.VerticalScrollBarVisibility="Hidden"
             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+            PreviewMouseDown="OnPreviewMouseDown"
             ItemsSource="{Binding ViewModel.CurrentDeck}"
             ItemTemplate="{StaticResource ActionCardViewTemplate}"
             Background="{StaticResource MainContentBackground}"

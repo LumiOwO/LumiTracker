@@ -1,4 +1,5 @@
 ﻿using LumiTracker.ViewModels.Pages;
+using System.Windows.Input;
 using Wpf.Ui.Controls;
 
 
@@ -14,6 +15,11 @@ namespace LumiTracker.Views.Pages
             DataContext = this;
 
             InitializeComponent();
+        }
+
+        private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }

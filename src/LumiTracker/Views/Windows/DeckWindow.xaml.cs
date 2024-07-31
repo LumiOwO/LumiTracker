@@ -104,21 +104,6 @@ namespace LumiTracker.Views.Windows
             }
         }
 
-        private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-        }
-
-        private void OnMouseEnter(object sender, MouseEventArgs e)
-        {
-            ViewModel.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-        }
-
-        private void OnMouseLeave(object sender, MouseEventArgs e)
-        {
-            ViewModel.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
-        }
-
         private void OnChecked(object sender, RoutedEventArgs e)
         {
             ViewModel.ToggleButtonIcon = SymbolRegular.ChevronDown48;
