@@ -276,4 +276,8 @@
     <value>牌组</value>
     <comment/>
   </data>
+  <data name="DefaultDeckName" xml:space="preserve">
+    <value>我的牌组</value>
+    <comment/>
+  </data>
 </root>

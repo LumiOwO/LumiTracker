@@ -6,18 +6,18 @@ namespace LumiTracker.Models
 {
     public class DeckUtils
     {
-        public static int[]? DecodeShareCode(string shareCode)
+        public static int[]? DecodeShareCode(string sharecode)
         {
             // Reference: https://gist.github.com/zyr17/36aae02c77d02602d6089f967027372a#file-deck_str_to_cards_4_2-py
 
             byte[]? code = null;
             try
             {
-                code = Convert.FromBase64String(shareCode);
+                code = Convert.FromBase64String(sharecode);
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"An unexpected error occurred when decoding {shareCode}.\n{ex.ToString()}");
+                Configuration.Logger.LogError($"An unexpected error occurred when decoding {sharecode}.\n{ex.ToString()}");
                 return null;
             }
             if (code.Length != 51)

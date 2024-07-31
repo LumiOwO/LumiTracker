@@ -276,4 +276,8 @@
     <value>Deck</value>
     <comment/>
   </data>
+  <data name="DefaultDeckName" xml:space="preserve">
+    <value>My Deck</value>
+    <comment/>
+  </data>
 </root>

@@ -1,21 +1,21 @@
 ﻿<Page x:Class="LumiTracker.Views.Pages.DeckPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:pages="clr-namespace:LumiTracker.ViewModels.Pages"
-      xmlns:svs="clr-namespace:LumiTracker.Services"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:helpers="clr-namespace:LumiTracker.Helpers"
-      xmlns:models="clr-namespace:LumiTracker.Models"
-      xmlns:ctrls="clr-namespace:LumiTracker.Controls"
-      mc:Ignorable="d" 
-      d:DesignHeight="450" 
-      d:DesignWidth="800"
-      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-      ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-      Title="{svs:Localization DeckPageTitle}">
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:pages="clr-namespace:LumiTracker.ViewModels.Pages"
+        xmlns:svs="clr-namespace:LumiTracker.Services"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:helpers="clr-namespace:LumiTracker.Helpers"
+        xmlns:models="clr-namespace:LumiTracker.Models"
+        xmlns:ctrls="clr-namespace:LumiTracker.Controls"
+        mc:Ignorable="d" 
+        d:DesignHeight="450" 
+        d:DesignWidth="800"
+        ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+        ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        Title="{svs:Localization DeckPageTitle}">
 
     <Page.Resources>
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -87,16 +87,94 @@
                     VerticalAlignment="Stretch"
                     HorizontalAlignment="Stretch"
                     />
-                <!-- Placeholder Circle -->
-                <Ellipse 
-                    Grid.Row="0"
-                    Visibility="{Binding PlaceholderVisibility, Mode=OneWay}"
-                    Margin="3,3,3,3"
-                    Fill="#242b34"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    />
             </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DeckInfoTemplate" DataType="{x:Type pages:DeckInfo}">
+            <Grid
+                Width="{Binding ActualWidth,
+                    RelativeSource={RelativeSource AncestorType={x:Type ListView}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.9
+                    }"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                >
+                <Grid
+                    HorizontalAlignment="Center"
+                    >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                
+                    <ui:SymbolIcon 
+                        Grid.Column="0"
+                        Margin="0, 0, 2, 0"
+                        Visibility="{Binding IconVisibility}"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        Symbol="CheckmarkCircle24"
+                        FontSize="{Binding ActualHeight,
+                            RelativeSource={RelativeSource AncestorType={x:Type ListView}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.045
+                            }"
+                        />
+                    <TextBlock 
+                        Grid.Column="1"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        Text="{Binding Name}"
+                        TextWrapping="NoWrap"
+                        TextTrimming="CharacterEllipsis"
+                        FontSize="{Binding ActualHeight,
+                            RelativeSource={RelativeSource AncestorType={x:Type ListView}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.045
+                            }"
+                        />
+                </Grid>
+
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ControlButtonTemplate" DataType="{x:Type pages:ControlButton}">
+            <ui:Button 
+                Margin="0, 0, 0, 20"
+                Width="{Binding ActualWidth,
+                    RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.75
+                    }"
+                Command="{Binding ClickCommand}">
+                <Grid
+                    Margin="0, 1, 0, 1"
+                    HorizontalAlignment="Center"
+                    >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:SymbolIcon 
+                        Grid.Column="0"
+                        FontSize="{Binding ActualHeight,
+                            RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.042
+                            }"
+                        Margin="0, 0, 6, 0"
+                        Symbol="{Binding Icon}"
+                        />
+                    <TextBlock 
+                        Grid.Column="1"
+                        FontSize="{Binding ActualHeight,
+                            RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.042
+                            }"
+                        Text="{Binding Text}"/>
+                    
+                </Grid>
+            </ui:Button>
         </DataTemplate>
     </Page.Resources>
 
@@ -110,6 +188,7 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -129,18 +208,80 @@
             </ItemsControl.ItemsPanel>
         </ItemsControl>
 
-        <!-- Controls -->
-        <!--<Grid
+        <!-- Deck name -->
+        <TextBlock
             Grid.Column="0"
             Grid.Row="1"
+            Text="我的牌组"
+            Margin="0, 10, 0, 0"
+            FontWeight="Bold"
+            FontSize="{Binding ActualHeight,
+                    RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.045
+                    }"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            />
+
+        <!-- Controls -->
+        <Grid
+            Margin="15, 25, 0, 0"
+            Grid.Column="0"
+            Grid.Row="2"
             >
-        </Grid>-->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+            
+            <!-- Deck List -->
+            <ListView
+                Grid.Column="0"
+                x:Name="UserDeckListView"
+                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                ItemsSource="{Binding ViewModel.UserDeckList.DeckInfos}"
+                ItemTemplate="{StaticResource DeckInfoTemplate}"
+                Background="{StaticResource MainContentBackground}"
+                Height="{Binding ActualHeight,
+                    RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.98
+                    }"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top">
+            </ListView>
+
+            <!-- Buttons -->
+            <ItemsControl
+                Grid.Column="1"
+                x:Name="ControlButtonsView"
+                Margin="0, 0, 0, 0"
+                ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                ItemsSource="{Binding ViewModel.Buttons}"
+                ItemTemplate="{StaticResource ControlButtonTemplate}"
+                Background="Transparent"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+                
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid 
+                            Columns="1" 
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </Grid>
 
         <!-- Cards -->
         <ListView
             Grid.Column="1"
             Grid.Row="0"
-            Grid.RowSpan="2"
+            Grid.RowSpan="3"
             x:Name="CardListView"
             Padding="0, 2, 0, 2"
             ScrollViewer.VerticalScrollBarVisibility="Hidden"

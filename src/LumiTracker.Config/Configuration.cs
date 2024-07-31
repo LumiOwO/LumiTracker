@@ -88,7 +88,7 @@ namespace LumiTracker.Config
             "LumiTracker"
         );
 
-        private static readonly string ConfigDir = Path.Combine(
+        public static readonly string ConfigDir = Path.Combine(
             DocumentsDir,
             "config"
         );
@@ -153,7 +153,7 @@ namespace LumiTracker.Config
             _logger = loggerFactory.CreateLogger<Configuration>();
         }
 
-        private static JObject LoadJObject(string path)
+        public static JObject LoadJObject(string path)
         {
             string jsonString = File.ReadAllText(path);
             return JObject.Parse(jsonString, new JsonLoadSettings
