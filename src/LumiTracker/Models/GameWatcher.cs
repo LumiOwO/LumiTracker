@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using LumiTracker.Config;
-using LumiTracker.ViewModels.Windows;
+﻿using LumiTracker.Config;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
-using Wpf.Ui.Appearance;
 
 namespace LumiTracker.Models
 {
@@ -17,7 +8,10 @@ namespace LumiTracker.Models
     {
         NoWindowFound,
         WindowNotForeground,
-        WindowWatcherStarted
+        WindowWatcherStarted,
+
+        NumGameWatcherStates,
+        Invalid = NumGameWatcherStates,
     }
 
     public class GameWatcher

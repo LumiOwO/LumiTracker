@@ -17,6 +17,8 @@
         YuanShen,
         Global,
         Cloud,
+
+        NumClientTypes
     }
 
     public enum EActionCardType : int

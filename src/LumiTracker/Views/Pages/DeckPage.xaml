@@ -112,7 +112,7 @@
                         FontSize="{Binding ActualHeight,
                             RelativeSource={RelativeSource AncestorType={x:Type ListView}},
                             Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.045
+                            ConverterParameter=0.036
                             }"
                         />
                     <TextBlock 
@@ -124,7 +124,7 @@
                         FontSize="{Binding ActualHeight,
                             RelativeSource={RelativeSource AncestorType={x:Type ListView}},
                             Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.045
+                            ConverterParameter=0.036
                             }"
                         />
                 </Grid>
@@ -169,7 +169,7 @@
                             Converter={StaticResource SizeWithRatioConverter}, 
                             ConverterParameter=0.042
                             }"
-                        Text="{Binding Text}"/>
+                        Text="{Binding TextItem.Text}"/>
                     
                 </Grid>
             </ui:Button>

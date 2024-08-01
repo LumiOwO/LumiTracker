@@ -59,55 +59,71 @@ namespace LumiTracker.ViewModels.Windows
 
         public void Init(ICommand TrayMenuItemClicked)
         {
+            LocalizationExtension? itemNameBinding = null;
+
             // init menu items
             StartViewItem = new NavigationViewItem()
             {
-                Content = LocalizationSource.Instance["Start"],
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Power24 },
                 TargetPageType = typeof(StartPage)
             };
+            itemNameBinding = LocalizationExtension.Create("Start");
+            StartViewItem.SetBinding(NavigationViewItem.ContentProperty, itemNameBinding);
+
             DeckViewItem = new NavigationViewItem()
             {
-                Content = LocalizationSource.Instance["DeckPageTitle"],
                 Icon = new SymbolIcon { Symbol = SymbolRegular.TextBulletListLtr24 },
                 TargetPageType = typeof(DeckPage)
             };
+            itemNameBinding = LocalizationExtension.Create("DeckPageTitle");
+            DeckViewItem.SetBinding(NavigationViewItem.ContentProperty, itemNameBinding);
+
             RankViewItem = new NavigationViewItem()
             {
-                Content = LocalizationSource.Instance["Rank"],
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Crown20 },
                 TargetPageType = typeof(RankPage)
             };
+            itemNameBinding = LocalizationExtension.Create("Rank");
+            RankViewItem.SetBinding(NavigationViewItem.ContentProperty, itemNameBinding);
+
             AboutViewItem = new NavigationViewItem()
             {
-                Content = LocalizationSource.Instance["About"],
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Info24 },
                 TargetPageType = typeof(AboutPage)
             };
-            MenuItems = new() { StartViewItem, DeckViewItem, RankViewItem, AboutViewItem };
+            itemNameBinding = LocalizationExtension.Create("About");
+            AboutViewItem.SetBinding(NavigationViewItem.ContentProperty, itemNameBinding);
+
+            MenuItems = new () { StartViewItem, DeckViewItem, RankViewItem, AboutViewItem };
 
             SettingsViewItem = new NavigationViewItem()
             {
-                Content = LocalizationSource.Instance["Settings"],
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Settings24 },
                 TargetPageType = typeof(SettingsPage)
             };
-            FooterMenuItems = new() { SettingsViewItem };
+            itemNameBinding = LocalizationExtension.Create("Settings");
+            SettingsViewItem.SetBinding(NavigationViewItem.ContentProperty, itemNameBinding);
+
+            FooterMenuItems = new () { SettingsViewItem };
 
             HomeTrayMenuItem = new Wpf.Ui.Controls.MenuItem
             {
-                Header  = LocalizationSource.Instance["Tray_Home"],
                 Command = TrayMenuItemClicked,
                 CommandParameter = "tray_home",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Home20 },
             };
+            itemNameBinding = LocalizationExtension.Create("Tray_Home");
+            HomeTrayMenuItem.SetBinding(Wpf.Ui.Controls.MenuItem.HeaderProperty, itemNameBinding);
+
             QuitTrayMenuItem = new Wpf.Ui.Controls.MenuItem
             {
-                Header  = LocalizationSource.Instance["Tray_Quit"],
                 Command = TrayMenuItemClicked,
                 CommandParameter = "tray_quit",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.ArrowExit20 },
             };
+            itemNameBinding = LocalizationExtension.Create("Tray_Quit");
+            QuitTrayMenuItem.SetBinding(Wpf.Ui.Controls.MenuItem.HeaderProperty, itemNameBinding);
+
             TrayMenuItems = new() { HomeTrayMenuItem, QuitTrayMenuItem };
 
             // refresh language

@@ -1,16 +1,10 @@
 ﻿using LumiTracker.Views.Windows;
-using LumiTracker.Watcher;
 using LumiTracker.Config;
 using LumiTracker.Models;
-using System.Windows.Controls;
-using System;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel;
-using System.Linq;
-using Newtonsoft.Json.Linq;
 using System.Windows.Media;
-using System.Reflection.Metadata;
-using LumiTracker.Helpers;
+using System.Windows.Data;
+using LumiTracker.Services;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -21,13 +15,21 @@ namespace LumiTracker.ViewModels.Pages
         private GameWatcher _gameWatcher;
 
         [ObservableProperty]
-        private EClientType _currentClientType;
+        private LocalizationTextItem[] _clientTypes = new LocalizationTextItem[(int)EClientType.NumClientTypes];
 
         [ObservableProperty]
-        private IEnumerable<EClientType> _clientTypes = Enum.GetValues(typeof(EClientType)).Cast<EClientType>();
+        private int _selectedClientIndex = -1;
 
         [ObservableProperty]
-        private EGameWatcherState _gameWatcherState = EGameWatcherState.NoWindowFound;
+        private EGameWatcherState _gameWatcherState = EGameWatcherState.Invalid;
+
+        [ObservableProperty]
+        private LocalizationTextItem _gameWatcherStateText = new ();
+        partial void OnGameWatcherStateChanged(EGameWatcherState oldValue, EGameWatcherState newValue)
+        {
+            var binding = LocalizationExtension.Create(newValue);
+            BindingOperations.SetBinding(GameWatcherStateText, LocalizationTextItem.TextProperty, binding);
+        }
 
         [ObservableProperty]
         private Brush _gameWatcherStateBrush = Brushes.DarkGray;
@@ -43,15 +45,30 @@ namespace LumiTracker.ViewModels.Pages
 
         public void Init()
         {
-            CurrentClientType = Configuration.Get<EClientType>("client_type");
-            ShowUIOutside     = Configuration.Get<bool>("show_ui_outside");
+            // Client types
+            for (EClientType i = 0; i < EClientType.NumClientTypes; i++)
+            {
+                var textItem = new LocalizationTextItem();
+                var binding  = LocalizationExtension.Create(i);
+                BindingOperations.SetBinding(textItem, LocalizationTextItem.TextProperty, binding);
+                ClientTypes[(int)i] = textItem;
+            }
+            EClientType ClientType = Configuration.Get<EClientType>("client_type");
+            SelectedClientIndex = (int)ClientType;
+
+            // Game Watcher State
+            GameWatcherState = EGameWatcherState.NoWindowFound;
+
+            // Options in main page
+            ShowUIOutside = Configuration.Get<bool>("show_ui_outside");
             _deckWindow.SetbOutside(ShowUIOutside);
 
+            // Start game watcher
             _gameWatcher.GenshinWindowFound += OnGenshinWindowFound;
             _gameWatcher.WindowWatcherStart += OnWindowWatcherStart;
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
 
-            _gameWatcher.Start(GetProcessName(CurrentClientType));
+            _gameWatcher.Start(GetProcessName(ClientType));
         }
 
         private string GetProcessName(EClientType clientType)
@@ -97,29 +114,18 @@ namespace LumiTracker.ViewModels.Pages
         }
 
         [RelayCommand]
-        public void OnSelectedClientChanged(ComboBox comboBox)
+        public void OnSelectedClientChanged()
         {
-            if (comboBox.SelectedItem == null)
-            {
-                Configuration.Logger.LogDebug($"Trigger an invalid OnSelectedClientChanged for language change");
-                return;
-            }
-
-            EClientType SelectedClientType = (EClientType)comboBox.SelectedItem;
+            EClientType SelectedClientType = (EClientType)SelectedClientIndex;
             Configuration.Logger.LogDebug($"{SelectedClientType}");
-            if (SelectedClientType == CurrentClientType) 
-            { 
-                return; 
-            }
-            CurrentClientType = SelectedClientType;
 
             GameWatcherState = EGameWatcherState.NoWindowFound;
             GameWatcherStateBrush = Brushes.DarkGray;
 
-            string processName = GetProcessName(CurrentClientType);
+            string processName = GetProcessName(SelectedClientType);
             Configuration.Logger.LogDebug(processName);
 
-            Configuration.Set("client_type", CurrentClientType.ToString());
+            Configuration.Set("client_type", SelectedClientType.ToString());
 
             _gameWatcher.ChangeGameClient(processName);
         }

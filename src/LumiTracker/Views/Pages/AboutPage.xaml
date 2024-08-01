@@ -35,21 +35,21 @@
         <ui:HyperlinkButton
             Margin="-1, 40, 0, 0"
             Padding="5"
-            Content="说明文档"
+            Content="{svs:Localization DocumentationLink}"
             NavigateUri="https://github.com/LumiOwO/LumiTracker"
             ToolTip="https://github.com/LumiOwO/LumiTracker" />
 
         <ui:HyperlinkButton
             Margin="-1, 0, 0, 0"
             Padding="5"
-            Content="Bilibili"
+            Content="{svs:Localization BiliBiliLink}"
             NavigateUri="https://space.bilibili.com/234035154"
             ToolTip="https://space.bilibili.com/234035154" />
 
         <ui:HyperlinkButton
             Margin="-1, 0, 0, 0"
             Padding="5"
-            Content="Github"
+            Content="{svs:Localization GithubLink}"
             NavigateUri="https://github.com/LumiOwO/LumiTracker"
             ToolTip="https://github.com/LumiOwO/LumiTracker" />
 

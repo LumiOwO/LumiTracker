@@ -5,9 +5,10 @@ using LumiTracker.Models;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 using System.Windows.Media;
-using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Windows.Input;
+using LumiTracker.Services;
+using System.Windows.Data;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -64,16 +65,31 @@ namespace LumiTracker.ViewModels.Pages
         private ObservableCollection<DeckInfo> _deckInfos = [];
     }
 
-    public class ControlButton
+    enum EControlButtonType : int
     {
-        public string Text { get; }
+        SetAsActiveDeck,
+        EditDeckName,
+        ReimportDeck,
+        ShareDeck,
+        AddNewDeck,
+        DeleteDeck,
+
+        NumControlButtons
+    }
+
+    public partial class ControlButton : DependencyObject
+    {
+        public LocalizationTextItem TextItem { get; }
         public SymbolRegular Icon { get; }
         public ICommand ClickCommand { get; }
         public ControlAppearance Appearance { get; }
 
-        public ControlButton(string text, SymbolRegular icon, ICommand command, ControlAppearance appearance)
+        public ControlButton(string textLocalizationKey, SymbolRegular icon, ICommand command, ControlAppearance appearance)
         {
-            Text = text; 
+            TextItem = new LocalizationTextItem();
+            var binding = LocalizationExtension.Create(textLocalizationKey);
+            BindingOperations.SetBinding(TextItem, LocalizationTextItem.TextProperty, binding);
+
             Icon = icon;
             ClickCommand = command;
             Appearance = appearance;
@@ -92,7 +108,7 @@ namespace LumiTracker.ViewModels.Pages
         private DeckList _userDeckList = new ();
 
         [ObservableProperty]
-        private ObservableCollection<ControlButton> _buttons = [];
+        private ControlButton[] _buttons = new ControlButton[(int)EControlButtonType.NumControlButtons];
 
         private static readonly string UserDecksDescPath = Path.Combine(
             Configuration.ConfigDir,
@@ -103,19 +119,18 @@ namespace LumiTracker.ViewModels.Pages
         {
             /////////////////////////
             // Init buttons
-            Buttons = new ObservableCollection<ControlButton>
-            {
-                new ControlButton ( 
-                    "设为出战牌组", SymbolRegular.Checkmark24, Button1ClickCommand, ControlAppearance.Info),
-                new ControlButton ( 
-                    "编辑牌组名称",        SymbolRegular.Pen24, Button1ClickCommand, ControlAppearance.Secondary ),
-                new ControlButton ( 
-                    "重新导入牌组",      SymbolRegular.ArrowSync24, Button1ClickCommand, ControlAppearance.Secondary ),
-                new ControlButton ( 
-                    "添加牌组",      SymbolRegular.AddCircle24, Button1ClickCommand, ControlAppearance.Secondary ),
-                new ControlButton ( 
-                    "删除牌组",      SymbolRegular.Delete24, Button1ClickCommand, ControlAppearance.Danger ),
-            };
+            Buttons[(int)EControlButtonType.SetAsActiveDeck] = new ControlButton(
+                "SetAsActiveDeck", SymbolRegular.Checkmark24, SetAsActiveDeckClickedCommand, ControlAppearance.Info);
+            Buttons[(int)EControlButtonType.EditDeckName] = new ControlButton(
+                "EditDeckName", SymbolRegular.Pen24, EditDeckNameClickedCommand, ControlAppearance.Secondary);
+            Buttons[(int)EControlButtonType.ReimportDeck] = new ControlButton(
+                "ReimportDeck", SymbolRegular.ArrowSync24, ReimportDeckClickedCommand, ControlAppearance.Secondary);
+            Buttons[(int)EControlButtonType.ShareDeck] = new ControlButton(
+                "ShareDeck", SymbolRegular.Share24, ShareDeckClickedCommand, ControlAppearance.Secondary);
+            Buttons[(int)EControlButtonType.AddNewDeck] = new ControlButton(
+                "AddNewDeck", SymbolRegular.AddCircle24, AddNewDeckClickedCommand, ControlAppearance.Secondary);
+            Buttons[(int)EControlButtonType.DeleteDeck] = new ControlButton(
+                "DeleteDeck", SymbolRegular.Delete24, DeleteDeckClickedCommand, ControlAppearance.Danger);
 
             /////////////////////////
             // Load deck infos
@@ -192,14 +207,44 @@ namespace LumiTracker.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnButton1Click()
+        private void OnSetAsActiveDeckClicked()
         {
-            Configuration.Logger.LogDebug("OnButton1Click");
+            Configuration.Logger.LogDebug("OnSetAsActiveDeckClicked");
+        }
+
+        [RelayCommand]
+        private void OnEditDeckNameClicked()
+        {
+            Configuration.Logger.LogDebug("OnEditDeckNameClicked");
+        }
+
+        [RelayCommand]
+        private void OnReimportDeckClicked()
+        {
+            Configuration.Logger.LogDebug("OnReimportDeckClicked");
+        }
+
+        [RelayCommand]
+        private void OnShareDeckClicked()
+        {
+            Configuration.Logger.LogDebug("OnShareDeckClicked");
+        }
+
+        [RelayCommand]
+        private void OnAddNewDeckClicked()
+        {
+            Configuration.Logger.LogDebug("OnAddNewDeckClicked");
+        }
+
+        [RelayCommand]
+        private void OnDeleteDeckClicked()
+        {
+            Configuration.Logger.LogDebug("OnDeleteDeckClicked");
         }
 
         public void OnNavigatedTo()
         {
-            
+
         }
 
         public void OnNavigatedFrom() 

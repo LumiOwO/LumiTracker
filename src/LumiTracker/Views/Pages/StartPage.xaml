@@ -19,10 +19,6 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <Page.Resources>
-        <helpers:EnumToLocalizationConverter x:Key="EnumToLocalizationConverter" />
-    </Page.Resources>
-
     <StackPanel>
         <Grid VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
@@ -45,20 +41,19 @@
                 Grid.Column="1"
                 x:Name="ClientTypeComboBox"
                 HorizontalAlignment="Stretch"
+                SelectedIndex="{Binding ViewModel.SelectedClientIndex, Mode=TwoWay}"
                 ItemsSource="{Binding ViewModel.ClientTypes, Mode=OneWay}"
-                SelectedItem="{Binding ViewModel.CurrentClientType, Mode=OneWay}"
                 >
                 <ComboBox.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate DataType="{x:Type svs:LocalizationTextItem}">
                         <ContentPresenter
-                            Content="{Binding Converter={StaticResource EnumToLocalizationConverter}}"/>
+                            Content="{Binding Text}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="SelectionChanged">
                         <b:InvokeCommandAction 
                             Command="{Binding ViewModel.SelectedClientChangedCommand}"
-                            CommandParameter="{Binding ElementName=ClientTypeComboBox}"
                             />
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
@@ -80,7 +75,7 @@
                 Margin="8,0,0,0"
                 VerticalAlignment="Center"
                 Foreground="{Binding ViewModel.GameWatcherStateBrush, Mode=OneWay}"
-                Text="{Binding ViewModel.GameWatcherState, Mode=OneWay, Converter={StaticResource EnumToLocalizationConverter}}" />
+                Text="{Binding ViewModel.GameWatcherStateText.Text, Mode=OneWay}" />
         </Grid>
 
         <Grid 

@@ -280,4 +280,40 @@
     <value>我的牌组</value>
     <comment/>
   </data>
+  <data name="SetAsActiveDeck" xml:space="preserve">
+    <value>设为出战牌组</value>
+    <comment/>
+  </data>
+  <data name="EditDeckName" xml:space="preserve">
+    <value>编辑牌组名称</value>
+    <comment/>
+  </data>
+  <data name="ReimportDeck" xml:space="preserve">
+    <value>重新导入牌组</value>
+    <comment/>
+  </data>
+  <data name="ShareDeck" xml:space="preserve">
+    <value>分享牌组</value>
+    <comment/>
+  </data>
+  <data name="AddNewDeck" xml:space="preserve">
+    <value>添加牌组</value>
+    <comment/>
+  </data>
+  <data name="DeleteDeck" xml:space="preserve">
+    <value>删除牌组</value>
+    <comment/>
+  </data>
+  <data name="DocumentationLink" xml:space="preserve">
+    <value>说明文档</value>
+    <comment/>
+  </data>
+  <data name="BiliBiliLink" xml:space="preserve">
+    <value>B站主页</value>
+    <comment/>
+  </data>
+  <data name="GithubLink" xml:space="preserve">
+    <value>Github</value>
+    <comment/>
+  </data>
 </root>
