@@ -1,5 +1,6 @@
 ﻿using LumiTracker.ViewModels.Pages;
 using System.Windows.Input;
+using System.Windows.Media;
 using Wpf.Ui.Controls;
 
 
@@ -13,6 +14,9 @@ namespace LumiTracker.Views.Pages
         {
             ViewModel = viewModel;
             DataContext = this;
+
+            // Hide selected color of list view
+            this.Resources["ListViewItemPillFillBrush"] = new SolidColorBrush(Color.FromArgb(0x00, 0x00, 0x00, 0x00));
 
             InitializeComponent();
         }

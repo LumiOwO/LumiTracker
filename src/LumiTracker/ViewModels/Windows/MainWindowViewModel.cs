@@ -3,12 +3,8 @@ using Wpf.Ui.Controls;
 
 using LumiTracker.Config;
 using LumiTracker.Services;
-using LumiTracker.ViewModels.Pages;
 using LumiTracker.Views.Pages;
 using Wpf.Ui.Appearance;
-using Wpf.Ui;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -23,7 +19,7 @@ namespace LumiTracker.ViewModels.Windows
         private ObservableCollection<object>? _footerMenuItems;
 
         [ObservableProperty]
-        private ObservableCollection<Wpf.Ui.Controls.MenuItem>? _trayMenuItems;
+        private ObservableCollection<MenuItem>? _trayMenuItems;
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -40,9 +36,9 @@ namespace LumiTracker.ViewModels.Windows
         private NavigationViewItem? _settingsViewItem;
 
         [ObservableProperty]
-        private Wpf.Ui.Controls.MenuItem? _homeTrayMenuItem;
+        private MenuItem? _homeTrayMenuItem;
         [ObservableProperty]
-        private Wpf.Ui.Controls.MenuItem? _quitTrayMenuItem;
+        private MenuItem? _quitTrayMenuItem;
 
         public MainWindowViewModel(IServiceProvider serviceProvider)
         {
@@ -106,23 +102,23 @@ namespace LumiTracker.ViewModels.Windows
 
             FooterMenuItems = new () { SettingsViewItem };
 
-            HomeTrayMenuItem = new Wpf.Ui.Controls.MenuItem
+            HomeTrayMenuItem = new MenuItem
             {
                 Command = TrayMenuItemClicked,
                 CommandParameter = "tray_home",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Home20 },
             };
             itemNameBinding = LocalizationExtension.Create("Tray_Home");
-            HomeTrayMenuItem.SetBinding(Wpf.Ui.Controls.MenuItem.HeaderProperty, itemNameBinding);
+            HomeTrayMenuItem.SetBinding(MenuItem.HeaderProperty, itemNameBinding);
 
-            QuitTrayMenuItem = new Wpf.Ui.Controls.MenuItem
+            QuitTrayMenuItem = new MenuItem
             {
                 Command = TrayMenuItemClicked,
                 CommandParameter = "tray_quit",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.ArrowExit20 },
             };
             itemNameBinding = LocalizationExtension.Create("Tray_Quit");
-            QuitTrayMenuItem.SetBinding(Wpf.Ui.Controls.MenuItem.HeaderProperty, itemNameBinding);
+            QuitTrayMenuItem.SetBinding(MenuItem.HeaderProperty, itemNameBinding);
 
             TrayMenuItems = new() { HomeTrayMenuItem, QuitTrayMenuItem };
 

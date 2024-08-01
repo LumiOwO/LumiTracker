@@ -9,6 +9,7 @@
         xmlns:helpers="clr-namespace:LumiTracker.Helpers"
         xmlns:models="clr-namespace:LumiTracker.Models"
         xmlns:ctrls="clr-namespace:LumiTracker.Controls"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d" 
         d:DesignHeight="450" 
         d:DesignWidth="800"
@@ -105,19 +106,16 @@
                 
                     <ui:SymbolIcon 
                         Grid.Column="0"
-                        Margin="0, 0, 2, 0"
+                        Margin="0, 0, 3, 0"
+                        Symbol="Checkmark24"
                         Visibility="{Binding IconVisibility}"
-                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                        Symbol="CheckmarkCircle24"
-                        FontSize="{Binding ActualHeight,
-                            RelativeSource={RelativeSource AncestorType={x:Type ListView}},
-                            Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.036
-                            }"
+                        Foreground="{Binding TextColor}"
+                        FontWeight="{Binding TextWeight}"
                         />
                     <TextBlock 
                         Grid.Column="1"
-                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        FontWeight="{Binding TextWeight}"
+                        Foreground="{Binding TextColor}"
                         Text="{Binding Name}"
                         TextWrapping="NoWrap"
                         TextTrimming="CharacterEllipsis"
@@ -141,37 +139,30 @@
                     Converter={StaticResource SizeWithRatioConverter}, 
                     ConverterParameter=0.75
                     }"
+                Height="{Binding ActualHeight,
+                        RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.1
+                        }"
+                Icon="{Binding Icon}"
+                FontSize="{Binding ActualHeight,
+                    RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.04
+                    }"
+                IsEnabled="{Binding IsEnabled}"
+                Opacity="{Binding Opacity}"
                 Command="{Binding ClickCommand}">
 
-                <Grid
-                    Margin="0, 1, 0, 1"
-                    HorizontalAlignment="Center"
-                    >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <ui:SymbolIcon 
-                        Grid.Column="0"
-                        FontSize="{Binding ActualHeight,
-                            RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
-                            Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.042
-                            }"
-                        Margin="0, 0, 6, 0"
-                        Symbol="{Binding Icon}"
-                        />
-                    <TextBlock 
-                        FontWeight="Bold"
-                        Grid.Column="1"
-                        FontSize="{Binding ActualHeight,
-                            RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
-                            Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.042
-                            }"
-                        Text="{Binding TextItem.Text}"/>
-                    
-                </Grid>
+                <TextBlock 
+                    FontWeight="Bold"
+                    FontSize="{Binding ActualHeight,
+                        RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.04
+                        }"
+                    Opacity="{Binding Opacity}"
+                    Text="{Binding TextItem.Text}"/>
             </ui:Button>
         </DataTemplate>
     </Page.Resources>
@@ -210,7 +201,7 @@
         <TextBlock
             Grid.Column="0"
             Grid.Row="1"
-            Text="我的牌组"
+            Text="{Binding ViewModel.UserDeckList.SelectedDeckName}"
             Margin="0, 15, 0, 0"
             FontWeight="Bold"
             FontSize="{Binding ActualHeight,
@@ -253,6 +244,16 @@
                         }"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Top">
+
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="SelectionChanged">
+                            <b:InvokeCommandAction 
+                                Command="{Binding ViewModel.SelectedDeckChangedCommand}"
+                                CommandParameter="{Binding SelectedIndex, ElementName=UserDeckListView}"
+                                />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+
                 </ui:ListView>
             </Border>
 
@@ -266,8 +267,13 @@
                 ItemsSource="{Binding ViewModel.Buttons}"
                 ItemTemplate="{StaticResource ControlButtonTemplate}"
                 Background="Transparent"
+                Height="{Binding ActualHeight,
+                    RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.98
+                    }"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
+                VerticalAlignment="Top">
                 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
