@@ -352,4 +352,12 @@
     <value>Current Active Deck: </value>
     <comment/>
   </data>
+  <data name="DeleteConfirm_Title" xml:space="preserve">
+    <value>Delete this Deck?</value>
+    <comment/>
+  </data>
+  <data name="DeleteConfirm_Message" xml:space="preserve">
+    <value>Deck Name: </value>
+    <comment/>
+  </data>
 </root>

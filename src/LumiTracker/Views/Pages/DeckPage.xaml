@@ -135,6 +135,7 @@
                         ConverterParameter=0.1
                         }"
                 Icon="{Binding Icon}"
+                Foreground="#f0f0f0"
                 FontSize="{Binding ActualHeight,
                     RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
                     Converter={StaticResource SizeWithRatioConverter}, 

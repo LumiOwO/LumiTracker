@@ -356,4 +356,12 @@
     <value>当前出战牌组：</value>
     <comment/>
   </data>
+  <data name="DeleteConfirm_Title" xml:space="preserve">
+    <value>确定要删除这套牌组吗？</value>
+    <comment/>
+  </data>
+  <data name="DeleteConfirm_Message" xml:space="preserve">
+    <value>牌组名称：</value>
+    <comment/>
+  </data>
 </root>

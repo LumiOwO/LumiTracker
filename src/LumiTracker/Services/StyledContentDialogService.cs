@@ -49,7 +49,7 @@ namespace LumiTracker.Services
         public async Task<(ContentDialogResult, string)> ShowTextInputDialogAsync(string title, string text, string placeholder)
         {
             // Init
-            var content = new TextInputDialogDialogContent();
+            var content = new TextInputDialogContent();
             content.TextBox.Text = text;
             content.TextBox.PlaceholderText = placeholder;
 
@@ -84,18 +84,25 @@ namespace LumiTracker.Services
             return (result, content.TextBox.Text);
         }
 
-        public async Task<ContentDialogResult> ShowSimpleDialogAsync(string title)
+        public async Task<ContentDialogResult> ShowDeleteConfirmDialogAsync(string deckName)
         {
+            // Init
+            var content = new DeleteConfirmDialogContent();
+            content.TextPrefix.Text = LocalizationSource.Instance["DeleteConfirm_Message"];
+            content.TextMain.Text   = deckName;
+
             // Show dialog
-            ContentDialogResult result = await MainService.ShowSimpleDialogAsync(
-                new SimpleContentDialogCreateOptions()
-                {
-                    Content = "",
-                    Title = title,
-                    PrimaryButtonText = LocalizationSource.Instance["OK"],
-                    CloseButtonText = LocalizationSource.Instance["Cancel"],
-                }
-            );
+            var dialog = new ContentDialog()
+            {
+                Title   = LocalizationSource.Instance["DeleteConfirm_Title"],
+                Content = content,
+                PrimaryButtonText = LocalizationSource.Instance["OK"],
+                CloseButtonText   = LocalizationSource.Instance["Cancel"],
+                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.CheckmarkCircle24),
+                CloseButtonIcon   = new SymbolIcon(SymbolRegular.DismissCircle24),
+            };
+            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
+
             return result;
         }
     }

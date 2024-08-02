@@ -3,11 +3,11 @@
 namespace LumiTracker.Controls
 {
     /// <summary>
-    /// Interaction logic for ClosingDialogContent.xaml
+    /// Interaction logic for DeleteConfirmDialogContent.xaml
     /// </summary>
-    public partial class TextInputDialogDialogContent : UserControl
+    public partial class DeleteConfirmDialogContent : UserControl
     {
-        public TextInputDialogDialogContent()
+        public DeleteConfirmDialogContent()
         {
             InitializeComponent();
         }

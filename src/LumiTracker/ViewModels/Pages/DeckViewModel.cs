@@ -56,10 +56,12 @@ namespace LumiTracker.ViewModels.Pages
 
     public partial class DeckList : ObservableObject
     {
+        public static readonly SolidColorBrush HighlightColor = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
+
         [JsonProperty("active")]
         [ObservableProperty]
         [property: JsonIgnore]
-        private int _activeIndex = -1;
+        public int _activeIndex = -1;
 
         [JsonProperty("decks")]
         [ObservableProperty]
@@ -76,7 +78,7 @@ namespace LumiTracker.ViewModels.Pages
             if (newValue >= 0)
             {
                 DeckInfos[newValue].TextWeight = FontWeights.Bold;
-                DeckInfos[newValue].TextColor  = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
+                DeckInfos[newValue].TextColor  = HighlightColor;
             }
         }
     }
@@ -111,26 +113,26 @@ namespace LumiTracker.ViewModels.Pages
             Opacity = IsEnabled ? 1.0 : 0.3;
         }
 
-        public ControlButton(string textLocalizationKey, SymbolRegular icon, ICommand command, ControlAppearance appearance, bool isEnabled)
+        public ControlButton(string textKey, SymbolRegular icon, ICommand command, ControlAppearance appearance, bool isEnabled)
         {
             TextItem = new LocalizationTextItem();
-            var binding = LocalizationExtension.Create(textLocalizationKey);
+            var binding = LocalizationExtension.Create(textKey);
             BindingOperations.SetBinding(TextItem, LocalizationTextItem.TextProperty, binding);
 
-            Icon = icon;
+            Icon         = icon;
             ClickCommand = command;
-            Appearance = appearance;
-            IsEnabled = isEnabled;
+            Appearance   = appearance;
+            IsEnabled    = isEnabled;
         }
     }
 
     public partial class DeckViewModel : ObservableObject, INavigationAware
     {
         [ObservableProperty]
-        private ObservableCollection<AvatarView> _avatars = new () { new AvatarView(), new AvatarView(), new AvatarView() };
+        private ObservableCollection<AvatarView> _avatars = [ new AvatarView(), new AvatarView(), new AvatarView() ];
 
         [ObservableProperty]
-        private ObservableCollection<ActionCardView> _currentDeck = new ();
+        private ObservableCollection<ActionCardView> _currentDeck = [];
 
         [ObservableProperty]
         private DeckList _userDeckList = new ();
@@ -168,17 +170,47 @@ namespace LumiTracker.ViewModels.Pages
             /////////////////////////
             // Init buttons
             Buttons[(int)EControlButtonType.SetAsActiveDeck] = new ControlButton(
-                "SetAsActiveDeck", SymbolRegular.Checkmark24, SetAsActiveDeckClickedCommand, ControlAppearance.Info, false);
+                textKey    : "SetAsActiveDeck",
+                icon       : SymbolRegular.Checkmark24,
+                command    : SetAsActiveDeckClickedCommand,
+                appearance : ControlAppearance.Caution,
+                isEnabled  : false
+            );
             Buttons[(int)EControlButtonType.EditDeckName] = new ControlButton(
-                "EditDeckName", SymbolRegular.Pen24, EditDeckNameClickedCommand, ControlAppearance.Secondary, false);
+                textKey    : "EditDeckName",
+                icon       : SymbolRegular.Pen24,
+                command    : EditDeckNameClickedCommand,
+                appearance : ControlAppearance.Secondary,
+                isEnabled  : false
+            );
             Buttons[(int)EControlButtonType.ReimportDeck] = new ControlButton(
-                "ReimportDeck", SymbolRegular.ArrowSync24, ReimportDeckClickedCommand, ControlAppearance.Secondary, false);
+                textKey    : "ReimportDeck",
+                icon       : SymbolRegular.ArrowSync24,
+                command    : ReimportDeckClickedCommand,
+                appearance : ControlAppearance.Secondary,
+                isEnabled  : false
+            );
             Buttons[(int)EControlButtonType.ShareDeck] = new ControlButton(
-                "ShareDeck", SymbolRegular.Share24, ShareDeckClickedCommand, ControlAppearance.Secondary, false);
+                textKey    : "ShareDeck",
+                icon       : SymbolRegular.Share24,
+                command    : ShareDeckClickedCommand,
+                appearance : ControlAppearance.Secondary,
+                isEnabled  : false
+            );
             Buttons[(int)EControlButtonType.AddNewDeck] = new ControlButton(
-                "AddNewDeck", SymbolRegular.AddCircle24, AddNewDeckClickedCommand, ControlAppearance.Secondary, true);
+                textKey    : "AddNewDeck",
+                icon       : SymbolRegular.AddCircle24,
+                command    : AddNewDeckClickedCommand,
+                appearance : ControlAppearance.Secondary,
+                isEnabled  : true
+            );
             Buttons[(int)EControlButtonType.DeleteDeck] = new ControlButton(
-                "DeleteDeck", SymbolRegular.Delete24, DeleteDeckClickedCommand, ControlAppearance.Danger, true);
+                textKey    : "DeleteDeck",
+                icon       : SymbolRegular.Delete24,
+                command    : DeleteDeckClickedCommand,
+                appearance : ControlAppearance.Danger,
+                isEnabled  : true
+            );
 
             /////////////////////////
             // Load deck infos
@@ -207,7 +239,13 @@ namespace LumiTracker.ViewModels.Pages
             {
                 Buttons[(int)i].IsEnabled = valid;
             }
-            if (!valid) return;
+            if (!valid)
+            {
+                Avatars = [new AvatarView(), new AvatarView(), new AvatarView()];
+                CurrentDeck = [];
+                SelectedDeckName = "";
+                return;
+            }
 
             ///////////////////////
             // Decode share code
@@ -272,6 +310,12 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         private void OnSetAsActiveDeckClicked()
         {
+            Configuration.Logger.LogDebug("OnSetAsActiveDeckClicked");
+            if (SelectedDeckIndex < 0)
+            {
+                return;
+            }
+
             UserDeckList.ActiveIndex = SelectedDeckIndex;
             SaveDeckList();
             SnackbarService.Show(
@@ -286,6 +330,12 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         private async Task OnEditDeckNameClicked()
         {
+            Configuration.Logger.LogDebug("OnEditDeckNameClicked");
+            if (SelectedDeckIndex < 0)
+            {
+                return;
+            }
+
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
                 LocalizationSource.Instance["EditDeckName_Title"],
                 SelectedDeckName,
@@ -307,6 +357,12 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         private async Task OnReimportDeckClicked()
         {
+            Configuration.Logger.LogDebug("OnReimportDeckClicked");
+            if (SelectedDeckIndex < 0)
+            {
+                return;
+            }
+
             var (result, sharecode) = await ContentDialogService.ShowTextInputDialogAsync(
                 LocalizationSource.Instance["ImportDeck_Title"],
                 "",
@@ -337,6 +393,12 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         private void OnShareDeckClicked()
         {
+            Configuration.Logger.LogDebug("OnShareDeckClicked");
+            if (SelectedDeckIndex < 0)
+            {
+                return;
+            }
+
             var info = UserDeckList.DeckInfos[SelectedDeckIndex];
             string sharecode = info.ShareCode;
 
@@ -353,6 +415,7 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         private async Task OnAddNewDeckClicked()
         {
+            Configuration.Logger.LogDebug("OnAddNewDeckClicked");
             var (result, sharecode) = await ContentDialogService.ShowTextInputDialogAsync(
                 LocalizationSource.Instance["ImportDeck_Title"], 
                 "",
@@ -383,9 +446,51 @@ namespace LumiTracker.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnDeleteDeckClicked()
+        private async Task OnDeleteDeckClicked()
         {
             Configuration.Logger.LogDebug("OnDeleteDeckClicked");
+            if (SelectedDeckIndex < 0)
+            {
+                return;
+            }
+
+            var result = await ContentDialogService.ShowDeleteConfirmDialogAsync(
+                SelectedDeckName
+            );
+
+            if (result == ContentDialogResult.Primary)
+            {
+                Configuration.Logger.LogDebug($"Before delete: SelectedDeckIndex = {SelectedDeckIndex}, ActiveIndex = {UserDeckList.ActiveIndex}");
+
+                int prevSelectedDeckIndex = SelectedDeckIndex;
+                UserDeckList.DeckInfos.RemoveAt(SelectedDeckIndex); // SelectedDeckIndex -> -1
+
+                // Update active index
+                // The active deckInfo will be persistant after RemoveAt(),
+                // so no need to trigger OnActiveIndexChanged() here
+                // Modify the field directly to prevent the trigger
+#pragma warning disable MVVMTK0034
+                if (prevSelectedDeckIndex == UserDeckList.ActiveIndex)
+                {
+                    UserDeckList._activeIndex = -1;
+                }
+                else if (prevSelectedDeckIndex < UserDeckList.ActiveIndex)
+                {
+                    UserDeckList._activeIndex--;
+                }
+                else // (SelectedDeckIndex > prevActiveIndex)
+                {
+
+                }
+#pragma warning restore MVVMTK0034
+
+                // Restore SelectedDeckIndex
+                SelectedDeckIndex = Math.Min(prevSelectedDeckIndex, UserDeckList.DeckInfos.Count - 1);
+
+                Configuration.Logger.LogDebug($"After delete: SelectedDeckIndex = {SelectedDeckIndex}, ActiveIndex = {UserDeckList.ActiveIndex}");
+
+                SaveDeckList();
+            }
         }
 
         public void OnNavigatedTo()
