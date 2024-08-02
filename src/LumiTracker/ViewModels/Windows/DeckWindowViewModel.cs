@@ -48,14 +48,15 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private int _round = 0;
 
-        private GameWatcher _gameWatcher;
-
+        [ObservableProperty]
         private DeckViewModel _deckViewModel;
 
-        public DeckWindowViewModel(GameWatcher gameWatcher, DeckViewModel deckViewModel)
+        private GameWatcher _gameWatcher;
+
+        public DeckWindowViewModel(DeckViewModel deckViewModel, GameWatcher gameWatcher)
         {
-            _gameWatcher   = gameWatcher;
             _deckViewModel = deckViewModel;
+            _gameWatcher   = gameWatcher;
 
             _gameWatcher.GameStarted        += OnGameStarted;
             _gameWatcher.MyActionCardPlayed += OnMyActionCardPlayed;
@@ -80,7 +81,16 @@ namespace LumiTracker.ViewModels.Windows
             GameStarted = gameStart;
             if (gameStart)
             {
-                MyDeck = new CardList(Configuration.Get<string>("share_code"));
+                if (DeckViewModel.UserDeckList.ActiveIndex < 0)
+                {
+                    MyDeck = new();
+                }
+                else
+                {
+                    int activeIndex = DeckViewModel.UserDeckList.ActiveIndex;
+                    string sharecode = DeckViewModel.UserDeckList.DeckInfos[activeIndex].ShareCode;
+                    MyDeck = new CardList(sharecode);
+                }
             }
             else
             {

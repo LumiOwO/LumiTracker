@@ -61,7 +61,7 @@ namespace LumiTracker.ViewModels.Pages
         [JsonProperty("active")]
         [ObservableProperty]
         [property: JsonIgnore]
-        public int _activeIndex = -1;
+        private int _activeIndex = -1;
 
         [JsonProperty("decks")]
         [ObservableProperty]
@@ -70,7 +70,7 @@ namespace LumiTracker.ViewModels.Pages
 
         partial void OnActiveIndexChanged(int oldValue, int newValue)
         {
-            if (oldValue >= 0)
+            if (oldValue >= 0 && oldValue < DeckInfos.Count)
             {
                 DeckInfos[oldValue].TextWeight = FontWeights.Light;
                 DeckInfos[oldValue].TextColor  = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
@@ -466,23 +466,18 @@ namespace LumiTracker.ViewModels.Pages
                 UserDeckList.DeckInfos.RemoveAt(SelectedDeckIndex); // SelectedDeckIndex -> -1
 
                 // Update active index
-                // The active deckInfo will be persistant after RemoveAt(),
-                // so no need to trigger OnActiveIndexChanged() here
-                // Modify the field directly to prevent the trigger
-#pragma warning disable MVVMTK0034
                 if (prevSelectedDeckIndex == UserDeckList.ActiveIndex)
                 {
-                    UserDeckList._activeIndex = -1;
+                    UserDeckList.ActiveIndex = -1;
                 }
                 else if (prevSelectedDeckIndex < UserDeckList.ActiveIndex)
                 {
-                    UserDeckList._activeIndex--;
+                    UserDeckList.ActiveIndex--;
                 }
                 else // (SelectedDeckIndex > prevActiveIndex)
                 {
 
                 }
-#pragma warning restore MVVMTK0034
 
                 // Restore SelectedDeckIndex
                 SelectedDeckIndex = Math.Min(prevSelectedDeckIndex, UserDeckList.DeckInfos.Count - 1);
