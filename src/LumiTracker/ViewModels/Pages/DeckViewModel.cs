@@ -156,9 +156,14 @@ namespace LumiTracker.ViewModels.Pages
 
         private ISnackbarService SnackbarService;
 
-        public DeckViewModel(ISnackbarService snackbarService)
+        private StyledContentDialogService ContentDialogService;
+
+        public DeckViewModel(ISnackbarService snackbarService, StyledContentDialogService contentDialogService)
         {
+            /////////////////////////
+            // Services
             SnackbarService = snackbarService;
+            ContentDialogService = contentDialogService;
 
             /////////////////////////
             // Init buttons
@@ -208,11 +213,16 @@ namespace LumiTracker.ViewModels.Pages
             // Decode share code
             DeckInfo info = UserDeckList.DeckInfos[index];
             string sharecode = info.ShareCode;
+            DecodeShareCode(info, sharecode);
+        }
+
+        private bool DecodeShareCode(DeckInfo info, string sharecode) 
+        {
             int[]? cards = DeckUtils.DecodeShareCode(sharecode);
             if (cards == null)
             {
                 Configuration.Logger.LogWarning($"Invalid share code: {sharecode}");
-                return;
+                return false;
             }
             info.ShareCode = sharecode;
             SelectedDeckName = info.Name;
@@ -249,6 +259,8 @@ namespace LumiTracker.ViewModels.Pages
                 currentDeck.Add(new ActionCardView(card_id));
             }
             CurrentDeck = currentDeck;
+
+            return true;
         }
 
         private void SaveDeckList()
@@ -262,30 +274,9 @@ namespace LumiTracker.ViewModels.Pages
         {
             UserDeckList.ActiveIndex = SelectedDeckIndex;
             SaveDeckList();
-        }
-
-        [RelayCommand]
-        private void OnEditDeckNameClicked()
-        {
-            Configuration.Logger.LogDebug("OnEditDeckNameClicked");
-        }
-
-        [RelayCommand]
-        private void OnReimportDeckClicked()
-        {
-            Configuration.Logger.LogDebug("OnReimportDeckClicked");
-        }
-
-        [RelayCommand]
-        private void OnShareDeckClicked()
-        {
-            var info = UserDeckList.DeckInfos[SelectedDeckIndex];
-            string shareCode = info.ShareCode;
-
-            Clipboard.SetText(shareCode);
             SnackbarService.Show(
-                LocalizationSource.Instance["CopyToClipboard"],
-                $"{shareCode}",
+                LocalizationSource.Instance["SetAsActiveSuccess_Title"],
+                LocalizationSource.Instance["SetAsActiveSuccess_Message"] + SelectedDeckName,
                 ControlAppearance.Success,
                 new SymbolIcon(SymbolRegular.CheckmarkCircle24),
                 TimeSpan.FromSeconds(2)
@@ -293,9 +284,102 @@ namespace LumiTracker.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnAddNewDeckClicked()
+        private async Task OnEditDeckNameClicked()
         {
-            Configuration.Logger.LogDebug("OnAddNewDeckClicked");
+            var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
+                LocalizationSource.Instance["EditDeckName_Title"],
+                SelectedDeckName,
+                LocalizationSource.Instance["EditDeckName_Placeholder"]
+            );
+
+            if (result == ContentDialogResult.Primary)
+            {
+                if (name == "")
+                {
+                    name = LocalizationSource.Instance["DefaultDeckName"];
+                }
+                UserDeckList.DeckInfos[SelectedDeckIndex].Name = name;
+                SelectedDeckName = name;
+                SaveDeckList();
+            }
+        }
+
+        [RelayCommand]
+        private async Task OnReimportDeckClicked()
+        {
+            var (result, sharecode) = await ContentDialogService.ShowTextInputDialogAsync(
+                LocalizationSource.Instance["ImportDeck_Title"],
+                "",
+                LocalizationSource.Instance["ImportDeck_Placeholder"]
+            );
+
+            if (result == ContentDialogResult.Primary)
+            {
+                var info = UserDeckList.DeckInfos[SelectedDeckIndex];
+                bool success = DecodeShareCode(info, sharecode);
+                if (success)
+                {
+                    SaveDeckList();
+                }
+                else
+                {
+                    SnackbarService.Show(
+                        LocalizationSource.Instance["InvalidSharingCode_Title"],
+                        LocalizationSource.Instance["InvalidSharingCode_Message"] + sharecode,
+                        ControlAppearance.Danger,
+                        new SymbolIcon(SymbolRegular.DismissCircle24),
+                        TimeSpan.FromSeconds(3)
+                    );
+                }
+            }
+        }
+
+        [RelayCommand]
+        private void OnShareDeckClicked()
+        {
+            var info = UserDeckList.DeckInfos[SelectedDeckIndex];
+            string sharecode = info.ShareCode;
+
+            Clipboard.SetText(sharecode);
+            SnackbarService.Show(
+                LocalizationSource.Instance["CopyToClipboard"],
+                $"{sharecode}",
+                ControlAppearance.Success,
+                new SymbolIcon(SymbolRegular.CheckmarkCircle24),
+                TimeSpan.FromSeconds(2)
+            );
+        }
+
+        [RelayCommand]
+        private async Task OnAddNewDeckClicked()
+        {
+            var (result, sharecode) = await ContentDialogService.ShowTextInputDialogAsync(
+                LocalizationSource.Instance["ImportDeck_Title"], 
+                "",
+                LocalizationSource.Instance["ImportDeck_Placeholder"]
+            );
+
+            if (result == ContentDialogResult.Primary)
+            {
+                var info = new DeckInfo();
+                bool success = DecodeShareCode(info, sharecode);
+                if (success)
+                {
+                    UserDeckList.DeckInfos.Add(info);
+                    SelectedDeckIndex = UserDeckList.DeckInfos.Count - 1;
+                    SaveDeckList();
+                }
+                else
+                {
+                    SnackbarService.Show(
+                        LocalizationSource.Instance["InvalidSharingCode_Title"],
+                        LocalizationSource.Instance["InvalidSharingCode_Message"] + sharecode,
+                        ControlAppearance.Danger,
+                        new SymbolIcon(SymbolRegular.DismissCircle24),
+                        TimeSpan.FromSeconds(3)
+                    );
+                }
+            }
         }
 
         [RelayCommand]

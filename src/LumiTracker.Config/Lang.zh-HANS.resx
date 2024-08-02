@@ -277,7 +277,7 @@
     <comment/>
   </data>
   <data name="DefaultDeckName" xml:space="preserve">
-    <value>我的牌组</value>
+    <value>&lt;未命名牌组&gt;</value>
     <comment/>
   </data>
   <data name="SetAsActiveDeck" xml:space="preserve">
@@ -317,7 +317,43 @@
     <comment/>
   </data>
   <data name="CopyToClipboard" xml:space="preserve">
-    <value>已复制到剪贴板</value>
+    <value>分享码已复制到剪贴板</value>
+    <comment/>
+  </data>
+  <data name="Paste" xml:space="preserve">
+    <value>粘贴</value>
+    <comment/>
+  </data>
+  <data name="ImportDeck_Title" xml:space="preserve">
+    <value>使用分享码导入牌组</value>
+    <comment/>
+  </data>
+  <data name="ImportDeck_Placeholder" xml:space="preserve">
+    <value>请输入分享码</value>
+    <comment/>
+  </data>
+  <data name="EditDeckName_Title" xml:space="preserve">
+    <value>编辑牌组名称</value>
+    <comment/>
+  </data>
+  <data name="EditDeckName_Placeholder" xml:space="preserve">
+    <value>请输入备注名</value>
+    <comment/>
+  </data>
+  <data name="InvalidSharingCode_Title" xml:space="preserve">
+    <value>分享码导入失败</value>
+    <comment/>
+  </data>
+  <data name="InvalidSharingCode_Message" xml:space="preserve">
+    <value>无效的分享码：</value>
+    <comment/>
+  </data>
+  <data name="SetAsActiveSuccess_Title" xml:space="preserve">
+    <value>设置成功</value>
+    <comment/>
+  </data>
+  <data name="SetAsActiveSuccess_Message" xml:space="preserve">
+    <value>当前出战牌组：</value>
     <comment/>
   </data>
 </root>

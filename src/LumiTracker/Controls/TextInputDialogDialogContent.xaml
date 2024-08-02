@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="LumiTracker.Controls.TextInputDialogDialogContent"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            xmlns:helpers="clr-namespace:LumiTracker.Helpers"
+            xmlns:ctrls="clr-namespace:LumiTracker.Controls"
+            xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+            xmlns:svs="clr-namespace:LumiTracker.Services"
+            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+            mc:Ignorable="d">
+    <UserControl.Resources>
+        <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+
+        <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#909090"/>
+    </UserControl.Resources>
+
+    <ui:TextBox 
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:TextInputDialogDialogContent}}"
+        x:Name="TextBox"
+        d:Text="testtest"
+        Width="400"
+        Height="Auto"
+        VerticalAlignment="Center"
+        VerticalContentAlignment="Center"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Stretch"
+        >
+    </ui:TextBox>
+</UserControl>

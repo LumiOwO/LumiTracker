@@ -48,8 +48,8 @@ namespace LumiTracker
 
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
-                services.AddSingleton<IContentDialogService, ContentDialogService>();
                 services.AddSingleton<ISnackbarService, SnackbarService>();
+                services.AddSingleton<StyledContentDialogService>();
 
                 // Localization
                 services.AddSingleton<ILocalizationService, LocalizationService>();

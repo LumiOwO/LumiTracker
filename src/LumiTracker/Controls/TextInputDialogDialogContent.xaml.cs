@@ -3,11 +3,11 @@
 namespace LumiTracker.Controls
 {
     /// <summary>
-    /// Interaction logic for ClosingDialog.xaml
+    /// Interaction logic for ClosingDialogContent.xaml
     /// </summary>
-    public partial class ClosingDialog : UserControl
+    public partial class TextInputDialogDialogContent : UserControl
     {
-        public ClosingDialog()
+        public TextInputDialogDialogContent()
         {
             InitializeComponent();
         }

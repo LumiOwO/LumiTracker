@@ -277,7 +277,7 @@
     <comment/>
   </data>
   <data name="DefaultDeckName" xml:space="preserve">
-    <value>My Deck</value>
+    <value>&lt;Untitled&gt;</value>
     <comment/>
   </data>
   <data name="SetAsActiveDeck" xml:space="preserve">
@@ -317,7 +317,39 @@
     <comment/>
   </data>
   <data name="CopyToClipboard" xml:space="preserve">
-    <value>Copied to the clipboard</value>
+    <value>Sharing Code copied to the clipboard</value>
+    <comment/>
+  </data>
+  <data name="Paste" xml:space="preserve">
+    <value>Paste</value>
+    <comment/>
+  </data>
+  <data name="ImportDeck_Title" xml:space="preserve">
+    <value>Use Sharing Code to import deck</value>
+    <comment/>
+  </data>
+  <data name="ImportDeck_Placeholder" xml:space="preserve">
+    <value>Please enter Sharing Code</value>
+    <comment/>
+  </data>
+  <data name="EditDeckName_Title" xml:space="preserve">
+    <value>Edit Deck Name</value>
+    <comment/>
+  </data>
+  <data name="InvalidSharingCode_Title" xml:space="preserve">
+    <value>Failed to import the Sharing Code</value>
+    <comment/>
+  </data>
+  <data name="InvalidSharingCode_Message" xml:space="preserve">
+    <value>Invalid Sharing Code: </value>
+    <comment/>
+  </data>
+  <data name="SetAsActiveSuccess_Title" xml:space="preserve">
+    <value>Success</value>
+    <comment/>
+  </data>
+  <data name="SetAsActiveSuccess_Message" xml:space="preserve">
+    <value>Current Active Deck: </value>
     <comment/>
   </data>
 </root>

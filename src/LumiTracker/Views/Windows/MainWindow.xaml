@@ -74,7 +74,8 @@
             </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
-        <ContentPresenter x:Name="RootContentDialog" Grid.Row="1" />
+        <ContentPresenter x:Name="MainContentDialog"    Grid.Row="1" />
+        <ContentPresenter x:Name="ClosingContentDialog" Grid.Row="1" />
 
         <tray:NotifyIcon
             x:Name="TrayIcon"

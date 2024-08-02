@@ -9,6 +9,7 @@ using LumiTracker.Views.Pages;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Wpf.Ui.Extensions;
+using LumiTracker.Services;
 
 namespace LumiTracker.Views.Windows
 {
@@ -20,18 +21,18 @@ namespace LumiTracker.Views.Windows
 
         private readonly IPageService _pageService;
 
-        private readonly IContentDialogService _contentDialogService;
-
         private readonly ISnackbarService _snackbarService;
+
+        private readonly StyledContentDialogService _contentDialogService;
 
         private Task? _ShowClosingDialog = null;
 
         public MainWindow(
-            MainWindowViewModel   viewModel,
-            IPageService          pageService,
-            INavigationService    navigationService,
-            IContentDialogService contentDialogService,
-            ISnackbarService      snackbarService
+            MainWindowViewModel        viewModel,
+            IPageService               pageService,
+            INavigationService         navigationService,
+            ISnackbarService           snackbarService,
+            StyledContentDialogService contentDialogService
         )
         {
             SourceInitialized += MainWindow_SourceInitialized;
@@ -48,7 +49,7 @@ namespace LumiTracker.Views.Windows
 
             SetPageService(pageService);
             navigationService.SetNavigationControl(RootNavigation);
-            contentDialogService.SetDialogHost(RootContentDialog);
+            contentDialogService.SetDialogHosts(MainContentDialog, ClosingContentDialog);
             snackbarService.SetSnackbarPresenter(SnackbarPresenter);
 
             _pageService = pageService;
@@ -117,9 +118,7 @@ namespace LumiTracker.Views.Windows
             
             if (Configuration.Get<bool>("show_closing_dialog"))
             {
-                var closingDialog = new ClosingDialog();
-                closingDialog.DataContext = this;
-                _ShowClosingDialog = OnShowClosingDialog(closingDialog);
+                _ShowClosingDialog = OnShowClosingDialog();
             }
             else
             {
@@ -135,32 +134,16 @@ namespace LumiTracker.Views.Windows
             Application.Current.Shutdown();
         }
 
-        private async Task OnShowClosingDialog(ClosingDialog content)
+        private async Task OnShowClosingDialog()
         {
             try
             {
-                // Init
-                content.MinimizeButton.IsChecked     = (Configuration.Get<EClosingBehavior>("closing_behavior") == EClosingBehavior.Minimize);
-                content.QuitButton.IsChecked         = !content.MinimizeButton.IsChecked;
-                content.NotShowAgainButton.IsChecked = false;
-
-                // Show Closing dialog
-                ContentDialogResult result = await _contentDialogService.ShowSimpleDialogAsync(
-                    new SimpleContentDialogCreateOptions()
-                    {
-                        Content           = content,
-                        Title             = LocalizationSource.Instance["ClosingDialogTitle"],
-                        PrimaryButtonText = LocalizationSource.Instance["OK"],
-                        CloseButtonText   = LocalizationSource.Instance["Cancel"],
-                    }
-                );
+                var (result, MinimizeChecked, NotShowAgainChecked) = await _contentDialogService.ShowClosingDialogAsync();
                 bool PressedOK = (result == ContentDialogResult.Primary);
 
                 // Save to config
-                Configuration.Set("closing_behavior", 
-                    (content.MinimizeButton.IsChecked ?? false) ? "Minimize" : "Quit", 
-                    auto_save: false);
-                if (PressedOK && (content.NotShowAgainButton.IsChecked ?? false))
+                Configuration.Set("closing_behavior", MinimizeChecked ? "Minimize" : "Quit", auto_save: false);
+                if (PressedOK && NotShowAgainChecked)
                 {
                     Configuration.Set("show_closing_dialog", false, auto_save: false);
                 }
