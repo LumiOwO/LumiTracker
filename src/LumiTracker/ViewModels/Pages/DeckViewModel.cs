@@ -49,22 +49,10 @@ namespace LumiTracker.ViewModels.Pages
         [JsonIgnore]
         [ObservableProperty]
         private Brush _textColor = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
-
-        [JsonIgnore]
-        [ObservableProperty]
-        private Visibility _iconVisibility = Visibility.Collapsed;
     }
 
     public partial class DeckList : ObservableObject
     {
-        [JsonIgnore]
-        [ObservableProperty]
-        private int _selectedIndex = -1;
-
-        [JsonIgnore]
-        [ObservableProperty]
-        private string _selectedDeckName = "";
-
         [JsonProperty("active")]
         [ObservableProperty]
         private int _activeIndex = -1;
@@ -79,13 +67,11 @@ namespace LumiTracker.ViewModels.Pages
             {
                 DeckInfos[oldValue].TextWeight     = FontWeights.Light;
                 DeckInfos[oldValue].TextColor      = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
-                DeckInfos[oldValue].IconVisibility = Visibility.Collapsed;
             }
             if (newValue >= 0)
             {
                 DeckInfos[newValue].TextWeight     = FontWeights.Bold;
                 DeckInfos[newValue].TextColor      = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
-                DeckInfos[newValue].IconVisibility = Visibility.Visible;
             }
         }
     }
@@ -145,6 +131,17 @@ namespace LumiTracker.ViewModels.Pages
         private DeckList _userDeckList = new ();
 
         [ObservableProperty]
+        private int _selectedDeckIndex = -1;
+
+        [ObservableProperty]
+        private string _selectedDeckName = "";
+
+        partial void OnSelectedDeckIndexChanged(int oldValue, int newValue)
+        {
+            Select(newValue);
+        }
+
+        [ObservableProperty]
         private ControlButton[] _buttons = new ControlButton[(int)EControlButtonType.NumControlButtons];
 
         private static readonly string UserDecksDescPath = Path.Combine(
@@ -188,6 +185,17 @@ namespace LumiTracker.ViewModels.Pages
 
         private void Select(int index)
         {
+            ///////////////////////
+            // Check index
+            bool valid = (index >= 0);
+            for (EControlButtonType i = 0; i <= EControlButtonType.SelectedDeckOperationLast; i++)
+            {
+                Buttons[(int)i].IsEnabled = valid;
+            }
+            if (!valid) return;
+
+            ///////////////////////
+            // Decode share code
             DeckInfo info = UserDeckList.DeckInfos[index];
             string sharecode = info.ShareCode;
             int[]? cards = DeckUtils.DecodeShareCode(sharecode);
@@ -197,8 +205,7 @@ namespace LumiTracker.ViewModels.Pages
                 return;
             }
             info.ShareCode = sharecode;
-            UserDeckList.SelectedIndex = index;
-            UserDeckList.SelectedDeckName = info.Name;
+            SelectedDeckName = info.Name;
 
             ///////////////////////
             // Avatars
@@ -234,16 +241,6 @@ namespace LumiTracker.ViewModels.Pages
             CurrentDeck = currentDeck;
         }
 
-        [RelayCommand]
-        public void OnSelectedDeckChanged(int selectedIndex)
-        {
-            bool valid = (selectedIndex >= 0);
-            for (EControlButtonType i = 0; i <= EControlButtonType.SelectedDeckOperationLast; i++)
-            {
-                Buttons[(int)i].IsEnabled = valid;
-            }
-            Select(selectedIndex);
-        }
 
         [RelayCommand]
         private void OnSetAsActiveDeckClicked()

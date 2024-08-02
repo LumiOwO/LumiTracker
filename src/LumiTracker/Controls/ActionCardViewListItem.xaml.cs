@@ -20,7 +20,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty ItemWidthProperty = DependencyProperty.Register(
-            "ItemWidth", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(null));
+            "ItemWidth", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(1.0));
 
         public double ItemWidth
         {
@@ -29,7 +29,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty ItemHeightProperty = DependencyProperty.Register(
-            "ItemHeight", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(null));
+            "ItemHeight", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(1.0));
 
         public double ItemHeight
         {
@@ -38,7 +38,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty CostFontSizeProperty = DependencyProperty.Register(
-            "CostFontSize", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(null));
+            "CostFontSize", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(1.0));
 
         public double CostFontSize
         {
@@ -47,7 +47,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty NameFontSizeProperty = DependencyProperty.Register(
-            "NameFontSize", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(null));
+            "NameFontSize", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(1.0));
 
         public double NameFontSize
         {
@@ -56,7 +56,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty CountVisibilityProperty = DependencyProperty.Register(
-            "CountVisibility", typeof(Visibility), typeof(ActionCardViewListItem), new PropertyMetadata(null));
+            "CountVisibility", typeof(Visibility), typeof(ActionCardViewListItem), new PropertyMetadata(Visibility.Visible));
 
         public Visibility CountVisibility
         {
@@ -65,7 +65,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty CountFontSizeProperty = DependencyProperty.Register(
-            "CountFontSize", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(null));
+            "CountFontSize", typeof(double), typeof(ActionCardViewListItem), new PropertyMetadata(1.0));
 
         public double CountFontSize
         {

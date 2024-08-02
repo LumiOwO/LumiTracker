@@ -30,7 +30,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty WindowHeightProperty = DependencyProperty.Register(
-            "WindowHeight", typeof(double), typeof(DeckWindowCardListTab), new PropertyMetadata(null));
+            "WindowHeight", typeof(double), typeof(DeckWindowCardListTab), new PropertyMetadata(1.0));
 
         public double WindowHeight
         {
@@ -39,7 +39,7 @@ namespace LumiTracker.Controls
         }
 
         public static readonly DependencyProperty WindowWidthProperty = DependencyProperty.Register(
-            "WindowWidth", typeof(double), typeof(DeckWindowCardListTab), new PropertyMetadata(null));
+            "WindowWidth", typeof(double), typeof(DeckWindowCardListTab), new PropertyMetadata(1.0));
 
         public double WindowWidth
         {

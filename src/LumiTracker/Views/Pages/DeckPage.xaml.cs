@@ -16,12 +16,12 @@ namespace LumiTracker.Views.Pages
             DataContext = this;
 
             // Hide selected color of list view
-            this.Resources["ListViewItemPillFillBrush"] = new SolidColorBrush(Color.FromArgb(0x00, 0x00, 0x00, 0x00));
+            //Resources["ListViewItemBackgroundPointerOver"] = new SolidColorBrush(Color.FromArgb(0x00, 0x00, 0x00, 0x00));
 
             InitializeComponent();
         }
 
-        private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void OnCardsListClicked(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
         }

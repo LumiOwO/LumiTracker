@@ -15,9 +15,9 @@ namespace LumiTracker.Helpers
             if (value is double size && parameter is string ratioStr)
             {
                 double.TryParse(ratioStr, out double ratio);
-                return size * ratio;
+                return Math.Max(size * ratio, 1.0);
             }
-            return value;
+            return 1.0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -32,10 +32,10 @@ namespace LumiTracker.Helpers
         {
             if (values == null || values.Length != 2 || !(values[0] is double size) || !(values[1] is double ratio))
             {
-                return -1;
+                return 1.0;
             }
 
-            return size * ratio;
+            return Math.Max(size * ratio, 1.0);
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
