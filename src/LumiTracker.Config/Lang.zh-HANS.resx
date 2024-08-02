@@ -364,4 +364,8 @@
     <value>牌组名称：</value>
     <comment/>
   </data>
+  <data name="None" xml:space="preserve">
+    <value>无</value>
+    <comment/>
+  </data>
 </root>

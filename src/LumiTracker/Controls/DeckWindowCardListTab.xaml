@@ -18,6 +18,7 @@
         <helpers:SizeWithRatioVariableConverter x:Key="SizeWithRatioVariableConverter" />
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <helpers:MultiBooleanAndToVisibilityConverter x:Key="MultiBooleanAndToVisibilityConverter" />
+        <helpers:GetActiveDeckNameConverter x:Key="GetActiveDeckNameConverter" />
 
         <SolidColorBrush 
             x:Key="MainContentBackground"
@@ -94,7 +95,7 @@
                     }"
             FontSize="{Binding WindowHeight, 
                     Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=0.012
+                    ConverterParameter=0.015
                     }"
             >
             <Run 
@@ -113,20 +114,38 @@
             Margin="0, 5, 0, 5"
             HorizontalAlignment="Center"
             VerticalAlignment="Stretch"
+            TextWrapping="NoWrap"
+            TextTrimming="CharacterEllipsis"
             Visibility="{Binding ViewModel.GameNotStarted,
                     Converter={StaticResource BooleanToVisibilityConverter},
                     ConverterParameter=Hidden
                     }"
             FontSize="{Binding WindowHeight, 
                     Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=0.012
+                    ConverterParameter=0.015
+                    }"
+            MaxWidth="{Binding WindowWidth, 
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.9
                     }"
             >
             <Run 
-                Foreground="DarkGray"
+                Foreground="White"
                 FontWeight="Light"
-                Text="{svs:Localization GameNotStarted}"
+                Text="{svs:Localization SetAsActiveSuccess_Message}"
             />
+            <Run 
+                Foreground="#f9ca24"
+                FontWeight="Bold"
+            >
+                <Run.Text>
+                    <MultiBinding Converter="{StaticResource GetActiveDeckNameConverter}" >
+                        <Binding Path="ViewModel.DeckViewModel.UserDeckList.DeckInfos" />
+                        <Binding Path="ViewModel.DeckViewModel.UserDeckList.ActiveIndex" />
+                        <Binding Path="ViewModel.DeckViewModel.SelectedDeckName" />
+                    </MultiBinding>
+                </Run.Text>
+            </Run>
         </TextBlock>
     </Grid>
 </UserControl>

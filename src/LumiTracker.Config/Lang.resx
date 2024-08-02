@@ -360,4 +360,8 @@
     <value>Deck Name: </value>
     <comment/>
   </data>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
+    <comment/>
+  </data>
 </root>
