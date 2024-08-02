@@ -1,7 +1,5 @@
 ﻿using LumiTracker.ViewModels.Windows;
-using LumiTracker.Watcher;
 using Wpf.Ui;
-using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
 using LumiTracker.Config;
@@ -11,8 +9,6 @@ using LumiTracker.Views.Pages;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Wpf.Ui.Extensions;
-using Microsoft.Extensions.Options;
-using System.Threading;
 
 namespace LumiTracker.Views.Windows
 {
@@ -26,13 +22,16 @@ namespace LumiTracker.Views.Windows
 
         private readonly IContentDialogService _contentDialogService;
 
+        private readonly ISnackbarService _snackbarService;
+
         private Task? _ShowClosingDialog = null;
 
         public MainWindow(
             MainWindowViewModel   viewModel,
             IPageService          pageService,
             INavigationService    navigationService,
-            IContentDialogService contentDialogService
+            IContentDialogService contentDialogService,
+            ISnackbarService      snackbarService
         )
         {
             SourceInitialized += MainWindow_SourceInitialized;
@@ -50,9 +49,11 @@ namespace LumiTracker.Views.Windows
             SetPageService(pageService);
             navigationService.SetNavigationControl(RootNavigation);
             contentDialogService.SetDialogHost(RootContentDialog);
+            snackbarService.SetSnackbarPresenter(SnackbarPresenter);
 
             _pageService = pageService;
             _contentDialogService = contentDialogService;
+            _snackbarService = snackbarService;
 
             TrayIcon.Menu!.DataContext = this;
         }

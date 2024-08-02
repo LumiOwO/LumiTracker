@@ -316,4 +316,8 @@
     <value>Github</value>
     <comment/>
   </data>
+  <data name="CopyToClipboard" xml:space="preserve">
+    <value>Copied to the clipboard</value>
+    <comment/>
+  </data>
 </root>

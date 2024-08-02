@@ -10,6 +10,7 @@ using System.Windows.Input;
 using LumiTracker.Services;
 using System.Windows.Data;
 using Newtonsoft.Json.Linq;
+using Wpf.Ui;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -69,13 +70,13 @@ namespace LumiTracker.ViewModels.Pages
         {
             if (oldValue >= 0)
             {
-                DeckInfos[oldValue].TextWeight     = FontWeights.Light;
-                DeckInfos[oldValue].TextColor      = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
+                DeckInfos[oldValue].TextWeight = FontWeights.Light;
+                DeckInfos[oldValue].TextColor  = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
             }
             if (newValue >= 0)
             {
-                DeckInfos[newValue].TextWeight     = FontWeights.Bold;
-                DeckInfos[newValue].TextColor      = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
+                DeckInfos[newValue].TextWeight = FontWeights.Bold;
+                DeckInfos[newValue].TextColor  = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
             }
         }
     }
@@ -153,8 +154,12 @@ namespace LumiTracker.ViewModels.Pages
             "decks.json"
         );
 
-        public DeckViewModel()
+        private ISnackbarService SnackbarService;
+
+        public DeckViewModel(ISnackbarService snackbarService)
         {
+            SnackbarService = snackbarService;
+
             /////////////////////////
             // Init buttons
             Buttons[(int)EControlButtonType.SetAsActiveDeck] = new ControlButton(
@@ -185,6 +190,7 @@ namespace LumiTracker.ViewModels.Pages
             }
             UserDeckList.DeckInfos   = userDecks.DeckInfos;
             UserDeckList.ActiveIndex = userDecks.ActiveIndex;
+            SelectedDeckIndex        = userDecks.ActiveIndex;
         }
 
         private void Select(int index)
@@ -273,7 +279,17 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         private void OnShareDeckClicked()
         {
-            Configuration.Logger.LogDebug("OnShareDeckClicked");
+            var info = UserDeckList.DeckInfos[SelectedDeckIndex];
+            string shareCode = info.ShareCode;
+
+            Clipboard.SetText(shareCode);
+            SnackbarService.Show(
+                LocalizationSource.Instance["CopyToClipboard"],
+                $"{shareCode}",
+                ControlAppearance.Success,
+                new SymbolIcon(SymbolRegular.CheckmarkCircle24),
+                TimeSpan.FromSeconds(2)
+            );
         }
 
         [RelayCommand]

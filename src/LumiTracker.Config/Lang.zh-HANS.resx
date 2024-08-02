@@ -316,4 +316,8 @@
     <value>Github</value>
     <comment/>
   </data>
+  <data name="CopyToClipboard" xml:space="preserve">
+    <value>已复制到剪贴板</value>
+    <comment/>
+  </data>
 </root>

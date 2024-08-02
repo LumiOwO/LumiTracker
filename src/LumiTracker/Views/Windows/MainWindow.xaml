@@ -67,6 +67,11 @@
             d:BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
             d:TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
             >
+            <ui:NavigationView.ContentOverlay>
+                <Grid>
+                    <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
+                </Grid>
+            </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
         <ContentPresenter x:Name="RootContentDialog" Grid.Row="1" />
