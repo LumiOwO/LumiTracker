@@ -63,6 +63,25 @@ namespace LumiTracker.Config
         }
     }
 
+    public class CustomJsonTextWriter : JsonTextWriter
+    {
+        public CustomJsonTextWriter(TextWriter writer) : base(writer)
+        {
+        }
+
+        protected override void WriteIndent()
+        {
+            if (WriteState != WriteState.Array)
+            {
+                base.WriteIndent();
+            }
+            else
+            {
+                WriteIndentSpace();
+            }
+        }
+    }
+
 
     public class Configuration
     {
@@ -163,6 +182,39 @@ namespace LumiTracker.Config
             });
         }
 
+        public static bool SaveJObject(JObject jObject, string path)
+        {
+            try
+            {
+                string directoryPath = Path.GetDirectoryName(path)!;
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                using (var stringWriter = new StringWriter())
+                {
+                    var customWriter = new CustomJsonTextWriter(stringWriter)
+                    {
+                        Formatting  = Formatting.Indented,
+                        Indentation = 2,
+                        IndentChar  = ' ',
+                    };
+                    var serializer = new JsonSerializer();
+                    serializer.Serialize(customWriter, jObject);
+
+                    File.WriteAllText(path, stringWriter.ToString());
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error occurred while saving to {path} \n{ex.ToString()}");
+                return false;
+            }
+        }
+
         private static Configuration Instance
         {
             get
@@ -229,21 +281,7 @@ namespace LumiTracker.Config
                 return true;
             }
 
-            if (!Directory.Exists(ConfigDir))
-            {
-                Directory.CreateDirectory(ConfigDir);
-            }
-            try
-            {
-                string json = JsonConvert.SerializeObject(UserConfig, Formatting.Indented);
-                File.WriteAllText(UserConfigPath, json);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError("Error occurred while writing to file: " + e.Message);
-                return false;
-            }
+            return SaveJObject(UserConfig, UserConfigPath);
         }
     }
 

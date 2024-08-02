@@ -9,6 +9,7 @@ using System.IO;
 using System.Windows.Input;
 using LumiTracker.Services;
 using System.Windows.Data;
+using Newtonsoft.Json.Linq;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -37,17 +38,18 @@ namespace LumiTracker.ViewModels.Pages
 
         [JsonProperty("name")]
         [ObservableProperty]
+        [property: JsonIgnore]
         private string _name = LocalizationSource.Instance["DefaultDeckName"];
 
         [JsonProperty("characters")]
         public int[] Characters = [];
 
-        [JsonIgnore]
         [ObservableProperty]
+        [property: JsonIgnore]
         private FontWeight _textWeight = FontWeights.Light;
 
-        [JsonIgnore]
         [ObservableProperty]
+        [property: JsonIgnore]
         private Brush _textColor = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
     }
 
@@ -55,10 +57,12 @@ namespace LumiTracker.ViewModels.Pages
     {
         [JsonProperty("active")]
         [ObservableProperty]
+        [property: JsonIgnore]
         private int _activeIndex = -1;
 
         [JsonProperty("decks")]
         [ObservableProperty]
+        [property: JsonIgnore]
         private ObservableCollection<DeckInfo> _deckInfos = [];
 
         partial void OnActiveIndexChanged(int oldValue, int newValue)
@@ -241,11 +245,17 @@ namespace LumiTracker.ViewModels.Pages
             CurrentDeck = currentDeck;
         }
 
+        private void SaveDeckList()
+        {
+            Configuration.SaveJObject(JObject.FromObject(UserDeckList), UserDecksDescPath);
+        }
+
 
         [RelayCommand]
         private void OnSetAsActiveDeckClicked()
         {
-            Configuration.Logger.LogDebug("OnSetAsActiveDeckClicked");
+            UserDeckList.ActiveIndex = SelectedDeckIndex;
+            SaveDeckList();
         }
 
         [RelayCommand]
