@@ -10,11 +10,11 @@
 
 - [ ] Record cards
   - [x] My/opponent's played cards
-  - [ ] Drawn cards
+  - [x] Drawn cards
   - [ ] Discarded cards
   - [ ] Elemental Tuned cards
-  - [ ] Created cards placed into the deck
-- [ ] Import deck before the match, display remaining cards in the deck during the match
+  - [x] Created cards placed into the deck
+- [x] Import deck before the match, display remaining cards in the deck during the match
 - [x] Show Ranking
 - [x] Record current round
 - [ ] Damage calculation
@@ -44,7 +44,13 @@ Please try running the program as an administrator.
 
 ## Screenshots
 
-![image-20240607051247421](images/image-20240607051247421.png)
+- Deck Import Page
+
+![image-20240607051247421](images/Snipaste_2024-08-03_18-18-05.png)
+
+- In-Game UI
+
+![image-20240607051247421](images/Snipaste_2024-07-28_17-02-50.png)
 
 ## References
 

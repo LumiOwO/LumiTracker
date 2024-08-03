@@ -13,6 +13,7 @@ def main(publish_dir):
     reset_configs = {
         "DEBUG"               : False,
         "DEBUG_SAVE"          : False,
+        "frame_limit"         : 50,
         "lang"                : "zh-HANS",
         "closing_behavior"    : "Minimize",
         "theme"               : "Dark",

@@ -1,3 +1,17 @@
+# \[[v1.1.0](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.1.0)\] - 2024.08.03
+- 检测功能
+    - [Add] **过牌**和**向牌库新增卡牌**的检测
+- 对局界面
+    - [Add] 牌库剩余卡牌页面
+- 启动界面
+    - [Add] 牌库导入界面页面
+- 体验优化
+    - [Add] 配置文件跨版本保留（包括设置、牌组）
+    - [Add] 优化主界面的关闭流程
+    - [Mod] 调整Accent Color以及若干样式
+- Bug修复
+    - [Temp] 不区分`幻戏倒计时：3`的衍生牌
+
 # \[[v1.0.3](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.0.3)\] - 2024.07.20
 - 增加4.8版本卡牌
 - 新增选项：允许记牌器界面显示在游戏窗口外侧
