@@ -4,8 +4,14 @@
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
             xmlns:ctrls="clr-namespace:LumiTracker.Controls"
+             xmlns:helpers="clr-namespace:LumiTracker.Helpers"
             mc:Ignorable="d" 
             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <helpers:HideNegativeIntValueConverter x:Key="HideNegativeIntValueConverter" />
+    </UserControl.Resources>
+
     <Grid
         DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:ActionCardViewListItem}}"
         Opacity="{Binding Value.Opacity, Mode=OneWay}"
@@ -40,7 +46,12 @@
             VerticalAlignment="Center"
             Foreground="White"
             FontSize="{Binding CostFontSize}"
-            Text="{Binding Value.Cost, Mode=OneWay}" >
+            Text="{Binding Value.Cost, Mode=OneWay}" 
+            Visibility="{Binding Value.Cost,
+                Converter={StaticResource HideNegativeIntValueConverter},
+                ConverterParameter=Hidden
+                }"
+            >
             <TextBlock.Effect>
                 <DropShadowEffect 
                     ShadowDepth="2"

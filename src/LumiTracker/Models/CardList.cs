@@ -21,13 +21,20 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private  double  _opacity;
 
-        public ActionCardView(int card_id, int count = 1)
+        public ActionCardView(int card_id, bool inGame, int count = 1)
         {
             var info = Configuration.Database["actions"]![card_id]!;
             var cardName = info[Configuration.Get<string>("lang")]!.ToString();
             var jCost    = info["cost"]!;
             var cost     = jCost[0]!.ToObject<int>();
             var costType = jCost[1]!.ToObject<ECostType>();
+
+            // TODO: fix the temp fix for the tokens of Counting Down to 3 
+            if (inGame && card_id == 301)
+            {
+                cost     = -1;
+                cardName = "幻戏倒计时";
+            }
 
             Cost         = cost;
             CostTypeUri  = $"pack://siteoforigin:,,,/assets/images/costs/{costType.ToString()}.png";
@@ -56,9 +63,9 @@ namespace LumiTracker.Models
 
         public Dictionary<int, DateTime> Timestamps { get; private set; } = new ();
 
-        public CardList() : this(SortType.Default) { }
+        public bool InGame { get; }
 
-        public CardList(SortType sortType)
+        public CardList(bool inGame, SortType sortType = SortType.Default)
         {
             IComparer<int> comparer;
             if (sortType == SortType.TimestampDescending)
@@ -79,9 +86,10 @@ namespace LumiTracker.Models
             }
 
             Data = new ConcurrentObservableSortedDictionary<int, ActionCardView>(comparer);
+            InGame = inGame;
         }
 
-        public CardList(string shareCode, SortType sortType = SortType.Default) : this(sortType)
+        public CardList(string shareCode, bool inGame, SortType sortType = SortType.Default) : this(inGame, sortType)
         {
             int[]? cards = DeckUtils.DecodeShareCode(shareCode);
             if (cards == null)
@@ -92,7 +100,7 @@ namespace LumiTracker.Models
             Add(cards[3..]);
         }
 
-        public CardList(int[] card_ids, SortType sortType = SortType.Default) : this(sortType)
+        public CardList(int[] card_ids, bool inGame, SortType sortType = SortType.Default) : this(inGame, sortType)
         {
             Add(card_ids);
         }
@@ -126,7 +134,7 @@ namespace LumiTracker.Models
                 }
                 else
                 {
-                    pairsToUpdate.Add(card_id, new ActionCardView(card_id));
+                    pairsToUpdate.Add(card_id, new ActionCardView(card_id, InGame));
                 }
             }
 

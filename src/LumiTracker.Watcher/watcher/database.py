@@ -234,6 +234,11 @@ class ActionCardHandler:
 
         feature = self.ExtractCardFeature()
         card_id, dist = db.SearchByFeature(feature, EAnnType.ACTIONS)
+
+        # TODO: fix the temp fix for the tokens of Counting Down to 3 
+        # 319, 320, 321 -> 301
+        if card_id == 319 or card_id == 320 or card_id == 321:
+            card_id = 301
         
         return card_id, dist
     

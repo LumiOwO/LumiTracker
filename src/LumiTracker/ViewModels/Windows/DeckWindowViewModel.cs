@@ -75,26 +75,26 @@ namespace LumiTracker.ViewModels.Windows
 
         private void Reset(bool gameStart)
         {
-            MyActionCardsPlayed = new CardList(CardList.SortType.TimestampDescending);
-            OpActionCardsPlayed = new CardList(CardList.SortType.TimestampDescending);
+            MyActionCardsPlayed = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
+            OpActionCardsPlayed = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
             Round = 0;
             GameStarted = gameStart;
             if (gameStart)
             {
                 if (DeckViewModel.UserDeckList.ActiveIndex < 0)
                 {
-                    MyDeck = new();
+                    MyDeck = new CardList(inGame: true);
                 }
                 else
                 {
                     int activeIndex = DeckViewModel.UserDeckList.ActiveIndex;
                     string sharecode = DeckViewModel.UserDeckList.DeckInfos[activeIndex].ShareCode;
-                    MyDeck = new CardList(sharecode);
+                    MyDeck = new CardList(sharecode, inGame: true);
                 }
             }
             else
             {
-                MyDeck = new ();
+                MyDeck = new CardList(inGame: true);
             }
         }
 
