@@ -454,9 +454,7 @@ namespace LumiTracker.ViewModels.Pages
                 return;
             }
 
-            var result = await ContentDialogService.ShowDeleteConfirmDialogAsync(
-                SelectedDeckName
-            );
+            var result = await ContentDialogService.ShowDeleteConfirmDialogAsync(SelectedDeckName);
 
             if (result == ContentDialogResult.Primary)
             {

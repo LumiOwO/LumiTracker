@@ -35,8 +35,9 @@ namespace LumiTracker.Services
                 Title   = LocalizationSource.Instance["ClosingDialogTitle"],
                 PrimaryButtonText = LocalizationSource.Instance["OK"],
                 CloseButtonText   = LocalizationSource.Instance["Cancel"],
-                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.CheckmarkCircle24),
-                CloseButtonIcon   = new SymbolIcon(SymbolRegular.DismissCircle24),
+                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
+                CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24),
+                PrimaryButtonAppearance = ControlAppearance.Info,
             };
             ContentDialogResult result = await ClosingService.ShowAsync(dialog, default);
 
@@ -61,9 +62,10 @@ namespace LumiTracker.Services
                 PrimaryButtonText   = LocalizationSource.Instance["OK"],
                 SecondaryButtonText = LocalizationSource.Instance["Paste"],
                 CloseButtonText     = LocalizationSource.Instance["Cancel"],
-                PrimaryButtonIcon   = new SymbolIcon(SymbolRegular.CheckmarkCircle24),
+                PrimaryButtonIcon   = new SymbolIcon(SymbolRegular.Checkmark24),
                 SecondaryButtonIcon = new SymbolIcon(SymbolRegular.ClipboardPaste24),
-                CloseButtonIcon     = new SymbolIcon(SymbolRegular.DismissCircle24),
+                CloseButtonIcon     = new SymbolIcon(SymbolRegular.Dismiss24),
+                PrimaryButtonAppearance = ControlAppearance.Info,
             };
             dialog.ButtonClicked += (ContentDialog sender, ContentDialogButtonClickEventArgs args) =>
             {
@@ -98,8 +100,9 @@ namespace LumiTracker.Services
                 Content = content,
                 PrimaryButtonText = LocalizationSource.Instance["OK"],
                 CloseButtonText   = LocalizationSource.Instance["Cancel"],
-                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.CheckmarkCircle24),
-                CloseButtonIcon   = new SymbolIcon(SymbolRegular.DismissCircle24),
+                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Delete24),
+                CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24),
+                PrimaryButtonAppearance = ControlAppearance.Danger,
             };
             ContentDialogResult result = await MainService.ShowAsync(dialog, default);
 

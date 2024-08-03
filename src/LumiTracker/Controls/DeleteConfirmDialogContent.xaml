@@ -30,7 +30,7 @@
         <Run 
             x:Name="TextMain"
             FontWeight="Bold"
-            Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+            Foreground="Red"
             d:Text="Main"/>
     </TextBlock>
 </UserControl>
