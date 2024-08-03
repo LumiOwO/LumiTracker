@@ -216,6 +216,8 @@ class CardFlowTask(TaskBase):
             self.center_crop.top  : self.center_crop.bottom, 
             self.center_crop.left : self.center_crop.right
         ]
+        if cfg.DEBUG:
+            self.center_buffer = center_buffer
 
         # Convert to grayscale
         gray = cv2.cvtColor(center_buffer, cv2.COLOR_BGR2GRAY)
@@ -249,7 +251,7 @@ class CardFlowTask(TaskBase):
         MERGED_W_MIN = self.center_crop.width  * 0.1
         MERGED_W_MAX = self.center_crop.width  * 0.2
         MERGED_H_MIN = self.center_crop.height * 0.95
-        MERGE_DIST   = self.center_crop.width  * 0.15
+        MERGE_DIST   = self.center_crop.width  * 0.14
         def ValidMergedBox(bbox):
             return bbox.width > MERGED_W_MIN and bbox.width < MERGED_W_MAX and bbox.height > MERGED_H_MIN
 
@@ -294,7 +296,6 @@ class CardFlowTask(TaskBase):
                 bboxes = []
 
         if cfg.DEBUG:
-            self.center_buffer = center_buffer
             self.thresh = thresh
             self.bboxes = bboxes
             self.gray = gray

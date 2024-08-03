@@ -146,7 +146,7 @@ class CropBox:
     def height(self):
         return self.bottom - self.top
     
-    def __str__(self):
+    def __repr__(self):
         return f"CropBox(left={self.left}, top={self.top}, right={self.right}, bottom={self.bottom})"
 
     def Merge(self, other):

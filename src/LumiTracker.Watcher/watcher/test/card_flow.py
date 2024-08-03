@@ -1,7 +1,7 @@
 from ..config import cfg
 cfg.DEBUG = True
 
-from ..enums import ERatioType
+from ..regions import GetRatioType
 from ..frame_manager import FrameManager
 
 import logging
@@ -19,16 +19,29 @@ def image():
     task = frame_manager.card_flow_task
     frame_manager.round = 1
 
-    image_path = 'temp/Snipaste_2024-07-14_22-08-36.png'
+    image_path = 'temp/Snipaste_2024-08-03_15-42-23.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
     height, width = image.shape[:2]
-    print(width, height)
-    task.OnResize(width, height, ERatioType.E16_9)
+    ratio_type = GetRatioType(width, height)
+    print(width, height, ratio_type)
+    task.OnResize(width, height, ratio_type)
 
     task.frame_buffer = image
     task.Tick(frame_manager)
+    print("Detected:")
+    for num, recorder in enumerate(task.card_recorder):
+        res = ""
+        for i in range(num):
+            if i > 0:
+                res += ", "
+            if not recorder[i]:
+                res += "____"
+            else:
+                card_id = next(iter(recorder[i].keys()))
+                res += frame_manager.db["actions"][card_id]["zh-HANS"] if card_id >= 0 else "None"
+        print(f"{num}: {res}")
 
     dst = task.frame_buffer
     # dst = cv2.cvtColor(task.my_deck_edges, cv2.COLOR_GRAY2BGRA)

@@ -1,9 +1,9 @@
 import time
 import logging
 
-from .config import cfg, LogDebug, LogInfo, LogWarning
+from .config import cfg, LogDebug, LogWarning
+from .regions import GetRatioType
 from .database import Database
-from .enums import ETaskType, ERatioType
 from .tasks import GameStartTask, CardPlayedTask, GameOverTask, RoundTask, CardFlowTask
 
 class FrameManager:
@@ -39,25 +39,7 @@ class FrameManager:
             return
 
         # Update ratio
-        ratio = client_width / client_height
-        EPSILON = 0.005
-        if   abs( ratio - 16 / 9 ) < EPSILON:
-            ratio_type = ERatioType.E16_9
-        elif abs( ratio - 16 / 10) < EPSILON:
-            ratio_type = ERatioType.E16_10
-        elif abs( ratio - 64 / 27) < EPSILON:
-            ratio_type = ERatioType.E64_27
-        elif abs( ratio - 43 / 18) < EPSILON:
-            ratio_type = ERatioType.E43_18
-        elif abs( ratio - 12 / 5 ) < EPSILON:
-            ratio_type = ERatioType.E12_5
-        else:
-            LogInfo(
-                type=ETaskType.UNSUPPORTED_RATIO.name, 
-                client_width=client_width, 
-                client_height=client_height,
-                )
-            ratio_type = ERatioType.E16_9 # default
+        ratio_type = GetRatioType(client_width, client_height)
         
         for task in self.tasks:
             task.OnResize(client_width, client_height, ratio_type)
