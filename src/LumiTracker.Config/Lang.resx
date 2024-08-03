@@ -236,6 +236,10 @@
     <value>This software is open-source and completely free. If you paid for it, you have been scammed!</value>
     <comment/>
   </data>
+  <data name="SafeDeclaration" xml:space="preserve">
+    <value>This software works with computer vision and does not involve any reading or modification of the game's internal memory data.</value>
+    <comment/>
+  </data>
   <data name="UnsupportedRatioWarning" xml:space="preserve">
     <value>Current resolution of game window is not supported.</value>
     <comment/>

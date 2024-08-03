@@ -28,16 +28,22 @@
         <TextBlock 
             Margin="5,20,0,2" 
             Text="{svs:Localization FreeDeclaration}" 
-            FontSize="18"
+            FontSize="17"
             FontWeight="Bold"
+            />
+
+        <TextBlock 
+            Margin="5,20,0,2" 
+            Text="{svs:Localization SafeDeclaration}" 
+            FontSize="17"
             />
 
         <ui:HyperlinkButton
             Margin="-1, 40, 0, 0"
             Padding="5"
             Content="{svs:Localization DocumentationLink}"
-            NavigateUri="https://github.com/LumiOwO/LumiTracker"
-            ToolTip="https://github.com/LumiOwO/LumiTracker" />
+            NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe"
+            ToolTip="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe" />
 
         <ui:HyperlinkButton
             Margin="-1, 0, 0, 0"

@@ -236,6 +236,10 @@
     <value>此软件为开源软件，并且完全免费。如果你是付费获得的，说明你被骗了！</value>
     <comment/>
   </data>
+  <data name="SafeDeclaration" xml:space="preserve">
+    <value>工作原理基于计算机视觉，不涉及任何对游戏本体内存数据的读取和修改。</value>
+    <comment/>
+  </data>
   <data name="UnsupportedRatioWarning" xml:space="preserve">
     <value>当前游戏窗口的分辨率暂时不受支持。</value>
     <comment/>

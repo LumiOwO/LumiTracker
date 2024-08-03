@@ -141,5 +141,14 @@
             VerticalAlignment="Center"
             Grid.Column="0" />
 
+        <ui:HyperlinkButton
+            Margin="-1, 40, 0, 0"
+            Padding="5"
+            Content="{svs:Localization DocumentationLink}"
+            NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe"
+            ToolTip="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe" 
+            >
+        </ui:HyperlinkButton>
+
     </StackPanel>
 </Page>
