@@ -2,7 +2,7 @@
 
 <a href="https://dotnet.microsoft.com/en-us/download/dotnet/latest/runtime"><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-blue?logo=windowsxp&style=flat-square&color=1E9BFA" /></a>
 
-[中文](README.md) | English
+[中文](README.md) | English | [Documentation](https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe)
 
 # ** English card names are on the way!! **
 

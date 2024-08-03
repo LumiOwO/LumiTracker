@@ -3,7 +3,7 @@
 
 <a href="https://dotnet.microsoft.com/zh-cn/download/dotnet/latest/runtime"><img alt="Windows" src="https://img.shields.io/badge/platform-Windows-blue?logo=windowsxp&style=flat-square&color=1E9BFA" /></a>
 
-中文 | [English](README_en.md)
+中文 | [English](README_en.md) | [说明文档](https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe)
 
 ## 功能
 
