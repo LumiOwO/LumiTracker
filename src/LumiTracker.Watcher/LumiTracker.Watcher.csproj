@@ -1,13 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Platforms>AnyCPU;x64</Platforms>
-    <BaseOutputPath>$(SolutionDir)\bin</BaseOutputPath>
-    <Version>$(OutputPath)</Version>
-    <PackageId>$(OutputPath)</PackageId>
+    <Version>$(VersionNumber)</Version>
+    <PackageId>LumiTracker.Watcher</PackageId>
     <Title></Title>
     <Description></Description>
     <PackageOutputPath>$(TargetDir)</PackageOutputPath>

@@ -1,0 +1,33 @@
+<Project>
+  <PropertyGroup>
+    <VersionNumber>1.1.0</VersionNumber>
+
+    <AssemblyVersion>$(VersionNumber)</AssemblyVersion>
+    <FileVersion>$(VersionNumber)</FileVersion>
+    <InformationalVersion>$(VersionNumber)</InformationalVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <!-- Debug configuration for AnyCPU -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>$(SolutionDir)bin\Debug\LumiTrackApp-$(AssemblyVersion)\</OutputPath>
+  </PropertyGroup>
+
+  <!-- Release configuration for AnyCPU -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>$(SolutionDir)bin\Release\LumiTrackApp-$(AssemblyVersion)\</OutputPath>
+  </PropertyGroup>
+
+  <!-- Debug configuration for x64 -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutputPath>$(SolutionDir)bin\x64\Debug\LumiTrackApp-$(AssemblyVersion)\</OutputPath>
+  </PropertyGroup>
+
+  <!-- Release configuration for x64 -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutputPath>$(SolutionDir)bin\x64\Release\LumiTrackApp-$(AssemblyVersion)\</OutputPath>
+  </PropertyGroup>
+</Project>
+

@@ -2,18 +2,15 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\LumiTracker.ico</ApplicationIcon>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Platforms>AnyCPU;x64</Platforms>
-    <BaseOutputPath>$(SolutionDir)\bin</BaseOutputPath>
-    <AssemblyVersion>1.1.0</AssemblyVersion>
     <Copyright>Copyright (c) 2024 LumiOwO</Copyright>
     <Authors>LumiOwO@hotmail.com</Authors>
     <PackageProjectUrl>https://github.com/LumiOwO/LumiTracker</PackageProjectUrl>
+    <PublishDir>$(SolutionDir)publish\LumiTrackApp-$(AssemblyVersion)\</PublishDir>
   </PropertyGroup>
 
   <ItemGroup>
