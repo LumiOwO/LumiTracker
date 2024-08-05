@@ -10,7 +10,8 @@
     <Copyright>Copyright (c) 2024 LumiOwO</Copyright>
     <Authors>LumiOwO@hotmail.com</Authors>
     <PackageProjectUrl>https://github.com/LumiOwO/LumiTracker</PackageProjectUrl>
-    <PublishDir>$(SolutionDir)publish\LumiTrackApp-$(AssemblyVersion)\</PublishDir>
+    <PublishDir>$(SolutionDir)publish\LumiTrackerApp-$(AssemblyVersion)\</PublishDir>
+    <AssemblyName>LumiTrackerApp</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +32,7 @@
 
   <ItemGroup>
 	<ProjectReference Include="..\LumiTracker.Config\LumiTracker.Config.csproj" />
+	<ProjectReference Include="..\LumiTracker.Launcher\LumiTracker.Launcher.vcxproj" />
     <ProjectReference Include="..\LumiTracker.Watcher\LumiTracker.Watcher.csproj" />
   </ItemGroup>
 
@@ -54,6 +56,10 @@
 
     <Exec Command="$(SolutionDir)python\python.exe -E $(SolutionDir)dev_assets\publish_reset_config.py $(PublishDir)" />
     <Message Text="Reset published config.json successfully." Importance="high" />
+
+    <Exec Command="copy /Y $(TargetDir)..\LumiTracker.exe $(PublishDir)..\LumiTracker.exe" />
+    <Exec Command="copy /Y $(TargetDir)..\LumiTracker.ini $(PublishDir)..\LumiTracker.ini" />
+    <Exec Command="copy /Y $(TargetDir)..\Utils.bat $(PublishDir)..\Utils.bat" />
     
   </Target>
 
