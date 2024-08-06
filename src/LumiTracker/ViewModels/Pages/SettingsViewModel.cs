@@ -23,9 +23,12 @@ namespace LumiTracker.ViewModels.Pages
 
         private readonly ILocalizationService _localizationService;
 
-        public SettingsViewModel(ILocalizationService localizationService)
+        private readonly UpdateService _updateService;
+
+        public SettingsViewModel(ILocalizationService localizationService, UpdateService updateService)
         {
             _localizationService = localizationService;
+            _updateService = updateService;
         }
 
         public void OnNavigatedTo()
@@ -44,6 +47,8 @@ namespace LumiTracker.ViewModels.Pages
             CurrentTheme           = Configuration.Get<ApplicationTheme>("theme");
 
             _isInitialized = true;
+
+            Task task = _updateService.TryUpdateAsync();
         }
 
         [RelayCommand]

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\LumiTracker.ico</ApplicationIcon>
     <UseWPF>true</UseWPF>
@@ -10,7 +10,7 @@
     <Copyright>Copyright (c) 2024 LumiOwO</Copyright>
     <Authors>LumiOwO@hotmail.com</Authors>
     <PackageProjectUrl>https://github.com/LumiOwO/LumiTracker</PackageProjectUrl>
-    <PublishDir>$(SolutionDir)publish\LumiTrackerApp-$(AssemblyVersion)\</PublishDir>
+    <PublishDir>$(SolutionDir)publish\LumiTracker\LumiTrackerApp-$(AssemblyVersion)\</PublishDir>
     <AssemblyName>LumiTrackerApp</AssemblyName>
   </PropertyGroup>
 
@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2592.51" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

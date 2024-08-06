@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿global using IniSection  = System.Collections.Generic.Dictionary<string, string>;
+global using IniSettings = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>;
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -87,6 +90,8 @@ namespace LumiTracker.Config
     {
         private static readonly Lazy<Configuration> _lazyInstance = new Lazy<Configuration>(() => new Configuration());
 
+        private IniSettings _ini;
+
         private JObject _db;
 
         private JObject _defaultConfig;
@@ -98,11 +103,21 @@ namespace LumiTracker.Config
         private StreamWriter _errorWriter;
 
         // Directories
-        private static readonly string ExeDir = Path.GetDirectoryName(
+        public static readonly string AppDir = Path.GetDirectoryName(
             Assembly.GetExecutingAssembly().Location
         )!;
 
-        private static readonly string DocumentsDir = Path.Combine(
+        public static readonly string RootDir = Path.Combine(
+            AppDir,
+            ".."
+        );
+
+        public static readonly string CacheDir = Path.Combine(
+            AppDir,
+            "cache"
+        );
+
+        public static readonly string DocumentsDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "LumiTracker"
         );
@@ -112,21 +127,26 @@ namespace LumiTracker.Config
             "config"
         );
 
-        private static readonly string LogDir = Path.Combine(
+        public static readonly string LogDir = Path.Combine(
             DocumentsDir,
             "log"
         );
 
         // Files
+        public static readonly string IniFilePath = Path.Combine(
+            RootDir,
+            "LumiTracker.ini"
+        );
+
         private static readonly string DbFilePath = Path.Combine(
-            ExeDir,
+            AppDir,
             "assets",
             "database",
             "db.json"
         );
 
         private static readonly string DefaultConfigPath = Path.Combine(
-            ExeDir,
+            AppDir,
             "assets",
             "config.json"
         );
@@ -143,6 +163,7 @@ namespace LumiTracker.Config
 
         private Configuration()
         {
+            _ini            = LoadIniSettings(IniFilePath);
             _db             = LoadJObject(DbFilePath);
             _defaultConfig  = LoadJObject(DefaultConfigPath);
             if (File.Exists(UserConfigPath))
@@ -170,6 +191,37 @@ namespace LumiTracker.Config
                     ;
             });
             _logger = loggerFactory.CreateLogger<Configuration>();
+        }
+
+        private static IniSettings LoadIniSettings(string path)
+        {
+            var sections = new IniSettings();
+
+            string? currentSection = null;
+            foreach (var line in File.ReadLines(path))
+            {
+                var trimmedLine = line.Trim();
+                if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith(";")) // Skip empty lines and comments
+                    continue;
+
+                if (trimmedLine.StartsWith("[") && trimmedLine.EndsWith("]")) // Section header
+                {
+                    currentSection = trimmedLine.Trim('[', ']').Trim();
+                    if (!sections.ContainsKey(currentSection))
+                    {
+                        sections[currentSection] = new Dictionary<string, string>();
+                    }
+                }
+                else if (currentSection != null) // Key-value pair
+                {
+                    var parts = trimmedLine.Split(['='], 2);
+                    var key   = parts[0].Trim();
+                    var value = parts[1].Trim();
+                    sections[currentSection][key] = value;
+                }
+            }
+
+            return sections;
         }
 
         public static JObject LoadJObject(string path)
@@ -252,6 +304,14 @@ namespace LumiTracker.Config
             get
             {
                 return Instance._logger;
+            }
+        }
+
+        public static IniSection Ini
+        {
+            get
+            {
+                return Instance._ini["Application"];
             }
         }
 

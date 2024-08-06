@@ -50,6 +50,7 @@ namespace LumiTracker
                 services.AddSingleton<INavigationService, NavigationService>();
                 services.AddSingleton<ISnackbarService, SnackbarService>();
                 services.AddSingleton<StyledContentDialogService>();
+                services.AddSingleton<UpdateService>();
 
                 // Localization
                 services.AddSingleton<ILocalizationService, LocalizationService>();
