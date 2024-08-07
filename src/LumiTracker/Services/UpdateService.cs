@@ -8,8 +8,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Diagnostics;
 using Newtonsoft.Json;
-using System.Security.Policy;
-using System.Threading;
 
 namespace LumiTracker.Services
 {
@@ -74,12 +72,18 @@ namespace LumiTracker.Services
             downloadTestClient = new HttpClient();
             downloadTestClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
             downloadTestClient.Timeout = TimeSpan.FromSeconds(5);
+
+            // Will only do this when just updated
+            if (Configuration.Get<bool>("just_updated"))
+            {
+                CleanCacheAndOldFiles();
+            }
         }
 
         private async Task MainTask()
         {
             // Step 1: Get the latest release info from gitee
-            Configuration.Logger.LogDebug("============= [Update] Step 1 =============");
+            Configuration.Logger.LogDebug("============= [Update] Step 0 =============");
 
             var response = await mainClient.GetStringAsync(metaUrl);
             var releaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(response);
@@ -94,6 +98,10 @@ namespace LumiTracker.Services
                 Configuration.Logger.LogInformation($"[Update] Version {latestVersion} is already latest.");
                 return;
             }
+
+            // Step 1: Clear old files
+            Configuration.Logger.LogDebug("============= [Update] Step 1 =============");
+            CleanCacheAndOldFiles();
 
             // Step 2: Process meta data of packages that need to download
             Configuration.Logger.LogDebug("============= [Update] Step 2 =============");
@@ -113,7 +121,7 @@ namespace LumiTracker.Services
                     continue;
                 int lastIdx = fields.Length - 1;
                 fields[lastIdx] = fields[lastIdx].Substring(0, fields[lastIdx].Length - 4); // remove postfix (.txt)
-                Configuration.Logger.LogDebug($"============= {fields.Length} =============");
+
                 string package = fields[1];
                 string md5     = fields[2];
                 long   size    = long.Parse(fields[3]); 
@@ -462,6 +470,28 @@ namespace LumiTracker.Services
             using (FileStream destinationStream = new FileStream(destFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
             {
                 await sourceStream.CopyToAsync(destinationStream);
+            }
+        }
+
+        public void CleanCacheAndOldFiles()
+        {
+            if (Directory.Exists(Configuration.CacheDir))
+            {
+                Configuration.Logger.LogInformation($"Removing cache dir...");
+                Directory.Delete(Configuration.CacheDir, recursive: true);
+            }
+
+            Configuration.Logger.LogInformation($"Removing old version files...");
+            foreach (var directory in Directory.GetDirectories(Configuration.RootDir))
+            {
+                if (Path.GetFullPath(directory) == Path.GetFullPath(Configuration.AppDir))
+                    continue;
+                string dirName = Path.GetFileName(directory);
+                if (!dirName.StartsWith("LumiTrackerApp-"))
+                    continue;
+
+                Configuration.Logger.LogInformation($"Removing {dirName}...");
+                Directory.Delete(directory, recursive: true);
             }
         }
     }

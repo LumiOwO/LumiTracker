@@ -111,6 +111,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         return 1;
     }
 
+    std::string parameters = "just_updated";
+
+    std::string command = app + " " + parameters;
+
     // Launch the executable
     // Define the startup info structure
     STARTUPINFOA si;
@@ -128,7 +132,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     // Create the process
     BOOL success = CreateProcessA(
         NULL,                   // Application name
-        app.data(),             // Command line (process to run)
+        command.data(),         // Command line (process to run)
         NULL,                   // Process security attributes
         NULL,                   // Thread security attributes
         FALSE,                  // Inherit handles

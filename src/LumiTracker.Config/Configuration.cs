@@ -340,6 +340,11 @@ namespace LumiTracker.Config
             }
         }
 
+        public static void SetTemporal<T>(string key, T value)
+        {
+            DefaultConfig[key] = JToken.FromObject(value!);
+        }
+
         public static bool Save()
         {
             if (UserConfig.Count == 0)

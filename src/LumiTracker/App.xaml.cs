@@ -116,6 +116,11 @@ namespace LumiTracker
             // Start listening for pipe messages asynchronously
             Task.Run(() => ListenForPipeMessagesAsync());
 
+            if (e.Args.Length == 1 && e.Args[0] == "just_updated")
+            {
+                Configuration.SetTemporal("just_updated", true);
+            }
+
             _host.Start();
         }
 

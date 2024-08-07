@@ -38,5 +38,6 @@
   "theme": "Dark",
   "client_type": "YuanShen",
   "show_ui_outside": true,
-  "show_closing_dialog": false
+  "show_closing_dialog": false,
+  "just_updated": false
 }
