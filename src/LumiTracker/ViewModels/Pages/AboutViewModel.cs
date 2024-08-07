@@ -20,15 +20,9 @@ namespace LumiTracker.ViewModels.Pages
 
         public void OnNavigatedFrom() { }
 
-        private string GetAssemblyVersion()
-        {
-            Version? version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            return version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "";
-        }
-
         private void InitializeViewModel()
         {
-            AppVersion = $"{LocalizationSource.Instance["AppName"]} v{GetAssemblyVersion()}";
+            AppVersion = $"{LocalizationSource.Instance["AppName"]} v{Configuration.GetAssemblyVersion()}";
             _isInitialized = true;
         }
     }

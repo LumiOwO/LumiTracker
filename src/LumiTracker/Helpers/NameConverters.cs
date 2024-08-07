@@ -36,4 +36,17 @@ namespace LumiTracker.Helpers
             throw new NotImplementedException();
         }
     }
+
+    public class MainWindowTitleNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return $"{LocalizationSource.Instance["AppName"]} {Configuration.GetAssemblyVersion()} - {LocalizationSource.Instance["AppSubTitle"]}";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

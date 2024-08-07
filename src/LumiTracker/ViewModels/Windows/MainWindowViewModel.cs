@@ -7,11 +7,16 @@ using LumiTracker.Views.Pages;
 using Wpf.Ui.Appearance;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Data;
+using LumiTracker.Helpers;
 
 namespace LumiTracker.ViewModels.Windows
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+        [ObservableProperty]
+        private LocalizationTextItem _appTitle = new ();
+
         [ObservableProperty]
         private ObservableCollection<object>? _menuItems;
 
@@ -43,6 +48,10 @@ namespace LumiTracker.ViewModels.Windows
         public MainWindowViewModel(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+
+            var binding = LocalizationExtension.Create("AppSubTitle");
+            binding.Converter = new MainWindowTitleNameConverter();
+            BindingOperations.SetBinding(_appTitle, LocalizationTextItem.TextProperty, binding);
 
             // refresh theme
             ApplicationThemeManager.Apply(Configuration.Get<ApplicationTheme>("theme"));

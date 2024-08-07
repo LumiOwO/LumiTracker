@@ -9,7 +9,7 @@
     xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
     xmlns:svs="clr-namespace:LumiTracker.Services"
     
-    Title="{svs:Localization AppTitle}"
+    Title="{Binding ViewModel.AppTitle.Text}"
     Width="1100"
     Height="650"
     d:DataContext="{d:DesignInstance local:MainWindow,
@@ -40,7 +40,7 @@
 
         <ui:TitleBar
             x:Name="TitleBar"
-            Title="{svs:Localization AppTitle}"
+            Title="{Binding ViewModel.AppTitle.Text}"
             Grid.Row="0"
             Margin="0"
             CloseWindowByDoubleClickOnIcon="False"
@@ -83,7 +83,7 @@
             Icon="pack://application:,,,/Assets/LumiTracker.png"
             FocusOnLeftClick="True"
             MenuOnRightClick="True"
-            TooltipText="{svs:Localization AppTitle}">
+            TooltipText="{Binding ViewModel.AppTitle.Text}">
             <tray:NotifyIcon.Menu>
                 <ContextMenu ItemsSource = "{Binding ViewModel.TrayMenuItems, Mode=OneWay}" />
             </tray:NotifyIcon.Menu>

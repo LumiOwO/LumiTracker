@@ -73,8 +73,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
     HICON hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP_ICON));
 
+    std::string rootDir = lpCmdLine;
+    if (!rootDir.empty())
+    {
+        Sleep(1500);
+    }
+
     // Define the path to the .ini file
-    std::string iniFilePath = "LumiTracker.ini";
+    std::string iniFilePath = rootDir + "LumiTracker.ini";
 
     // Read and parse the .ini file
     IniData iniData = ReadIniFile(iniFilePath);
@@ -98,7 +104,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     std::string appVersion = versionIt->second;
 
     // Check if the executable exists
-    std::string app = "LumiTrackerApp-" + appVersion + "\\LumiTrackerApp.exe";
+    std::string app = rootDir + "LumiTrackerApp-" + appVersion + "\\LumiTrackerApp.exe";
     if (!fs::exists(app)) 
     {
         std::cerr << "Error: Specified executable not found." << std::endl;

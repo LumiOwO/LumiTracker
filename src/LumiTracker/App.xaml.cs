@@ -127,6 +127,10 @@ namespace LumiTracker
             await _host.StopAsync();
 
             _host.Dispose();
+
+            // Release the mutex before starting a new instance
+            mutex!.ReleaseMutex();
+            mutex!.Dispose();
         }
 
         /// <summary>

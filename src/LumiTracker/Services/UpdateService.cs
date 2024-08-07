@@ -4,13 +4,12 @@ using System.IO.Compression;
 using System.IO;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
-using System.IO.Pipes;
 using System.Security.Cryptography;
 using System.Text;
-using System.Windows.Input;
 using System.Diagnostics;
 using Newtonsoft.Json;
-using System;
+using System.Security.Policy;
+using System.Threading;
 
 namespace LumiTracker.Services
 {
@@ -25,11 +24,9 @@ namespace LumiTracker.Services
 
     class AttachMeta
     {
-        public string id { get; set; } = "";
-        public string name { get; set; } = "";
-        public long size { get; set; } = 0;
+        // gitee & github
+        public string name { get; set; } = ""; // [Notice] use .txt placeholder on gitee
         public string browser_download_url { get; set; } = "";
-
         // Not in the response body
         public bool need_update { get; set; } = false;
         public string package { get; set; } = "";
@@ -42,8 +39,8 @@ namespace LumiTracker.Services
         public string id { get; set; } = "";
         public string tag_name { get; set; } = "";
         public string body { get; set; } = "";
+        public AttachMeta[] assets { get; set; } = [];
     }
-
     
     public class UpdateService
     {
@@ -55,56 +52,80 @@ namespace LumiTracker.Services
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"An error occurred while updating.\n{ex.ToString()}");
+                Configuration.Logger.LogError($"[Update] An error occurred while updating.\n{ex.ToString()}");
             }
         }
 
-        private readonly HttpClient httpClient = new HttpClient();
+        private readonly string metaUrl = $"https://gitee.com/api/v5/repos/LumiOwO/LumiTracker/releases/latest";
+
+        private readonly string packagesUrl = $"https://github.com/LumiOwO/LumiTracker/releases/download/Packages";
+
+        private readonly HttpClient mainClient;
+        private readonly HttpClient downloadTestClient;
+
+        public UpdateService()
+        {
+            mainClient = new HttpClient();
+            mainClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
+            mainClient.Timeout = TimeSpan.FromSeconds(300);
+
+            downloadTestClient = new HttpClient();
+            downloadTestClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
+            downloadTestClient.Timeout = TimeSpan.FromSeconds(5);
+        }
 
         private async Task MainTask()
         {
-            // Step 1: Get the latest release info from GitHub
-            string releaseUrl = $"https://gitee.com/api/v5/repos/LumiOwO/LumiTracker/releases/latest";
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
+            // Step 1: Get the latest release info from gitee
+            Configuration.Logger.LogDebug("============= [Update] Step 1 =============");
 
-            var response = await httpClient.GetStringAsync(releaseUrl);
-            var releaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(response)!;
+            var response = await mainClient.GetStringAsync(metaUrl);
+            var releaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(response);
+            if (releaseMeta == null)
+            {
+                Configuration.Logger.LogWarning("[Update] Invalid release meta from http response.");
+                return;
+            }
             string latestVersion = releaseMeta.tag_name.TrimStart('v');
             if (VersionCompare(Configuration.Ini["Version"], latestVersion) >= 0)
             {
+                Configuration.Logger.LogInformation($"[Update] Version {latestVersion} is already latest.");
                 return;
             }
 
-            // Step 2: Get the meta data of packages that need to download
-            string attachsUrl = $"https://gitee.com/api/v5/repos/LumiOwO/LumiTracker/releases/{releaseMeta.id}/attach_files";
-            response = await httpClient.GetStringAsync(attachsUrl);
-            var attachMetas = JsonConvert.DeserializeObject<AttachMeta[]>(response)!;
+            // Step 2: Process meta data of packages that need to download
+            Configuration.Logger.LogDebug("============= [Update] Step 2 =============");
+
+            if (!Directory.Exists(Configuration.CacheDir))
+            {
+                Directory.CreateDirectory(Configuration.CacheDir);
+            }
+            string bestUrl = await GetBestDownloadUrl();
 
             List<AttachMeta> downloadMetas = [];
-            foreach (var attachMeta in attachMetas)
+            foreach (var attachMeta in releaseMeta.assets)
             {
                 string[] fields = attachMeta.name.Split('-');
                 if (fields.Length != 3 && fields[0] != "Package")
                     continue;
 
                 string package = fields[1];
-                string md5 = fields[2].Substring(0, fields[2].Length - 4); // remove ".zip"
+                string md5 = fields[2].Substring(0, fields[2].Length - 4); // remove postfix (.zip or .txt)
                 if (package == "Patch" || md5 != Configuration.Ini[package])
                 {
+                    attachMeta.name = $"Package-{package}-{md5}.zip";
+                    attachMeta.browser_download_url = $"{bestUrl}/{attachMeta.name}";
                     attachMeta.need_update = true;
-                    attachMeta.package     = package;
-                    attachMeta.md5         = md5;
-                    attachMeta.zip_path    = Path.Combine(Configuration.CacheDir, attachMeta.name);
+                    attachMeta.package = package;
+                    attachMeta.md5 = md5;
+                    attachMeta.zip_path = Path.Combine(Configuration.CacheDir, attachMeta.name);
 
                     downloadMetas.Add(attachMeta);
                 }
             }
 
             // Step 3: Download packages
-            if (!Directory.Exists(Configuration.CacheDir))
-            {
-                Directory.CreateDirectory(Configuration.CacheDir);
-            }
+            Configuration.Logger.LogDebug("============= [Update] Step 3 =============");
 
             string[] md5Hashs = new string[(int)EPackageType.NumPackages];
             for (EPackageType type = 0; type < EPackageType.NumPackages; type++)
@@ -112,12 +133,12 @@ namespace LumiTracker.Services
                 md5Hashs[(int)type] = Configuration.Ini[type.ToString()];
             }
 
+
             foreach (var meta in downloadMetas)
             {
                 string url = meta.browser_download_url;
-                Configuration.Logger.LogDebug($"Downloading {meta.package}: {FormatBytes(meta.size)}, {url}");
 
-                using (var downloadResponse = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+                using (var downloadResponse = await mainClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
                 {
                     downloadResponse.EnsureSuccessStatusCode();
 
@@ -126,16 +147,17 @@ namespace LumiTracker.Services
                     {
                         var buffer = new byte[8192];
                         var totalBytesRead = 0L;
-                        var totalBytes = meta.size;
-                        var stopwatch = Stopwatch.StartNew();
+                        var totalBytes = downloadResponse.Content.Headers.ContentLength ?? -1;
+                        Configuration.Logger.LogDebug($"[Update] Downloading {meta.package}: {FormatBytes(totalBytes)}, {url}");
 
+                        var stopwatch = Stopwatch.StartNew();
                         int bytesRead;
                         int logBytes = 0;
                         while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
                             await fileStream.WriteAsync(buffer, 0, bytesRead);
                             totalBytesRead += bytesRead;
-                            logBytes       += bytesRead;
+                            logBytes += bytesRead;
                             if (stopwatch.Elapsed.TotalSeconds >= 1)
                             {
                                 // Calculate progress
@@ -143,10 +165,10 @@ namespace LumiTracker.Services
 
                                 // Calculate download speed
                                 var elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
-                                var downloadSpeed  = logBytes / (elapsedSeconds + 1e-5);
+                                var downloadSpeed = logBytes / (elapsedSeconds + 1e-5);
 
                                 // Print progress and speed
-                                Configuration.Logger.LogDebug($"Downloaded {totalBytesRead} of {totalBytes} bytes ({progress:0.00}%) - Speed: {FormatBytes(downloadSpeed)}/s");
+                                Configuration.Logger.LogDebug($"[Update] Downloaded {totalBytesRead} of {totalBytes} bytes ({progress:0.00}%) - Speed: {FormatBytes(downloadSpeed)}/s");
 
                                 logBytes = 0;
                                 stopwatch.Restart();
@@ -161,16 +183,18 @@ namespace LumiTracker.Services
                 // Check if the computed hash matches the expected hash
                 if (!md5Hash.Equals(meta.md5, StringComparison.OrdinalIgnoreCase))
                 {
-                    Configuration.Logger.LogError($"Package {meta.package} downloaded failed. md5 hash {md5Hash} does not match the expected value {meta.md5}.");
+                    Configuration.Logger.LogError($"[Update] Package {meta.package} downloaded failed. md5 hash {md5Hash} does not match the expected value {meta.md5}.");
                     return;
                 }
 
-                Configuration.Logger.LogDebug($"Package {meta.package} downloaded, md5: {md5Hash}");
+                Configuration.Logger.LogDebug($"[Update] Package {meta.package} downloaded, md5: {md5Hash}");
                 EPackageType type = Enum.Parse<EPackageType>(meta.package);
                 md5Hashs[(int)type] = md5Hash;
             }
 
             // Step 4: Unzip packages
+            Configuration.Logger.LogDebug("============= [Update] Step 4 =============");
+
             string dstDir = Path.Combine(Configuration.RootDir, "LumiTrackerApp-" + latestVersion);
             foreach (var meta in downloadMetas)
             {
@@ -187,10 +211,12 @@ namespace LumiTracker.Services
                 }
 
                 ZipFile.ExtractToDirectory(meta.zip_path, upzip_path);
-                Configuration.Logger.LogDebug($"Extracted package {meta.package} to: {upzip_path}");
+                Configuration.Logger.LogDebug($"[Update] Extracted package {meta.package} to: {upzip_path}");
             }
 
             // Step 5: Update ini file
+            Configuration.Logger.LogDebug("============= [Update] Step 5 =============");
+
             using (StreamWriter writer = new StreamWriter(Configuration.IniFilePath))
             {
                 writer.WriteLine("[Application]");
@@ -202,10 +228,14 @@ namespace LumiTracker.Services
             }
 
             // Step 6: Restart
+            Configuration.Logger.LogDebug("============= [Update] Step 6 =============");
+
             string launcherPath = Path.Combine(Configuration.RootDir, "LumiTracker.exe");
+            Configuration.Logger.LogDebug(launcherPath);
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName        = launcherPath,
+                Arguments       = Configuration.RootDir + "\\",
                 UseShellExecute = false,  // Required to set CreateNoWindow to true
                 CreateNoWindow  = true,   // Hides the console window
             };
@@ -214,10 +244,87 @@ namespace LumiTracker.Services
             process.StartInfo = startInfo;
             if (!process.Start())
             {
-                Configuration.Logger.LogError("Failed to Restart.");
+                Configuration.Logger.LogError("[Update] Failed to Restart app.");
                 return;
             }
             Application.Current.Shutdown();
+        }
+
+
+        private readonly string[] ghPrefixs = [
+            "https://mirror.ghproxy.com/",
+            "https://github.abskoop.workers.dev/",
+            "https://gh-proxy.com/",
+            "https://github.moeyy.xyz/",
+        ];
+
+        private async Task<string> GetBestDownloadUrl()
+        {
+            double max_speed = 0.0;
+            string bestPrefix = "";
+            string url = $"{packagesUrl}/DownloadTest";
+
+            var tasks = new Task<double>[ghPrefixs.Length];
+            for (int i = 0; i < ghPrefixs.Length; i++)
+            {
+                tasks[i] = DownloadSpeedTest(ghPrefixs[i] + url);
+            }
+            var speeds = await Task.WhenAll(tasks);
+
+            for (int i = 0; i < ghPrefixs.Length; i++)
+            {
+                if (speeds[i] > max_speed)
+                {
+                    max_speed  = speeds[i];
+                    bestPrefix = ghPrefixs[i];
+                }
+            }
+            Configuration.Logger.LogInformation($"[Update] Best download speed {FormatBytes(max_speed)}/s with url prefix: {bestPrefix}");
+            return bestPrefix + packagesUrl;
+        }
+
+        private async Task<double> DownloadSpeedTest(string url)
+        {
+            Configuration.Logger.LogDebug($"[Update] Download test: {url}");
+
+            long bytesRead = 0;
+            var stopwatch = Stopwatch.StartNew();
+            try
+            {
+                // Send a GET request
+                HttpResponseMessage response = await downloadTestClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                if (response.IsSuccessStatusCode)
+                {
+                    // Read the response content as a stream
+                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    {
+                        // Get the length of the content
+                        long contentLength = response.Content.Headers.ContentLength ?? -1;
+
+                        // Read the content in chunks
+                        byte[] buffer = new byte[8192];
+                        int bytes;
+                        while ((bytes = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            bytesRead += bytes;
+                        }
+                    }
+                }
+                else
+                {
+                    Configuration.Logger.LogDebug($"[Update] Failed to download from {url}. Status code: {response.StatusCode}");
+                    bytesRead = 0;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                Configuration.Logger.LogDebug($"[Update] Download from {url} timed out.");
+            }
+            stopwatch.Stop();
+
+            double speed = bytesRead / stopwatch.Elapsed.TotalSeconds;
+            Configuration.Logger.LogDebug($"[Update] Download speed = {FormatBytes(speed)}/s from {url}");
+            return speed;
         }
 
         private string FormatBytes(double bytes)

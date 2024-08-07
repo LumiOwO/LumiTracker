@@ -121,8 +121,8 @@
     <value>LumiTracker</value>
     <comment/>
   </data>
-  <data name="AppTitle" xml:space="preserve">
-    <value>LumiTracker - Genshin TCG Deck Tracker</value>
+  <data name="AppSubTitle" xml:space="preserve">
+    <value>Genshin TCG Deck Tracker</value>
     <comment/>
   </data>
   <data name="Start" xml:space="preserve">
