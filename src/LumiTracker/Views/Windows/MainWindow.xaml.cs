@@ -93,6 +93,12 @@ namespace LumiTracker.Views.Windows
             startPage.Init();
 
             RootNavigation.Navigate(typeof(StartPage));
+
+            // Will only do this when just updated
+            if (Configuration.Get<bool>("just_updated"))
+            {
+                UpdateService.CleanCacheAndOldFiles();
+            }
         }
 
         private void MainWindow_ContentRendered(object? sender, EventArgs e)

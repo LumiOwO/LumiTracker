@@ -72,12 +72,6 @@ namespace LumiTracker.Services
             downloadTestClient = new HttpClient();
             downloadTestClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
             downloadTestClient.Timeout = TimeSpan.FromSeconds(5);
-
-            // Will only do this when just updated
-            if (Configuration.Get<bool>("just_updated"))
-            {
-                CleanCacheAndOldFiles();
-            }
         }
 
         private async Task MainTask()
@@ -441,6 +435,10 @@ namespace LumiTracker.Services
 
         private async Task CopyDirectoryAsync(string sourceDir, string destDir)
         {
+            if (!Directory.Exists(sourceDir))
+            {
+                return;
+            }
             // Create the destination directory if it doesn't exist
             if (!Directory.Exists(destDir))
             {
@@ -473,7 +471,7 @@ namespace LumiTracker.Services
             }
         }
 
-        public void CleanCacheAndOldFiles()
+        public static void CleanCacheAndOldFiles()
         {
             if (Directory.Exists(Configuration.CacheDir))
             {
