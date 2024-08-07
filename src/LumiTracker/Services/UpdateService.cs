@@ -27,6 +27,8 @@ namespace LumiTracker.Services
         // gitee & github
         public string name { get; set; } = ""; // [Notice] use .txt placeholder on gitee
         public string browser_download_url { get; set; } = "";
+        // not valid from gitee
+        public long size { get; set; } = 0;
         // Not in the response body
         public bool need_update { get; set; } = false;
         public string package { get; set; } = "";
@@ -41,7 +43,7 @@ namespace LumiTracker.Services
         public string body { get; set; } = "";
         public AttachMeta[] assets { get; set; } = [];
     }
-    
+
     public class UpdateService
     {
         public async Task TryUpdateAsync()
@@ -102,24 +104,30 @@ namespace LumiTracker.Services
             }
             string bestUrl = await GetBestDownloadUrl();
 
+            long totalBytes = 0;
             List<AttachMeta> downloadMetas = [];
             foreach (var attachMeta in releaseMeta.assets)
             {
                 string[] fields = attachMeta.name.Split('-');
-                if (fields.Length != 3 && fields[0] != "Package")
+                if (fields.Length != 4 && fields[0] != "Package")
                     continue;
-
+                int lastIdx = fields.Length - 1;
+                fields[lastIdx] = fields[lastIdx].Substring(0, fields[lastIdx].Length - 4); // remove postfix (.txt)
+                Configuration.Logger.LogDebug($"============= {fields.Length} =============");
                 string package = fields[1];
-                string md5 = fields[2].Substring(0, fields[2].Length - 4); // remove postfix (.zip or .txt)
+                string md5     = fields[2];
+                long   size    = long.Parse(fields[3]); 
                 if (package == "Patch" || md5 != Configuration.Ini[package])
                 {
                     attachMeta.name = $"Package-{package}-{md5}.zip";
+                    attachMeta.size = size;
                     attachMeta.browser_download_url = $"{bestUrl}/{attachMeta.name}";
                     attachMeta.need_update = true;
                     attachMeta.package = package;
                     attachMeta.md5 = md5;
                     attachMeta.zip_path = Path.Combine(Configuration.CacheDir, attachMeta.name);
 
+                    totalBytes += size;
                     downloadMetas.Add(attachMeta);
                 }
             }
@@ -133,7 +141,7 @@ namespace LumiTracker.Services
                 md5Hashs[(int)type] = Configuration.Ini[type.ToString()];
             }
 
-
+            long totalBytesRead = 0;
             foreach (var meta in downloadMetas)
             {
                 string url = meta.browser_download_url;
@@ -146,9 +154,7 @@ namespace LumiTracker.Services
                     using (var fileStream = new FileStream(meta.zip_path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 8192, useAsync: true))
                     {
                         var buffer = new byte[8192];
-                        var totalBytesRead = 0L;
-                        var totalBytes = downloadResponse.Content.Headers.ContentLength ?? -1;
-                        Configuration.Logger.LogDebug($"[Update] Downloading {meta.package}: {FormatBytes(totalBytes)}, {url}");
+                        Configuration.Logger.LogDebug($"[Update] Downloading {meta.package}: {FormatBytes(meta.size)}, {url}");
 
                         var stopwatch = Stopwatch.StartNew();
                         int bytesRead;
@@ -192,7 +198,7 @@ namespace LumiTracker.Services
                 md5Hashs[(int)type] = md5Hash;
             }
 
-            // Step 4: Unzip packages
+            // Step 4: Unzip packages & copy unchanged files
             Configuration.Logger.LogDebug("============= [Update] Step 4 =============");
 
             string dstDir = Path.Combine(Configuration.RootDir, "LumiTrackerApp-" + latestVersion);
@@ -200,7 +206,7 @@ namespace LumiTracker.Services
             {
                 string upzip_path = meta.package switch
                 {
-                    "Patch"  => dstDir,
+                    "Patch" => dstDir,
                     "Assets" => Path.Combine(dstDir, "assets"),
                     "Python" => Path.Combine(dstDir, "python"),
                     _ => "__INVALID__",
@@ -211,7 +217,36 @@ namespace LumiTracker.Services
                 }
 
                 ZipFile.ExtractToDirectory(meta.zip_path, upzip_path);
-                Configuration.Logger.LogDebug($"[Update] Extracted package {meta.package} to: {upzip_path}");
+                Configuration.Logger.LogInformation($"[Update] Extracted package {meta.package} to: {upzip_path}");
+            }
+            for (EPackageType type = 0; type < EPackageType.NumPackages; type++)
+            {
+                if (md5Hashs[(int)type] != Configuration.Ini[type.ToString()])
+                {
+                    // Already unzipped
+                    continue;
+                }
+                if (type == EPackageType.Patch)
+                {
+                    // Impossible
+                    Configuration.Logger.LogError("[Update] Unknown error: Package Patch should always be updated!");
+                    continue;
+                }
+
+                string copySrc = Configuration.AppDir;
+                string copyDst = dstDir;
+                if (type == EPackageType.Assets)
+                {
+                    copySrc = Path.Combine(copySrc, "assets", "images");
+                    copyDst = Path.Combine(copyDst, "assets", "images");
+                }
+                else if (type == EPackageType.Python)
+                {
+                    copySrc = Path.Combine(copySrc, "python");
+                    copyDst = Path.Combine(copyDst, "python");
+                }
+                Configuration.Logger.LogInformation($"[Update] Copy from {copySrc} to {copyDst}");
+                await CopyDirectoryAsync(copySrc, copyDst);
             }
 
             // Step 5: Update ini file
@@ -226,12 +261,12 @@ namespace LumiTracker.Services
                     writer.WriteLine($"{type.ToString()} = {md5Hashs[(int)type]}");
                 }
             }
+            Configuration.Logger.LogDebug("[Update] .ini file updated");
 
             // Step 6: Restart
             Configuration.Logger.LogDebug("============= [Update] Step 6 =============");
 
             string launcherPath = Path.Combine(Configuration.RootDir, "LumiTracker.exe");
-            Configuration.Logger.LogDebug(launcherPath);
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName        = launcherPath,
@@ -261,7 +296,7 @@ namespace LumiTracker.Services
         private async Task<string> GetBestDownloadUrl()
         {
             double max_speed = 0.0;
-            string bestPrefix = "";
+            string bestPrefix = ghPrefixs[0];
             string url = $"{packagesUrl}/DownloadTest";
 
             var tasks = new Task<double>[ghPrefixs.Length];
@@ -275,7 +310,7 @@ namespace LumiTracker.Services
             {
                 if (speeds[i] > max_speed)
                 {
-                    max_speed  = speeds[i];
+                    max_speed = speeds[i];
                     bestPrefix = ghPrefixs[i];
                 }
             }
@@ -319,6 +354,10 @@ namespace LumiTracker.Services
             catch (TaskCanceledException)
             {
                 Configuration.Logger.LogDebug($"[Update] Download from {url} timed out.");
+            }
+            catch (Exception e)
+            {
+                Configuration.Logger.LogWarning($"[Update] Download failed from {url}: {e.Message}");
             }
             stopwatch.Stop();
 
@@ -389,6 +428,40 @@ namespace LumiTracker.Services
                     sb.Append(hashBytes[i].ToString("x2"));
                 }
                 return sb.ToString();
+            }
+        }
+
+        private async Task CopyDirectoryAsync(string sourceDir, string destDir)
+        {
+            // Create the destination directory if it doesn't exist
+            if (!Directory.Exists(destDir))
+            {
+                Directory.CreateDirectory(destDir);
+            }
+
+            // Copy files
+            foreach (string file in Directory.GetFiles(sourceDir))
+            {
+                string fileName = Path.GetFileName(file);
+                string destFile = Path.Combine(destDir, fileName);
+                await CopyFileAsync(file, destFile);
+            }
+
+            // Copy subdirectories
+            foreach (string subDir in Directory.GetDirectories(sourceDir))
+            {
+                string subDirName = Path.GetFileName(subDir);
+                string destSubDir = Path.Combine(destDir, subDirName);
+                await CopyDirectoryAsync(subDir, destSubDir);
+            }
+        }
+
+        private async Task CopyFileAsync(string sourceFile, string destFile)
+        {
+            using (FileStream sourceStream = new FileStream(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous))
+            using (FileStream destinationStream = new FileStream(destFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
+            {
+                await sourceStream.CopyToAsync(destinationStream);
             }
         }
     }
