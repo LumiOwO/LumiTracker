@@ -46,13 +46,27 @@ namespace LumiTracker.Services
     {
         public async Task TryUpdateAsync()
         {
-            try
+            int update_retries = Configuration.Get<int>("update_retries");
+            bool success = false;
+            for (int i = 0; i < update_retries; i++)
             {
-                await MainTask();
+                Configuration.Logger.LogDebug($"[Update] Trying to update, retry count = {i}");
+                try
+                {
+                    success = await MainTask();
+                }
+                catch (Exception ex)
+                {
+                    Configuration.Logger.LogError($"[Update] An error occurred while updating.\n{ex.ToString()}");
+                }
+                if (success) break;
             }
-            catch (Exception ex)
+
+            if (success)
             {
-                Configuration.Logger.LogError($"[Update] An error occurred while updating.\n{ex.ToString()}");
+                // Restart
+                Configuration.SetTemporal("restart", true);
+                Application.Current.Shutdown();
             }
         }
 
@@ -74,7 +88,7 @@ namespace LumiTracker.Services
             downloadTestClient.Timeout = TimeSpan.FromSeconds(5);
         }
 
-        private async Task MainTask()
+        private async Task<bool> MainTask()
         {
             // Step 1: Get the latest release info from gitee
             Configuration.Logger.LogDebug("============= [Update] Step 0 =============");
@@ -84,13 +98,13 @@ namespace LumiTracker.Services
             if (releaseMeta == null)
             {
                 Configuration.Logger.LogWarning("[Update] Invalid release meta from http response.");
-                return;
+                return false;
             }
             string latestVersion = releaseMeta.tag_name.TrimStart('v');
             if (VersionCompare(Configuration.Ini["Version"], latestVersion) >= 0)
             {
                 Configuration.Logger.LogInformation($"[Update] Version {latestVersion} is already latest.");
-                return;
+                return false;
             }
 
             // Step 1: Clear old files
@@ -192,7 +206,7 @@ namespace LumiTracker.Services
                 if (!md5Hash.Equals(meta.md5, StringComparison.OrdinalIgnoreCase))
                 {
                     Configuration.Logger.LogError($"[Update] Package {meta.package} downloaded failed. md5 hash {md5Hash} does not match the expected value {meta.md5}.");
-                    return;
+                    return false;
                 }
 
                 Configuration.Logger.LogDebug($"[Update] Package {meta.package} downloaded, md5: {md5Hash}");
@@ -258,6 +272,7 @@ namespace LumiTracker.Services
             {
                 writer.WriteLine("[Application]");
                 writer.WriteLine($"Version = {latestVersion}");
+                writer.WriteLine($"Console = 0");
                 for (EPackageType type = 0; type < EPackageType.NumPackages; type++)
                 {
                     writer.WriteLine($"{type.ToString()} = {md5Hashs[(int)type]}");
@@ -265,18 +280,15 @@ namespace LumiTracker.Services
             }
             Configuration.Logger.LogDebug("[Update] .ini file updated");
 
-            // Step 6: Restart
-            Configuration.Logger.LogDebug("============= [Update] Step 6 =============");
-            Configuration.SetTemporal("restart", true);
-            Application.Current.Shutdown();
+            return true;
         }
 
 
         private readonly string[] ghPrefixs = [
-            "https://mirror.ghproxy.com/",
+            "https://github.moeyy.xyz/",
             "https://github.abskoop.workers.dev/",
             "https://gh-proxy.com/",
-            "https://github.moeyy.xyz/",
+            "https://mirror.ghproxy.com/",
         ];
 
         private async Task<string> GetBestDownloadUrl()

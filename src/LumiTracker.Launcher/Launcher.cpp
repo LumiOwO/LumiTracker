@@ -114,20 +114,22 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     std::string parameters = "just_updated";
 
     std::string command = app + " " + parameters;
+    
+    auto consoleIt = applicationSection.find("Console");
+    bool showConsole = (consoleIt != applicationSection.end() && consoleIt->second == "1");
 
     // Launch the executable
     // Define the startup info structure
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;
-
-    // Initialize the STARTUPINFO structure
     ZeroMemory(&si, sizeof(si));
+    ZeroMemory(&pi, sizeof(pi));
+
     si.cb = sizeof(si);
     si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_HIDE; // Hide the console window
+    si.wShowWindow = showConsole ? SW_SHOW : SW_HIDE;
 
-    // Initialize the PROCESS_INFORMATION structure
-    ZeroMemory(&pi, sizeof(pi));
+    DWORD flags = showConsole ? CREATE_NEW_CONSOLE: 0;
 
     // Create the process
     BOOL success = CreateProcessA(
@@ -136,7 +138,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         NULL,                   // Process security attributes
         NULL,                   // Thread security attributes
         FALSE,                  // Inherit handles
-        0,                      // Creation flags
+        flags,                  // Creation flags
         NULL,                   // Environment
         NULL,                   // Current directory
         &si,                    // STARTUPINFO pointer

@@ -30,6 +30,7 @@ set "INI_FILE=%TARGET_DIR%\LumiTracker.ini"
 (
     echo [Application]
     echo Version = %VERSION_NUMBER%
+    echo Console = 0
     echo Patch = 0
     echo Python = 0
     echo Assets = 0
