@@ -17,6 +17,7 @@ using LumiTracker.Models;
 using Wpf.Ui.Appearance;
 using Microsoft.Win32;
 using System.IO.Pipes;
+using System.Diagnostics;
 
 namespace LumiTracker
 {
@@ -136,6 +137,25 @@ namespace LumiTracker
             // Release the mutex before starting a new instance
             mutex!.ReleaseMutex();
             mutex!.Dispose();
+
+            if (Configuration.Get<bool>("restart"))
+            {
+                string launcherPath = Path.Combine(Configuration.RootDir, "LumiTracker.exe");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = launcherPath,
+                    Arguments = Configuration.RootDir + "\\",
+                    UseShellExecute = false,  // Required to set CreateNoWindow to true
+                    CreateNoWindow = true,   // Hides the console window
+                };
+
+                var process = new Process();
+                process.StartInfo = startInfo;
+                if (!process.Start())
+                {
+                    Configuration.Logger.LogError("[Update] Failed to Restart app.");
+                }
+            }
         }
 
         /// <summary>

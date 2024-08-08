@@ -321,12 +321,12 @@ namespace LumiTracker.Config
             }
         }
 
-        public static T Get<T>(string key)
+        public static T Get<T>(string key) 
         {
             JToken? value;
-            if (!UserConfig.TryGetValue(key, out value))
+            if (!UserConfig.TryGetValue(key, out value) && !DefaultConfig.TryGetValue(key, out value))
             {
-                value = DefaultConfig[key]!;
+                return default!;
             }
             return value!.ToObject<T>()!;
         }

@@ -20,7 +20,6 @@ def main(publish_dir):
         "client_type"         : "YuanShen",
         "show_ui_outside"     : False,
         "show_closing_dialog" : True,
-        "just_updated"        : False,
     }
     cfg.update(reset_configs)
 

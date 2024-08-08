@@ -267,23 +267,7 @@ namespace LumiTracker.Services
 
             // Step 6: Restart
             Configuration.Logger.LogDebug("============= [Update] Step 6 =============");
-
-            string launcherPath = Path.Combine(Configuration.RootDir, "LumiTracker.exe");
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName        = launcherPath,
-                Arguments       = Configuration.RootDir + "\\",
-                UseShellExecute = false,  // Required to set CreateNoWindow to true
-                CreateNoWindow  = true,   // Hides the console window
-            };
-
-            var process = new Process();
-            process.StartInfo = startInfo;
-            if (!process.Start())
-            {
-                Configuration.Logger.LogError("[Update] Failed to Restart app.");
-                return;
-            }
+            Configuration.SetTemporal("restart", true);
             Application.Current.Shutdown();
         }
 
