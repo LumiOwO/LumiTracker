@@ -37,6 +37,38 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock 
+                Grid.Column="0"
+                Margin="0,0,0,2" 
+                Text="{svs:Localization Update}" 
+                FontSize="15"
+                FontWeight="Bold"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                />
+
+            <ui:Button 
+                Grid.Column="1"
+                Command="{Binding ViewModel.UpdateButtonClickedCommand, Mode=OneWay}"
+                Content="{svs:Localization Update}" />
+
+            <TextBlock 
+                Grid.Column="2" 
+                Margin="15,0,0,2" 
+                Text="{svs:Localization Language}" 
+                FontSize="15"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"/>
+
+        </Grid>
+
+        <Grid Margin="10,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock 
                 Margin="0,0,0,2" 
                 Text="{svs:Localization Language}" 
                 FontSize="15"

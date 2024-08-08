@@ -145,6 +145,10 @@
     <value>设置</value>
     <comment/>
   </data>
+  <data name="Update" xml:space="preserve">
+    <value>更新</value>
+    <comment/>
+  </data>
   <data name="Language" xml:space="preserve">
     <value>语言</value>
     <comment/>

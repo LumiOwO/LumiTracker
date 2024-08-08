@@ -145,6 +145,10 @@
     <value>Settings</value>
     <comment/>
   </data>
+  <data name="Update" xml:space="preserve">
+    <value>Update</value>
+    <comment/>
+  </data>
   <data name="Language" xml:space="preserve">
     <value>Language</value>
     <comment/>

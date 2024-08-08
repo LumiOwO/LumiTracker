@@ -1,8 +1,10 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Controls;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using System.Windows.Controls;
+using System.Windows.Data;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
 using Wpf.Ui.Extensions;
@@ -107,6 +109,56 @@ namespace LumiTracker.Services
             ContentDialogResult result = await MainService.ShowAsync(dialog, default);
 
             return result;
+        }
+
+        private ContentDialog? UpdateDialog;
+
+        public async Task<Task<ContentDialogResult>?> ShowUpdateDialogAsync(UpdateContext ctx)
+        {
+            // Init
+            var content = new DeleteConfirmDialogContent();
+            content.TextPrefix.Text = LocalizationSource.Instance["DeleteConfirm_Message"];
+
+            // Show dialog
+            UpdateDialog = new ContentDialog()
+            {
+                Title = LocalizationSource.Instance["DeleteConfirm_Title"],
+                PrimaryButtonText = LocalizationSource.Instance["OK"],
+                CloseButtonText = LocalizationSource.Instance["Cancel"],
+                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Delete24),
+                CloseButtonIcon = new SymbolIcon(SymbolRegular.Dismiss24),
+                PrimaryButtonAppearance = ControlAppearance.Danger,
+            };
+            ContentDialogResult result = await MainService.ShowAsync(UpdateDialog, default);
+            if (result == ContentDialogResult.None)
+            {
+                return null;
+            }
+
+            // Show dialog
+            UpdateDialog = new ContentDialog()
+            {
+                Title = LocalizationSource.Instance["DeleteConfirm_Title"],
+                Content = "",
+                IsFooterVisible = false,
+            };
+            var binding = new Binding("ReadyToRestart")
+            {
+                Source = ctx,
+                Mode   = BindingMode.OneWay,
+            };
+            UpdateDialog.SetBinding(ContentDialog.IsFooterVisibleProperty, binding);
+
+            return MainService.ShowAsync(UpdateDialog, default);
+        }
+
+        public void ClearUpdateDialog()
+        {
+            if (UpdateDialog != null)
+            {
+                UpdateDialog.Hide();
+                UpdateDialog = null;
+            }
         }
     }
 }

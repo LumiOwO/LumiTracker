@@ -4,9 +4,7 @@ using Wpf.Ui.Controls;
 using LumiTracker.Config;
 using LumiTracker.Services;
 using LumiTracker.Views.Pages;
-using Wpf.Ui.Appearance;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Data;
 using LumiTracker.Helpers;
 
@@ -52,14 +50,6 @@ namespace LumiTracker.ViewModels.Windows
             var binding = LocalizationExtension.Create("AppSubTitle");
             binding.Converter = new MainWindowTitleNameConverter();
             BindingOperations.SetBinding(_appTitle, LocalizationTextItem.TextProperty, binding);
-
-            // refresh theme
-            ApplicationThemeManager.Apply(Configuration.Get<ApplicationTheme>("theme"));
-            // Overwrite accent color
-            ApplicationAccentColorManager.Apply(
-                Color.FromArgb(0xff, 0x1c, 0xdd, 0xe9),
-                ApplicationTheme.Dark
-            );
         }
 
         public void Init(ICommand TrayMenuItemClicked)

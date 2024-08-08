@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using System.IO;
 using System.Reflection;
 using System.Windows.Threading;
+using System.Windows.Media;
 using Wpf.Ui;
 
 using Microsoft.Extensions.Logging;
@@ -121,6 +122,13 @@ namespace LumiTracker
             {
                 Configuration.SetTemporal("just_updated", true);
             }
+            // refresh theme
+            ApplicationThemeManager.Apply(Configuration.Get<ApplicationTheme>("theme"));
+            // Overwrite accent color
+            ApplicationAccentColorManager.Apply(
+                Color.FromArgb(0xff, 0x1c, 0xdd, 0xe9),
+                ApplicationTheme.Dark
+            );
 
             _host.Start();
         }

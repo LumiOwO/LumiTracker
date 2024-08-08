@@ -4,11 +4,9 @@ using Wpf.Ui.Controls;
 
 using LumiTracker.Config;
 using Microsoft.Extensions.Logging;
-using LumiTracker.Controls;
 using LumiTracker.Views.Pages;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
-using Wpf.Ui.Extensions;
 using LumiTracker.Services;
 
 namespace LumiTracker.Views.Windows
@@ -97,7 +95,7 @@ namespace LumiTracker.Views.Windows
             // Will only do this when just updated
             if (Configuration.Get<bool>("just_updated"))
             {
-                UpdateService.CleanCacheAndOldFiles();
+                UpdateUtils.CleanCacheAndOldFiles();
             }
         }
 

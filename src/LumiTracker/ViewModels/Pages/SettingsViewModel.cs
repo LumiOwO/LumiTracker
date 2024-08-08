@@ -47,8 +47,6 @@ namespace LumiTracker.ViewModels.Pages
             CurrentTheme           = Configuration.Get<ApplicationTheme>("theme");
 
             _isInitialized = true;
-
-            Task task = _updateService.TryUpdateAsync();
         }
 
         [RelayCommand]
@@ -102,6 +100,13 @@ namespace LumiTracker.ViewModels.Pages
             }
         }
 
-        
+        [ObservableProperty]
+        private UpdateContext _updateContext = new ();
+
+        [RelayCommand]
+        private async Task OnUpdateButtonClicked()
+        {
+            await _updateService.TryUpdateAsync(UpdateContext);
+        }
     }
 }

@@ -8,10 +8,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using Wpf.Ui;
+using Wpf.Ui.Controls;
 
 namespace LumiTracker.Services
 {
-    enum EPackageType
+    public enum EPackageType
     {
         Patch,
         Assets,
@@ -20,7 +22,7 @@ namespace LumiTracker.Services
         NumPackages
     }
 
-    class AttachMeta
+    public class AttachMeta
     {
         // gitee & github
         public string name { get; set; } = ""; // [Notice] use .txt placeholder on gitee
@@ -34,7 +36,7 @@ namespace LumiTracker.Services
         public string zip_path { get; set; } = "";
     }
 
-    class ReleaseMeta
+    public class ReleaseMeta
     {
         public string id { get; set; } = "";
         public string tag_name { get; set; } = "";
@@ -42,10 +44,72 @@ namespace LumiTracker.Services
         public AttachMeta[] assets { get; set; } = [];
     }
 
+    public enum EUpdateState
+    {
+        GetReleaseMeta,
+        AlreadyLatest,
+        ClearOldFiles,
+        ProcessMetadata,
+        Download,
+        UnzipAndCopy,
+        UpdateIniFile,
+        ReadyToRestart,
+
+        NumStages
+    }
+
+    public partial class UpdateContext : ObservableObject
+    {
+        // Controls
+        public EUpdateState State = EUpdateState.GetReleaseMeta;
+
+        public Task<ContentDialogResult>? ProgressDialogTask = null;
+
+        public ReleaseMeta? ReleaseMeta = null;
+
+        // UI
+        [ObservableProperty]
+        private string _promptText = "";
+
+        [ObservableProperty]
+        private string _remainTime = "";
+
+        [ObservableProperty]
+        private string _downloadSpeed = "";
+
+        [ObservableProperty]
+        private double _progress = 0.0;
+
+        [ObservableProperty]
+        private string _downloadedSize = "";
+
+        [ObservableProperty]
+        private string _totalSize = "";
+
+        [ObservableProperty]
+        private bool _readyToRestart = false;
+
+        public void Reset()
+        {
+            State = EUpdateState.GetReleaseMeta;
+            ProgressDialogTask = null;
+            ReleaseMeta        = null;
+
+            PromptText     = "";
+            RemainTime     = "";
+            DownloadSpeed  = "";
+            Progress       = 0.0;
+            DownloadedSize = "";
+            TotalSize      = "";
+            ReadyToRestart = false;
+        }
+    }
+
     public class UpdateService
     {
-        public async Task TryUpdateAsync()
+        public async Task TryUpdateAsync(UpdateContext ctx)
         {
+            // Get latest version meta
             int update_retries = Configuration.Get<int>("update_retries");
             bool success = false;
             for (int i = 0; i < update_retries; i++)
@@ -53,7 +117,41 @@ namespace LumiTracker.Services
                 Configuration.Logger.LogDebug($"[Update] Trying to update, retry count = {i}");
                 try
                 {
-                    success = await MainTask();
+                    ctx.Reset();
+                    success = await GetLatestVersionMeta(ctx);
+                }
+                catch (Exception ex)
+                {
+                    Configuration.Logger.LogError($"[Update] An error occurred while updating.\n{ex.ToString()}");
+                }
+                if (success) break;
+            }
+            if (!success)
+            {
+                // Show get latest meta failed prompt text
+                ContentDialogService.ClearUpdateDialog();
+                return;
+            }
+            else if (ctx.State == EUpdateState.AlreadyLatest)
+            {
+                // Show already latest prompt text
+                return;
+            }
+            else if (ctx.ProgressDialogTask == null)
+            {
+                // Not update now, clear prompt text
+                return;
+            }
+
+
+            // Download latest version
+            success = false;
+            for (int i = 0; i < update_retries; i++)
+            {
+                Configuration.Logger.LogDebug($"[Update] Trying to update, retry count = {i}");
+                try
+                {
+                    success = await Update(ctx);
                 }
                 catch (Exception ex)
                 {
@@ -62,12 +160,22 @@ namespace LumiTracker.Services
                 if (success) break;
             }
 
-            if (success)
+            if (!success)
+            {
+                // Show get latest meta failed prompt text
+                ContentDialogService.ClearUpdateDialog();
+                return;
+            }
+            else if (ctx.State == EUpdateState.ReadyToRestart)
             {
                 // Restart
                 Configuration.SetTemporal("restart", true);
                 Application.Current.Shutdown();
+                return;
             }
+
+            // Should not reach here
+            Configuration.Logger.LogError($"[Update] Unknown error. Should not reach here.");
         }
 
         private readonly string metaUrl = $"https://gitee.com/api/v5/repos/LumiOwO/LumiTracker/releases/latest";
@@ -75,44 +183,62 @@ namespace LumiTracker.Services
         private readonly string packagesUrl = $"https://github.com/LumiOwO/LumiTracker/releases/download/Packages";
 
         private readonly HttpClient mainClient;
-        private readonly HttpClient downloadTestClient;
 
-        public UpdateService()
+        private readonly HttpClient subClient;
+
+        private readonly StyledContentDialogService ContentDialogService;
+
+        public UpdateService(StyledContentDialogService contentDialogService)
         {
+            ContentDialogService = contentDialogService;
+
             mainClient = new HttpClient();
             mainClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
             mainClient.Timeout = TimeSpan.FromSeconds(300);
 
-            downloadTestClient = new HttpClient();
-            downloadTestClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
-            downloadTestClient.Timeout = TimeSpan.FromSeconds(5);
+            subClient = new HttpClient();
+            subClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
+            subClient.Timeout = TimeSpan.FromSeconds(5);
         }
 
-        private async Task<bool> MainTask()
+        private async Task<bool> GetLatestVersionMeta(UpdateContext ctx)
         {
-            // Step 1: Get the latest release info from gitee
-            Configuration.Logger.LogDebug("============= [Update] Step 0 =============");
+            // Get the latest release info from gitee
+            ctx.State = EUpdateState.GetReleaseMeta;
+            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
 
-            var response = await mainClient.GetStringAsync(metaUrl);
+            var response = await subClient.GetStringAsync(metaUrl);
             var releaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(response);
             if (releaseMeta == null)
             {
                 Configuration.Logger.LogWarning("[Update] Invalid release meta from http response.");
                 return false;
             }
+            ctx.ReleaseMeta = releaseMeta;
+
             string latestVersion = releaseMeta.tag_name.TrimStart('v');
-            if (VersionCompare(Configuration.Ini["Version"], latestVersion) >= 0)
+            if (UpdateUtils.VersionCompare(Configuration.Ini["Version"], latestVersion) >= 0)
             {
                 Configuration.Logger.LogInformation($"[Update] Version {latestVersion} is already latest.");
-                return false;
+                ctx.State = EUpdateState.AlreadyLatest;
+                return true;
             }
+            // Show update available dialog
+            var task = await ContentDialogService.ShowUpdateDialogAsync(ctx);
+            ctx.ProgressDialogTask = task;
+            return true;
+        }
 
-            // Step 1: Clear old files
-            Configuration.Logger.LogDebug("============= [Update] Step 1 =============");
-            CleanCacheAndOldFiles();
+        private async Task<bool> Update(UpdateContext ctx) 
+        { 
+            // Clear old files
+            ctx.State = EUpdateState.ClearOldFiles;
+            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
+            UpdateUtils.CleanCacheAndOldFiles();
 
-            // Step 2: Process meta data of packages that need to download
-            Configuration.Logger.LogDebug("============= [Update] Step 2 =============");
+            // Process meta data of packages that need to download
+            ctx.State = EUpdateState.ProcessMetadata;
+            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
 
             if (!Directory.Exists(Configuration.CacheDir))
             {
@@ -122,7 +248,7 @@ namespace LumiTracker.Services
 
             long totalBytes = 0;
             List<AttachMeta> downloadMetas = [];
-            foreach (var attachMeta in releaseMeta.assets)
+            foreach (var attachMeta in ctx.ReleaseMeta!.assets)
             {
                 string[] fields = attachMeta.name.Split('-');
                 if (fields.Length != 4 && fields[0] != "Package")
@@ -148,8 +274,10 @@ namespace LumiTracker.Services
                 }
             }
 
-            // Step 3: Download packages
-            Configuration.Logger.LogDebug("============= [Update] Step 3 =============");
+            // Download packages
+            ctx.State = EUpdateState.Download;
+            ctx.TotalSize = UpdateUtils.FormatBytes(totalBytes);
+            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
 
             string[] md5Hashs = new string[(int)EPackageType.NumPackages];
             for (EPackageType type = 0; type < EPackageType.NumPackages; type++)
@@ -157,7 +285,8 @@ namespace LumiTracker.Services
                 md5Hashs[(int)type] = Configuration.Ini[type.ToString()];
             }
 
-            long totalBytesRead = 0;
+            long downloadedBytes = 0;
+            var globalStopwatch = Stopwatch.StartNew();
             foreach (var meta in downloadMetas)
             {
                 string url = meta.browser_download_url;
@@ -170,7 +299,7 @@ namespace LumiTracker.Services
                     using (var fileStream = new FileStream(meta.zip_path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 8192, useAsync: true))
                     {
                         var buffer = new byte[8192];
-                        Configuration.Logger.LogDebug($"[Update] Downloading {meta.package}: {FormatBytes(meta.size)}, {url}");
+                        Configuration.Logger.LogDebug($"[Update] Downloading {meta.package}: {UpdateUtils.FormatBytes(meta.size)}, {url}");
 
                         var stopwatch = Stopwatch.StartNew();
                         int bytesRead;
@@ -178,19 +307,21 @@ namespace LumiTracker.Services
                         while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
                             await fileStream.WriteAsync(buffer, 0, bytesRead);
-                            totalBytesRead += bytesRead;
+                            downloadedBytes += bytesRead;
                             logBytes += bytesRead;
                             if (stopwatch.Elapsed.TotalSeconds >= 1)
                             {
-                                // Calculate progress
-                                var progress = (double)totalBytesRead / totalBytes * 100;
+                                var downloadSpeed  = logBytes / (stopwatch.Elapsed.TotalSeconds + 1e-5);
+                                var averageSpeed   = downloadedBytes / (globalStopwatch.Elapsed.TotalSeconds + 1e-5);
+                                var remainTime     = (totalBytes - downloadedBytes) / averageSpeed;
 
-                                // Calculate download speed
-                                var elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
-                                var downloadSpeed = logBytes / (elapsedSeconds + 1e-5);
+                                ctx.RemainTime     = UpdateUtils.FormatRemainTime(remainTime);
+                                ctx.DownloadSpeed  = UpdateUtils.FormatBytes(downloadSpeed) + "/s";
+                                ctx.Progress       = (double)downloadedBytes / totalBytes;
+                                ctx.DownloadedSize = UpdateUtils.FormatBytes(downloadedBytes);
 
-                                // Print progress and speed
-                                Configuration.Logger.LogDebug($"[Update] Downloaded {totalBytesRead} of {totalBytes} bytes ({progress:0.00}%) - Speed: {FormatBytes(downloadSpeed)}/s");
+                                Configuration.Logger.LogDebug(
+                                    $"[Update] {ctx.DownloadedSize} / {ctx.TotalSize} - Speed: {ctx.DownloadSpeed}");
 
                                 logBytes = 0;
                                 stopwatch.Restart();
@@ -200,7 +331,7 @@ namespace LumiTracker.Services
                 }
 
                 // Calculate the MD5 hash of the downloaded file asynchronously
-                string md5Hash = await FileMD5Sum(meta.zip_path);
+                string md5Hash = await UpdateUtils.FileMD5Sum(meta.zip_path);
 
                 // Check if the computed hash matches the expected hash
                 if (!md5Hash.Equals(meta.md5, StringComparison.OrdinalIgnoreCase))
@@ -213,10 +344,16 @@ namespace LumiTracker.Services
                 EPackageType type = Enum.Parse<EPackageType>(meta.package);
                 md5Hashs[(int)type] = md5Hash;
             }
+            ctx.RemainTime = UpdateUtils.FormatRemainTime(0);
+            ctx.DownloadSpeed = "";
+            ctx.Progress = 1.0;
+            ctx.DownloadedSize = ctx.TotalSize;
 
-            // Step 4: Unzip packages & copy unchanged files
-            Configuration.Logger.LogDebug("============= [Update] Step 4 =============");
+            // Unzip packages & copy unchanged files
+            ctx.State = EUpdateState.UnzipAndCopy;
+            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
 
+            string latestVersion = ctx.ReleaseMeta.tag_name.TrimStart('v');
             string dstDir = Path.Combine(Configuration.RootDir, "LumiTrackerApp-" + latestVersion);
             foreach (var meta in downloadMetas)
             {
@@ -262,11 +399,12 @@ namespace LumiTracker.Services
                     copyDst = Path.Combine(copyDst, "python");
                 }
                 Configuration.Logger.LogInformation($"[Update] Copy from {copySrc} to {copyDst}");
-                await CopyDirectoryAsync(copySrc, copyDst);
+                await UpdateUtils.CopyDirectoryAsync(copySrc, copyDst);
             }
 
-            // Step 5: Update ini file
-            Configuration.Logger.LogDebug("============= [Update] Step 5 =============");
+            // Update ini file
+            ctx.State = EUpdateState.UpdateIniFile;
+            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
 
             using (StreamWriter writer = new StreamWriter(Configuration.IniFilePath))
             {
@@ -280,6 +418,11 @@ namespace LumiTracker.Services
             }
             Configuration.Logger.LogDebug("[Update] .ini file updated");
 
+            // Wait for user confirm, then restart
+            Configuration.Logger.LogDebug("[Update] Ready to restart, waiting for confirm...");
+            ctx.State = EUpdateState.ReadyToRestart;
+            ctx.ReadyToRestart = true;
+            await ctx.ProgressDialogTask!;
             return true;
         }
 
@@ -312,7 +455,7 @@ namespace LumiTracker.Services
                     bestPrefix = ghPrefixs[i];
                 }
             }
-            Configuration.Logger.LogInformation($"[Update] Best download speed {FormatBytes(max_speed)}/s with url prefix: {bestPrefix}");
+            Configuration.Logger.LogInformation($"[Update] Best download speed {UpdateUtils.FormatBytes(max_speed)}/s with url prefix: {bestPrefix}");
             return bestPrefix + packagesUrl;
         }
 
@@ -325,7 +468,7 @@ namespace LumiTracker.Services
             try
             {
                 // Send a GET request
-                HttpResponseMessage response = await downloadTestClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                HttpResponseMessage response = await subClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                 if (response.IsSuccessStatusCode)
                 {
                     // Read the response content as a stream
@@ -360,11 +503,14 @@ namespace LumiTracker.Services
             stopwatch.Stop();
 
             double speed = bytesRead / stopwatch.Elapsed.TotalSeconds;
-            Configuration.Logger.LogDebug($"[Update] Download speed = {FormatBytes(speed)}/s from {url}");
+            Configuration.Logger.LogDebug($"[Update] Download speed = {UpdateUtils.FormatBytes(speed)}/s from {url}");
             return speed;
         }
+    }
 
-        private string FormatBytes(double bytes)
+    public class UpdateUtils
+    {
+        public static string FormatBytes(double bytes)
         {
             const double KB = 1024;
             const double MB = KB * 1024;
@@ -384,7 +530,23 @@ namespace LumiTracker.Services
             }
         }
 
-        private int VersionCompare(string v1, string v2)
+        public static string FormatRemainTime(double seconds)
+        {
+            // Define the maximum allowable seconds (99 minutes and 59 seconds)
+            const double maxSeconds = 99 * 60 + 59;
+
+            // Clamp the seconds to the maximum allowable value
+            seconds = Math.Min(seconds, maxSeconds);
+
+            // Calculate minutes and seconds
+            int minutes = (int)seconds / 60;
+            int secondsPart = (int)seconds % 60;
+
+            // Format as "MM:SS" with leading zeros
+            return $"{minutes:D2}:{secondsPart:D2}";
+        }
+
+        public static int VersionCompare(string v1, string v2)
         {
             // Remove the 'v' prefix and split the version numbers
             string[] parts1 = v1.Split('.');
@@ -412,7 +574,7 @@ namespace LumiTracker.Services
             return 0;
         }
 
-        private async Task<string> FileMD5Sum(string path)
+        public static async Task<string> FileMD5Sum(string path)
         {
             using (MD5 md5 = MD5.Create())
             using (FileStream fileStream = File.OpenRead(path))
@@ -429,7 +591,7 @@ namespace LumiTracker.Services
             }
         }
 
-        private async Task CopyDirectoryAsync(string sourceDir, string destDir)
+        public static async Task CopyDirectoryAsync(string sourceDir, string destDir)
         {
             if (!Directory.Exists(sourceDir))
             {
@@ -458,7 +620,7 @@ namespace LumiTracker.Services
             }
         }
 
-        private async Task CopyFileAsync(string sourceFile, string destFile)
+        public static async Task CopyFileAsync(string sourceFile, string destFile)
         {
             using (FileStream sourceStream = new FileStream(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous))
             using (FileStream destinationStream = new FileStream(destFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
