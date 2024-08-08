@@ -149,6 +149,34 @@
     <value>Update</value>
     <comment/>
   </data>
+  <data name="UpdatePrompt_Available" xml:space="preserve">
+    <value>Update Available</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
+    <value>Update Now</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Later" xml:space="preserve">
+    <value>Remind Me Later</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Connecting" xml:space="preserve">
+    <value>Connecting...</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Downloading" xml:space="preserve">
+    <value>Downloading...</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Unpacking" xml:space="preserve">
+    <value>Unpacking...</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Complete" xml:space="preserve">
+    <value>Update Complete!</value>
+    <comment/>
+  </data>
   <data name="Language" xml:space="preserve">
     <value>Language</value>
     <comment/>

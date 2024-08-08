@@ -149,6 +149,34 @@
     <value>更新</value>
     <comment/>
   </data>
+  <data name="UpdatePrompt_Available" xml:space="preserve">
+    <value>新版本已发布</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
+    <value>立即更新</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Later" xml:space="preserve">
+    <value>暂不更新</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Connecting" xml:space="preserve">
+    <value>连接中...</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Downloading" xml:space="preserve">
+    <value>下载中...</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Unpacking" xml:space="preserve">
+    <value>解压中...</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Complete" xml:space="preserve">
+    <value>更新完成！</value>
+    <comment/>
+  </data>
   <data name="Language" xml:space="preserve">
     <value>语言</value>
     <comment/>

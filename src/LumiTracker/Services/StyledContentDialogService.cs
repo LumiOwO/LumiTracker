@@ -115,19 +115,15 @@ namespace LumiTracker.Services
 
         public async Task<Task<ContentDialogResult>?> ShowUpdateDialogAsync(UpdateContext ctx)
         {
-            // Init
-            var content = new DeleteConfirmDialogContent();
-            content.TextPrefix.Text = LocalizationSource.Instance["DeleteConfirm_Message"];
-
             // Show dialog
             UpdateDialog = new ContentDialog()
             {
-                Title = LocalizationSource.Instance["DeleteConfirm_Title"],
-                PrimaryButtonText = LocalizationSource.Instance["OK"],
-                CloseButtonText = LocalizationSource.Instance["Cancel"],
-                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Delete24),
-                CloseButtonIcon = new SymbolIcon(SymbolRegular.Dismiss24),
-                PrimaryButtonAppearance = ControlAppearance.Danger,
+                Title = LocalizationSource.Instance["UpdatePrompt_Available"],
+                PrimaryButtonText = LocalizationSource.Instance["UpdatePrompt_UpdateNow"],
+                CloseButtonText   = LocalizationSource.Instance["UpdatePrompt_Later"],
+                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
+                CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24),
+                PrimaryButtonAppearance = ControlAppearance.Success,
             };
             ContentDialogResult result = await MainService.ShowAsync(UpdateDialog, default);
             if (result == ContentDialogResult.None)
@@ -135,19 +131,38 @@ namespace LumiTracker.Services
                 return null;
             }
 
+            // Init
+            var progressContent = new UpdateProgressDialogContent();
+            var binding = new Binding(".")
+            {
+                Source = ctx,
+                Mode = BindingMode.OneWay,
+            };
+            progressContent.SetBinding(UpdateProgressDialogContent.ContextProperty, binding);
+
             // Show dialog
             UpdateDialog = new ContentDialog()
             {
-                Title = LocalizationSource.Instance["DeleteConfirm_Title"],
-                Content = "",
-                IsFooterVisible = false,
+                Content = progressContent,
+                CloseButtonText = LocalizationSource.Instance["OK"],
+                CloseButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
+                CloseButtonAppearance = ControlAppearance.Success,
+                IsPrimaryButtonEnabled   = false,
+                IsSecondaryButtonEnabled = false,
+                IsEnabled = false,
             };
-            var binding = new Binding("ReadyToRestart")
+            binding = new Binding("ProgressText")
             {
                 Source = ctx,
-                Mode   = BindingMode.OneWay,
+                Mode = BindingMode.OneWay,
             };
-            UpdateDialog.SetBinding(ContentDialog.IsFooterVisibleProperty, binding);
+            UpdateDialog.SetBinding(ContentDialog.TitleProperty, binding);
+            binding = new Binding("ReadyToRestart")
+            {
+                Source = ctx,
+                Mode = BindingMode.OneWay,
+            };
+            UpdateDialog.SetBinding(ContentDialog.IsEnabledProperty, binding);
 
             return MainService.ShowAsync(UpdateDialog, default);
         }

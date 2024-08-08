@@ -142,10 +142,6 @@ namespace LumiTracker
 
             _host.Dispose();
 
-            // Release the mutex before starting a new instance
-            mutex!.ReleaseMutex();
-            mutex!.Dispose();
-
             if (Configuration.Get<bool>("restart"))
             {
                 string launcherPath = Path.Combine(Configuration.RootDir, "LumiTracker.exe");

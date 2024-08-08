@@ -67,9 +67,16 @@ namespace LumiTracker.Services
 
         public ReleaseMeta? ReleaseMeta = null;
 
-        // UI
+        // Settins UI
         [ObservableProperty]
         private string _promptText = "";
+
+        // Progress dialog UI
+        [ObservableProperty]
+        private string _progressText = "";
+
+        [ObservableProperty]
+        private bool _indeterminate = true;
 
         [ObservableProperty]
         private string _remainTime = "";
@@ -81,13 +88,13 @@ namespace LumiTracker.Services
         private double _progress = 0.0;
 
         [ObservableProperty]
-        private string _downloadedSize = "";
+        private string _downloadedSize = "0.00 MB";
 
         [ObservableProperty]
-        private string _totalSize = "";
+        private string _totalSize = "0.00 MB";
 
         [ObservableProperty]
-        private bool _readyToRestart = false;
+        bool _readyToRestart = false;
 
         public void Reset()
         {
@@ -96,11 +103,14 @@ namespace LumiTracker.Services
             ReleaseMeta        = null;
 
             PromptText     = "";
+
+            ProgressText   = "";
+            Indeterminate  = true;
             RemainTime     = "";
             DownloadSpeed  = "";
             Progress       = 0.0;
-            DownloadedSize = "";
-            TotalSize      = "";
+            DownloadedSize = "0.00 MB";
+            TotalSize      = "0.00 MB";
             ReadyToRestart = false;
         }
     }
@@ -128,18 +138,18 @@ namespace LumiTracker.Services
             }
             if (!success)
             {
-                // Show get latest meta failed prompt text
+                // TODO: Show get latest meta failed prompt text
                 ContentDialogService.ClearUpdateDialog();
                 return;
             }
             else if (ctx.State == EUpdateState.AlreadyLatest)
             {
-                // Show already latest prompt text
+                // TODO: Show already latest prompt text
                 return;
             }
             else if (ctx.ProgressDialogTask == null)
             {
-                // Not update now, clear prompt text
+                // TODO: Not update now, clear prompt text
                 return;
             }
 
@@ -162,7 +172,7 @@ namespace LumiTracker.Services
 
             if (!success)
             {
-                // Show get latest meta failed prompt text
+                // TODO: Show get latest meta failed prompt text
                 ContentDialogService.ClearUpdateDialog();
                 return;
             }
@@ -230,7 +240,10 @@ namespace LumiTracker.Services
         }
 
         private async Task<bool> Update(UpdateContext ctx) 
-        { 
+        {
+            ctx.Indeterminate = true;
+            ctx.ProgressText  = LocalizationSource.Instance["UpdatePrompt_Connecting"];
+
             // Clear old files
             ctx.State = EUpdateState.ClearOldFiles;
             Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
@@ -309,19 +322,24 @@ namespace LumiTracker.Services
                             await fileStream.WriteAsync(buffer, 0, bytesRead);
                             downloadedBytes += bytesRead;
                             logBytes += bytesRead;
-                            if (stopwatch.Elapsed.TotalSeconds >= 1)
+                            if (stopwatch.Elapsed.TotalSeconds >= 0.2)
                             {
                                 var downloadSpeed  = logBytes / (stopwatch.Elapsed.TotalSeconds + 1e-5);
                                 var averageSpeed   = downloadedBytes / (globalStopwatch.Elapsed.TotalSeconds + 1e-5);
                                 var remainTime     = (totalBytes - downloadedBytes) / averageSpeed;
 
+                                if (ctx.Indeterminate)
+                                {
+                                    ctx.Indeterminate = false;
+                                    ctx.ProgressText  = LocalizationSource.Instance["UpdatePrompt_Downloading"];
+                                }
                                 ctx.RemainTime     = UpdateUtils.FormatRemainTime(remainTime);
                                 ctx.DownloadSpeed  = UpdateUtils.FormatBytes(downloadSpeed) + "/s";
                                 ctx.Progress       = (double)downloadedBytes / totalBytes;
                                 ctx.DownloadedSize = UpdateUtils.FormatBytes(downloadedBytes);
 
-                                Configuration.Logger.LogDebug(
-                                    $"[Update] {ctx.DownloadedSize} / {ctx.TotalSize} - Speed: {ctx.DownloadSpeed}");
+                                //Configuration.Logger.LogDebug(
+                                //    $"[Update] {ctx.DownloadedSize} / {ctx.TotalSize} - Speed: {ctx.DownloadSpeed}");
 
                                 logBytes = 0;
                                 stopwatch.Restart();
@@ -344,13 +362,15 @@ namespace LumiTracker.Services
                 EPackageType type = Enum.Parse<EPackageType>(meta.package);
                 md5Hashs[(int)type] = md5Hash;
             }
-            ctx.RemainTime = UpdateUtils.FormatRemainTime(0);
-            ctx.DownloadSpeed = "";
-            ctx.Progress = 1.0;
+            ctx.RemainTime     = "";
+            ctx.DownloadSpeed  = "";
+            ctx.Progress       = 1.0;
             ctx.DownloadedSize = ctx.TotalSize;
 
             // Unzip packages & copy unchanged files
             ctx.State = EUpdateState.UnzipAndCopy;
+            ctx.Indeterminate  = true;
+            ctx.ProgressText   = LocalizationSource.Instance["UpdatePrompt_Unpacking"];
             Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
 
             string latestVersion = ctx.ReleaseMeta.tag_name.TrimStart('v');
@@ -421,6 +441,8 @@ namespace LumiTracker.Services
             // Wait for user confirm, then restart
             Configuration.Logger.LogDebug("[Update] Ready to restart, waiting for confirm...");
             ctx.State = EUpdateState.ReadyToRestart;
+            ctx.Indeterminate  = false;
+            ctx.ProgressText   = LocalizationSource.Instance["UpdatePrompt_Complete"];
             ctx.ReadyToRestart = true;
             await ctx.ProgressDialogTask!;
             return true;
@@ -467,8 +489,11 @@ namespace LumiTracker.Services
             var stopwatch = Stopwatch.StartNew();
             try
             {
+                CancellationTokenSource cts = new CancellationTokenSource();
+                CancellationToken token = cts.Token;
+
                 // Send a GET request
-                HttpResponseMessage response = await subClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                HttpResponseMessage response = await subClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
                 if (response.IsSuccessStatusCode)
                 {
                     // Read the response content as a stream
@@ -483,6 +508,10 @@ namespace LumiTracker.Services
                         while ((bytes = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
                             bytesRead += bytes;
+                            if (stopwatch.Elapsed.TotalSeconds > 2)
+                            {
+                                cts.Cancel();
+                            }
                         }
                     }
                 }
@@ -492,7 +521,7 @@ namespace LumiTracker.Services
                     bytesRead = 0;
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 Configuration.Logger.LogDebug($"[Update] Download from {url} timed out.");
             }
