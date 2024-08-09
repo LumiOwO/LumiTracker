@@ -1,5 +1,4 @@
 ﻿using LumiTracker.Config;
-using Newtonsoft.Json.Linq;
 using System.IO.Compression;
 using System.IO;
 using System.Net.Http;
@@ -8,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Diagnostics;
 using Newtonsoft.Json;
-using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace LumiTracker.Services
@@ -26,7 +24,6 @@ namespace LumiTracker.Services
     {
         // gitee & github
         public string name { get; set; } = ""; // [Notice] use .txt placeholder on gitee
-        public string browser_download_url { get; set; } = "";
         // not valid from gitee
         public long size { get; set; } = 0;
         // Not in the response body
@@ -66,6 +63,12 @@ namespace LumiTracker.Services
         public Task<ContentDialogResult>? ProgressDialogTask = null;
 
         public ReleaseMeta? ReleaseMeta = null;
+
+        public Stopwatch? globalStopwatch = null;
+
+        public long downloadedBytes = 0;
+
+        public long totalBytes = 0;
 
         // Settins UI
         [ObservableProperty]
@@ -161,7 +164,7 @@ namespace LumiTracker.Services
                 Configuration.Logger.LogDebug($"[Update] Trying to update, retry count = {i}");
                 try
                 {
-                    success = await Update(ctx);
+                    success = await Update(ctx, retry: (i != 0));
                 }
                 catch (Exception ex)
                 {
@@ -198,6 +201,8 @@ namespace LumiTracker.Services
 
         private readonly StyledContentDialogService ContentDialogService;
 
+        private Task? progressUpdater = null;
+
         public UpdateService(StyledContentDialogService contentDialogService)
         {
             ContentDialogService = contentDialogService;
@@ -214,15 +219,20 @@ namespace LumiTracker.Services
         private async Task<bool> GetLatestVersionMeta(UpdateContext ctx)
         {
             // Get the latest release info from gitee
-            ctx.State = EUpdateState.GetReleaseMeta;
             Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
+            ctx.State = EUpdateState.GetReleaseMeta;
 
-            var response = await subClient.GetStringAsync(metaUrl);
-            var releaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(response);
+            var releaseMeta = Configuration.Get<ReleaseMeta>("releaseMeta");
             if (releaseMeta == null)
             {
-                Configuration.Logger.LogWarning("[Update] Invalid release meta from http response.");
-                return false;
+                var response = await subClient.GetStringAsync(metaUrl);
+                releaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(response);
+                if (releaseMeta == null)
+                {
+                    Configuration.Logger.LogWarning("[Update] Invalid release meta from http response.");
+                    return false;
+                }
+                Configuration.SetTemporal("releaseMeta", releaseMeta);
             }
             ctx.ReleaseMeta = releaseMeta;
 
@@ -239,19 +249,27 @@ namespace LumiTracker.Services
             return true;
         }
 
-        private async Task<bool> Update(UpdateContext ctx) 
+        private async Task<bool> Update(UpdateContext ctx, bool retry) 
         {
-            ctx.Indeterminate = true;
-            ctx.ProgressText  = LocalizationSource.Instance["UpdatePrompt_Connecting"];
-
             // Clear old files
-            ctx.State = EUpdateState.ClearOldFiles;
             Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
+            ctx.State = EUpdateState.ClearOldFiles;
+            if (progressUpdater != null)
+            {
+                await progressUpdater;
+            }
+            ctx.ProgressText   = retry ? LocalizationSource.Instance["UpdatePrompt_Retrying"] : LocalizationSource.Instance["UpdatePrompt_Connecting"];
+            ctx.Indeterminate  = true;
+            ctx.RemainTime     = "";
+            ctx.DownloadSpeed  = "";
+            ctx.Progress       = 0.0;
+            ctx.DownloadedSize = "0.00 MB";
+            ctx.TotalSize      = "0.00 MB";
             UpdateUtils.CleanCacheAndOldFiles();
 
             // Process meta data of packages that need to download
-            ctx.State = EUpdateState.ProcessMetadata;
             Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
+            ctx.State = EUpdateState.ProcessMetadata;
 
             if (!Directory.Exists(Configuration.CacheDir))
             {
@@ -264,8 +282,19 @@ namespace LumiTracker.Services
             foreach (var attachMeta in ctx.ReleaseMeta!.assets)
             {
                 string[] fields = attachMeta.name.Split('-');
-                if (fields.Length != 4 && fields[0] != "Package")
+                if (fields[0] != "Package")
+                {
+                    // not a package
                     continue;
+                }
+                if (attachMeta.need_update)
+                {
+                    // already processed
+                    downloadMetas.Add(attachMeta);
+                    totalBytes += attachMeta.size;
+                    continue;
+                }
+
                 int lastIdx = fields.Length - 1;
                 fields[lastIdx] = fields[lastIdx].Substring(0, fields[lastIdx].Length - 4); // remove postfix (.txt)
 
@@ -276,7 +305,6 @@ namespace LumiTracker.Services
                 {
                     attachMeta.name = $"Package-{package}-{md5}.zip";
                     attachMeta.size = size;
-                    attachMeta.browser_download_url = $"{bestUrl}/{attachMeta.name}";
                     attachMeta.need_update = true;
                     attachMeta.package = package;
                     attachMeta.md5 = md5;
@@ -288,9 +316,9 @@ namespace LumiTracker.Services
             }
 
             // Download packages
+            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
             ctx.State = EUpdateState.Download;
             ctx.TotalSize = UpdateUtils.FormatBytes(totalBytes);
-            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
 
             string[] md5Hashs = new string[(int)EPackageType.NumPackages];
             for (EPackageType type = 0; type < EPackageType.NumPackages; type++)
@@ -298,11 +326,17 @@ namespace LumiTracker.Services
                 md5Hashs[(int)type] = Configuration.Ini[type.ToString()];
             }
 
-            long downloadedBytes = 0;
-            var globalStopwatch = Stopwatch.StartNew();
+            ctx.Indeterminate   = false;
+            ctx.ProgressText    = LocalizationSource.Instance["UpdatePrompt_Downloading"];
+            ctx.globalStopwatch = new Stopwatch();
+            ctx.downloadedBytes = 0;
+            ctx.totalBytes      = totalBytes;
+            progressUpdater = ProgressUpdater(ctx);
+
+            ctx.globalStopwatch.Start();
             foreach (var meta in downloadMetas)
             {
-                string url = meta.browser_download_url;
+                string url = $"{bestUrl}/{meta.name}";
 
                 using (var downloadResponse = await mainClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
                 {
@@ -314,36 +348,11 @@ namespace LumiTracker.Services
                         var buffer = new byte[8192];
                         Configuration.Logger.LogDebug($"[Update] Downloading {meta.package}: {UpdateUtils.FormatBytes(meta.size)}, {url}");
 
-                        var stopwatch = Stopwatch.StartNew();
                         int bytesRead;
-                        int logBytes = 0;
                         while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
                             await fileStream.WriteAsync(buffer, 0, bytesRead);
-                            downloadedBytes += bytesRead;
-                            logBytes += bytesRead;
-                            if (stopwatch.Elapsed.TotalSeconds >= 0.2)
-                            {
-                                var downloadSpeed  = logBytes / (stopwatch.Elapsed.TotalSeconds + 1e-5);
-                                var averageSpeed   = downloadedBytes / (globalStopwatch.Elapsed.TotalSeconds + 1e-5);
-                                var remainTime     = (totalBytes - downloadedBytes) / averageSpeed;
-
-                                if (ctx.Indeterminate)
-                                {
-                                    ctx.Indeterminate = false;
-                                    ctx.ProgressText  = LocalizationSource.Instance["UpdatePrompt_Downloading"];
-                                }
-                                ctx.RemainTime     = UpdateUtils.FormatRemainTime(remainTime);
-                                ctx.DownloadSpeed  = UpdateUtils.FormatBytes(downloadSpeed) + "/s";
-                                ctx.Progress       = (double)downloadedBytes / totalBytes;
-                                ctx.DownloadedSize = UpdateUtils.FormatBytes(downloadedBytes);
-
-                                //Configuration.Logger.LogDebug(
-                                //    $"[Update] {ctx.DownloadedSize} / {ctx.TotalSize} - Speed: {ctx.DownloadSpeed}");
-
-                                logBytes = 0;
-                                stopwatch.Restart();
-                            }
+                            ctx.downloadedBytes += bytesRead;
                         }
                     }
                 }
@@ -362,16 +371,20 @@ namespace LumiTracker.Services
                 EPackageType type = Enum.Parse<EPackageType>(meta.package);
                 md5Hashs[(int)type] = md5Hash;
             }
+            ctx.globalStopwatch.Stop();
+
+
+            // Unzip packages & copy unchanged files
+            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
+            ctx.State = EUpdateState.UnzipAndCopy;
+            await progressUpdater;
+
             ctx.RemainTime     = "";
             ctx.DownloadSpeed  = "";
             ctx.Progress       = 1.0;
             ctx.DownloadedSize = ctx.TotalSize;
-
-            // Unzip packages & copy unchanged files
-            ctx.State = EUpdateState.UnzipAndCopy;
             ctx.Indeterminate  = true;
             ctx.ProgressText   = LocalizationSource.Instance["UpdatePrompt_Unpacking"];
-            Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
 
             string latestVersion = ctx.ReleaseMeta.tag_name.TrimStart('v');
             string dstDir = Path.Combine(Configuration.RootDir, "LumiTrackerApp-" + latestVersion);
@@ -423,8 +436,8 @@ namespace LumiTracker.Services
             }
 
             // Update ini file
-            ctx.State = EUpdateState.UpdateIniFile;
             Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
+            ctx.State = EUpdateState.UpdateIniFile;
 
             using (StreamWriter writer = new StreamWriter(Configuration.IniFilePath))
             {
@@ -446,6 +459,34 @@ namespace LumiTracker.Services
             ctx.ReadyToRestart = true;
             await ctx.ProgressDialogTask!;
             return true;
+        }
+
+        private async Task ProgressUpdater(UpdateContext ctx)
+        {
+            long prevDownloadedBytes = ctx.downloadedBytes;
+            int  deltaTimeMS = 200; // ms
+            while (ctx.State == EUpdateState.Download) 
+            {
+                await Task.Delay(deltaTimeMS);
+                long downloadedBytes = ctx.downloadedBytes;
+                long totalBytes = ctx.totalBytes;
+                long deltaBytes = downloadedBytes - prevDownloadedBytes;
+
+                double downloadSpeed = 1000.0 / deltaTimeMS * deltaBytes;
+                var averageSpeed = downloadedBytes / (ctx.globalStopwatch!.Elapsed.TotalSeconds + 1e-5);
+                var remainTime = (totalBytes - downloadedBytes) / averageSpeed;
+
+
+                ctx.RemainTime = UpdateUtils.FormatRemainTime(remainTime);
+                ctx.DownloadSpeed = UpdateUtils.FormatBytes(downloadSpeed) + "/s";
+                ctx.Progress = (double)downloadedBytes / totalBytes;
+                ctx.DownloadedSize = UpdateUtils.FormatBytes(downloadedBytes);
+
+                //Configuration.Logger.LogDebug(
+                //    $"[Update] {ctx.DownloadedSize} / {ctx.TotalSize} - Speed: {ctx.DownloadSpeed}");
+
+                prevDownloadedBytes += deltaBytes;
+            }
         }
 
 
@@ -489,7 +530,7 @@ namespace LumiTracker.Services
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                CancellationTokenSource cts = new CancellationTokenSource();
+                CancellationTokenSource cts = new CancellationTokenSource(subClient.Timeout);
                 CancellationToken token = cts.Token;
 
                 // Send a GET request

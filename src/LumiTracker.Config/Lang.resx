@@ -165,6 +165,10 @@
     <value>Connecting...</value>
     <comment/>
   </data>
+  <data name="UpdatePrompt_Retrying" xml:space="preserve">
+    <value>Network Error, Retrying...</value>
+    <comment/>
+  </data>
   <data name="UpdatePrompt_Downloading" xml:space="preserve">
     <value>Downloading...</value>
     <comment/>
