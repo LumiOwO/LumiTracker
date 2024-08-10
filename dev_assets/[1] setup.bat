@@ -1,6 +1,9 @@
 @echo off
 setlocal
 
+:: Navigate to the directory containing requirements.txt
+cd /d "%~dp0"\..
+
 :: List of directories to be removed
 set DIRS="python/Scripts" "python/Lib" "python/images"
 
@@ -20,9 +23,6 @@ set PYTHONNOUSERSITE=1
 @REM set PYTHONWARNINGS=ignore
 
 set PYTHON_EXEC=python/python.exe
-
-:: Navigate to the directory containing requirements.txt
-cd /d "%~dp0"
 
 :: Run pip install to install packages from requirements.txt
 echo Installing required packages...

@@ -60,6 +60,8 @@
     <Exec Command="copy /Y $(TargetDir)..\LumiTracker.exe $(PublishDir)..\LumiTracker.exe" />
     <Exec Command="copy /Y $(TargetDir)..\LumiTracker.ini $(PublishDir)..\LumiTracker.ini" />
     <Exec Command="copy /Y $(TargetDir)..\Utils.bat $(PublishDir)..\Utils.bat" />
+
+    <Exec Command="&quot;$(SolutionDir)dev_assets\[3] package.bat&quot;" />
     
   </Target>
 
