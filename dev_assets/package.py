@@ -3,6 +3,8 @@ import py7zr
 import zipfile
 import os
 import hashlib
+import configparser
+from sortedcontainers import SortedSet
 from tqdm import tqdm
 
 def calculate_md5(file_path):
@@ -20,7 +22,7 @@ def calculate_md5(file_path):
     return md5_hash.hexdigest()
 
 def get_all_files(dst_dir):
-    file_list = set()
+    file_list = SortedSet()
     for root, dirs, filenames in os.walk(dst_dir):
         for filename in filenames:
             file_path = os.path.join(root, filename)
@@ -40,10 +42,11 @@ def package_full(files, dst_dir, root_dir, version):
                 # Update the progress bar
                 pbar.update(1)
 
-def package_separate(files, ignored_files, dst_dir, root_dir, package_name):
+def package_separate(files, ignored_files, dst_dir, root_dir, package_name, md5s):
     os.makedirs(dst_dir, exist_ok=True)
     dst_file = os.path.join(dst_dir, f"Package-{package_name}.zip")
-    
+    hasher = hashlib.md5()
+
     # Initialize the progress bar
     with zipfile.ZipFile(dst_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
         # Wrap the files list with tqdm
@@ -52,13 +55,21 @@ def package_separate(files, ignored_files, dst_dir, root_dir, package_name):
                 file_path = os.path.join(dst_dir, file)
                 if (file not in ignored_files) and os.path.isfile(file_path):
                     zipf.write(file_path, arcname=os.path.relpath(file, root_dir))
+                    file_hash = calculate_md5(file_path)
+                    hasher.update(file_hash.encode('utf-8'))
                 # Update the progress bar
                 pbar.update(1)
     # Update package metas
-    md5  = calculate_md5(dst_file)
     size = os.path.getsize(dst_file)
+    md5  = hasher.hexdigest()
+    md5s[package_name] = md5
+
     package_file = os.path.join(dst_dir, f"Package-{package_name}-{md5}.zip")
-    os.rename(dst_file, package_file)
+    if os.path.exists(package_file):
+        print(f"### Package-{package_name} no need to update.")
+        os.remove(dst_file)
+    else:
+        os.rename(dst_file, package_file)
     meta_file = os.path.join(dst_dir, f"Package-{package_name}-{md5}-{size}.txt")
     with open(meta_file, 'w') as file:
         pass  # No need to write anything
@@ -75,28 +86,43 @@ def main(publish_dir):
         return
     version = app_dir.split("-")[-1]
 
-    print("Packaging Full App...")
-    full_files = get_all_files(root_dir)
-    package_full(files=full_files, dst_dir=publish_dir, root_dir=root_dir, version=version)
+    ignored_files = SortedSet()
+    md5s = {}
 
-    ignored_files = set()
-
+    # ================== Packages ==================
     print("Packaging Package-Assets...")
     assets_dir    = os.path.join(app_dir, "assets")
     images_dir    = os.path.join(assets_dir, "images")
     assets_files  = get_all_files(images_dir)
-    package_separate(files=assets_files, ignored_files=set(), dst_dir=publish_dir, root_dir=assets_dir, package_name="Assets")
+    package_separate(files=assets_files, ignored_files=SortedSet(), dst_dir=publish_dir, root_dir=assets_dir, package_name="Assets", md5s=md5s)
     ignored_files = ignored_files | assets_files
 
     print("Packaging Package-Python...")
     python_dir    = os.path.join(app_dir, "python")
     python_files  = get_all_files(python_dir)
-    package_separate(files=python_files, ignored_files=set(), dst_dir=publish_dir, root_dir=python_dir, package_name="Python")
+    package_separate(files=python_files, ignored_files=SortedSet(), dst_dir=publish_dir, root_dir=python_dir, package_name="Python", md5s=md5s)
     ignored_files = ignored_files | python_files
 
     print("Packaging Package-Patch...")
     patch_files = get_all_files(app_dir)
-    package_separate(files=patch_files, ignored_files=ignored_files, dst_dir=publish_dir, root_dir=app_dir, package_name="Patch")
+    package_separate(files=patch_files, ignored_files=ignored_files, dst_dir=publish_dir, root_dir=app_dir, package_name="Patch", md5s=md5s)
+
+    # ================== Full app ==================
+    print("Updating .ini file...")
+    config = configparser.ConfigParser()
+    config.add_section('Application')
+    config.set('Application', 'Version', version)
+    config.set('Application', 'Console', "0")
+    config.set('Application', 'Patch', md5s["Patch"])
+    config.set('Application', 'Assets', md5s["Assets"])
+    config.set('Application', 'Python', md5s["Python"])
+    ini_file = os.path.join(root_dir, f"LumiTracker.ini")
+    with open(ini_file, 'w') as configfile:
+        config.write(configfile)
+
+    print("Packaging Full App...")
+    full_files = get_all_files(root_dir)
+    package_full(files=full_files, dst_dir=publish_dir, root_dir=root_dir, version=version)
 
 if __name__ == "__main__":
     publish_dir = sys.argv[1]
