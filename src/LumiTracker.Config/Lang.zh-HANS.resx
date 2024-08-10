@@ -149,8 +149,24 @@
     <value>更新</value>
     <comment/>
   </data>
-  <data name="UpdatePrompt_Available" xml:space="preserve">
-    <value>新版本已发布</value>
+  <data name="CheckUpdatesOnStartup" xml:space="preserve">
+    <value>启动时检查更新</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
+    <value>检查更新</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Fetching" xml:space="preserve">
+    <value>获取最新版本...</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_AlreadyLatest" xml:space="preserve">
+    <value>已是最新版本</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Failed" xml:space="preserve">
+    <value>更新失败，请重试</value>
     <comment/>
   </data>
   <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
@@ -346,6 +362,10 @@
   </data>
   <data name="DocumentationLink" xml:space="preserve">
     <value>说明文档</value>
+    <comment/>
+  </data>
+  <data name="FeedbackLink" xml:space="preserve">
+    <value>问题反馈</value>
     <comment/>
   </data>
   <data name="BiliBiliLink" xml:space="preserve">

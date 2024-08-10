@@ -104,9 +104,17 @@ namespace LumiTracker.ViewModels.Pages
         private UpdateContext _updateContext = new ();
 
         [RelayCommand]
-        private async Task OnUpdateButtonClicked()
+        public async Task OnUpdateButtonClicked()
         {
             await _updateService.TryUpdateAsync(UpdateContext);
+        }
+
+        [ObservableProperty]
+        private bool _checkUpdatesOnStartup = Configuration.Get<bool>("check_updates_on_startup");
+
+        partial void OnCheckUpdatesOnStartupChanged(bool oldValue, bool newValue)
+        {
+            Configuration.Set("check_updates_on_startup", newValue);
         }
     }
 }

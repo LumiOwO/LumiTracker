@@ -8,6 +8,7 @@ using LumiTracker.Views.Pages;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using LumiTracker.Services;
+using LumiTracker.ViewModels.Pages;
 
 namespace LumiTracker.Views.Windows
 {
@@ -16,6 +17,8 @@ namespace LumiTracker.Views.Windows
         public MainWindowViewModel ViewModel { get; }
 
         private IntPtr hwnd = 0;
+
+        private SettingsViewModel _settingsViewModel;
 
         private readonly IPageService _pageService;
 
@@ -27,6 +30,7 @@ namespace LumiTracker.Views.Windows
 
         public MainWindow(
             MainWindowViewModel        viewModel,
+            SettingsViewModel          settingsViewModel,
             IPageService               pageService,
             INavigationService         navigationService,
             ISnackbarService           snackbarService,
@@ -50,6 +54,7 @@ namespace LumiTracker.Views.Windows
             contentDialogService.SetDialogHosts(MainContentDialog, ClosingContentDialog);
             snackbarService.SetSnackbarPresenter(SnackbarPresenter);
 
+            _settingsViewModel = settingsViewModel;
             _pageService = pageService;
             _contentDialogService = contentDialogService;
             _snackbarService = snackbarService;
@@ -96,6 +101,10 @@ namespace LumiTracker.Views.Windows
             if (Configuration.Get<bool>("just_updated"))
             {
                 UpdateUtils.CleanCacheAndOldFiles();
+            }
+            if (Configuration.Get<bool>("check_updates_on_startup"))
+            {
+                Task task = _settingsViewModel.OnUpdateButtonClicked();
             }
         }
 

@@ -48,6 +48,13 @@
         <ui:HyperlinkButton
             Margin="-1, 0, 0, 0"
             Padding="5"
+            Content="{svs:Localization FeedbackLink}"
+            NavigateUri="https://github.com/LumiOwO/LumiTracker/issues"
+            ToolTip="https://github.com/LumiOwO/LumiTracker/issues" />
+
+        <ui:HyperlinkButton
+            Margin="-1, 0, 0, 0"
+            Padding="5"
             Content="{svs:Localization BiliBiliLink}"
             NavigateUri="https://space.bilibili.com/234035154"
             ToolTip="https://space.bilibili.com/234035154" />

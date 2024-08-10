@@ -8,6 +8,10 @@ using System.Text;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Wpf.Ui.Controls;
+using System.Windows.Data;
+using System.Windows.Media;
+
+#pragma warning disable CS8618
 
 namespace LumiTracker.Services
 {
@@ -43,6 +47,7 @@ namespace LumiTracker.Services
 
     public enum EUpdateState
     {
+        None,
         GetReleaseMeta,
         AlreadyLatest,
         ClearOldFiles,
@@ -57,64 +62,92 @@ namespace LumiTracker.Services
 
     public partial class UpdateContext : ObservableObject
     {
-        // Controls
-        public EUpdateState State = EUpdateState.GetReleaseMeta;
-
-        public Task<ContentDialogResult>? ProgressDialogTask = null;
-
-        public ReleaseMeta? ReleaseMeta = null;
-
-        public Stopwatch? globalStopwatch = null;
-
-        public long downloadedBytes = 0;
-
-        public long totalBytes = 0;
-
-        // Settins UI
+        // Settings UI
         [ObservableProperty]
-        private string _promptText = "";
+        private LocalizationTextItem _promptText;
+
+        [ObservableProperty]
+        private Brush _promptColor;
+
+        [ObservableProperty]
+        private SymbolRegular _promptIcon;
+
+        [ObservableProperty]
+        private Visibility _promptShowLoading;
+
+        [ObservableProperty]
+        private Visibility _promptShowIcon;
+
+        // Controls
+        public EUpdateState State;
+
+        public Task<ContentDialogResult>? ProgressDialogTask;
+
+        public ReleaseMeta? ReleaseMeta;
+
+        public Stopwatch? globalStopwatch;
+
+        public long downloadedBytes;
+
+        public long totalBytes;
 
         // Progress dialog UI
         [ObservableProperty]
-        private string _progressText = "";
+        private string _progressText;
 
         [ObservableProperty]
-        private bool _indeterminate = true;
+        private bool _indeterminate;
 
         [ObservableProperty]
-        private string _remainTime = "";
+        private string _remainTime;
 
         [ObservableProperty]
-        private string _downloadSpeed = "";
+        private string _downloadSpeed;
 
         [ObservableProperty]
-        private double _progress = 0.0;
+        private double _progress;
 
         [ObservableProperty]
-        private string _downloadedSize = "0.00 MB";
+        private string _downloadedSize;
 
         [ObservableProperty]
-        private string _totalSize = "0.00 MB";
+        private string _totalSize;
 
         [ObservableProperty]
-        bool _readyToRestart = false;
+        bool _readyToRestart;
+
+        public UpdateContext()
+        {
+            // Settings UI
+            PromptText         = new ();
+            PromptColor        = Brushes.White;
+            PromptIcon         = SymbolRegular.Question24;
+            PromptShowLoading  = Visibility.Collapsed;
+            PromptShowIcon     = Visibility.Collapsed;
+
+            Reset();
+            State = EUpdateState.None;
+        }
 
         public void Reset()
         {
-            State = EUpdateState.GetReleaseMeta;
+            // Controls
+            State              = EUpdateState.GetReleaseMeta;
             ProgressDialogTask = null;
             ReleaseMeta        = null;
+            globalStopwatch    = null;
+            downloadedBytes    = 0;
+            totalBytes         = 0;
 
-            PromptText     = "";
-
-            ProgressText   = "";
-            Indeterminate  = true;
-            RemainTime     = "";
-            DownloadSpeed  = "";
-            Progress       = 0.0;
-            DownloadedSize = "0.00 MB";
-            TotalSize      = "0.00 MB";
-            ReadyToRestart = false;
+            // Progress dialog UI
+            ProgressText       = "";
+            Indeterminate      = true;
+            RemainTime         = "";
+            DownloadSpeed      = "";
+            Progress           = 0.0;
+            DownloadedSize     = "0.00 MB";
+            TotalSize          = "0.00 MB";
+            ReadyToRestart     = false;
         }
     }
 
@@ -122,6 +155,21 @@ namespace LumiTracker.Services
     {
         public async Task TryUpdateAsync(UpdateContext ctx)
         {
+            if (ctx.State != EUpdateState.None)
+                return;
+
+            await MainTask(ctx);
+            ctx.State = EUpdateState.None;
+        }
+
+        private async Task MainTask(UpdateContext ctx)
+        { 
+            var binding = LocalizationExtension.Create("UpdatePrompt_Fetching");
+            BindingOperations.SetBinding(ctx.PromptText, LocalizationTextItem.TextProperty, binding);
+            ctx.PromptShowLoading = Visibility.Visible;
+            ctx.PromptShowIcon    = Visibility.Collapsed;
+            ctx.PromptColor = new SolidColorBrush(Colors.Gray);
+
             // Get latest version meta
             int update_retries = Configuration.Get<int>("update_retries");
             bool success = false;
@@ -141,21 +189,26 @@ namespace LumiTracker.Services
             }
             if (!success)
             {
-                // TODO: Show get latest meta failed prompt text
-                ContentDialogService.ClearUpdateDialog();
-                return;
+                goto failed;
             }
             else if (ctx.State == EUpdateState.AlreadyLatest)
             {
-                // TODO: Show already latest prompt text
+                binding = LocalizationExtension.Create("UpdatePrompt_AlreadyLatest");
+                BindingOperations.SetBinding(ctx.PromptText, LocalizationTextItem.TextProperty, binding);
+                ctx.PromptShowLoading = Visibility.Collapsed;
+                ctx.PromptShowIcon = Visibility.Visible;
+                ctx.PromptIcon     = SymbolRegular.Checkmark24;
+                ctx.PromptColor    = new SolidColorBrush(Colors.Green);
                 return;
             }
             else if (ctx.ProgressDialogTask == null)
             {
-                // TODO: Not update now, clear prompt text
+                BindingOperations.ClearBinding(ctx.PromptText, LocalizationTextItem.TextProperty);
+                ctx.PromptText.Text   = "";
+                ctx.PromptShowLoading = Visibility.Collapsed;
+                ctx.PromptShowIcon    = Visibility.Collapsed;
                 return;
             }
-
 
             // Download latest version
             success = false;
@@ -175,9 +228,7 @@ namespace LumiTracker.Services
 
             if (!success)
             {
-                // TODO: Show get latest meta failed prompt text
-                ContentDialogService.ClearUpdateDialog();
-                return;
+                goto failed;
             }
             else if (ctx.State == EUpdateState.ReadyToRestart)
             {
@@ -189,6 +240,16 @@ namespace LumiTracker.Services
 
             // Should not reach here
             Configuration.Logger.LogError($"[Update] Unknown error. Should not reach here.");
+
+        failed:
+            binding = LocalizationExtension.Create("UpdatePrompt_Failed");
+            BindingOperations.SetBinding(ctx.PromptText, LocalizationTextItem.TextProperty, binding);
+            ctx.PromptShowLoading = Visibility.Collapsed;
+            ctx.PromptShowIcon = Visibility.Visible;
+            ctx.PromptIcon     = SymbolRegular.Dismiss24;
+            ctx.PromptColor    = new SolidColorBrush(Colors.Red);
+
+            ContentDialogService.ClearUpdateDialog();
         }
 
         private readonly string metaUrl = $"https://gitee.com/api/v5/repos/LumiOwO/LumiTracker/releases/latest";

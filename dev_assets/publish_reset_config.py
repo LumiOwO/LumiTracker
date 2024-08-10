@@ -11,15 +11,16 @@ def main(publish_dir):
 
     # Step 2: Modify the dictionary
     reset_configs = {
-        "DEBUG"               : False,
-        "DEBUG_SAVE"          : False,
-        "frame_limit"         : 50,
-        "lang"                : "zh-HANS",
-        "closing_behavior"    : "Minimize",
-        "theme"               : "Dark",
-        "client_type"         : "YuanShen",
-        "show_ui_outside"     : False,
+        "DEBUG" : False,
+        "DEBUG_SAVE" : False,
+        "frame_limit" : 50,
+        "lang" : "zh-HANS",
+        "closing_behavior" : "Minimize",
+        "theme" : "Dark",
+        "client_type" : "YuanShen",
+        "show_ui_outside" : False,
         "show_closing_dialog" : True,
+        "check_updates_on_startup" : True
     }
     cfg.update(reset_configs)
 

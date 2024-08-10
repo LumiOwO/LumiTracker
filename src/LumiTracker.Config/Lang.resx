@@ -149,8 +149,24 @@
     <value>Update</value>
     <comment/>
   </data>
-  <data name="UpdatePrompt_Available" xml:space="preserve">
-    <value>Update Available</value>
+  <data name="CheckUpdatesOnStartup" xml:space="preserve">
+    <value>Check Updates on Startup</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
+    <value>Check For Update</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Fetching" xml:space="preserve">
+    <value>Fetching latest version...</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_AlreadyLatest" xml:space="preserve">
+    <value>Already latest</value>
+    <comment/>
+  </data>
+  <data name="UpdatePrompt_Failed" xml:space="preserve">
+    <value>Update failed, please retry</value>
     <comment/>
   </data>
   <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
@@ -194,7 +210,7 @@
     <comment/>
   </data>
   <data name="ClosingBehavior_Minimize" xml:space="preserve">
-    <value>Minimize to system tray</value>
+    <value>Minimize to System Tray</value>
     <comment/>
   </data>
   <data name="Theme" xml:space="preserve">
@@ -346,6 +362,10 @@
   </data>
   <data name="DocumentationLink" xml:space="preserve">
     <value>Documentation</value>
+    <comment/>
+  </data>
+  <data name="FeedbackLink" xml:space="preserve">
+    <value>Feedback</value>
     <comment/>
   </data>
   <data name="BiliBiliLink" xml:space="preserve">

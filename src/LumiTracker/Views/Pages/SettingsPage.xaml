@@ -34,6 +34,7 @@
                 <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBlock 
@@ -49,17 +50,51 @@
             <ui:Button 
                 Grid.Column="1"
                 Command="{Binding ViewModel.UpdateButtonClickedCommand, Mode=OneWay}"
-                Content="{svs:Localization Update}" />
+                Content="{svs:Localization UpdatePrompt_CheckForUpdate}" />
 
-            <TextBlock 
+            <ui:ProgressRing
                 Grid.Column="2" 
                 Margin="15,0,0,2" 
-                Text="{svs:Localization Language}" 
+                Height="15"
+                Width="15"
+                VerticalAlignment="Stretch"
+                IsIndeterminate="True"
+                Visibility="{Binding ViewModel.UpdateContext.PromptShowLoading, Mode=OneWay}"
+                />
+
+            <ui:SymbolIcon
+                Grid.Column="2" 
+                Margin="15,0,0,2" 
+                FontWeight="Bold"
+                Visibility="{Binding ViewModel.UpdateContext.PromptShowIcon, Mode=OneWay}"
+                Symbol="{Binding ViewModel.UpdateContext.PromptIcon, Mode=OneWay}"
+                Foreground="{Binding ViewModel.UpdateContext.PromptColor, Mode=OneWay}"
+                />
+
+            <TextBlock 
+                Grid.Column="3" 
+                Margin="5,0,0,2" 
+                FontWeight="Bold"
+                Text="{Binding ViewModel.UpdateContext.PromptText.Text, Mode=OneWay}" 
+                Foreground="{Binding ViewModel.UpdateContext.PromptColor, Mode=OneWay}"
                 FontSize="15"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"/>
-
         </Grid>
+
+        <Grid Margin="10,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <CheckBox
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                IsChecked="{Binding ViewModel.CheckUpdatesOnStartup, Mode=TwoWay}"
+                Content="{svs:Localization CheckUpdatesOnStartup}"
+                />
+        </Grid>
+
 
         <Grid Margin="10,20,0,0">
             <Grid.ColumnDefinitions>

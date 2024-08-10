@@ -1,13 +1,10 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Controls;
-using Microsoft.Extensions.Options;
-using System;
-using System.Threading;
+using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Data;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
-using Wpf.Ui.Extensions;
 
 namespace LumiTracker.Services
 {
@@ -115,10 +112,17 @@ namespace LumiTracker.Services
 
         public async Task<Task<ContentDialogResult>?> ShowUpdateDialogAsync(UpdateContext ctx)
         {
-            // Show dialog
+            // Init latest release info dialog content
+            var releaseContent = new LatestReleaseDialogContent();
+            string title = ctx.ReleaseMeta!.tag_name;
+            string text  = ctx.ReleaseMeta!.body;
+            MarkdownParser.ParseMarkdown(releaseContent.RichTextBox.Document, text);
+
+            // Show latest release info dialog
             UpdateDialog = new ContentDialog()
             {
-                Title = LocalizationSource.Instance["UpdatePrompt_Available"],
+                Title   = title,
+                Content = releaseContent,
                 PrimaryButtonText = LocalizationSource.Instance["UpdatePrompt_UpdateNow"],
                 CloseButtonText   = LocalizationSource.Instance["UpdatePrompt_Later"],
                 PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
@@ -131,7 +135,7 @@ namespace LumiTracker.Services
                 return null;
             }
 
-            // Init
+            // Init progress dialog content
             var progressContent = new UpdateProgressDialogContent();
             var binding = new Binding(".")
             {
@@ -140,7 +144,7 @@ namespace LumiTracker.Services
             };
             progressContent.SetBinding(UpdateProgressDialogContent.ContextProperty, binding);
 
-            // Show dialog
+            // Show progress dialog
             UpdateDialog = new ContentDialog()
             {
                 Content = progressContent,
