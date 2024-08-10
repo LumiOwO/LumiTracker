@@ -1,3 +1,7 @@
+# \[[v1.2.1](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.1)\] - 2024.08.10
+### Bug修复
+- 修复启动架构更新导致的闪退问题
+
 # \[[v1.2.0](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.0)\] - 2024.08.10
 ### 体验优化
 - **新增**: 支持自动更新，终于不用每次都卸载重装一遍了！
