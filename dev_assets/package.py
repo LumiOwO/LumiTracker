@@ -3,9 +3,10 @@ import py7zr
 import zipfile
 import os
 import hashlib
-import configparser
+import shutil
 from sortedcontainers import SortedSet
 from tqdm import tqdm
+import subprocess
 
 def calculate_md5(file_path):
     # Create an MD5 hash object
@@ -74,6 +75,30 @@ def package_separate(files, ignored_files, dst_dir, root_dir, package_name, md5s
     with open(meta_file, 'w') as file:
         pass  # No need to write anything
 
+
+def run_inno_setup(script_path, compiler_path, defines):
+    # Check if the script file exists
+    if not os.path.isfile(script_path):
+        print(f"Script file {script_path} does not exist.")
+        return
+    
+    # Check if the Inno Setup Compiler executable exists
+    if not os.path.isfile(compiler_path):
+        print(f"Inno Setup Compiler {compiler_path} does not exist.")
+        return
+
+    # Command to run Inno Setup Compiler
+    command = [compiler_path, "/Qp", script_path]
+    for key, value in defines.items():
+        command.append(f'/D{key}={value}')
+
+    try:
+        # Run the command and wait for it to complete
+        subprocess.run(command, check=True)
+        print("Inno Setup script executed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while running Inno Setup: {e}")
+
 def main(publish_dir):
     root_dir = os.path.join(publish_dir, "LumiTracker")
     app_dir  = ""
@@ -109,20 +134,29 @@ def main(publish_dir):
 
     # ================== Full app ==================
     print("Updating .ini file...")
-    config = configparser.ConfigParser()
-    config.add_section('Application')
-    config.set('Application', 'Version', version)
-    config.set('Application', 'Console', "0")
-    config.set('Application', 'Patch', md5s["Patch"])
-    config.set('Application', 'Assets', md5s["Assets"])
-    config.set('Application', 'Python', md5s["Python"])
     ini_file = os.path.join(root_dir, f"LumiTracker.ini")
-    with open(ini_file, 'w') as configfile:
-        config.write(configfile)
+    with open(ini_file, 'w') as file:
+        # Write sections and options
+        file.write(f'[Application]\n')
+        file.write(f'Version = {version}\n')
+        file.write(f'Console = 0\n')
+        file.write(f'Patch = {md5s["Patch"]}\n')
+        file.write(f'Assets = {md5s["Assets"]}\n')
+        file.write(f'Python = {md5s["Python"]}\n')
 
     print("Packaging Full App...")
     full_files = get_all_files(root_dir)
     package_full(files=full_files, dst_dir=publish_dir, root_dir=root_dir, version=version)
+
+    print("Running InnoSetup...")
+    script_file_path = os.path.join(publish_dir, "..", "dev_assets", f"setup.iss")
+    inno_setup_compiler_path = 'D:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe'
+    defines = {
+        'MyAppVersion': version,
+        'MyRootDir': os.path.join(publish_dir, ".."),
+        'MyPublishDir': publish_dir,
+    }
+    run_inno_setup(script_file_path, inno_setup_compiler_path, defines)
 
 if __name__ == "__main__":
     publish_dir = sys.argv[1]

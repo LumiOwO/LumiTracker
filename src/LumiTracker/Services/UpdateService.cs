@@ -99,6 +99,9 @@ namespace LumiTracker.Services
         private bool _indeterminate;
 
         [ObservableProperty]
+        private string _elapsedTime;
+
+        [ObservableProperty]
         private string _remainTime;
 
         [ObservableProperty]
@@ -142,6 +145,7 @@ namespace LumiTracker.Services
             // Progress dialog UI
             ProgressText       = "";
             Indeterminate      = true;
+            ElapsedTime        = "";
             RemainTime         = "";
             DownloadSpeed      = "";
             Progress           = 0.0;
@@ -321,6 +325,7 @@ namespace LumiTracker.Services
             }
             ctx.ProgressText   = retry ? LocalizationSource.Instance["UpdatePrompt_Retrying"] : LocalizationSource.Instance["UpdatePrompt_Connecting"];
             ctx.Indeterminate  = true;
+            ctx.ElapsedTime    = "";
             ctx.RemainTime     = "";
             ctx.DownloadSpeed  = "";
             ctx.Progress       = 0.0;
@@ -440,6 +445,7 @@ namespace LumiTracker.Services
             ctx.State = EUpdateState.UnzipAndCopy;
             await progressUpdater;
 
+            ctx.ElapsedTime    = "";
             ctx.RemainTime     = "";
             ctx.DownloadSpeed  = "";
             ctx.Progress       = 1.0;
@@ -532,15 +538,16 @@ namespace LumiTracker.Services
                 long downloadedBytes = ctx.downloadedBytes;
                 long totalBytes = ctx.totalBytes;
                 long deltaBytes = downloadedBytes - prevDownloadedBytes;
+                double elapsedTime = ctx.globalStopwatch!.Elapsed.TotalSeconds;
 
                 double downloadSpeed = 1000.0 / deltaTimeMS * deltaBytes;
-                var averageSpeed = downloadedBytes / (ctx.globalStopwatch!.Elapsed.TotalSeconds + 1e-5);
+                var averageSpeed = downloadedBytes / (elapsedTime + 1e-5);
                 var remainTime = (totalBytes - downloadedBytes) / averageSpeed;
 
-
-                ctx.RemainTime = UpdateUtils.FormatRemainTime(remainTime);
-                ctx.DownloadSpeed = UpdateUtils.FormatBytes(downloadSpeed) + "/s";
-                ctx.Progress = (double)downloadedBytes / totalBytes;
+                ctx.ElapsedTime    = UpdateUtils.FormatTime(elapsedTime);
+                ctx.RemainTime     = UpdateUtils.FormatTime(remainTime);
+                ctx.DownloadSpeed  = UpdateUtils.FormatBytes(downloadSpeed) + "/s";
+                ctx.Progress       = (double)downloadedBytes / totalBytes;
                 ctx.DownloadedSize = UpdateUtils.FormatBytes(downloadedBytes);
 
                 //Configuration.Logger.LogDebug(
@@ -661,7 +668,7 @@ namespace LumiTracker.Services
             }
         }
 
-        public static string FormatRemainTime(double seconds)
+        public static string FormatTime(double seconds)
         {
             // Define the maximum allowable seconds (99 minutes and 59 seconds)
             const double maxSeconds = 99 * 60 + 59;

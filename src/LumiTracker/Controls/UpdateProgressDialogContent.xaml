@@ -10,7 +10,7 @@
             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
             mc:Ignorable="d">
     <UserControl.Resources>
-        <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+        <helpers:BooleanNotThenToVisibilityConverter x:Key="BooleanNotThenToVisibilityConverter" />
 
         <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#909090"/>
     </UserControl.Resources>
@@ -25,16 +25,22 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
+
         <TextBlock
             Grid.Row="0"
             Grid.Column="0"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
-            Text="{Binding Context.RemainTime}"
             FontWeight="Bold" 
             Foreground="#f9ca24"
-            >
+            Visibility="{Binding Context.Indeterminate,
+                Converter={StaticResource BooleanNotThenToVisibilityConverter},
+                ConverterParameter=Hidden
+                }"
+                >
+            <Run Text="{Binding Context.ElapsedTime}"/>
+            <Run Text="/" /> 
+            <Run Text="{Binding Context.RemainTime}"/>
         </TextBlock>
 
         <TextBlock
@@ -63,6 +69,10 @@
             Grid.Column="0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
+            Visibility="{Binding Context.Indeterminate,
+                Converter={StaticResource BooleanNotThenToVisibilityConverter},
+                ConverterParameter=Hidden
+                }"
             >
             <Run Text="{Binding Context.DownloadSpeed}"/>
         </TextBlock>
