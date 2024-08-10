@@ -165,6 +165,10 @@
     <value>已是最新版本</value>
     <comment/>
   </data>
+  <data name="UpdatePrompt_UpdateAvailable" xml:space="preserve">
+    <value>检测到新版本</value>
+    <comment/>
+  </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
     <value>更新失败，请重试</value>
     <comment/>

@@ -165,6 +165,10 @@
     <value>Already latest</value>
     <comment/>
   </data>
+  <data name="UpdatePrompt_UpdateAvailable" xml:space="preserve">
+    <value>An update is available</value>
+    <comment/>
+  </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
     <value>Update failed, please retry</value>
     <comment/>

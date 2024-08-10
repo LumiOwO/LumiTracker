@@ -1,3 +1,7 @@
+# \[[v1.2.0](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.0)\] - 2024.08.10
+### 体验优化
+- **新增**: 支持自动更新，终于不用每次都卸载重装一遍了！
+
 # \[[v1.1.0](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.1.0)\] - 2024.08.03
 ### 检测功能
 - **Add**: **过牌** 和 **向牌库新增卡牌**的检测

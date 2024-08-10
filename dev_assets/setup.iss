@@ -29,12 +29,12 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}-Release
+DefaultDirName={commonpf64}\{#MyAppName}-Release
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ; PrivilegesRequired=lowest
 OutputDir={#MyPublishDir}
-OutputBaseFilename=LumiTracker_Setup
+OutputBaseFilename=LumiTracker_v{#MyAppVersion}_Setup
 SetupIconFile={#MyRootDir}\src\LumiTracker\Assets\LumiTracker.ico
 Compression=lzma
 SolidCompression=yes

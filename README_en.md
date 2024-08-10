@@ -22,7 +22,7 @@
 ---
 
 - [ ] Multi-language support
-- [ ] In-app updates
+- [x] In-app updates
 - [x] Support for Genshin Impact Cloud Game
 
 ## System Requirements

@@ -10,8 +10,14 @@ if "%~1"=="" (
 
 :: Handle the 'uninstall' case
 if "%~1"=="uninstall" (
-    echo Uninstall process initiated.
-    :: Add your uninstall logic here, if any
+    echo Uninstall process started.
+    cd /d %~dp0
+
+    for /d %%D in (LumiTrackerApp-*) do (
+        echo Deleting directory: %%D
+        rd /s /q "%%D"
+    )
+
     goto :eof
 )
 

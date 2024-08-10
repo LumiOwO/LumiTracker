@@ -207,10 +207,12 @@ namespace LumiTracker.Services
             }
             else if (ctx.ProgressDialogTask == null)
             {
-                BindingOperations.ClearBinding(ctx.PromptText, LocalizationTextItem.TextProperty);
-                ctx.PromptText.Text   = "";
+                binding = LocalizationExtension.Create("UpdatePrompt_UpdateAvailable");
+                BindingOperations.SetBinding(ctx.PromptText, LocalizationTextItem.TextProperty, binding);
                 ctx.PromptShowLoading = Visibility.Collapsed;
-                ctx.PromptShowIcon    = Visibility.Collapsed;
+                ctx.PromptShowIcon    = Visibility.Visible;
+                ctx.PromptIcon  = SymbolRegular.Alert24;
+                ctx.PromptColor = new SolidColorBrush(Colors.Orange);
                 return;
             }
 
