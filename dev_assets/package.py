@@ -61,7 +61,6 @@ def package_separate(files, ignored_files, dst_dir, root_dir, package_name, md5s
                 # Update the progress bar
                 pbar.update(1)
     # Update package metas
-    size = os.path.getsize(dst_file)
     md5  = hasher.hexdigest()
     md5s[package_name] = md5
 
@@ -71,7 +70,10 @@ def package_separate(files, ignored_files, dst_dir, root_dir, package_name, md5s
         os.remove(dst_file)
     else:
         os.rename(dst_file, package_file)
-    meta_file = os.path.join(dst_dir, f"Package-{package_name}-{md5}-{size}.txt")
+
+    size = os.path.getsize(package_file)
+    checksum = calculate_md5(package_file)
+    meta_file = os.path.join(dst_dir, f"Package-{package_name}-{md5}-{size}-{checksum}.txt")
     with open(meta_file, 'w') as file:
         pass  # No need to write anything
 

@@ -33,7 +33,9 @@ namespace LumiTracker.Services
         // Not in the response body
         public bool need_update { get; set; } = false;
         public string package { get; set; } = "";
-        public string md5 { get; set; } = "";
+        public string md5 { get; set; } = "";      // package id
+
+        public string checksum { get; set; } = ""; // For download check, not package id
         public string zip_path { get; set; } = "";
     }
 
@@ -366,16 +368,18 @@ namespace LumiTracker.Services
                 int lastIdx = fields.Length - 1;
                 fields[lastIdx] = fields[lastIdx].Substring(0, fields[lastIdx].Length - 4); // remove postfix (.txt)
 
-                string package = fields[1];
-                string md5     = fields[2];
-                long   size    = long.Parse(fields[3]); 
+                string package  = fields[1];
+                string md5      = fields[2];
+                long   size     = long.Parse(fields[3]);
+                string checksum = fields[4];
                 if (package == "Patch" || md5 != Configuration.Ini[package])
                 {
                     attachMeta.name = $"Package-{package}-{md5}.zip";
                     attachMeta.size = size;
                     attachMeta.need_update = true;
-                    attachMeta.package = package;
-                    attachMeta.md5 = md5;
+                    attachMeta.package  = package;
+                    attachMeta.md5      = md5;
+                    attachMeta.checksum = checksum;
                     attachMeta.zip_path = Path.Combine(Configuration.CacheDir, attachMeta.name);
 
                     totalBytes += size;
@@ -426,18 +430,18 @@ namespace LumiTracker.Services
                 }
 
                 // Calculate the MD5 hash of the downloaded file asynchronously
-                string md5Hash = await UpdateUtils.FileMD5Sum(meta.zip_path);
+                string checksum = await UpdateUtils.FileMD5Sum(meta.zip_path);
 
                 // Check if the computed hash matches the expected hash
-                if (!md5Hash.Equals(meta.md5, StringComparison.OrdinalIgnoreCase))
+                if (!checksum.Equals(meta.checksum, StringComparison.OrdinalIgnoreCase))
                 {
-                    Configuration.Logger.LogError($"[Update] Package {meta.package} downloaded failed. md5 hash {md5Hash} does not match the expected value {meta.md5}.");
+                    Configuration.Logger.LogError($"[Update] Package {meta.package} downloaded failed. md5 checksum {checksum} does not match the expected value {meta.checksum}.");
                     return false;
                 }
 
-                Configuration.Logger.LogDebug($"[Update] Package {meta.package} downloaded, md5: {md5Hash}");
+                Configuration.Logger.LogDebug($"[Update] Package {meta.package} downloaded, md5 checksum: {checksum}");
                 EPackageType type = Enum.Parse<EPackageType>(meta.package);
-                md5Hashs[(int)type] = md5Hash;
+                md5Hashs[(int)type] = meta.md5;
             }
             ctx.globalStopwatch.Stop();
 

@@ -10,7 +10,7 @@
             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
             mc:Ignorable="d">
     <UserControl.Resources>
-        <helpers:BooleanNotThenToVisibilityConverter x:Key="BooleanNotThenToVisibilityConverter" />
+        <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
 
         <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#909090"/>
     </UserControl.Resources>
@@ -33,8 +33,8 @@
             VerticalAlignment="Bottom"
             FontWeight="Bold" 
             Foreground="#f9ca24"
-            Visibility="{Binding Context.Indeterminate,
-                Converter={StaticResource BooleanNotThenToVisibilityConverter},
+            Visibility="{Binding Context.ElapsedTime,
+                Converter={StaticResource StringToVisibilityConverter},
                 ConverterParameter=Hidden
                 }"
                 >
@@ -69,8 +69,8 @@
             Grid.Column="0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
-            Visibility="{Binding Context.Indeterminate,
-                Converter={StaticResource BooleanNotThenToVisibilityConverter},
+            Visibility="{Binding Context.ElapsedTime,
+                Converter={StaticResource StringToVisibilityConverter},
                 ConverterParameter=Hidden
                 }"
             >
