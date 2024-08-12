@@ -38,6 +38,7 @@
   "closing_behavior": "Quit",
   "theme": "Dark",
   "client_type": "YuanShen",
+  "capture_type": "BitBlt",
   "show_ui_outside": true,
   "show_closing_dialog": false,
   "check_updates_on_startup": true

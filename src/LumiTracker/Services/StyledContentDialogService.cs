@@ -1,8 +1,10 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Controls;
-using System.Reflection;
+using System.IO;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
 
@@ -178,6 +180,33 @@ namespace LumiTracker.Services
                 UpdateDialog.Hide();
                 UpdateDialog = null;
             }
+        }
+
+        public async Task<ContentDialogResult> ShowCaptureTestDialogAsync(string filename)
+        {
+            // Init
+            var content = new Wpf.Ui.Controls.Image();
+            content.Source = new BitmapImage(new Uri(Path.Combine(Configuration.LogDir, filename), UriKind.Absolute));
+            content.CornerRadius = new CornerRadius(4);
+            content.BorderBrush  = new SolidColorBrush(Color.FromArgb(0x33, 0x00, 0x00, 0x00));
+            content.VerticalAlignment = VerticalAlignment.Center;
+            content.Stretch   = Stretch.Uniform;
+            content.MaxHeight = 350;
+
+            // Show dialog
+            var dialog = new ContentDialog()
+            {
+                Title   = LocalizationSource.Instance["CaptureType_TestDoneTitle"],
+                Content = content,
+                CloseButtonText = LocalizationSource.Instance["OK"],
+                CloseButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
+                CloseButtonAppearance    = ControlAppearance.Success,
+                IsPrimaryButtonEnabled   = false,
+                IsSecondaryButtonEnabled = false,
+            };
+            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
+
+            return result;
         }
     }
 }

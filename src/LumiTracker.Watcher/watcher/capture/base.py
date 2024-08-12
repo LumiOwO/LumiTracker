@@ -1,11 +1,14 @@
 import win32gui
 import win32api
 import ctypes
+from datetime import datetime
+import os
 
-from ..config import cfg, LogDebug
+from ..config import cfg, LogDebug, LogInfo
+from ..enums import ETaskType
+from ..database import SaveImage
 from ..frame_manager import FrameManager
-
-import ctypes
+from ..input_manager import InputManager
 
 kernel32 = ctypes.WinDLL('kernel32')
 kernel32.Sleep.argtypes = [ctypes.c_ulong]
@@ -22,6 +25,7 @@ class CaptureBase:
         self.hwnd           = 0
         self.frame_manager  = None
         self.frame_interval = 1.0 / cfg.frame_limit
+        self.input_manager  = None
 
         # set timer resolution to 1 ms
         winmm.timeBeginPeriod(1)
@@ -29,6 +33,7 @@ class CaptureBase:
     def Start(self, hwnd):
         self.hwnd = hwnd
         self.frame_manager = FrameManager()
+        self.input_manager = InputManager()
 
         self.OnStart(hwnd)
         self.MainLoop()
@@ -45,7 +50,19 @@ class CaptureBase:
     def OnResize(self, client_width, client_height):
         raise NotImplementedError()
 
+    def BeforeFrameArrived(self):
+        self.input_manager.Tick()
+
     def OnFrameArrived(self, frame_buffer):
+        if self.input_manager.capture_save_dir:
+            filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
+            path = os.path.join(self.input_manager.capture_save_dir, filename)
+            SaveImage(frame_buffer, path, remove_alpha=True)
+            LogInfo(
+                type=f"{ETaskType.CAPTURE_TEST.name}",
+                filename=filename,
+                )
+
         # frame_buffer: 4-channels, BGRX
         self.frame_manager.OnFrameArrived(frame_buffer)
 

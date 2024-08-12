@@ -1,5 +1,11 @@
 import enum
 
+class ECaptureType(enum.Enum):
+    BitBlt          = 0
+    WindowsCapture  = enum.auto()
+
+    NumCaptureTypes = enum.auto()
+
 class ETaskType(enum.Enum):
     NONE              = 0
 
@@ -17,8 +23,8 @@ class ETaskType(enum.Enum):
     MY_CREATE_HAND    = enum.auto() # eg. Furina
     OP_CREATE_HAND    = enum.auto()
 
-    # types for exception
     UNSUPPORTED_RATIO = enum.auto()
+    CAPTURE_TEST      = enum.auto()
 
 class ERegionType(enum.Enum):
     GAME_START = 0

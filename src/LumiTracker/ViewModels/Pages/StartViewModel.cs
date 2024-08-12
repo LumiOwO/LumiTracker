@@ -14,6 +14,8 @@ namespace LumiTracker.ViewModels.Pages
 
         private GameWatcher _gameWatcher;
 
+        private readonly StyledContentDialogService _contentDialogService;
+
         [ObservableProperty]
         private LocalizationTextItem[] _clientTypes = new LocalizationTextItem[(int)EClientType.NumClientTypes];
 
@@ -35,16 +37,55 @@ namespace LumiTracker.ViewModels.Pages
         private Brush _gameWatcherStateBrush = Brushes.DarkGray;
 
         [ObservableProperty]
+        private string[] _captureTypes = new string[(int)ECaptureType.NumCaptureTypes];
+
+        [ObservableProperty]
+        private int _selectedCaptureIndex = -1;
+
+        [ObservableProperty]
+        private LocalizationTextItem _cloudGameHint = new ();
+
+        [ObservableProperty]
+        private bool _captureSelectionEnabled = true;
+
+        partial void OnSelectedClientIndexChanged(int oldValue, int newValue)
+        {
+            if (newValue == (int)EClientType.Cloud)
+            {
+                var binding = LocalizationExtension.Create("CaptureType_CloudGameHint");
+                BindingOperations.SetBinding(CloudGameHint, LocalizationTextItem.TextProperty, binding);
+                SelectedCaptureIndex = (int)ECaptureType.WindowsCapture;
+                CaptureSelectionEnabled = false;
+            }
+            else
+            {
+                BindingOperations.ClearBinding(CloudGameHint, LocalizationTextItem.TextProperty);
+                CloudGameHint.Text = "";
+                SelectedCaptureIndex = (int)Configuration.Get<ECaptureType>("capture_type");
+                CaptureSelectionEnabled = true;
+            }
+        }
+
+        [ObservableProperty]
         private bool _showUIOutside = false;
 
-        public StartViewModel(IDeckWindow deckWindow, GameWatcher gameWatcher)
+        public StartViewModel(IDeckWindow deckWindow, GameWatcher gameWatcher, StyledContentDialogService contentDialogService)
         {
             _deckWindow  = deckWindow;
             _gameWatcher = gameWatcher;
+            _contentDialogService = contentDialogService;
         }
 
         public void Init()
         {
+            // Capture types
+            for (ECaptureType i = 0; i < ECaptureType.NumCaptureTypes; i++)
+            {
+                CaptureTypes[(int)i] = i.ToString();
+            }
+            ECaptureType CaptureType = Configuration.Get<ECaptureType>("capture_type");
+            SelectedCaptureIndex = (int)CaptureType;
+
             // Client types
             for (EClientType i = 0; i < EClientType.NumClientTypes; i++)
             {
@@ -59,7 +100,7 @@ namespace LumiTracker.ViewModels.Pages
             // Game Watcher State
             GameWatcherState = EGameWatcherState.NoWindowFound;
 
-            // Options in main page
+            // Show UI outside
             ShowUIOutside = Configuration.Get<bool>("show_ui_outside");
             _deckWindow.SetbOutside(ShowUIOutside);
 
@@ -67,26 +108,9 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.GenshinWindowFound += OnGenshinWindowFound;
             _gameWatcher.WindowWatcherStart += OnWindowWatcherStart;
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
+            _gameWatcher.CaptureTestDone    += OnCaptureTestDone;
 
-            _gameWatcher.Start(GetProcessName(ClientType));
-        }
-
-        private string GetProcessName(EClientType clientType)
-        {
-            string processName = "";
-            if (clientType == EClientType.YuanShen)
-            {
-                processName = "YuanShen.exe";
-            }
-            else if (clientType == EClientType.Global)
-            {
-                processName = "GenshinImpact.exe";
-            }
-            else if (clientType == EClientType.Cloud)
-            {
-                processName = "Genshin Impact Cloud Game.exe";
-            }
-            return processName;
+            _gameWatcher.Start(EClientProcessNames.Values[(int)ClientType]);
         }
 
         private void OnGenshinWindowFound()
@@ -116,16 +140,20 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         public void OnSelectedClientChanged()
         {
-            EClientType SelectedClientType = (EClientType)SelectedClientIndex;
-            Configuration.Logger.LogDebug($"{SelectedClientType}");
+            EClientType  SelectedClientType  = (EClientType)SelectedClientIndex;
+            ECaptureType SelectedCaptureType = (ECaptureType)SelectedCaptureIndex;
+            string processName = EClientProcessNames.Values[(int)SelectedClientType];
+            Configuration.Logger.LogInformation($"Client = {processName}, CaptureType = {SelectedCaptureType.ToString()}");
 
             GameWatcherState = EGameWatcherState.NoWindowFound;
             GameWatcherStateBrush = Brushes.DarkGray;
 
-            string processName = GetProcessName(SelectedClientType);
-            Configuration.Logger.LogDebug(processName);
-
-            Configuration.Set("client_type", SelectedClientType.ToString());
+            Configuration.Set("client_type",  SelectedClientType.ToString(), auto_save: false);
+            if (SelectedClientType != EClientType.Cloud)
+            {
+                Configuration.Set("capture_type", SelectedCaptureType.ToString(), auto_save: false);
+            }
+            Configuration.Save();
 
             _gameWatcher.ChangeGameClient(processName);
         }
@@ -137,6 +165,20 @@ namespace LumiTracker.ViewModels.Pages
             _deckWindow.SetbOutside(ShowUIOutside);
 
             Configuration.Set("show_ui_outside", ShowUIOutside);
+        }
+
+        [RelayCommand]
+        public async Task OnCaptureTest()
+        {
+            await _gameWatcher.DumpToBackend(Configuration.LogDir);
+        }
+
+        public void OnCaptureTestDone(string filename)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Task task = _contentDialogService.ShowCaptureTestDialogAsync(filename);
+            });
         }
     }
 }

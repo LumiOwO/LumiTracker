@@ -53,6 +53,8 @@ class WindowsCapture(CaptureBase):
 
     # Called Every Time A New Frame Is Available
     def on_frame_arrived(self, frame: Frame, capture_control: InternalCaptureControl):
+        self.BeforeFrameArrived()
+
         if frame.width != self.window_size[0] or frame.height != self.window_size[1]:
             self.OnResize(frame.width, frame.height)
 

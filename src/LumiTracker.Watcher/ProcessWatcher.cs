@@ -48,6 +48,8 @@ namespace LumiTracker.Watcher
 
     public delegate void OnUnsupportedRatioCallback();
 
+    public delegate void OnCaptureTestDoneCallback(string filename);
+
     public delegate void ExceptionHandlerCallback(Exception ex);
 
     public class ProcessWatcher : IAsyncDisposable
@@ -64,6 +66,7 @@ namespace LumiTracker.Watcher
         public event OnMyCardsCreateDeckCallback?  MyCardsCreateDeck;
         public event OnOpCardsCreateDeckCallback?  OpCardsCreateDeck;
         public event OnUnsupportedRatioCallback?   UnsupportedRatio;
+        public event OnCaptureTestDoneCallback?    CaptureTestDone;
         public event ExceptionHandlerCallback?     ExceptionHandler;
 
 
@@ -87,7 +90,7 @@ namespace LumiTracker.Watcher
             var processes = GetProcessByName(processName);
             if (processes.Count == 0)
             {
-                Configuration.Logger.LogInformation($"No process found with name: {processName}");
+                Configuration.Logger.LogDebug($"No process found with name: {processName}");
                 return res;
             }
 
@@ -100,7 +103,7 @@ namespace LumiTracker.Watcher
             var info = GetMainWindowInfo(proc);
             if (info.hwnd == 0)
             {
-                Configuration.Logger.LogInformation($"No windows found for process '{processName}' (PID: {proc.Id})");
+                Configuration.Logger.LogDebug($"No windows found for process '{processName}' (PID: {proc.Id})");
                 return res;
             }
             GenshinWindowFound?.Invoke();
@@ -108,7 +111,7 @@ namespace LumiTracker.Watcher
             var foregroundHwnd = GetForegroundWindow();
             if (info.hwnd != foregroundHwnd)
             {
-                Configuration.Logger.LogInformation($"Window for process '{processName}' (PID: {proc.Id}) is not foreground");
+                Configuration.Logger.LogDebug($"Window for process '{processName}' (PID: {proc.Id}) is not foreground");
                 return res;
             }
 
@@ -140,7 +143,7 @@ namespace LumiTracker.Watcher
                     info.hwnd  = hwnd;
                     info.title = GetWindowText(hwnd);
                 }
-                Configuration.Logger.LogInformation($"###Main window: hwnd={info.hwnd}, title={info.title}");
+                Configuration.Logger.LogDebug($"###Main window: hwnd={info.hwnd}, title={info.title}");
             }
 
             return info;
@@ -156,6 +159,7 @@ namespace LumiTracker.Watcher
         private SpinLockedValue<bool> ShouldCancel = new (false);
         private Task? _processWatcherTask;
         private Task? _windowWatcherTask;
+        public StreamWriter? BackendStreamWriter { get; private set; } = null;
 
         public async ValueTask DisposeAsync()
         {
@@ -203,11 +207,10 @@ namespace LumiTracker.Watcher
         {
             Configuration.Logger.LogInformation($"Begin to start window watcher");
 
-            string captureType = "BitBlt"; // default 
-            if (processName == "Genshin Impact Cloud Game.exe")
-            {
-                captureType = "WindowsCapture"; // Genshin cloud cannot captured by bitblt
-            }
+            string captureType = 
+                processName == EClientProcessNames.Values[(int)EClientType.Cloud] ?
+                ECaptureType.WindowsCapture.ToString() :
+                Configuration.Get<ECaptureType>("capture_type").ToString();
 
             bool canHideBorder = ApiInformation.IsPropertyPresent(
                 "Windows.Graphics.Capture.GraphicsCaptureSession", "IsBorderRequired");
@@ -218,6 +221,7 @@ namespace LumiTracker.Watcher
                 Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {captureType} {(canHideBorder ? 1 : 0)}",
                 UseShellExecute = false,
                 RedirectStandardError = true,
+                RedirectStandardInput = true,
                 CreateNoWindow = true,
                 WorkingDirectory = Configuration.AppDir,
             };
@@ -233,12 +237,14 @@ namespace LumiTracker.Watcher
             }
             ChildProcessTracker.AddProcess(process);
             process.BeginErrorReadLine();
+            BackendStreamWriter = process.StandardInput;
 
             WindowWatcherStart?.Invoke(info.hwnd);
             while (!process.HasExited)
             {
                 if (ShouldCancel.Value)
                 {
+                    BackendStreamWriter = null;
                     process.Kill();
                 }
                 await Task.Delay(interval);
@@ -315,6 +321,11 @@ namespace LumiTracker.Watcher
                         Configuration.Logger.LogWarning(
                             $"[ProcessWatcher] Current resolution is {client_width} x {client_height} with ratio = {ratio}, which is not supported now.");
                         UnsupportedRatio?.Invoke();
+                    }
+                    else if (task_type == ETaskType.CAPTURE_TEST)
+                    {
+                        string filename = message_data["filename"]!.ToObject<string>()!;
+                        CaptureTestDone?.Invoke(filename);
                     }
                     else
                     {

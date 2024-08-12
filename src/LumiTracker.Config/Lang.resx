@@ -254,7 +254,7 @@
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
-    <value>Game window not detected</value>
+    <value>Detecting game window...</value>
     <comment/>
   </data>
   <data name="GameWatcherState_WindowNotForeground" xml:space="preserve">
@@ -263,6 +263,22 @@
   </data>
   <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
     <value>LumiTracker started</value>
+    <comment/>
+  </data>
+  <data name="CaptureType" xml:space="preserve">
+    <value>Capture Type</value>
+    <comment/>
+  </data>
+  <data name="CaptureType_Test" xml:space="preserve">
+    <value>Test</value>
+    <comment/>
+  </data>
+  <data name="CaptureType_CloudGameHint" xml:space="preserve">
+    <value>* This is the only available method for cloud game.</value>
+    <comment/>
+  </data>
+  <data name="CaptureType_TestDoneTitle" xml:space="preserve">
+    <value>Capture Result</value>
     <comment/>
   </data>
   <data name="MyPlayedCards" xml:space="preserve">

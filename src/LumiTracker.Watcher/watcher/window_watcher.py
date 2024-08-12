@@ -3,6 +3,7 @@ import logging
 import ctypes
 
 from .config import cfg, LogDebug, LogError
+from .enums import ECaptureType
 
 class WindowWatcher:
     def __init__(self):
@@ -34,10 +35,10 @@ if __name__ == '__main__':
         can_hide_border=can_hide_border,
         )
 
-    if capture_type == "BitBlt":
+    if capture_type == ECaptureType.BitBlt.name:
         from .capture import BitBlt
         capture = BitBlt()
-    elif capture_type == "WindowsCapture":
+    elif capture_type == ECaptureType.WindowsCapture.name:
         from .capture import WindowsCapture
         capture = WindowsCapture(can_hide_border)
     else:

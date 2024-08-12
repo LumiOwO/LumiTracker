@@ -46,6 +46,8 @@ namespace LumiTracker.Models
 
         public event OnUnsupportedRatioCallback?    UnsupportedRatio;
 
+        public event OnCaptureTestDoneCallback?     CaptureTestDone;
+
         public GameWatcher()
         {
 
@@ -61,6 +63,19 @@ namespace LumiTracker.Models
         {
             processName.Value = name;
             StopCurrentProcessWatcher();
+        }
+
+        public async Task DumpToBackend(string message)
+        {
+            if (processWatcher.Value == null)
+                return;
+
+            var writer = processWatcher.Value.BackendStreamWriter;
+            if (writer != null && writer.BaseStream.CanWrite)
+            {
+                await writer.WriteLineAsync(message);
+                await writer.FlushAsync();
+            }
         }
 
         private async Task MainLoop()
@@ -86,6 +101,7 @@ namespace LumiTracker.Models
                 watcher.MyCardsCreateDeck  += OnMyCardsCreateDeck;
                 watcher.OpCardsCreateDeck  += OnOpCardsCreateDeck;
                 watcher.UnsupportedRatio   += OnUnsupportedRatio;
+                watcher.CaptureTestDone    += OnCaptureTestDone;
                 watcher.ExceptionHandler   += OnException;
                 processWatcher.Value = watcher;
 
@@ -181,7 +197,13 @@ namespace LumiTracker.Models
             Configuration.Logger.LogDebug("OnUnsupportedRatio");
             UnsupportedRatio?.Invoke();
         }
-        
+
+        private void OnCaptureTestDone(string filename)
+        {
+            Configuration.Logger.LogDebug("OnCaptureTestDone");
+            CaptureTestDone?.Invoke(filename);
+        }
+
         private void OnException(Exception e)
         {
             // do nothing

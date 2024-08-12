@@ -18,9 +18,10 @@ def main(publish_dir):
         "closing_behavior" : "Minimize",
         "theme" : "Dark",
         "client_type" : "YuanShen",
+        "capture_type": "BitBlt",
         "show_ui_outside" : False,
         "show_closing_dialog" : True,
-        "check_updates_on_startup" : True
+        "check_updates_on_startup" : True,
     }
     cfg.update(reset_configs)
 

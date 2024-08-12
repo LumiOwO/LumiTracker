@@ -21,6 +21,24 @@
         NumClientTypes
     }
 
+    public class EClientProcessNames
+    {
+        public static readonly string[] Values = [
+            "YuanShen.exe",
+            "GenshinImpact.exe",
+            "Genshin Impact Cloud Game.exe",
+            //"PotPlayerMini64.exe",
+        ];
+    }
+
+    public enum ECaptureType : int
+    {
+        BitBlt,
+        WindowsCapture,
+
+        NumCaptureTypes
+    }
+
     public enum EActionCardType : int
     {
         Talent,
@@ -89,7 +107,7 @@
         MY_CREATE_HAND, // eg. Furina
         OP_CREATE_HAND,
 
-        // types for exception
         UNSUPPORTED_RATIO,
+        CAPTURE_TEST,
     }
 }

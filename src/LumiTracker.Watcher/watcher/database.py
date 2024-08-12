@@ -16,7 +16,9 @@ from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType
 def LoadImage(path):
     return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
 
-def SaveImage(image, path):
+def SaveImage(image, path, remove_alpha=False):
+    if remove_alpha and len(image.shape) == 3 and image.shape[-1] == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
     if image.dtype == np.float32:
         image *= 255
     cv2.imencode(Path(path).suffix, image)[1].tofile(path)

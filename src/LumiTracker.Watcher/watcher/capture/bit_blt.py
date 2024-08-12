@@ -55,6 +55,8 @@ class BitBlt(CaptureBase):
         while True:
             start_time = time.perf_counter()
 
+            self.BeforeFrameArrived()
+
             # Capture frame
             frame_buffer, status = self.CaptureWindow()
             if status == BitBlt.SUCCESS:

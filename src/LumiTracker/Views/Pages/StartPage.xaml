@@ -19,6 +19,12 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+        
+    </Page.Resources>
+        
+
     <StackPanel>
         <Grid VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
@@ -76,6 +82,75 @@
                 VerticalAlignment="Center"
                 Foreground="{Binding ViewModel.GameWatcherStateBrush, Mode=OneWay}"
                 Text="{Binding ViewModel.GameWatcherStateText.Text, Mode=OneWay}" />
+        </Grid>
+
+        <Grid 
+            Margin="0, 15, 0, 0"
+            VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock 
+                Margin="0,0,0,2" 
+                Text="{svs:Localization CaptureType}" 
+                FontSize="15"
+                FontWeight="Bold"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Column="0" />
+
+            <ComboBox
+                Grid.Column="1"
+                x:Name="CaptureTypeComboBox"
+                HorizontalAlignment="Stretch"
+                SelectedIndex="{Binding ViewModel.SelectedCaptureIndex, Mode=TwoWay}"
+                ItemsSource="{Binding ViewModel.CaptureTypes, Mode=OneWay}"
+                IsEnabled="{Binding ViewModel.CaptureSelectionEnabled, Mode=OneWay}"
+                >
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectionChanged">
+                        <b:InvokeCommandAction 
+                            Command="{Binding ViewModel.SelectedClientChangedCommand}"
+                            />
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </ComboBox>
+
+            <ui:Button 
+                Grid.Column="2"
+                Margin="15, 0, 0, 0"
+                Height="30"
+                Padding="9,5,9,6"
+                Command="{Binding ViewModel.CaptureTestCommand, Mode=OneWay}">
+                <TextBlock 
+                    FontSize="14"
+                    Text="{svs:Localization CaptureType_Test}" />
+            </ui:Button>
+        </Grid>
+
+        <Grid 
+            Margin="0, 6, 0, 0"
+            VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Column="1"
+                x:Name="CaptureTestStateText"
+                Margin="8,0,0,0"
+                FontSize="12"
+                VerticalAlignment="Center"
+                Foreground="Gray"
+                Visibility="{Binding ViewModel.CloudGameHint.Text,
+                    Converter={StaticResource StringToVisibilityConverter},
+                    ConverterParameter=Collapsed
+                    }"
+                Text="{Binding ViewModel.CloudGameHint.Text, Mode=OneWay}" />
         </Grid>
 
         <Grid 
