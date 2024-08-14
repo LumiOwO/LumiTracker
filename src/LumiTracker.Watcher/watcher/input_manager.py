@@ -5,7 +5,7 @@ import queue
 class AsyncInput:
     def __init__(self):
         self.queue = queue.Queue()
-        self.thread = threading.Thread(target=self.ReadInput)
+        self.thread = threading.Thread(target=self.ReadInput, daemon=True)
         self.thread.start()
 
     def ReadInput(self):
