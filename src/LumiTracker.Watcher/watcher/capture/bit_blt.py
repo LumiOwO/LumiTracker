@@ -19,37 +19,30 @@ class BitBlt(CaptureBase):
     def __init__(self):
         super().__init__()
 
-        self.hwnd_dc = None
-        self.mfc_dc  = None
-        self.save_dc = None
+        self.hdc     = None
+        self.memdc   = None
         self.bitmap  = None
         self.width   = 0
         self.height  = 0
 
     def OnStart(self, hwnd):
         # Get window device context
-        self.hwnd_dc = win32gui.GetWindowDC(self.hwnd)
-        self.mfc_dc  = win32ui.CreateDCFromHandle(self.hwnd_dc)
-        self.save_dc = self.mfc_dc.CreateCompatibleDC()
+        self.hdc   = win32gui.GetWindowDC(hwnd)
+        self.memdc = win32gui.CreateCompatibleDC(self.hdc)
 
     def OnClosed(self):
         # Clean up
         self.DestroyBitmap()
         
         try:
-            self.save_dc.DeleteDC()
+            win32gui.DeleteDC(self.memdc)
         except win32ui.error as e:
-            LogWarning(info=f"Error deleting save_dc, maybe the reason is the closed hwnd")
+            LogWarning(info=f"Error deleting memdc, maybe the reason is the closed hwnd")
     
         try:
-            self.mfc_dc.DeleteDC()
+            win32gui.ReleaseDC(self.hwnd, self.hdc)
         except win32ui.error as e:
-            LogWarning(info=f"Error deleting mfc_dc, maybe the reason is the closed hwnd")
-
-        try:
-            win32gui.ReleaseDC(self.hwnd, self.hwnd_dc)
-        except win32ui.error as e:
-            LogWarning(info=f"Error releasing hwnd_dc, maybe the reason is the closed hwnd")
+            LogWarning(info=f"Error releasing hdc, maybe the reason is the closed hwnd")
 
     def MainLoop(self):
         while True:
@@ -69,11 +62,6 @@ class BitBlt(CaptureBase):
             else:
                 raise NotImplementedError()
 
-            if cfg.DEBUG_SAVE:
-                # image.save(os.path.join(cfg.debug_dir, "save", f"bitblt.png"))
-                # exit(1)
-                pass
-
             dt = time.perf_counter() - start_time
             self.WaitForFrameRateLimit(elapsed_time=dt)
     
@@ -83,9 +71,9 @@ class BitBlt(CaptureBase):
         self.frame_manager.Resize(client_width, client_height)
     
     def CreateBitmap(self, width, height):
-        self.bitmap = win32ui.CreateBitmap()
-        self.bitmap.CreateCompatibleBitmap(self.mfc_dc, width, height)
-        self.save_dc.SelectObject(self.bitmap)
+        hbitmap = win32gui.CreateCompatibleBitmap(self.hdc, width, height)
+        self.bitmap = win32ui.CreateBitmapFromHandle(hbitmap)
+        oldbmp = win32gui.SelectObject(self.memdc, hbitmap)
 
         self.width  = width
         self.height = height
@@ -94,6 +82,7 @@ class BitBlt(CaptureBase):
         if self.bitmap is None:
             return
         win32gui.DeleteObject(self.bitmap.GetHandle())
+        self.bitmap = None
 
     def CaptureWindow(self):
         try:
@@ -108,9 +97,7 @@ class BitBlt(CaptureBase):
                 self.OnResize(client_width, client_height)
 
             # BitBlt to capture the window frame
-            self.save_dc.BitBlt(
-                (0, 0), (client_width, client_height), self.mfc_dc, 
-                (offset[0], offset[1]), win32con.SRCCOPY)
+            win32gui.BitBlt(self.memdc, 0, 0, client_width, client_height, self.hdc, offset[0], offset[1], win32con.SRCCOPY)
 
             # Get the bitmap data
             bitmap_bits = self.bitmap.GetBitmapBits(True)
