@@ -1,11 +1,17 @@
 ﻿using System.Windows.Documents;
 using System.Text.RegularExpressions;
+using System.Windows.Media;
 
 public class MarkdownParser
 {
-    private static readonly Regex HeaderRegex     = new Regex(@"^(#+)\s*(.*)$");
-    private static readonly Regex BoldRegex       = new Regex(@"(\*\*)([^*]+)(\*\*)");
-    private static readonly Regex ItalicRegex     = new Regex(@"(\*)([^*]+)(\*)");
+    private static readonly Regex HeaderRegex     
+        = new Regex(@"^(#+)\s*(.*)$", RegexOptions.Compiled);
+    private static readonly Regex BoldRegex       
+        = new Regex(@"(\*\*)([^*]+)(\*\*)", RegexOptions.Compiled);
+    private static readonly Regex ItalicRegex     
+        = new Regex(@"(\*)([^*]+)(\*)", RegexOptions.Compiled);
+    private static readonly Regex ColorRegex      
+        = new Regex(@"\$\{\\color\{(?<color>#[0-9a-fA-F]{6})\}\{\\textbf\{(?<text>.*?)\}\}\}\$", RegexOptions.Compiled);
 
     public static void ParseMarkdown(FlowDocument document, string markdown)
     {
@@ -61,7 +67,7 @@ public class MarkdownParser
 
     private static Inline ProcessMarkdownText(string text)
     {
-        text = text.Replace("`", string.Empty);
+        text = text.Replace("`", "**");
 
         var result = new Span();
         int lastIndex = 0;
@@ -70,6 +76,7 @@ public class MarkdownParser
         var formattingMatches = new List<Match>();
         formattingMatches.AddRange(BoldRegex.Matches(text).Cast<Match>());
         formattingMatches.AddRange(ItalicRegex.Matches(text).Cast<Match>());
+        formattingMatches.AddRange(ColorRegex.Matches(text).Cast<Match>());
 
         // Sort matches by index to process them in order
         formattingMatches = formattingMatches.OrderBy(m => m.Index).ToList();
@@ -96,6 +103,14 @@ public class MarkdownParser
             else if (ItalicRegex.IsMatch(match.Value)) 
             {
                 result.Inlines.Add(new Run(match.Groups[2].Value) { FontStyle = FontStyles.Italic });
+            }
+            else if (ColorRegex.IsMatch(match.Value))
+            {
+                result.Inlines.Add(new Run(match.Groups["text"].Value) 
+                {
+                    FontWeight = FontWeights.Bold,
+                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(match.Groups["color"].Value)),
+                });
             }
 
             lastIndex = match.Index + match.Length;
