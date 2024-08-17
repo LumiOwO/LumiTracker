@@ -191,7 +191,7 @@
             </TextBlock>
             
         </Grid>
-        
+
         <TextBlock 
             Margin="0,60,0,2" 
             Text="{svs:Localization Instruction}" 
@@ -202,23 +202,29 @@
             Grid.Column="0" />
 
         <TextBlock 
-            Margin="20,10,0,2" 
-            Text="{svs:Localization Instruction1}" 
+            Margin="17,10,0,2" 
+            Text="{svs:Localization Instruction1, StringFormat=•  {0}}" 
             FontSize="15"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
             Grid.Column="0" />
         <TextBlock 
-            Margin="20,10,0,2" 
-            Text="{svs:Localization SupportedRatioInfo}" 
-            LineHeight="23"
+            Margin="17,10,0,2" 
+            Text="{svs:Localization Instruction2, StringFormat=•  {0}}" 
+            FontSize="15"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Grid.Column="0" />
+        <TextBlock 
+            Margin="17,10,0,2" 
+            Text="{svs:Localization Instruction3, StringFormat=•  {0}}" 
             FontSize="15"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
             Grid.Column="0" />
 
         <ui:HyperlinkButton
-            Margin="-1, 40, 0, 0"
+            Margin="-1, 20, 0, 0"
             Padding="5"
             Content="{svs:Localization DocumentationLink}"
             NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe"

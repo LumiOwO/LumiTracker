@@ -61,3 +61,11 @@ Please try running the program as an administrator.
 - [Fluent UI System Icons](https://github.com/microsoft/fluentui-system-icons)
 - [Inno Setup](https://jrsoftware.org/isinfo.php)
 - [Swordfish.NET.CollectionsV3](https://github.com/stewienj/SwordfishCollections)
+
+## Acknowledgments
+
+A special thanks to the following open-source projects for providing significant inspiration to this project:
+
+- [Hearthstone-Deck-Tracker](https://github.com/HearthSim/Hearthstone-Deck-Tracker)
+- [BetterGI](https://github.com/babalae/better-genshin-impact)
+- [Starward](https://github.com/Scighost/Starward)

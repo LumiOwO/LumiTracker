@@ -170,7 +170,7 @@
     <comment/>
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
-    <value>更新失败，请重试</value>
+    <value>更新失败，请重试；若仍未成功，请尝试以管理员身份运行</value>
     <comment/>
   </data>
   <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
@@ -294,7 +294,15 @@
     <comment/>
   </data>
   <data name="Instruction1" xml:space="preserve">
-    <value>全屏模式下，需要在游戏内的设置 -> 图像 -> 显示模式中，将独占全屏改为无边框；</value>
+    <value>如果检测不到对局开始，请尝试更换截帧方法；</value>
+    <comment/>
+  </data>
+  <data name="Instruction2" xml:space="preserve">
+    <value>请不要将游戏窗口最小化！最小化时无法捕获窗口内容；</value>
+    <comment/>
+  </data>
+  <data name="Instruction3" xml:space="preserve">
+    <value>全屏模式下，需要在游戏内的设置 -> 图像 -> 显示模式中，将「独占全屏」改为「无边框」。</value>
     <comment/>
   </data>
   <data name="SupportedRatioInfo" xml:space="preserve">

@@ -59,3 +59,9 @@
 - [Fluent UI System Icons](https://github.com/microsoft/fluentui-system-icons)
 - [Inno Setup](https://jrsoftware.org/isinfo.php)
 - [Swordfish.NET.CollectionsV3](https://github.com/stewienj/SwordfishCollections)
+
+## 致谢
+特别感谢以下开源项目，对本项目给予了极大的启发：
+- [Hearthstone-Deck-Tracker](https://github.com/HearthSim/Hearthstone-Deck-Tracker)
+- [BetterGI](https://github.com/babalae/better-genshin-impact)
+- [Starward](https://github.com/Scighost/Starward)

@@ -1,3 +1,12 @@
+# \[[v1.2.2](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.2)\] - 2024.08.17
+### 体验优化
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 现在，卡牌数量变化时，会有高亮提示
+- **[普通]** 优化主界面提示文本
+### Bug修复
+- ${\color{#ed8e06}{\textbf{[传说]}}}$ 新增**截帧方法**选项；无法启动对局记录的朋友，可以尝试更换截帧方法
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复BitBlt截屏方式下，游戏窗口退出时的资源释放问题
+- **[普通]** 修复更新日志界面的文字颜色显示问题
+
 # \[[v1.2.1](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.1)\] - 2024.08.10
 ### Bug修复
 - 修复启动架构更新导致的闪退问题
