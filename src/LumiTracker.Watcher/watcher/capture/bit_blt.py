@@ -55,7 +55,7 @@ class BitBlt(CaptureBase):
             if status == BitBlt.SUCCESS:
                 self.OnFrameArrived(frame_buffer)
             elif status == BitBlt.FAILED:
-                self.OnClosed()
+                self.Close()
                 break
             elif status == BitBlt.MINIMIZED:
                 pass

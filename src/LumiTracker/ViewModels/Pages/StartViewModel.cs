@@ -27,12 +27,7 @@ namespace LumiTracker.ViewModels.Pages
 
         [ObservableProperty]
         private LocalizationTextItem _gameWatcherStateText = new ();
-        partial void OnGameWatcherStateChanged(EGameWatcherState oldValue, EGameWatcherState newValue)
-        {
-            var binding = LocalizationExtension.Create(newValue);
-            BindingOperations.SetBinding(GameWatcherStateText, LocalizationTextItem.TextProperty, binding);
-        }
-
+        
         [ObservableProperty]
         private Brush _gameWatcherStateBrush = Brushes.DarkGray;
 
@@ -43,10 +38,16 @@ namespace LumiTracker.ViewModels.Pages
         private int _selectedCaptureIndex = -1;
 
         [ObservableProperty]
+        private Visibility _captureTestButtonVisibility = Visibility.Collapsed;
+
+        [ObservableProperty]
         private LocalizationTextItem _cloudGameHint = new ();
 
         [ObservableProperty]
         private bool _captureSelectionEnabled = true;
+
+        [ObservableProperty]
+        private bool _showUIOutside = false;
 
         partial void OnSelectedClientIndexChanged(int oldValue, int newValue)
         {
@@ -66,8 +67,32 @@ namespace LumiTracker.ViewModels.Pages
             }
         }
 
-        [ObservableProperty]
-        private bool _showUIOutside = false;
+        partial void OnGameWatcherStateChanged(EGameWatcherState oldValue, EGameWatcherState newValue)
+        {
+            var binding = LocalizationExtension.Create(newValue);
+            BindingOperations.SetBinding(GameWatcherStateText, LocalizationTextItem.TextProperty, binding);
+
+            if (newValue == EGameWatcherState.NoWindowFound)
+            {
+                GameWatcherStateBrush = Brushes.DarkGray;
+                CaptureTestButtonVisibility = Visibility.Collapsed;
+            }
+            else if (newValue == EGameWatcherState.WindowNotForeground)
+            {
+                GameWatcherStateBrush = Brushes.DarkOrange;
+                CaptureTestButtonVisibility = Visibility.Collapsed;
+            }
+            else if (newValue == EGameWatcherState.WindowWatcherStarted)
+            {
+                GameWatcherStateBrush = Brushes.LimeGreen;
+                CaptureTestButtonVisibility = Visibility.Visible;
+            }
+            else
+            {
+                GameWatcherStateBrush = Brushes.DarkGray;
+                CaptureTestButtonVisibility = Visibility.Collapsed;
+            }
+        }
 
         public StartViewModel(IDeckWindow deckWindow, GameWatcher gameWatcher, StyledContentDialogService contentDialogService)
         {
@@ -116,13 +141,11 @@ namespace LumiTracker.ViewModels.Pages
         private void OnGenshinWindowFound()
         {
             GameWatcherState = EGameWatcherState.WindowNotForeground;
-            GameWatcherStateBrush = Brushes.DarkOrange;
         }
 
         private void OnWindowWatcherStart(IntPtr hwnd)
         {
             GameWatcherState = EGameWatcherState.WindowWatcherStarted;
-            GameWatcherStateBrush = Brushes.LimeGreen;
 
             _deckWindow.ShowWindow();
             _deckWindow.AttachTo(hwnd);
@@ -131,7 +154,6 @@ namespace LumiTracker.ViewModels.Pages
         private void OnWindowWatcherExit()
         {
             GameWatcherState = EGameWatcherState.NoWindowFound;
-            GameWatcherStateBrush = Brushes.DarkGray;
 
             _deckWindow.Detach();
             _deckWindow.HideWindow();
@@ -146,7 +168,6 @@ namespace LumiTracker.ViewModels.Pages
             Configuration.Logger.LogInformation($"Client = {processName}, CaptureType = {SelectedCaptureType.ToString()}");
 
             GameWatcherState = EGameWatcherState.NoWindowFound;
-            GameWatcherStateBrush = Brushes.DarkGray;
 
             Configuration.Set("client_type",  SelectedClientType.ToString(), auto_save: false);
             if (SelectedClientType != EClientType.Cloud)

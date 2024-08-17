@@ -30,13 +30,17 @@ class CaptureBase:
         # set timer resolution to 1 ms
         winmm.timeBeginPeriod(1)
 
-    def Start(self, hwnd):
+    def Start(self, hwnd, port):
         self.hwnd = hwnd
         self.frame_manager = FrameManager()
-        self.input_manager = InputManager()
+        self.input_manager = InputManager(port)
 
         self.OnStart(hwnd)
         self.MainLoop()
+    
+    def Close(self):
+        self.OnClosed()
+        self.input_manager.Close()
     
     def OnStart(self, hwnd):
         raise NotImplementedError()

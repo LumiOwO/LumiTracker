@@ -1,6 +1,8 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
+using System.Net.Sockets;
+using System.Text;
 
 namespace LumiTracker.Models
 {
@@ -70,11 +72,14 @@ namespace LumiTracker.Models
             if (processWatcher.Value == null)
                 return;
 
-            var writer = processWatcher.Value.BackendStreamWriter;
-            if (writer != null && writer.BaseStream.CanWrite)
+            var socket = processWatcher.Value.BackendSocket;
+            if (socket != null)
             {
-                await writer.WriteLineAsync(message);
-                await writer.FlushAsync();
+                byte[] data = Encoding.UTF8.GetBytes(message + "\n");
+                await Task.Factory.FromAsync(
+                    (callback, state) => socket.BeginSend(data, 0, data.Length, SocketFlags.None, callback, state),
+                    socket.EndSend,
+                    null);
             }
         }
 

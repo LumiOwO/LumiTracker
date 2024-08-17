@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using LumiTracker.Config;
-using System.Security.Cryptography;
 using Newtonsoft.Json.Linq;
-using System.Text.Json;
-using System.Windows;
 using Newtonsoft.Json;
 using Windows.Foundation.Metadata;
+using System.Net.Sockets;
+using System.Net;
 
 
 namespace LumiTracker.Watcher
@@ -159,7 +154,7 @@ namespace LumiTracker.Watcher
         private SpinLockedValue<bool> ShouldCancel = new (false);
         private Task? _processWatcherTask;
         private Task? _windowWatcherTask;
-        public StreamWriter? BackendStreamWriter { get; private set; } = null;
+        public Socket? BackendSocket { get; private set; } = null;
 
         public async ValueTask DisposeAsync()
         {
@@ -207,6 +202,8 @@ namespace LumiTracker.Watcher
         {
             Configuration.Logger.LogInformation($"Begin to start window watcher");
 
+            //////////////////////////
+            // Prepare start info
             string captureType = 
                 processName == EClientProcessNames.Values[(int)EClientType.Cloud] ?
                 ECaptureType.WindowsCapture.ToString() :
@@ -215,17 +212,24 @@ namespace LumiTracker.Watcher
             bool canHideBorder = ApiInformation.IsPropertyPresent(
                 "Windows.Graphics.Capture.GraphicsCaptureSession", "IsBorderRequired");
 
+            // Grab available port
+            var tempSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            tempSocket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+            int port = ((IPEndPoint)tempSocket!.LocalEndPoint!).Port;
+            tempSocket.Close();
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = Path.Combine(Configuration.AppDir, "python", "python.exe"),
-                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {captureType} {(canHideBorder ? 1 : 0)}",
+                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {captureType} {(canHideBorder ? 1 : 0)} {port}",
                 UseShellExecute = false,
                 RedirectStandardError = true,
-                RedirectStandardInput = true,
                 CreateNoWindow = true,
                 WorkingDirectory = Configuration.AppDir,
             };
 
+            //////////////////////////
+            // Create backend process
             var process = new Process();
             process.StartInfo = startInfo;
             process.ErrorDataReceived += WindowWatcherEventHandler;
@@ -237,15 +241,36 @@ namespace LumiTracker.Watcher
             }
             ChildProcessTracker.AddProcess(process);
             process.BeginErrorReadLine();
-            BackendStreamWriter = process.StandardInput;
 
+            var KillProcess = () => 
+            {
+                BackendSocket?.Dispose();
+                BackendSocket = null;
+                process.Kill();
+            };
+
+            //////////////////////////
+            // Connect backend socket
+            try
+            {
+                BackendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                await BackendSocket.ConnectAsync(new IPEndPoint(IPAddress.Loopback, port));
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"Failed to connect to backend socket.\n{ex.ToString()}");
+                KillProcess();
+                return;
+            }
+
+            //////////////////////////
+            // Main loop
             WindowWatcherStart?.Invoke(info.hwnd);
             while (!process.HasExited)
             {
                 if (ShouldCancel.Value)
                 {
-                    BackendStreamWriter = null;
-                    process.Kill();
+                    KillProcess();
                 }
                 await Task.Delay(interval);
             }

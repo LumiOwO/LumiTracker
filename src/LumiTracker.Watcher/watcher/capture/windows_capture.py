@@ -72,4 +72,4 @@ class WindowsCapture(CaptureBase):
     # Called When The Capture Item Closes Usually When The Window Closes, Capture
     # Session Will End After This Function Ends
     def on_closed(self):
-        self.OnClosed()
+        self.Close()

@@ -125,6 +125,7 @@
                 Margin="15, 0, 0, 0"
                 Height="30"
                 Padding="9,5,9,6"
+                Visibility="{Binding ViewModel.CaptureTestButtonVisibility, Mode=OneWay}"
                 Command="{Binding ViewModel.CaptureTestCommand, Mode=OneWay}">
                 <TextBlock 
                     FontSize="14"
