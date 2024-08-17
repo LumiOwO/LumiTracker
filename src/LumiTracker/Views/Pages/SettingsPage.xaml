@@ -86,6 +86,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <CheckBox
                 Grid.Column="1"
@@ -93,6 +94,14 @@
                 IsChecked="{Binding ViewModel.CheckUpdatesOnStartup, Mode=TwoWay}"
                 Content="{svs:Localization CheckUpdatesOnStartup}"
                 />
+            <ui:HyperlinkButton
+                Grid.Column="2"
+                Margin="15, 0, 0, 0"
+                FontWeight="Bold"
+                Padding="10, 5, 10, 6"
+                Content="{svs:Localization UpdatePrompt_Manual}"
+                NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#KSvDdP00EoNnmox0Lkccs9fenMf"
+                ToolTip="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#KSvDdP00EoNnmox0Lkccs9fenMf" />
         </Grid>
 
 

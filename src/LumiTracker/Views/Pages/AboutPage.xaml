@@ -39,7 +39,7 @@
             />
 
         <ui:HyperlinkButton
-            Margin="-1, 40, 0, 0"
+            Margin="-1, 80, 0, 0"
             Padding="5"
             Content="{svs:Localization DocumentationLink}"
             NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe"

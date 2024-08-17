@@ -173,6 +173,10 @@
     <value>Update failed, please retry; If it still fails, try running as admin.</value>
     <comment/>
   </data>
+  <data name="UpdatePrompt_Manual" xml:space="preserve">
+    <value>Manual Update</value>
+    <comment/>
+  </data>
   <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
     <value>Update Now</value>
     <comment/>

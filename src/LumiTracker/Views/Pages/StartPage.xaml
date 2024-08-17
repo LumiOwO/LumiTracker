@@ -227,6 +227,7 @@
             Margin="-1, 20, 0, 0"
             Padding="5"
             Content="{svs:Localization DocumentationLink}"
+            FontWeight="Bold"
             NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe"
             ToolTip="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe" 
             >
