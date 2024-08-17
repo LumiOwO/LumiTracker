@@ -10,11 +10,21 @@
 
     <UserControl.Resources>
         <helpers:HideNegativeIntValueConverter x:Key="HideNegativeIntValueConverter" />
+        <helpers:DoubleToVisibilityConverter x:Key="DoubleToVisibilityConverter" />
+
+        <Storyboard x:Key="BlinkAnimation">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                RepeatBehavior="1x"
+                AutoReverse="True"
+                From="0.0"
+                To="0.7"
+                Duration="0:0:0.5" />
+        </Storyboard>
     </UserControl.Resources>
 
     <Grid
         DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:ActionCardViewListItem}}"
-        Opacity="{Binding Value.Opacity, Mode=OneWay}"
         HorizontalAlignment="Stretch"
         Width="{Binding ItemWidth}"
         Margin="0, -5, 0, -5"
@@ -28,10 +38,28 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
+        
+        <!-- Highlight -->
+        <Border  
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            x:Name="HighlightPanel"
+            Background="White"
+            Opacity="0"
+            Visibility="{Binding Path=Opacity, 
+                RelativeSource={RelativeSource Self},
+                Converter={StaticResource DoubleToVisibilityConverter},
+                ConverterParameter=Collapsed,
+                Mode=OneWay}"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            />
 
         <!-- dice image -->
         <Image 
+            Grid.Column="0"
             Source="{Binding Value.CostTypeUri, Mode=OneWay}" 
+            Opacity="{Binding Value.Opacity, Mode=OneWay}"
             Margin="0,0,0,0"
             Stretch="UniformToFill"
             VerticalAlignment="Stretch"
@@ -42,6 +70,7 @@
             Grid.Column="0"
             Margin="0,0,0,0"
             FontWeight="Bold"
+            Opacity="{Binding Value.Opacity, Mode=OneWay}"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Foreground="White"
@@ -67,6 +96,7 @@
             Grid.Column="1" 
             Grid.ColumnSpan="2"
             Margin="{Binding SnapshotMargin}"
+            Opacity="{Binding Value.Opacity, Mode=OneWay}"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
             >
@@ -89,6 +119,7 @@
             Margin="5,0,0,0"
             Foreground="White"
             FontWeight="Medium"
+            Opacity="{Binding Value.Opacity, Mode=OneWay}"
             TextWrapping="NoWrap"
             TextTrimming="CharacterEllipsis"
             HorizontalAlignment="Stretch"
@@ -100,6 +131,7 @@
             Grid.Column="2"
             Visibility="{Binding CountVisibility}"
             Margin="12,1,12,0"
+            Opacity="{Binding Value.Opacity, Mode=OneWay}"
             FontWeight="Bold"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"

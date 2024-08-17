@@ -3,16 +3,11 @@ using System.Windows.Data;
 
 namespace LumiTracker.Helpers
 {
-    public class BooleanToVisibilityConverter : IValueConverter
+    public class VisibilityConverterUtils
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public static Visibility ToVisibility(string invisibleType, Func<bool> visibleCondition) 
         {
-            if (!(value is bool isVisible && parameter is string invisibleType))
-            {
-                throw new NotImplementedException();
-            }
-
-            if (isVisible)
+            if (visibleCondition())
             {
                 return Visibility.Visible;
             }
@@ -28,6 +23,19 @@ namespace LumiTracker.Helpers
             {
                 throw new NotImplementedException();
             }
+        }
+    }
+
+    public class BooleanToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(value is bool isVisible && parameter is string invisibleType))
+            {
+                throw new NotImplementedException();
+            }
+
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => isVisible);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -45,22 +53,25 @@ namespace LumiTracker.Helpers
                 throw new NotImplementedException();
             }
 
-            if (s != "")
-            {
-                return Visibility.Visible;
-            }
-            else if (invisibleType == "Collapsed")
-            {
-                return Visibility.Collapsed;
-            }
-            else if (invisibleType == "Hidden")
-            {
-                return Visibility.Hidden;
-            }
-            else
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => s != "");
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DoubleToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(value is double v && parameter is string invisibleType))
             {
                 throw new NotImplementedException();
             }
+
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => v != 0.0);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -76,23 +87,7 @@ namespace LumiTracker.Helpers
             if (values == null || values.Length == 0 || !values.All(v => v is bool) || !(parameter is string invisibleType))
                 return false;
 
-            bool isVisible = values.Cast<bool>().All(b => b);
-            if (isVisible)
-            {
-                return Visibility.Visible;
-            }
-            else if (invisibleType == "Collapsed")
-            {
-                return Visibility.Collapsed;
-            }
-            else if (invisibleType == "Hidden")
-            {
-                return Visibility.Hidden;
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => values.Cast<bool>().All(b => b));
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
@@ -110,22 +105,7 @@ namespace LumiTracker.Helpers
                 throw new NotImplementedException();
             }
 
-            if (intValue >= 0)
-            {
-                return Visibility.Visible;
-            }
-            else if (invisibleType == "Collapsed")
-            {
-                return Visibility.Collapsed;
-            }
-            else if (invisibleType == "Hidden")
-            {
-                return Visibility.Hidden;
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => intValue >= 0);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

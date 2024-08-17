@@ -1,7 +1,6 @@
 ﻿using LumiTracker.Models;
 using System.Windows.Controls;
-using System.Windows.Input;
-using Wpf.Ui.Controls;
+using System.Windows.Media.Animation;
 
 namespace LumiTracker.Controls
 {
@@ -11,7 +10,7 @@ namespace LumiTracker.Controls
     public partial class ActionCardViewListItem : UserControl
     {
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
-            "Value", typeof(ActionCardView), typeof(ActionCardViewListItem), new PropertyMetadata(null));
+            "Value", typeof(ActionCardView), typeof(ActionCardViewListItem), new PropertyMetadata(null, OnValueChanged));
 
         public ActionCardView Value
         {
@@ -82,9 +81,23 @@ namespace LumiTracker.Controls
             set { SetValue(SnapshotMarginProperty, value); }
         }
 
+        private Storyboard blinkAnimation;
+
         public ActionCardViewListItem()
         {
             InitializeComponent();
+
+            blinkAnimation = (Storyboard)FindResource("BlinkAnimation");
+            Storyboard.SetTarget(blinkAnimation, HighlightPanel);
+        }
+
+        private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is ActionCardView newValue && newValue.ShouldNotify())
+            {
+                var control = (ActionCardViewListItem)d;
+                control.blinkAnimation.Begin();
+            }
         }
     }
 }

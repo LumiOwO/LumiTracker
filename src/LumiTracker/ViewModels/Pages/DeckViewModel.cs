@@ -294,7 +294,7 @@ namespace LumiTracker.ViewModels.Pages
             ObservableCollection<ActionCardView> currentDeck = new ();
             foreach (int card_id in transposed)
             {
-                currentDeck.Add(new ActionCardView(card_id, inGame: false));
+                currentDeck.Add(new ActionCardView(null, card_id, inGame: false));
             }
             CurrentDeck = currentDeck;
 

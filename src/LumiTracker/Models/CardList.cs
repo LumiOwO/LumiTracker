@@ -1,8 +1,6 @@
 ﻿using LumiTracker.Config;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using Swordfish.NET.Collections;
-using System.Collections.ObjectModel;
 
 namespace LumiTracker.Models
 {
@@ -17,11 +15,11 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private  string  _snapshotUri;
         [ObservableProperty]
-        private  int     _count;
+        private  int     _count = 0;
         [ObservableProperty]
         private  double  _opacity;
 
-        public ActionCardView(int card_id, bool inGame, int count = 1)
+        public ActionCardView(CardList? parent, int card_id, bool inGame, int count = 1)
         {
             var info = Configuration.Database["actions"]![card_id]!;
             var cardName = info[Configuration.Get<string>("lang")]!.ToString();
@@ -42,11 +40,26 @@ namespace LumiTracker.Models
             SnapshotUri  = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
             Count        = count;
             Opacity      = 1.0;
+
+            Parent       = parent;
         }
+
+        private CardList? Parent;
+        private int OperationIndex = 1;
 
         partial void OnCountChanged(int oldValue, int newValue)
         {
             Opacity = (Count == 0) ? 0.3 : 1.0;
+
+            if (Parent != null) 
+            {
+                OperationIndex = Parent.OperationCount + 1;
+            }
+        }
+
+        public bool ShouldNotify()
+        {
+            return OperationIndex == Parent?.OperationCount;
         }
     }
 
@@ -64,6 +77,8 @@ namespace LumiTracker.Models
         public Dictionary<int, DateTime> Timestamps { get; private set; } = new ();
 
         public bool InGame { get; }
+
+        public int OperationCount { get; private set; } = 0;
 
         public CardList(bool inGame, SortType sortType = SortType.Default)
         {
@@ -134,9 +149,10 @@ namespace LumiTracker.Models
                 }
                 else
                 {
-                    pairsToUpdate.Add(card_id, new ActionCardView(card_id, InGame));
+                    pairsToUpdate.Add(card_id, new ActionCardView(this, card_id, InGame));
                 }
             }
+            OperationCount++;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -202,6 +218,7 @@ namespace LumiTracker.Models
                     Configuration.Logger.LogWarning($"[CardList.Remove] Card id {card_id} is not in the deck.");
                 }
             }
+            OperationCount++;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
