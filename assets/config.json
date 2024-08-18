@@ -19,10 +19,14 @@
     0.2777777777777778
   ],
   "action_crop_box2": [
-    0.5476190476190477,
-    0.7013888888888888,
+    0.5285714285714286,
+    0.7055555555555556,
     0.23809523809523808,
     0.1388888888888889
+  ],
+  "feature_image_size": [
+    200,
+    300
   ],
   "assets_dir": "assets",
   "database_dir": "assets/database",
@@ -30,7 +34,7 @@
   "cards_dir": "cards",
   "hash_size": 10,
   "ann_index_len": 100,
-  "threshold": 30,
+  "threshold": 26,
   "strict_threshold": 20,
   "ann_metric": "hamming",
   "ann_n_trees": 10,

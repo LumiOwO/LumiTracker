@@ -145,6 +145,11 @@ def MultiPHash(gray_image, hash_size=8):
     # highfreq_factor = 4
     # img_size = hash_size * highfreq_factor
     # gray_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
+
+    # resize
+    w, h = cfg.feature_image_size
+    interpolation = cv2.INTER_LINEAR if gray_image.shape[0] < h else cv2.INTER_AREA
+    gray_image = cv2.resize(gray_image, (w, h), interpolation=interpolation)
     
     dct = cv2.dct(gray_image)
 
@@ -186,17 +191,12 @@ class CropBox:
         self.bottom = max(self.bottom, other.bottom)
 
 
-CLAHE = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(4, 4))
-
 def Preprocess(image):
     # to gray image
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
 
-    # remove high frequency noise
-    # gray_image = cv2.GaussianBlur(gray_image, (9, 9), 0)
-
     # histogram equalization
-    gray_image = CLAHE.apply(gray_image)
+    gray_image = cv2.equalizeHist(gray_image)
 
     # to float buffer
     gray_image = gray_image.astype(np.float32) / 255.0
@@ -274,31 +274,42 @@ class ActionCardHandler:
     def Update(self, frame_buffer, db):
         self.frame_buffer = frame_buffer
 
-        # TODO: fix the temp fix for the tokens of Counting Down to 3 
-        # 319, 320, 321 -> 301
-        def _tempfix(card_id):
-            if card_id == 319 or card_id == 320 or card_id == 321:
-                card_id = 301
-            return card_id
-
         ahash, dhash = self.ExtractCardFeatures()
         card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
         card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
 
+        # TODO: fix the temp fix for the tokens of Counting Down to 3 
+        # 319, 320, 321 -> 301
+        def _tempfix(card_id):
+            # if card_id == 319 or card_id == 320 or card_id == 321:
+            #     card_id = 301
+            return card_id
+        
         card_id_a = _tempfix(card_ids_a[0])
         card_id_d = _tempfix(card_ids_d[0])
+
         threshold = cfg.threshold
-        if dists_a[0] <= threshold and dists_d[0] <= threshold and card_id_a == card_id_d:
+        strict_threshold = cfg.strict_threshold
+        dist_a = dists_a[0]
+        dist_d = dists_d[0]
+        if dist_d <= strict_threshold: # dhash is more sensitive, so check it first
+            card_id = card_id_d
+            dist    = dist_d
+        elif dist_a <= strict_threshold:
             card_id = card_id_a
+            dist    = dist_a
+        elif card_id_a == card_id_d and dist_a <= threshold and dist_d <= threshold:
+            card_id = card_id_a
+            dist    = min(dists_a[0], dists_d[0])
         else:
             card_id = -1
+            dist    = max(dists_a[0], dists_d[0])
         # if card_id >= 0:
         #     LogDebug(
         #         card_a=CardName(card_id_a, db),
         #         card_d=CardName(card_id_d, db),
         #         dists=(dists_a[:3], dists_d[:3]))
 
-        dist = min(dists_a[0], dists_d[0])
         return card_id, dist, (dists_a[:3], dists_d[:3])
     
     def OnResize(self, crop_box):
@@ -473,9 +484,9 @@ class Database:
         # height = 200
         # crop_box1 = CropBox(left, top, left + width, top + height)
         # cfg.action_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.width / 420, crop_box1.height / 720))
-        # left   = 230
+        # left   = 222
         # width  = 100
-        # top    = 505
+        # top    = 508
         # height = 100
         # crop_box2 = CropBox(left, top, left + width, top + height)
         # cfg.action_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
