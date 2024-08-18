@@ -41,9 +41,9 @@ class GameStartTask(TaskBase):
         ]
 
         feature = ExtractFeature(buffer)
-        ctrl_id, dist = self.db.SearchByFeature(feature, EAnnType.CTRLS)
-        start = (dist <= cfg.strict_threshold) and (ctrl_id == ECtrlType.GAME_START.value)
-        start = self.filter.Filter(start, dist)
+        ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
+        start = (dists[0] <= cfg.strict_threshold) and (ctrl_ids[0] == ECtrlType.GAME_START.value)
+        start = self.filter.Filter(start, dists[0])
 
         frame_manager.reset_tasks = start
         if start:
@@ -51,7 +51,7 @@ class GameStartTask(TaskBase):
             frame_manager.round        = 0
 
             LogInfo(
-                info=f"Game start, last dist in window = {dist}",
+                info=f"Game start, last dist in window = {dists[0]}",
                 type=self.task_type.name,
                 )
             if cfg.DEBUG_SAVE:

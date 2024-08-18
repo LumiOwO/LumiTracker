@@ -4,7 +4,7 @@ from ..enums import EAnnType, ETaskType, ERegionType
 from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..database import CropBox
-from ..database import ActionCardHandler
+from ..database import ActionCardHandler, CardName
 from ..stream_filter import StreamFilter
 
 from types import SimpleNamespace
@@ -95,10 +95,8 @@ class CardFlowTask(TaskBase):
 
             card_handler = ActionCardHandler()
             card_handler.OnResize(box)
-            card_id, dist = card_handler.Update(self.frame_buffer, self.db)
-            if dist > cfg.threshold:
-                card_id = -1
-            card_id = self.round0.filters[i].Filter(card_id, dist)
+            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
+            card_id = self.round0.filters[i].Filter(card_id, dist=dist)
 
             # record last detected card_id
             if card_id >= 0:
@@ -122,22 +120,21 @@ class CardFlowTask(TaskBase):
 
             card_handler = ActionCardHandler()
             card_handler.OnResize(box)
-            card_id, dist = card_handler.Update(self.frame_buffer, self.db)
-            if dist > cfg.threshold:
-                card_id = -1
-                invalid_count += 1
+            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
 
             if card_id >= 0:
                 recorder[i][card_id] += 1
+            else:
+                invalid_count += 1
 
             if cfg.DEBUG:
                 debug_bboxes.append(box)
-                detected.append((card_id, dist))
+                detected.append((card_id, dists))
 
         if cfg.DEBUG:
             self.bboxes = debug_bboxes
             # if detected:
-            #     LogDebug(center=[(self.db["actions"][card[0]]["zh-HANS"] if card[0] >= 0 else "None", card[1]) for card in detected])
+            #     LogDebug(center=[(CardName(card_id, self.db), card[1]) for card in detected])
 
         timestamp = time.perf_counter()
         # my deck
@@ -164,7 +161,7 @@ class CardFlowTask(TaskBase):
         if self.round0.cards:
             cards = self.round0.cards
             LogInfo(type=ETaskType.MY_DRAWN.name, cards=cards,
-                    names=[(self.db["actions"][card]["zh-HANS"]) for card in cards])
+                    names=[CardName(card, self.db) for card in cards])
             self.round0.cards = []
         
         # dump if signaled
@@ -203,7 +200,7 @@ class CardFlowTask(TaskBase):
             recorder = self.card_recorder[self.signaled_num_cards]
             cards = [max(d, key=d.get) for d in recorder]
             LogInfo(type=task_type.name, cards=cards,
-                    names=[(self.db["actions"][card]["zh-HANS"]) for card in cards])
+                    names=[CardName(card, self.db) for card in cards])
         
         # reset
         self.card_recorder[self.signaled_num_cards] = [defaultdict(int) for _ in range(self.signaled_num_cards)]

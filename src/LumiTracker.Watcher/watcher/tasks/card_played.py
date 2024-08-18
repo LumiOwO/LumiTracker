@@ -4,7 +4,7 @@ from ..stream_filter import StreamFilter
 from ..enums import EAnnType, ETaskType, ERegionType
 from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
-from ..database import ActionCardHandler, CropBox
+from ..database import ActionCardHandler, CropBox, CardName
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
@@ -35,20 +35,18 @@ class CardPlayedTask(TaskBase):
         self.valid = frame_manager.game_started
 
     def _Tick(self, frame_manager):
-        card_id, dist = self.card_handler.Update(self.frame_buffer, self.db)
-        if dist > cfg.threshold:
-            card_id = -1
+        card_id, dist, dists = self.card_handler.Update(self.frame_buffer, self.db)
         if cfg.DEBUG:
             # if (self.task_type.value == 1) and True: #(card_id != -1):
             if (True) and (card_id != -1):
-                LogDebug(info=f'{dist=}, {self.task_type.name}: {self.db["actions"][card_id]["zh-HANS"] if card_id >= 0 else "None"}')
-        card_id = self.filter.Filter(card_id, dist)
+                LogDebug(info=f'{dists=}, {self.task_type.name}: {CardName(card_id, self.db)}')
+        card_id = self.filter.Filter(card_id, dist=dist)
 
         if card_id >= 0:
             LogInfo(
                 type=self.task_type.name,
                 card_id=card_id,
-                name=self.db["actions"][card_id]["zh-HANS"],
+                name=CardName(card_id, self.db),
                 )
         
         if cfg.DEBUG_SAVE:

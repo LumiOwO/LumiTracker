@@ -132,6 +132,34 @@ def DHashVertical(gray_image, hash_size=8):
 
     return ImageHash(diff)
 
+def MultiPHash(gray_image, hash_size=8):
+    """
+    Perceptual Hash computation.
+
+    Implementation follows http://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
+
+    Reference: https://github.com/JohannesBuchner/imagehash/blob/master/imagehash/__init__.py
+
+    image: gray image, dtype == float32
+    """
+    # highfreq_factor = 4
+    # img_size = hash_size * highfreq_factor
+    # gray_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
+    
+    dct = cv2.dct(gray_image)
+
+    # ahash
+    dctlowfreq = dct[:hash_size, :hash_size]
+    med = np.median(dctlowfreq)
+    diff = dctlowfreq > med
+    ahash = ImageHash(diff)
+
+    # dhash vertical
+    dctlowfreq = dct[:hash_size + 1, :hash_size]
+    diff = dctlowfreq[1:, :] > dctlowfreq[:-1, :]
+    dhash = ImageHash(diff)
+    
+    return ahash, dhash
 
 class CropBox:
     def __init__(self, left, top, right, bottom):
@@ -165,7 +193,7 @@ def Preprocess(image):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
 
     # remove high frequency noise
-    gray_image = cv2.GaussianBlur(gray_image, (9, 9), 0)
+    # gray_image = cv2.GaussianBlur(gray_image, (9, 9), 0)
 
     # histogram equalization
     gray_image = CLAHE.apply(gray_image)
@@ -179,10 +207,19 @@ def Preprocess(image):
 def ExtractFeature(image):
     gray_image = Preprocess(image)
 
-    feature = PHash(gray_image, hash_size=cfg.hash_size)
+    feature = DHash(gray_image, hash_size=cfg.hash_size)
     feature = feature.hash.flatten()
 
     return feature
+
+def ExtractMultiFeatures(image):
+    gray_image = Preprocess(image)
+
+    ahash, dhash = MultiPHash(gray_image, hash_size=cfg.hash_size)
+    ahash = ahash.hash.flatten()
+    dhash = dhash.hash.flatten()
+
+    return ahash, dhash
 
 def FeatureDistance(feature1, feature2):
     return ImageHash(feature1) - ImageHash(feature2)
@@ -196,6 +233,9 @@ def HashToFeature(hash_str):
     return feature
 
 
+def CardName(card_id, db, lang="zh-HANS"):
+    return db["actions"][card_id][lang] if card_id >= 0 else "None"
+
 class ActionCardHandler:
     def __init__(self):
         self.feature_buffer = None
@@ -204,7 +244,7 @@ class ActionCardHandler:
         self.frame_buffer   = None
         self.crop_box       = None  # init when resize
 
-    def ExtractCardFeature(self):
+    def ExtractCardFeatures(self):
         # Get action card region
         region_buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
@@ -228,21 +268,38 @@ class ActionCardHandler:
         ]
 
         # Extract feature
-        feature = ExtractFeature(self.feature_buffer)
-        return feature
+        features = ExtractMultiFeatures(self.feature_buffer)
+        return features
 
     def Update(self, frame_buffer, db):
         self.frame_buffer = frame_buffer
 
-        feature = self.ExtractCardFeature()
-        card_id, dist = db.SearchByFeature(feature, EAnnType.ACTIONS)
-
         # TODO: fix the temp fix for the tokens of Counting Down to 3 
         # 319, 320, 321 -> 301
-        if card_id == 319 or card_id == 320 or card_id == 321:
-            card_id = 301
-        
-        return card_id, dist
+        def _tempfix(card_id):
+            if card_id == 319 or card_id == 320 or card_id == 321:
+                card_id = 301
+            return card_id
+
+        ahash, dhash = self.ExtractCardFeatures()
+        card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
+        card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
+
+        card_id_a = _tempfix(card_ids_a[0])
+        card_id_d = _tempfix(card_ids_d[0])
+        threshold = cfg.threshold
+        if dists_a[0] <= threshold and dists_d[0] <= threshold and card_id_a == card_id_d:
+            card_id = card_id_a
+        else:
+            card_id = -1
+        # if card_id >= 0:
+        #     LogDebug(
+        #         card_a=CardName(card_id_a, db),
+        #         card_d=CardName(card_id_d, db),
+        #         dists=(dists_a[:3], dists_d[:3]))
+
+        dist = min(dists_a[0], dists_d[0])
+        return card_id, dist, (dists_a[:3], dists_d[:3])
     
     def OnResize(self, crop_box):
         self.crop_box = crop_box
@@ -369,15 +426,15 @@ class Database:
             game_start_test_path = "temp/test/game_start_frame.png"
             image = LoadImage(game_start_test_path)
             feature = ExtractFeature(image)
-            ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
-            print(f'"info": "{game_start_test_path}: {dist=}, {ECtrlType(ctrl_id).name}"')
+            ctrl_ids, dists = self.SearchByFeature(feature, EAnnType.CTRLS)
+            LogDebug(infp=f'{game_start_test_path}, {dists[0]=}, {ECtrlType(ctrl_ids[0]).name}')
 
             # Game over test
             image = LoadImage(os.path.join(cfg.debug_dir, f"GameOverTest.png"))
             main_content, valid = GameOverTask.CropMainContent(image)
             feature = ExtractFeature(main_content)
-            ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
-            LogDebug(info=f"GameOverTest, {dist=}, {ECtrlType(ctrl_id).name}")
+            ctrl_ids, dists = self.SearchByFeature(feature, EAnnType.CTRLS)
+            LogDebug(info=f"GameOverTest, {dists[0]=}, {ECtrlType(ctrl_ids[0]).name}")
             SaveImage(main_content, os.path.join(cfg.debug_dir, f"GameOverTest_MainContent.png"))
 
             # Rounds test
@@ -386,8 +443,8 @@ class Database:
                 image = LoadImage(os.path.join(cfg.debug_dir, f"crop{i + 1}.png"))
                 main_content, valid = RoundTask.CropMainContent(image)
                 feature = ExtractFeature(main_content)
-                ctrl_id, dist = self.SearchByFeature(feature, EAnnType.CTRLS)
-                LogDebug(info=f"round{i + 1}, {dist=}")
+                ctrl_ids, dists = self.SearchByFeature(feature, EAnnType.CTRLS)
+                LogDebug(info=f"round{i + 1}, {dists[0]=}")
 
 
     def _UpdateActionCards(self, save_image_assets):
@@ -429,7 +486,8 @@ class Database:
         action_cards_dir = os.path.join(cfg.cards_dir, "actions")
         n_images = len(csv_data)
         actions  = [None] * n_images
-        features = [None] * n_images
+        ahashs   = [None] * n_images
+        dhashs   = [None] * n_images
         for image_idx, row in enumerate(csv_data):
             card_id = int(row["id"])
             if image_idx < num_actions:
@@ -458,7 +516,7 @@ class Database:
                 SaveImage(snapshot, snapshot_path)
 
             handler.frame_buffer = image
-            feature = handler.ExtractCardFeature()
+            ahash, dhash = handler.ExtractCardFeatures()
 
             cost_type = row["element"]
             # special case: talent for Attack
@@ -476,17 +534,20 @@ class Database:
                 "cost"    : (cost, cost_type),
             }
 
-            features[card_id] = feature
+            ahashs[card_id]   = ahash
+            dhashs[card_id]   = dhash
             actions[card_id]  = action
 
         if cfg.DEBUG:
-            n = len(features)
+            n = len(ahashs)
             min_dist = 100000
             from collections import defaultdict
+
+            # ahash
             close_dists = defaultdict(list)
             for i in range(n):
                 for j in range(i + 1, n):
-                    dist = FeatureDistance(features[i], features[j])
+                    dist = FeatureDistance(ahashs[i], ahashs[j])
                     min_dist = min(dist, min_dist)
                     if dist <= cfg.threshold:
                         close_dists[dist].append(f'{i}{actions[i]["zh-HANS"]} <-----> {j}{actions[j]["zh-HANS"]}') 
@@ -498,7 +559,23 @@ class Database:
                 close_dists=close_dists, 
                 )
 
-        LogInfo(info=f"Loaded {len(features)} images from {action_cards_dir}")
+            # dhash
+            close_dists = defaultdict(list)
+            for i in range(n):
+                for j in range(i + 1, n):
+                    dist = FeatureDistance(dhashs[i], dhashs[j])
+                    min_dist = min(dist, min_dist)
+                    if dist <= cfg.threshold:
+                        close_dists[dist].append(f'{i}{actions[i]["zh-HANS"]} <-----> {j}{actions[j]["zh-HANS"]}') 
+            
+            close_dists = {key: close_dists[key] for key in sorted(close_dists)}
+            LogWarning(
+                indent=2,
+                min_dist=min_dist,
+                close_dists=close_dists, 
+                )
+
+        LogInfo(info=f"Loaded {len(ahashs)} images from {action_cards_dir}")
         self.data["actions"] = actions
 
         if cfg.DEBUG_SAVE:
@@ -509,13 +586,21 @@ class Database:
             LogDebug(info=f"save {image_file} at {cfg.debug_dir}")
 
         # cfg.ann_index_len = len(features[0])
-        ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
-        for i in range(len(features)):
-            ann.add_item(i, features[i])
-        ann.build(cfg.ann_n_trees)
-        ann_filename = f"{EAnnType.ACTIONS.name.lower()}.ann"
-        ann.save(os.path.join(cfg.database_dir, ann_filename))
-        self.anns[EAnnType.ACTIONS.value] = ann
+        ann_ahash = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
+        for i in range(len(ahashs)):
+            ann_ahash.add_item(i, ahashs[i])
+        ann_ahash.build(cfg.ann_n_trees)
+        ann_filename = f"{EAnnType.ACTIONS_A.name.lower()}.ann"
+        ann_ahash.save(os.path.join(cfg.database_dir, ann_filename))
+        self.anns[EAnnType.ACTIONS_A.value] = ann_ahash
+
+        ann_dhash = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
+        for i in range(len(dhashs)):
+            ann_dhash.add_item(i, dhashs[i])
+        ann_dhash.build(cfg.ann_n_trees)
+        ann_filename = f"{EAnnType.ACTIONS_D.name.lower()}.ann"
+        ann_dhash.save(os.path.join(cfg.database_dir, ann_filename))
+        self.anns[EAnnType.ACTIONS_D.value] = ann_dhash
 
         if cfg.DEBUG_SAVE:
             test_dir = os.path.join(cfg.debug_dir, "test")
@@ -528,19 +613,25 @@ class Database:
                 # print(image.shape, image.dtype)
                 if len(image.shape) == 2:
                     image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGRA)
+                if len(image.shape) == 3 and image.shape[-1] == 3:
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
                 height, width = image.shape[:2]
                 
                 handler = ActionCardHandler()
                 handler.OnResize(CropBox(0, 0, width, height))
                 handler.frame_buffer = image
-                my_feature = handler.ExtractCardFeature()
-                my_ids, my_dists = ann.get_nns_by_vector(my_feature, n=20, include_distances=True)
+                ahash, dhash = handler.ExtractCardFeatures()
+                card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
+                card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
 
                 dt = time.perf_counter() - begin_time
-                found_name = actions[my_ids[0]]['zh-HANS'] if my_dists[0] <= cfg.threshold else "None"
+                name_a = actions[card_ids_a[0]]['zh-HANS']
+                name_d = actions[card_ids_d[0]]['zh-HANS']
                 LogDebug(
-                    info=f"{file}: {found_name}", 
-                    dt=dt, my_ids=my_ids, my_dists=my_dists
+                    indent=2, file=file,
+                    name_a=name_a, card_ids_a=card_ids_a[:3], dists_a=dists_a[:3],
+                    name_d=name_d, card_ids_d=card_ids_d[:3], dists_d=dists_d[:3],
+                    dt=dt, 
                     )
 
     def _UpdateCharacters(self, save_image_assets):
@@ -643,7 +734,7 @@ class Database:
 
         # !!!!! Must use a large n, or it may not find the optimal result !!!!!
         ids, dists = ann.get_nns_by_vector(feature, n=20, include_distances=True)
-        return ids[0], dists[0]
+        return ids, dists
 
 
 if __name__ == '__main__':

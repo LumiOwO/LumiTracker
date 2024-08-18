@@ -46,16 +46,16 @@ class GameOverTask(TaskBase):
             return
 
         feature = ExtractFeature(main_content)
-        ctrl_id, dist = self.db.SearchByFeature(feature, EAnnType.CTRLS)
-        over = (dist <= cfg.strict_threshold) and (
-            ctrl_id >= ECtrlType.GAME_OVER_FIRST.value) and (ctrl_id <= ECtrlType.GAME_OVER_LAST.value)
-        over = self.filter.Filter(over, dist)
+        ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
+        over = (dists[0] <= cfg.strict_threshold) and (
+            ctrl_ids[0] >= ECtrlType.GAME_OVER_FIRST.value) and (ctrl_ids[0] <= ECtrlType.GAME_OVER_LAST.value)
+        over = self.filter.Filter(over, dists[0])
 
         if over:
             frame_manager.game_started = False
 
             LogInfo(
-                info=f"Game over, last dist in window = {dist}",
+                info=f"Game over, last dist in window = {dists[0]}",
                 type=f"{self.task_type.name}",
                 )
             if cfg.DEBUG_SAVE:

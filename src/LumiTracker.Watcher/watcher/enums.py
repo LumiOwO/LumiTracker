@@ -61,7 +61,8 @@ class ECtrlType(enum.Enum):
     CTRL_FEATURES_COUNT = enum.auto()
 
 class EAnnType(enum.Enum):
-    ACTIONS   = 0
+    ACTIONS_A = 0
+    ACTIONS_D = enum.auto()
     CTRLS     = enum.auto()
 
     ANN_COUNT = enum.auto()

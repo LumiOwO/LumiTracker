@@ -46,16 +46,16 @@ class RoundTask(TaskBase):
             return
 
         feature = ExtractFeature(main_content)
-        ctrl_id, dist = self.db.SearchByFeature(feature, EAnnType.CTRLS)
-        found = (dist <= cfg.strict_threshold) and (
-            ctrl_id >= ECtrlType.ROUND_FIRST.value) and (ctrl_id <= ECtrlType.ROUND_LAST.value)
-        found = self.filter.Filter(found, dist)
+        ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
+        found = (dists[0] <= cfg.strict_threshold) and (
+            ctrl_ids[0] >= ECtrlType.ROUND_FIRST.value) and (ctrl_ids[0] <= ECtrlType.ROUND_LAST.value)
+        found = self.filter.Filter(found, dists[0])
 
         if found:
             frame_manager.round += 1
 
             LogInfo(
-                info=f"Found round text, last dist in window = {dist}",
+                info=f"Found round text, last dist in window = {dists[0]}",
                 type=self.task_type.name, 
                 round=frame_manager.round,
                 )

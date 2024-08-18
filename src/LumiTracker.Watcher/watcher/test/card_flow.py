@@ -3,6 +3,7 @@ cfg.DEBUG = True
 
 from ..regions import GetRatioType
 from ..frame_manager import FrameManager
+from ..database import CardName
 
 import logging
 import os
@@ -40,7 +41,7 @@ def image():
                 res += "____"
             else:
                 card_id = next(iter(recorder[i].keys()))
-                res += frame_manager.db["actions"][card_id]["zh-HANS"] if card_id >= 0 else "None"
+                res += CardName(card_id, frame_manager.db)
         print(f"{num}: {res}")
 
     dst = task.frame_buffer
