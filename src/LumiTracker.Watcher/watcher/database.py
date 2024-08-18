@@ -473,9 +473,9 @@ class Database:
         # height = 200
         # crop_box1 = CropBox(left, top, left + width, top + height)
         # cfg.action_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.width / 420, crop_box1.height / 720))
-        # left   = 250
+        # left   = 230
         # width  = 100
-        # top    = 450
+        # top    = 505
         # height = 100
         # crop_box2 = CropBox(left, top, left + width, top + height)
         # cfg.action_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
@@ -501,6 +501,8 @@ class Database:
                 LogError(info=f"Failed to load image: {image_path}")
                 exit(1)
         
+            snapshot_path = os.path.join(
+                cfg.assets_dir, "images", "snapshots", f"{card_id}.jpg")
             if save_image_assets:
                 # create snapshot
                 top    = int(row["snapshot_top"])
@@ -511,12 +513,11 @@ class Database:
                     crop_box.top  : crop_box.bottom, 
                     crop_box.left : crop_box.right
                 ]
-                snapshot_path = os.path.join(
-                    cfg.assets_dir, "images", "snapshots", f"{card_id}.jpg")
                 SaveImage(snapshot, snapshot_path)
 
             handler.frame_buffer = image
             ahash, dhash = handler.ExtractCardFeatures()
+            # SaveImage(handler.feature_buffer, snapshot_path)
 
             cost_type = row["element"]
             # special case: talent for Attack
@@ -540,10 +541,10 @@ class Database:
 
         if cfg.DEBUG:
             n = len(ahashs)
-            min_dist = 100000
             from collections import defaultdict
 
             # ahash
+            min_dist = 100000
             close_dists = defaultdict(list)
             for i in range(n):
                 for j in range(i + 1, n):
@@ -560,6 +561,7 @@ class Database:
                 )
 
             # dhash
+            min_dist = 100000
             close_dists = defaultdict(list)
             for i in range(n):
                 for j in range(i + 1, n):
