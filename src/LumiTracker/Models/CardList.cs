@@ -125,6 +125,8 @@ namespace LumiTracker.Models
 
         public void Add(int[] card_ids)
         {
+            if (card_ids.Length == 0) return;
+
             var pairsToUpdate = new Dictionary<int, ActionCardView>();
             var keysToRemove  = new HashSet<int>();
             foreach (var card_id in card_ids)
@@ -166,6 +168,8 @@ namespace LumiTracker.Models
 
         public void Remove(int[] card_ids, bool keep_zero)
         {
+            if (card_ids.Length == 0) return;
+
             var pairsToUpdate = new Dictionary<int, ActionCardView>();
             var keysToRemove  = new HashSet<int>();
             foreach (var card_id in card_ids)

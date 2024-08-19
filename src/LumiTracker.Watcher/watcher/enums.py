@@ -6,6 +6,14 @@ class ECaptureType(enum.Enum):
 
     NumCaptureTypes = enum.auto()
 
+class EGameState(enum.Enum):
+    GameNotStarted  = 0
+    StartingHand    = enum.auto()
+    RollPhase       = enum.auto()
+    ActionPhase     = enum.auto()
+    NatureAndWisdom = enum.auto()
+
+
 class ETaskType(enum.Enum):
     NONE              = 0
 
@@ -50,8 +58,12 @@ class ECtrlType(enum.Enum):
     GAME_OVER_WIN_ZH_HANS   = enum.auto()
     GAME_OVER_LOSE_ZH_HANS  = enum.auto()
 
-    GAME_OVER_FIRST = GAME_OVER_WIN_ZH_HANS
-    GAME_OVER_LAST  = GAME_OVER_LOSE_ZH_HANS
+    GAME_OVER_WIN_FIRST     = GAME_OVER_WIN_ZH_HANS
+    GAME_OVER_WIN_LAST      = GAME_OVER_WIN_ZH_HANS
+    GAME_OVER_LOSE_FIRST    = GAME_OVER_LOSE_ZH_HANS
+    GAME_OVER_LOSE_LAST     = GAME_OVER_LOSE_ZH_HANS
+    GAME_OVER_FIRST         = GAME_OVER_WIN_FIRST
+    GAME_OVER_LAST          = GAME_OVER_LOSE_LAST
 
     ROUND_ZH_HANS   = enum.auto()
 

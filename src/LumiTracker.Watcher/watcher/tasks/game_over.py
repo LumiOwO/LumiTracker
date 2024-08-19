@@ -11,16 +11,22 @@ import numpy as np
 import logging
 import os
 import cv2
+import enum
+
+class EGameResult(enum.Enum):
+    Null = 0
+    Win  = enum.auto()
+    Lose = enum.auto()
 
 class GameOverTask(TaskBase):
-    def __init__(self, db):
-        super().__init__(db)
+    def __init__(self, frame_manager):
+        super().__init__(frame_manager)
         self.task_type = ETaskType.GAME_OVER
         self.crop_box  = None  # init when resize
         self.Reset()
 
     def Reset(self):
-        self.filter    = StreamFilter(null_val=False)
+        self.filter = StreamFilter(null_val=EGameResult.Null)
     
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.GAME_OVER]
@@ -31,10 +37,7 @@ class GameOverTask(TaskBase):
 
         self.crop_box = CropBox(left, top, left + width, top + height)
 
-    def _PreTick(self, frame_manager):
-        self.valid = frame_manager.game_started
-
-    def _Tick(self, frame_manager):
+    def Tick(self):
         buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
@@ -46,16 +49,24 @@ class GameOverTask(TaskBase):
 
         feature = ExtractFeature_Control(main_content)
         ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
-        over = (dists[0] <= cfg.strict_threshold) and (
-            ctrl_ids[0] >= ECtrlType.GAME_OVER_FIRST.value) and (ctrl_ids[0] <= ECtrlType.GAME_OVER_LAST.value)
-        over = self.filter.Filter(over, dists[0])
+        ctrl_id, dist = ctrl_ids[0], dists[0]
+        if dist > cfg.strict_threshold:
+            res = EGameResult.Null
+        elif (ctrl_id >= ECtrlType.GAME_OVER_WIN_FIRST.value) and (ctrl_id <= ECtrlType.GAME_OVER_WIN_LAST.value):
+            res = EGameResult.Win
+        elif (ctrl_id >= ECtrlType.GAME_OVER_LOSE_FIRST.value) and (ctrl_id <= ECtrlType.GAME_OVER_LOSE_LAST.value):
+            res = EGameResult.Lose
+        else:
+            res = EGameResult.Null
+        res = self.filter.Filter(res, dist)
 
-        if over:
-            frame_manager.game_started = False
+        if res != EGameResult.Null:
+            self.fm.game_started = False
 
             LogInfo(
-                info=f"Game over, last dist in window = {dists[0]}",
+                info=f"Game Over, last dist in window = {dists[0]}",
                 type=f"{self.task_type.name}",
+                is_win=(res == EGameResult.Win),
                 )
             if cfg.DEBUG_SAVE:
                 SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))

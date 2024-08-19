@@ -1,44 +1,20 @@
 from .base import TaskBase
 
-from ..enums import EAnnType, ETaskType, ERegionType
+from ..enums import ETaskType, ERegionType
 from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import CropBox, ActionCardHandler, CardName
 from ..stream_filter import StreamFilter
 
-from types import SimpleNamespace
 from collections import deque, defaultdict
-import numpy as np
-import os
 import cv2
 import time
 
-class CardFlowTask(TaskBase):
-    def __init__(self, db):
-        super().__init__(db)
+class CenterCropTask(TaskBase):
+    def __init__(self, frame_manager):
+        super().__init__(frame_manager)
         self.center_crop   = None
         self.flow_anchor   = None
-        self.my_deck_crop  = None
-        self.op_deck_crop  = None
-        self.Reset()
-    
-    def Reset(self):
-        # round 0, five cards to detect
-        self.round0 = SimpleNamespace()
-        self.round0.cards   = [-1 for _ in range(5)]
-        self.round0.filters = [StreamFilter(null_val=-1) for _ in range(5)]
-
-        # round 1 ~ n
-        self.MAX_NUM_CARDS = 6
-        self.filter        = StreamFilter(null_val=0)
-        self.card_recorder = [[]]
-        for i in range(self.MAX_NUM_CARDS):
-            self.card_recorder.append([defaultdict(int) for _ in range(i + 1)])
-        
-        self.signaled_num_cards = 0
-        self.signaled_timestamp = 0 
-        self.my_deck_queue = deque()
-        self.op_deck_queue = deque()
 
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.CENTER]        # left, top, width, height
@@ -54,158 +30,6 @@ class CardFlowTask(TaskBase):
         width  = round(client_width  * box[2])
         height = round(client_height * box[3])
         self.flow_anchor = CropBox(left, top, left + width, top + height)
-
-        box    = REGIONS[ratio_type][ERegionType.MY_DECK] 
-        left   = round(client_width  * box[0])
-        top    = round(client_height * box[1])
-        width  = round(client_width  * box[2])
-        height = round(client_height * box[3])
-        self.my_deck_crop = CropBox(left, top, left + width, top + height)
-
-        box    = REGIONS[ratio_type][ERegionType.OP_DECK] 
-        left   = round(client_width  * box[0])
-        top    = round(client_height * box[1])
-        width  = round(client_width  * box[2])
-        height = round(client_height * box[3])
-        self.op_deck_crop = CropBox(left, top, left + width, top + height)
-
-    def _PreTick(self, frame_manager):
-        self.valid = frame_manager.game_started
-
-    def _Tick(self, frame_manager):
-        if frame_manager.round == 0:
-            self._DetectRound0()
-        else:
-            self._DetectRound()
-            self._DumpDetected()
-
-    def _DetectRound0(self):
-        bboxes = self.DetectCenterBoundingBoxes()
-        num_bboxes = len(bboxes)
-
-        if num_bboxes != 5:
-            return
-
-        for i, box in enumerate(bboxes):
-            box.left   = box.left + self.center_crop.left
-            box.top    = self.flow_anchor.top
-            box.right  = box.left + self.flow_anchor.width
-            box.bottom = box.top  + self.flow_anchor.height
-
-            card_handler = ActionCardHandler()
-            card_handler.OnResize(box)
-            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
-            card_id = self.round0.filters[i].Filter(card_id, dist=dist)
-
-            # record last detected card_id
-            if card_id >= 0:
-                self.round0.cards[i] = card_id
-
-    def _DetectRound(self):
-        # center
-        bboxes = self.DetectCenterBoundingBoxes()
-        num_bboxes = len(bboxes)
-
-        if cfg.DEBUG:
-            detected = []
-            debug_bboxes = []
-        recorder = self.card_recorder[num_bboxes]
-        invalid_count = 0
-        for i, box in enumerate(bboxes):
-            box.left   = box.left + self.center_crop.left
-            box.top    = self.flow_anchor.top
-            box.right  = box.left + self.flow_anchor.width
-            box.bottom = box.top  + self.flow_anchor.height
-
-            card_handler = ActionCardHandler()
-            card_handler.OnResize(box)
-            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
-
-            if card_id >= 0:
-                recorder[i][card_id] += 1
-            else:
-                invalid_count += 1
-
-            if cfg.DEBUG:
-                debug_bboxes.append(box)
-                detected.append((card_id, dists))
-
-        if cfg.DEBUG:
-            self.bboxes = debug_bboxes
-            # if detected:
-            #     LogDebug(center=[(CardName(card_id, self.db), card[1]) for card in detected])
-
-        timestamp = time.perf_counter()
-        # my deck
-        my_drawn_detected = self.DetectDeck(is_op=False)
-        if my_drawn_detected:
-            # LogDebug(my_drawn_detected=my_drawn_detected)
-            self.my_deck_queue.append(timestamp)
-        
-        # op deck
-        op_drawn_detected = self.DetectDeck(is_op=True)
-        if op_drawn_detected:
-            # LogDebug(op_drawn_detected=op_drawn_detected)
-            self.op_deck_queue.append(timestamp)
-
-        # stream filtering
-        num_cards = num_bboxes if invalid_count != num_bboxes else 0
-        num_cards = self.filter.Filter(num_cards, dist=0)
-        if num_cards > 0:
-            self.signaled_num_cards = num_cards
-            self.signaled_timestamp = timestamp
-    
-    def _DumpDetected(self):
-        # flush round 0 result
-        if self.round0.cards:
-            cards = self.round0.cards
-            LogInfo(type=ETaskType.MY_DRAWN.name, cards=cards,
-                    names=[CardName(card, self.db) for card in cards])
-            self.round0.cards = []
-        
-        # dump if signaled
-        if self.signaled_num_cards == 0:
-            return
-        WAIT_TIME = 1.2  # seconds
-        if time.perf_counter() - self.signaled_timestamp < WAIT_TIME:
-            return
-        
-        task_type = ETaskType.NONE
-        while len(self.my_deck_queue) > 0:
-            timestamp = self.my_deck_queue[0]
-            if timestamp > self.signaled_timestamp + WAIT_TIME:
-                break
-            self.my_deck_queue.popleft()
-            if task_type != ETaskType.NONE:
-                continue
-
-            if timestamp < self.signaled_timestamp - WAIT_TIME:
-                continue
-            task_type = ETaskType.MY_DRAWN if timestamp < self.signaled_timestamp else ETaskType.MY_CREATE_DECK
-        
-        while len(self.op_deck_queue) > 0:
-            timestamp = self.op_deck_queue[0]
-            if timestamp > self.signaled_timestamp + WAIT_TIME:
-                break
-            self.op_deck_queue.popleft()
-            if task_type != ETaskType.NONE:
-                continue
-
-            if timestamp < self.signaled_timestamp:
-                continue
-            task_type = ETaskType.OP_CREATE_DECK
-
-        if task_type != ETaskType.NONE:
-            recorder = self.card_recorder[self.signaled_num_cards]
-            cards = [max(d, key=d.get) for d in recorder]
-            LogInfo(type=task_type.name, cards=cards,
-                    names=[CardName(card, self.db) for card in cards])
-        
-        # reset
-        self.card_recorder[self.signaled_num_cards] = [defaultdict(int) for _ in range(self.signaled_num_cards)]
-        self.signaled_num_cards = 0
-        self.signaled_timestamp = 0 
-
 
     def DetectCenterBoundingBoxes(self):
         center_buffer = self.frame_buffer[
@@ -297,8 +121,103 @@ class CardFlowTask(TaskBase):
             self.gray = gray
 
         return bboxes
+
+class CardFlowTask(CenterCropTask):
+    def __init__(self, frame_manager):
+        super().__init__(frame_manager)
+        self.my_deck_crop  = None
+        self.op_deck_crop  = None
+        self.Reset()
     
-    def DetectDeck(self, is_op):
+    def Reset(self):
+        # round 1 ~ n
+        self.MAX_NUM_CARDS = 6
+        self.filter        = StreamFilter(null_val=0)
+        self.card_recorder = [[]]
+        for i in range(self.MAX_NUM_CARDS):
+            self.card_recorder.append([defaultdict(int) for _ in range(i + 1)])
+        
+        self.signaled_num_cards = 0
+        self.signaled_timestamp = 0 
+        self.my_deck_queue = deque()
+        self.op_deck_queue = deque()
+
+    def OnResize(self, client_width, client_height, ratio_type):
+        super().OnResize(client_width, client_height, ratio_type)
+
+        box    = REGIONS[ratio_type][ERegionType.MY_DECK] 
+        left   = round(client_width  * box[0])
+        top    = round(client_height * box[1])
+        width  = round(client_width  * box[2])
+        height = round(client_height * box[3])
+        self.my_deck_crop = CropBox(left, top, left + width, top + height)
+
+        box    = REGIONS[ratio_type][ERegionType.OP_DECK] 
+        left   = round(client_width  * box[0])
+        top    = round(client_height * box[1])
+        width  = round(client_width  * box[2])
+        height = round(client_height * box[3])
+        self.op_deck_crop = CropBox(left, top, left + width, top + height)
+
+    def Tick(self):
+        self._DetectRound()
+        self._DumpDetected()
+
+    def _DetectRound(self):
+        # center
+        bboxes = self.DetectCenterBoundingBoxes()
+        num_bboxes = len(bboxes)
+
+        if cfg.DEBUG:
+            detected = []
+            debug_bboxes = []
+        recorder = self.card_recorder[num_bboxes]
+        invalid_count = 0
+        for i, box in enumerate(bboxes):
+            box.left   = box.left + self.center_crop.left
+            box.top    = self.flow_anchor.top
+            box.right  = box.left + self.flow_anchor.width
+            box.bottom = box.top  + self.flow_anchor.height
+
+            card_handler = ActionCardHandler()
+            card_handler.OnResize(box)
+            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
+
+            if card_id >= 0:
+                recorder[i][card_id] += 1
+            else:
+                invalid_count += 1
+
+            if cfg.DEBUG:
+                debug_bboxes.append(box)
+                detected.append((card_id, dists))
+
+        if cfg.DEBUG:
+            self.bboxes = debug_bboxes
+            # if detected:
+            #     LogDebug(center=[(CardName(card_id, self.db), card[1]) for card in detected])
+
+        timestamp = time.perf_counter()
+        # my deck
+        my_drawn_detected = self._DetectDeck(is_op=False)
+        if my_drawn_detected:
+            # LogDebug(my_drawn_detected=my_drawn_detected)
+            self.my_deck_queue.append(timestamp)
+        
+        # op deck
+        op_drawn_detected = self._DetectDeck(is_op=True)
+        if op_drawn_detected:
+            # LogDebug(op_drawn_detected=op_drawn_detected)
+            self.op_deck_queue.append(timestamp)
+
+        # stream filtering
+        num_cards = num_bboxes if invalid_count != num_bboxes else 0
+        num_cards = self.filter.Filter(num_cards, dist=0)
+        if num_cards > 0:
+            self.signaled_num_cards = num_cards
+            self.signaled_timestamp = timestamp
+
+    def _DetectDeck(self, is_op):
         deck_crop = self.op_deck_crop if is_op else self.my_deck_crop
         deck_buffer = self.frame_buffer[
             deck_crop.top  : deck_crop.bottom, 
@@ -338,3 +257,47 @@ class CardFlowTask(TaskBase):
                 self.op_deck_bboxes = bboxes
         
         return True if bboxes else False
+
+    def _DumpDetected(self):
+        # dump if signaled
+        if self.signaled_num_cards == 0:
+            return
+        WAIT_TIME = 1.2  # seconds
+        if time.perf_counter() - self.signaled_timestamp < WAIT_TIME:
+            return
+        
+        task_type = ETaskType.NONE
+        while len(self.my_deck_queue) > 0:
+            timestamp = self.my_deck_queue[0]
+            if timestamp > self.signaled_timestamp + WAIT_TIME:
+                break
+            self.my_deck_queue.popleft()
+            if task_type != ETaskType.NONE:
+                continue
+
+            if timestamp < self.signaled_timestamp - WAIT_TIME:
+                continue
+            task_type = ETaskType.MY_DRAWN if timestamp < self.signaled_timestamp else ETaskType.MY_CREATE_DECK
+        
+        while len(self.op_deck_queue) > 0:
+            timestamp = self.op_deck_queue[0]
+            if timestamp > self.signaled_timestamp + WAIT_TIME:
+                break
+            self.op_deck_queue.popleft()
+            if task_type != ETaskType.NONE:
+                continue
+
+            if timestamp < self.signaled_timestamp:
+                continue
+            task_type = ETaskType.OP_CREATE_DECK
+
+        if task_type != ETaskType.NONE:
+            recorder = self.card_recorder[self.signaled_num_cards]
+            cards = [max(d, key=d.get) for d in recorder]
+            LogInfo(type=task_type.name, cards=cards,
+                    names=[CardName(card, self.db) for card in cards])
+        
+        # reset
+        self.card_recorder[self.signaled_num_cards] = [defaultdict(int) for _ in range(self.signaled_num_cards)]
+        self.signaled_num_cards = 0
+        self.signaled_timestamp = 0 

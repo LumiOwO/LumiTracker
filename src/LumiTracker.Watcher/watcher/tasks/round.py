@@ -13,14 +13,14 @@ import os
 import cv2
 
 class RoundTask(TaskBase):
-    def __init__(self, db):
-        super().__init__(db)
+    def __init__(self, frame_manager):
+        super().__init__(frame_manager)
         self.task_type = ETaskType.ROUND
         self.crop_box  = None  # init when resize
         self.Reset()
 
     def Reset(self):
-        self.filter    = StreamFilter(null_val=False)
+        self.filter = StreamFilter(null_val=False)
 
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.ROUND]
@@ -31,10 +31,7 @@ class RoundTask(TaskBase):
 
         self.crop_box = CropBox(left, top, left + width, top + height)
 
-    def _PreTick(self, frame_manager):
-        self.valid = frame_manager.game_started
-
-    def _Tick(self, frame_manager):
+    def Tick(self):
         buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
@@ -51,12 +48,12 @@ class RoundTask(TaskBase):
         found = self.filter.Filter(found, dists[0])
 
         if found:
-            frame_manager.round += 1
+            self.fm.round += 1
 
             LogInfo(
-                info=f"Found round text, last dist in window = {dists[0]}",
+                info=f"Found Round Text, last dist in window = {dists[0]}",
                 type=self.task_type.name, 
-                round=frame_manager.round,
+                round=self.fm.round,
                 )
             if cfg.DEBUG_SAVE:
                 SaveImage(main_content, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))

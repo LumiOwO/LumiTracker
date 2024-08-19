@@ -1,24 +1,26 @@
 class TaskBase:
-    def __init__(self, db):
-        self.db           = db
+    def __init__(self, frame_manager):
+        self.fm = frame_manager
+        self.db = frame_manager.db
         self.frame_buffer = None
-        self.valid        = True
-    
-    def PreTick(self, frame_manager, frame_buffer):
+
+    def SetFrameBuffer(self, frame_buffer):
         self.frame_buffer = frame_buffer
-        self._PreTick(frame_manager)
+
+    def PreTick(self):
+        pass
+
+    def Tick(self):
+        pass
     
-    def Tick(self, frame_manager):
-        self._Tick(frame_manager)
+    def PostTick(self):
+        pass
 
-    def _PreTick(self, frame_manager):
-        raise NotImplementedError()
-
-    def _Tick(self, frame_manager):
-        raise NotImplementedError()
+    def OnStateTransfer(self, old_state, new_state):
+        pass
     
     def OnResize(self, client_width, client_height, ratio_type):
-        raise NotImplementedError()
+        pass
     
     def Reset(self):
-        raise NotImplementedError()
+        pass

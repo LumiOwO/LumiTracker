@@ -13,14 +13,14 @@ import logging
 import os
 
 class CardPlayedTask(TaskBase):
-    def __init__(self, db, is_op):
-        super().__init__(db)
-        self.task_type      = ETaskType.OP_PLAYED if is_op else ETaskType.MY_PLAYED
-        self.card_handler   = ActionCardHandler()
+    def __init__(self, frame_manager, is_op):
+        super().__init__(frame_manager)
+        self.task_type    = ETaskType.OP_PLAYED if is_op else ETaskType.MY_PLAYED
+        self.card_handler = ActionCardHandler()
         self.Reset()
     
     def Reset(self):
-        self.filter         = StreamFilter(null_val=-1)
+        self.filter = StreamFilter(null_val=-1)
 
     def OnResize(self, client_width, client_height, ratio_type):
         region_type = ERegionType.OP_PLAYED if self.task_type == ETaskType.OP_PLAYED else ERegionType.MY_PLAYED
@@ -31,10 +31,7 @@ class CardPlayedTask(TaskBase):
         height = round(client_height * box[3])
         self.card_handler.OnResize(CropBox(left, top, left + width, top + height))
 
-    def _PreTick(self, frame_manager):
-        self.valid = frame_manager.game_started
-
-    def _Tick(self, frame_manager):
+    def Tick(self):
         card_id, dist, dists = self.card_handler.Update(self.frame_buffer, self.db)
         if cfg.DEBUG:
             # if (self.task_type.value == 1) and True: #(card_id != -1):
@@ -48,8 +45,8 @@ class CardPlayedTask(TaskBase):
                 card_id=card_id,
                 name=CardName(card_id, self.db),
                 )
-        
+
         if cfg.DEBUG_SAVE:
             import cv2
             image = cv2.cvtColor(self.feature_buffer, cv2.COLOR_BGRA2BGR)
-            SaveImage(image, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}{frame_manager.frame_count}.png"))
+            SaveImage(image, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}{self.fm.frame_count}.png"))
