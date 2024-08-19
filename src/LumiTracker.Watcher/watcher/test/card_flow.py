@@ -3,7 +3,7 @@ cfg.DEBUG = True
 
 from ..regions import GetRatioType
 from ..frame_manager import FrameManager
-from ..database import CardName
+from ..feature import CardName
 
 import logging
 import os

@@ -3,8 +3,7 @@ from .base import TaskBase
 from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
 from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
-from ..database import CropBox
-from ..database import ExtractFeature
+from ..feature import CropBox, ExtractFeature
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 

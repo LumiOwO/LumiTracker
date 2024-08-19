@@ -3,8 +3,7 @@ from .base import TaskBase
 from ..enums import EAnnType, ETaskType, ERegionType
 from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
-from ..database import CropBox
-from ..database import ActionCardHandler, CardName
+from ..feature import CropBox, ActionCardHandler, CardName
 from ..stream_filter import StreamFilter
 
 from types import SimpleNamespace
