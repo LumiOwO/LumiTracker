@@ -55,29 +55,6 @@ class ImageHash:
         # Returns the bit length of the hash
         return self.hash.size
 
-def PHash(gray_image, hash_size=8):
-    """
-    Perceptual Hash computation.
-
-    Implementation follows http://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
-
-    Reference: https://github.com/JohannesBuchner/imagehash/blob/master/imagehash/__init__.py
-
-    image: gray image, dtype == float32
-    """
-    # highfreq_factor = 4
-    # img_size = hash_size * highfreq_factor
-    # gray_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
-    
-    dct = cv2.dct(gray_image)
-
-    dctlowfreq = dct[:hash_size, :hash_size]
-    med = np.median(dctlowfreq)
-    diff = dctlowfreq > med
-    
-    return ImageHash(diff)
-
-
 def DHash(gray_image, hash_size=8):
     """
     Difference Hash computation.
@@ -113,7 +90,7 @@ def DHashVertical(gray_image, hash_size=8):
 
     return ImageHash(diff)
 
-def MultiPHash(gray_image, hash_size=8):
+def PHash_A(gray_image, hash_size=8):
     """
     Perceptual Hash computation.
 
@@ -128,7 +105,57 @@ def MultiPHash(gray_image, hash_size=8):
     # gray_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
 
     # resize
-    w, h = cfg.feature_image_size
+    gray_image = cv2.resize(gray_image, (hash_size, hash_size), interpolation=cv2.INTER_AREA)
+    
+    dct = cv2.dct(gray_image)
+
+    dctlowfreq = dct[:hash_size, :hash_size]
+    med = np.median(dctlowfreq)
+    diff = dctlowfreq > med
+    
+    return ImageHash(diff)
+
+def PHash_D(gray_image, hash_size=8):
+    """
+    Perceptual Hash computation.
+
+    Implementation follows http://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
+
+    Reference: https://github.com/JohannesBuchner/imagehash/blob/master/imagehash/__init__.py
+
+    image: gray image, dtype == float32
+    """
+    # highfreq_factor = 4
+    # img_size = hash_size * highfreq_factor
+    # gray_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
+
+    # resize
+    gray_image = cv2.resize(gray_image, (hash_size, hash_size + 1), interpolation=cv2.INTER_AREA)
+    
+    dct = cv2.dct(gray_image)
+
+    # dhash vertical
+    dctlowfreq = dct[:hash_size + 1, :hash_size]
+    diff = dctlowfreq[1:, :] > dctlowfreq[:-1, :]
+    
+    return ImageHash(diff)
+
+def MultiPHash(gray_image, target_size, hash_size=8):
+    """
+    Perceptual Hash computation.
+
+    Implementation follows http://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
+
+    Reference: https://github.com/JohannesBuchner/imagehash/blob/master/imagehash/__init__.py
+
+    image: gray image, dtype == float32
+    """
+    # highfreq_factor = 4
+    # img_size = hash_size * highfreq_factor
+    # gray_image = cv2.resize(gray_image, (img_size, img_size), interpolation=cv2.INTER_AREA)
+
+    # resize
+    w, h = target_size
     interpolation = cv2.INTER_LINEAR if gray_image.shape[0] < h else cv2.INTER_AREA
     gray_image = cv2.resize(gray_image, (w, h), interpolation=interpolation)
     
@@ -171,8 +198,8 @@ class CropBox:
         self.right  = max(self.right , other.right)
         self.bottom = max(self.bottom, other.bottom)
 
-
-def Preprocess(image):
+def ExtractFeature_Control(image):
+    # preprocess
     # to gray image
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
 
@@ -182,21 +209,24 @@ def Preprocess(image):
     # to float buffer
     gray_image = gray_image.astype(np.float32) / 255.0
 
-    return gray_image
-
-
-def ExtractFeature(image):
-    gray_image = Preprocess(image)
-
-    feature = DHash(gray_image, hash_size=cfg.hash_size)
+    hash_size = cfg.hash_size
+    feature = PHash_D(gray_image, hash_size=hash_size)
     feature = feature.hash.flatten()
 
     return feature
 
-def ExtractMultiFeatures(image):
-    gray_image = Preprocess(image)
+def ExtractFeature_ActionCard(image):
+    # preprocess
+    # to gray image
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
 
-    ahash, dhash = MultiPHash(gray_image, hash_size=cfg.hash_size)
+    # histogram equalization
+    gray_image = cv2.equalizeHist(gray_image)
+
+    # to float buffer
+    gray_image = gray_image.astype(np.float32) / 255.0
+
+    ahash, dhash = MultiPHash(gray_image, target_size=cfg.feature_image_size, hash_size=cfg.hash_size)
     ahash = ahash.hash.flatten()
     dhash = dhash.hash.flatten()
 
@@ -213,9 +243,9 @@ def HashToFeature(hash_str):
     feature = np.array(bool_list, dtype=bool)
     return feature
 
-
 def CardName(card_id, db, lang="zh-HANS"):
     return db["actions"][card_id][lang] if card_id >= 0 else "None"
+
 
 class ActionCardHandler:
     def __init__(self):
@@ -249,7 +279,7 @@ class ActionCardHandler:
         ]
 
         # Extract feature
-        features = ExtractMultiFeatures(self.feature_buffer)
+        features = ExtractFeature_ActionCard(self.feature_buffer)
         return features
 
     def Update(self, frame_buffer, db):
@@ -259,15 +289,8 @@ class ActionCardHandler:
         card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
         card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
 
-        # TODO: fix the temp fix for the tokens of Counting Down to 3 
-        # 319, 320, 321 -> 301
-        def _tempfix(card_id):
-            # if card_id == 319 or card_id == 320 or card_id == 321:
-            #     card_id = 301
-            return card_id
-        
-        card_id_a = _tempfix(card_ids_a[0])
-        card_id_d = _tempfix(card_ids_d[0])
+        card_id_a = card_ids_a[0]
+        card_id_d = card_ids_d[0]
 
         threshold = cfg.threshold
         strict_threshold = cfg.strict_threshold

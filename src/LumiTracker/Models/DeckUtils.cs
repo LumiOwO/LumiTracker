@@ -113,6 +113,7 @@ namespace LumiTracker.Models
 
             /////////////////////////
             // special cases
+            // TODO: change to enum
             if (is_talent)
             {
                 // 琳妮特(65)天赋 和 散兵(40)天赋，不知为何反了；琳妮特在前
@@ -168,6 +169,10 @@ namespace LumiTracker.Models
             {
                 return ArtifactCompare(a_card_id, b_card_id);
             }
+            else if (a_type == EActionCardType.Event)
+            {
+                return EventCompare(a_card_id, b_card_id);
+            }
             else
             {
                 return a_card_id.CompareTo(b_card_id);
@@ -188,6 +193,26 @@ namespace LumiTracker.Models
             int a = artifacts_order[$"{a_card_id}"]!.ToObject<int>();
             int b = artifacts_order[$"{b_card_id}"]!.ToObject<int>();
             return a.CompareTo(b);
+        }
+
+        public static int EventCompare(int a_card_id, int b_card_id)
+        {
+            float a = RemapEventTypeCardId(a_card_id);
+            float b = RemapEventTypeCardId(b_card_id);
+            return a.CompareTo(b);
+        }
+
+        private static float RemapEventTypeCardId(int id)
+        {
+            // TODO: change to enum
+            // Counting down to 3 tokens
+            return id switch 
+            {
+                319 => 301 + 0.1f,
+                320 => 301 + 0.2f,
+                321 => 301 + 0.3f,
+                _ => (float)id,
+            };
         }
 
         private static void SortingTest()

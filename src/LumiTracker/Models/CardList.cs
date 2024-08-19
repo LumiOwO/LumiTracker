@@ -27,13 +27,6 @@ namespace LumiTracker.Models
             var cost     = jCost[0]!.ToObject<int>();
             var costType = jCost[1]!.ToObject<ECostType>();
 
-            // TODO: fix the temp fix for the tokens of Counting Down to 3 
-            if (inGame && card_id == 301)
-            {
-                cost     = -1;
-                cardName = "幻戏倒计时";
-            }
-
             Cost         = cost;
             CostTypeUri  = $"pack://siteoforigin:,,,/assets/images/costs/{costType.ToString()}.png";
             CardName     = cardName;

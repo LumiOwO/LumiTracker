@@ -3,7 +3,7 @@ from .base import TaskBase
 from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
 from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
-from ..feature import CropBox, ExtractFeature
+from ..feature import CropBox, ExtractFeature_Control
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
@@ -44,7 +44,7 @@ class GameOverTask(TaskBase):
         if not valid:
             return
 
-        feature = ExtractFeature(main_content)
+        feature = ExtractFeature_Control(main_content)
         ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
         over = (dists[0] <= cfg.strict_threshold) and (
             ctrl_ids[0] >= ECtrlType.GAME_OVER_FIRST.value) and (ctrl_ids[0] <= ECtrlType.GAME_OVER_LAST.value)

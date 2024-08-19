@@ -9,10 +9,11 @@ import csv
 import os
 import shutil
 from pathlib import Path
+from collections import defaultdict
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
 from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType
-from .feature import CropBox, ActionCardHandler, ExtractFeature, FeatureDistance
+from .feature import CropBox, ActionCardHandler, ExtractFeature_Control, FeatureDistance
 
 def LoadImage(path):
     return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -23,6 +24,24 @@ def SaveImage(image, path, remove_alpha=False):
     if image.dtype == np.float32:
         image *= 255
     cv2.imencode(Path(path).suffix, image)[1].tofile(path)
+
+def CheckHashDistances(hashs, name_func):
+    n = len(hashs)
+    min_dist = 100000
+    close_dists = defaultdict(list)
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = FeatureDistance(hashs[i], hashs[j])
+            min_dist = min(dist, min_dist)
+            if dist <= cfg.threshold:
+                close_dists[dist].append(f'{i}{name_func(i)} <-----> {j}{name_func(j)}') 
+    
+    close_dists = {key: close_dists[key] for key in sorted(close_dists)}
+    LogWarning(
+        indent=2,
+        min_dist=min_dist,
+        close_dists=close_dists, 
+        )
 
 class Database:
     def __init__(self):
@@ -47,7 +66,7 @@ class Database:
         # Game start
         ctrl_id = ECtrlType.GAME_START.value
         image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{ctrl_id}.png"))
-        feature = ExtractFeature(image)
+        feature = ExtractFeature_Control(image)
         features[ctrl_id] = feature
 
         # Game over
@@ -57,7 +76,7 @@ class Database:
         for i in range(ctrl_id_first, ctrl_id_last + 1):
             image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
             main_content, valid = GameOverTask.CropMainContent(image)
-            feature = ExtractFeature(main_content)
+            feature = ExtractFeature_Control(main_content)
             features[i] = feature
             if cfg.DEBUG_SAVE:
                 SaveImage(main_content, os.path.join(cfg.debug_dir, f"{ECtrlType(i).name.lower()}.png"))
@@ -69,7 +88,7 @@ class Database:
         for i in range(ctrl_id_first, ctrl_id_last + 1):
             image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
             main_content, valid = RoundTask.CropMainContent(image)
-            feature = ExtractFeature(main_content)
+            feature = ExtractFeature_Control(main_content)
             features[i] = feature
             if cfg.DEBUG_SAVE:
                 SaveImage(main_content, os.path.join(cfg.debug_dir, f"{ECtrlType(i).name.lower()}.png"))
@@ -83,16 +102,18 @@ class Database:
         self.anns[EAnnType.CTRLS.value] = ann
 
         if cfg.DEBUG:
+            CheckHashDistances(features, name_func=lambda i: ECtrlType(i).name.lower())
+
             game_start_test_path = "temp/test/game_start_frame.png"
             image = LoadImage(game_start_test_path)
-            feature = ExtractFeature(image)
+            feature = ExtractFeature_Control(image)
             ctrl_ids, dists = self.SearchByFeature(feature, EAnnType.CTRLS)
-            LogDebug(infp=f'{game_start_test_path}, {dists[0]=}, {ECtrlType(ctrl_ids[0]).name}')
+            LogDebug(info=f'{game_start_test_path}, {dists[0]=}, {ECtrlType(ctrl_ids[0]).name}')
 
             # Game over test
             image = LoadImage(os.path.join(cfg.debug_dir, f"GameOverTest.png"))
             main_content, valid = GameOverTask.CropMainContent(image)
-            feature = ExtractFeature(main_content)
+            feature = ExtractFeature_Control(main_content)
             ctrl_ids, dists = self.SearchByFeature(feature, EAnnType.CTRLS)
             LogDebug(info=f"GameOverTest, {dists[0]=}, {ECtrlType(ctrl_ids[0]).name}")
             SaveImage(main_content, os.path.join(cfg.debug_dir, f"GameOverTest_MainContent.png"))
@@ -102,7 +123,7 @@ class Database:
             for i in range(n_rounds):
                 image = LoadImage(os.path.join(cfg.debug_dir, f"crop{i + 1}.png"))
                 main_content, valid = RoundTask.CropMainContent(image)
-                feature = ExtractFeature(main_content)
+                feature = ExtractFeature_Control(main_content)
                 ctrl_ids, dists = self.SearchByFeature(feature, EAnnType.CTRLS)
                 LogDebug(info=f"round{i + 1}, {dists[0]=}")
 
@@ -200,42 +221,10 @@ class Database:
             actions[card_id]  = action
 
         if cfg.DEBUG:
-            n = len(ahashs)
-            from collections import defaultdict
-
             # ahash
-            min_dist = 100000
-            close_dists = defaultdict(list)
-            for i in range(n):
-                for j in range(i + 1, n):
-                    dist = FeatureDistance(ahashs[i], ahashs[j])
-                    min_dist = min(dist, min_dist)
-                    if dist <= cfg.threshold:
-                        close_dists[dist].append(f'{i}{actions[i]["zh-HANS"]} <-----> {j}{actions[j]["zh-HANS"]}') 
-            
-            close_dists = {key: close_dists[key] for key in sorted(close_dists)}
-            LogWarning(
-                indent=2,
-                min_dist=min_dist,
-                close_dists=close_dists, 
-                )
-
+            CheckHashDistances(ahashs, name_func=lambda i: actions[i]["zh-HANS"])
             # dhash
-            min_dist = 100000
-            close_dists = defaultdict(list)
-            for i in range(n):
-                for j in range(i + 1, n):
-                    dist = FeatureDistance(dhashs[i], dhashs[j])
-                    min_dist = min(dist, min_dist)
-                    if dist <= cfg.threshold:
-                        close_dists[dist].append(f'{i}{actions[i]["zh-HANS"]} <-----> {j}{actions[j]["zh-HANS"]}') 
-            
-            close_dists = {key: close_dists[key] for key in sorted(close_dists)}
-            LogWarning(
-                indent=2,
-                min_dist=min_dist,
-                close_dists=close_dists, 
-                )
+            CheckHashDistances(dhashs, name_func=lambda i: actions[i]["zh-HANS"])
 
         LogInfo(info=f"Loaded {len(ahashs)} images from {action_cards_dir}")
         self.data["actions"] = actions

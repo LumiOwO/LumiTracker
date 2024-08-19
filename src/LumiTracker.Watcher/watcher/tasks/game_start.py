@@ -3,7 +3,7 @@ from .base import TaskBase
 from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
 from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
-from ..feature import CropBox, ExtractFeature
+from ..feature import CropBox, ExtractFeature_Control
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
@@ -39,7 +39,7 @@ class GameStartTask(TaskBase):
             self.crop_box.left : self.crop_box.right
         ]
 
-        feature = ExtractFeature(buffer)
+        feature = ExtractFeature_Control(buffer)
         ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
         start = (dists[0] <= cfg.strict_threshold) and (ctrl_ids[0] == ECtrlType.GAME_START.value)
         start = self.filter.Filter(start, dists[0])
