@@ -31,7 +31,7 @@ class GameStateGameNotStarted(GameState):
         return [self.fm.game_start_task]
     
     def Next(self):
-        if self.fm.game_start_task.detected:
+        if self.fm.game_started:
             state = EGameState.StartingHand
         else:
             state = self.GetState()
@@ -53,25 +53,12 @@ class GameStateStartingHand(GameState):
             ]
     
     def Next(self):
-        if self.fm.round > 0:
-            # TODO: add roll phase
+        if not self.fm.game_started:
+            state = EGameState.GameNotStarted
+        elif self.fm.round > 0:
             state = EGameState.ActionPhase
         else:
             state = self.GetState()
-        return state
-
-class GameStateRollPhase(GameState):
-    def __init__(self, frame_manager):
-        super().__init__(frame_manager)
-    
-    def GetState(self):
-        return EGameState.RollPhase
-    
-    def CollectTasks(self):
-        return [self.fm.game_start_task]
-    
-    def Next(self):
-        state = self.GetState()
         return state
 
 class GameStateActionPhase(GameState):
@@ -92,8 +79,11 @@ class GameStateActionPhase(GameState):
             ]
 
     def Next(self):
-        # TODO: add roll phase & NatureAndWisdom
-        state = self.GetState()
+        # TODO: add NatureAndWisdom
+        if not self.fm.game_started:
+            state = EGameState.GameNotStarted
+        else:
+            state = self.GetState()
         return state
 
 class GameStateNatureAndWisdom(GameState):
@@ -104,10 +94,16 @@ class GameStateNatureAndWisdom(GameState):
         return EGameState.NatureAndWisdom
     
     def CollectTasks(self):
-        return [self.fm.game_start_task]
+        return [
+            self.fm.game_start_task,
+            self.fm.game_over_task,
+            ]
     
     def Next(self):
-        state = self.GetState()
+        if not self.fm.game_started:
+            state = EGameState.GameNotStarted
+        else:
+            state = self.GetState()
         return state
 
 
@@ -140,7 +136,6 @@ class FrameManager:
         self.states = [
             GameStateGameNotStarted(self),  
             GameStateStartingHand(self),    
-            GameStateRollPhase(self),       
             GameStateActionPhase(self),     
             GameStateNatureAndWisdom(self), 
         ]
@@ -178,12 +173,10 @@ class FrameManager:
         old_state = self.state.GetState()
         if self.game_start_task.detected:
             new_state = EGameState.StartingHand
-        elif not self.game_started:
-            new_state = EGameState.GameNotStarted
         else:
             new_state = self.state.Next()
-
         transfer = (self.game_start_task.detected) or (new_state != old_state)
+
         if transfer:
             LogDebug(info=f"GameState: {old_state.name} ---> {new_state.name}")
             for task in self.tasks:
