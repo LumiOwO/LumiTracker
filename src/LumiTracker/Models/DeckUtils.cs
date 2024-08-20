@@ -116,24 +116,24 @@ namespace LumiTracker.Models
             // TODO: change to enum
             if (is_talent)
             {
-                // 琳妮特(65)天赋 和 散兵(40)天赋，不知为何反了；琳妮特在前
-                if (a_character_id == 65 && b_character_id == 40)
+                // 琳妮特天赋 和 散兵天赋，不知为何反了；琳妮特在前
+                if (a_character_id == (int)ECharacterCard.Lynette && b_character_id == (int)ECharacterCard.Wanderer)
                 {
                     return -1;
                 }
-                else if (a_character_id == 40 && b_character_id == 65)
+                else if (a_character_id == (int)ECharacterCard.Wanderer && b_character_id == (int)ECharacterCard.Lynette)
                 {
                     return 1;
                 }
             }
             else
             {
-                // 早柚(72) 和 琳妮特(65)，不知为何反了；早柚在前
-                if (a_character_id == 72 && b_character_id == 65)
+                // 早柚 和 琳妮特，不知为何反了；早柚在前
+                if (a_character_id == (int)ECharacterCard.Sayu && b_character_id == (int)ECharacterCard.Lynette)
                 {
                     return -1;
                 }
-                else if (a_character_id == 65 && b_character_id == 72)
+                else if (a_character_id == (int)ECharacterCard.Lynette && b_character_id == (int)ECharacterCard.Sayu)
                 {
                     return 1;
                 }
@@ -204,13 +204,11 @@ namespace LumiTracker.Models
 
         private static float RemapEventTypeCardId(int id)
         {
-            // TODO: change to enum
-            // Counting down to 3 tokens
-            return id switch 
+            return (EActionCard)id switch 
             {
-                319 => 301 + 0.1f,
-                320 => 301 + 0.2f,
-                321 => 301 + 0.3f,
+                EActionCard.CountdownToTheShow2 => (float)EActionCard.CountdownToTheShow3 + 0.1f,
+                EActionCard.CountdownToTheShow1 => (float)EActionCard.CountdownToTheShow3 + 0.2f,
+                EActionCard.TheShowBegins       => (float)EActionCard.CountdownToTheShow3 + 0.3f,
                 _ => (float)id,
             };
         }

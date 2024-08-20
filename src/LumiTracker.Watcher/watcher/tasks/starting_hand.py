@@ -19,7 +19,6 @@ class StartingHandTask(CenterCropTask):
         self.filters = [StreamFilter(null_val=-1) for _ in range(5)]
 
     def OnStateTransfer(self, old_state, new_state):
-        # TODO: change to RollPhase
         if new_state == EGameState.ActionPhase:
             LogInfo(
                 type=ETaskType.MY_DRAWN.name, 

@@ -1,4 +1,5 @@
 import enum
+from ._enums_gen import EActionCard, ECharacterCard
 
 class ECaptureType(enum.Enum):
     BitBlt          = 0

@@ -7,6 +7,7 @@ import time
 import json
 import csv
 import os
+import re
 import shutil
 from pathlib import Path
 from collections import defaultdict
@@ -42,6 +43,18 @@ def CheckHashDistances(hashs, name_func):
         min_dist=min_dist,
         close_dists=close_dists, 
         )
+
+def StringToVariableName(s):
+    # Remove apostrophes
+    s = s.replace("'", "")
+    # Remove all non-alphanumeric characters except for spaces
+    s = re.sub(r"[^a-zA-Z0-9\s]", " ", s)
+    # Split the string by spaces
+    words = s.split()
+    # Capitalize the first letter of each word
+    words = [word.capitalize() for word in words]
+    # Join the words together to form the variable name
+    return "".join(words)
 
 class Database:
     def __init__(self):
@@ -133,13 +146,13 @@ class Database:
                     mode='r', newline='', encoding='utf-8') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             csv_data = [row for row in csv_reader]
-        num_actions = len(csv_data)
+        num_sharable = len(csv_data)
         
         with open(os.path.join(cfg.cards_dir, "tokens.csv"), 
                     mode='r', newline='', encoding='utf-8') as tokens_file:
             tokens_reader = csv.DictReader(tokens_file)
             for row in tokens_reader:
-                row["id"] = int(row["id"]) + num_actions
+                row["id"] = int(row["id"]) + num_sharable
                 csv_data.append(row)
 
         # left   = 70
@@ -171,10 +184,10 @@ class Database:
         dhashs   = [None] * n_images
         for image_idx, row in enumerate(csv_data):
             card_id = int(row["id"])
-            if image_idx < num_actions:
+            if image_idx < num_sharable:
                 image_file = f'action_{card_id}_{row["zh-HANS"]}.png'
             else:
-                image_file = f'tokens/token_{card_id - num_actions}_{row["zh-HANS"]}.png'
+                image_file = f'tokens/token_{card_id - num_sharable}_{row["zh-HANS"]}.png'
 
             image_path = os.path.join(action_cards_dir, image_file)
             image = LoadImage(image_path)
@@ -284,6 +297,8 @@ class Database:
                     name_d=name_d, card_ids_d=card_ids_d[:3], dists_d=dists_d[:3],
                     dt=dt, 
                     )
+        
+        return num_sharable
 
     def _UpdateCharacters(self, save_image_assets):
         with open(os.path.join(cfg.cards_dir, "characters.csv"), 
@@ -297,6 +312,7 @@ class Database:
         for i, row in enumerate(data):
             character = {
                 "zh-HANS"    : row["zh-HANS"],
+                "en-US"      : row["en-US"],
                 "element"    : EElementType[row["element"]].value,
                 "is_monster" : True if row["is_monster"] == "1" else False,
             }
@@ -315,6 +331,93 @@ class Database:
 
         self.data["characters"] = characters
         self.data["talent_to_character"] = talent_to_character
+    
+    def _UpdateGeneratedEnums(self, num_sharable_actions):
+        eActions = [StringToVariableName(action["en-US"]) for action in self.data["actions"]]
+        eCharacters = [StringToVariableName(character["en-US"]) for character in self.data["characters"]]
+
+        indent = 0
+        file = None
+        def WriteLine(line):
+            print(" " * (indent * 4) + line, file=file)
+
+        ####################
+        # c-sharp
+        file = open(os.path.join(cfg.cards_dir, "..", "src", "LumiTracker.Config", "Enums.gen.cs"), 
+                    mode='w', encoding='utf-8')
+        WriteLine("// This file is generated. Do not modify.")
+        WriteLine("")
+        WriteLine("namespace LumiTracker.Config")
+        WriteLine("{")
+        indent += 1
+
+        # actions
+        WriteLine("public enum EActionCard : int")
+        WriteLine("{")
+        indent += 1
+        for eAction in eActions:
+            WriteLine(eAction + ",")
+        # controls
+        WriteLine(f"")
+        WriteLine(f"NumActions,")
+        WriteLine(f"NumSharables = {num_sharable_actions},")
+        WriteLine(f"NumTokens = NumActions - NumSharables,")
+        indent -= 1
+        WriteLine("}")
+        WriteLine("")
+
+        # characters
+        WriteLine("public enum ECharacterCard : int")
+        WriteLine("{")
+        indent += 1
+        for eCharacter in eCharacters:
+            WriteLine(eCharacter + ",")
+        # controls
+        WriteLine(f"")
+        WriteLine(f"NumCharacters,")
+        indent -= 1
+        WriteLine("}")
+
+        indent -= 1
+        WriteLine("}")
+        file.close()
+
+        ####################
+        # python
+        file = open(os.path.join(cfg.cards_dir, "..", "src", "LumiTracker.Watcher", "watcher", "_enums_gen.py"), 
+                    mode='w', encoding='utf-8')
+        WriteLine("# This file is generated. Do not modify.")
+        WriteLine("")
+        WriteLine("import enum")
+        WriteLine("")
+
+        # actions
+        WriteLine("class EActionCard(enum.Enum):")
+        indent += 1
+        WriteLine(f"{eActions[0]} = 0")
+        for eAction in eActions[1:]:
+            WriteLine(f"{eAction} = enum.auto()")
+        # controls
+        WriteLine(f"")
+        WriteLine(f"NumActions = enum.auto()")
+        WriteLine(f"NumSharables = {num_sharable_actions}")
+        WriteLine(f"NumTokens = NumActions - NumSharables")
+        indent -= 1
+        WriteLine("")
+
+        # characters
+        WriteLine("class ECharacterCard(enum.Enum):")
+        indent += 1
+        WriteLine(f"{eCharacters[0]} = 0")
+        for eCharacter in eCharacters[1:]:
+            WriteLine(f"{eCharacter} = enum.auto()")
+        # controls
+        WriteLine(f"")
+        WriteLine(f"NumCharacters = enum.auto()")
+        indent -= 1
+        WriteLine("")
+
+        file.close()
 
     def _UpdateExtraInfos(self):
         # share code
@@ -359,8 +462,9 @@ class Database:
 
     def _Update(self, save_image_assets):
         self._UpdateControls()
-        self._UpdateActionCards(save_image_assets)
+        num_sharable_actions = self._UpdateActionCards(save_image_assets)
         self._UpdateCharacters(save_image_assets)
+        self._UpdateGeneratedEnums(num_sharable_actions)
         self._UpdateExtraInfos()
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:
