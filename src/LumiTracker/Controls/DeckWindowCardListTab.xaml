@@ -22,7 +22,7 @@
 
         <SolidColorBrush 
             x:Key="MainContentBackground"
-            Color="#e6282c34" />
+            Color="#ff282c34" />
 
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <ctrls:ActionCardViewListItem

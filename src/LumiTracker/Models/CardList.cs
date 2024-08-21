@@ -1,6 +1,9 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Helpers;
+using LumiTracker.Services;
 using Microsoft.Extensions.Logging;
 using Swordfish.NET.Collections;
+using System.Windows.Data;
 
 namespace LumiTracker.Models
 {
@@ -11,7 +14,7 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private  string  _costTypeUri;
         [ObservableProperty]
-        private  string  _cardName;
+        private  LocalizationTextItem  _cardName = new ();
         [ObservableProperty]
         private  string  _snapshotUri;
         [ObservableProperty]
@@ -19,26 +22,32 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private  double  _opacity;
 
+        private CardList? Parent;
+        private int OperationIndex = 1;
+
         public ActionCardView(CardList? parent, int card_id, bool inGame, int count = 1)
         {
+            Parent       = parent;
+
             var info = Configuration.Database["actions"]![card_id]!;
-            var cardName = info[Configuration.Get<string>("lang")]!.ToString();
             var jCost    = info["cost"]!;
             var cost     = jCost[0]!.ToObject<int>();
             var costType = jCost[1]!.ToObject<ECostType>();
 
             Cost         = cost;
             CostTypeUri  = $"pack://siteoforigin:,,,/assets/images/costs/{costType.ToString()}.png";
-            CardName     = cardName;
             SnapshotUri  = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
             Count        = count;
             Opacity      = 1.0;
-
-            Parent       = parent;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                CardName = new ();
+                var binding = LocalizationExtension.Create();
+                binding.Converter = new ActionCardNameConverter();
+                binding.ConverterParameter = card_id;
+                BindingOperations.SetBinding(CardName, LocalizationTextItem.TextProperty, binding);
+            });
         }
-
-        private CardList? Parent;
-        private int OperationIndex = 1;
 
         partial void OnCountChanged(int oldValue, int newValue)
         {

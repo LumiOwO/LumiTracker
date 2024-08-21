@@ -1,14 +1,7 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.ViewModels.Pages;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace LumiTracker.Helpers
@@ -42,6 +35,24 @@ namespace LumiTracker.Helpers
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return $"{LocalizationSource.Instance["AppName"]} {Configuration.GetAssemblyVersion()} - {LocalizationSource.Instance["AppSubTitle"]}";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ActionCardNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string none = LocalizationSource.Instance["None"];
+            if (parameter is not int card_id || card_id < 0 || card_id >= (int)EActionCard.NumActions)
+            {
+                return none;
+            }
+            return Configuration.Database["actions"]![card_id]![Configuration.Get<string>("lang")]!.ToString();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

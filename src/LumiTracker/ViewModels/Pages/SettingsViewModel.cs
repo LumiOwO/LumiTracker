@@ -55,9 +55,8 @@ namespace LumiTracker.ViewModels.Pages
             Enum.TryParse(lang.Replace('-', '_'), out ELanguage curLang);
             CurrentLanguage = curLang;
             
-            _localizationService.ChangeLanguage(lang);
-
             Configuration.Set("lang", lang);
+            _localizationService.ChangeLanguage(lang);
         }
 
         [RelayCommand]

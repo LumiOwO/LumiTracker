@@ -24,7 +24,7 @@ namespace LumiTracker.Services
             Source = LocalizationSource.Instance;
         }
 
-        public static LocalizationExtension Create(string name)
+        public static LocalizationExtension Create(string name = "None")
         {
             return new LocalizationExtension(name);
         }

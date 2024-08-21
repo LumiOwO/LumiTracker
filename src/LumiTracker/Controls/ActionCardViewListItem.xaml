@@ -125,7 +125,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             FontSize="{Binding NameFontSize}"
-            Text="{Binding Value.CardName, Mode=OneWay}" />
+            Text="{Binding Value.CardName.Text, Mode=OneWay}" />
         <!-- count -->
         <TextBlock
             Grid.Column="2"
