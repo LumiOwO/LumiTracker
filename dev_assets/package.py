@@ -111,7 +111,7 @@ def main(publish_dir):
             break
     if not app_dir:
         return
-    version = app_dir.split("-")[-1]
+    version = app_dir.split("-", 1)[-1]
 
     ignored_files = SortedSet()
     md5s = {}

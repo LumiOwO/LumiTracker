@@ -10,7 +10,7 @@
     <Copyright>Copyright (c) 2024 LumiOwO</Copyright>
     <Authors>LumiOwO@hotmail.com</Authors>
     <PackageProjectUrl>https://github.com/LumiOwO/LumiTracker</PackageProjectUrl>
-    <PublishDir>$(SolutionDir)publish\LumiTracker\LumiTrackerApp-$(AssemblyVersion)\</PublishDir>
+    <PublishDir>$(SolutionDir)publish\LumiTracker\LumiTrackerApp-$(InformationalVersion)\</PublishDir>
     <AssemblyName>LumiTrackerApp</AssemblyName>
   </PropertyGroup>
 

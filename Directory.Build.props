@@ -1,10 +1,13 @@
 <Project>
   <PropertyGroup>
     <VersionNumber>1.2.2</VersionNumber>
+    <BetaNumber></BetaNumber>
 
     <AssemblyVersion>$(VersionNumber)</AssemblyVersion>
     <FileVersion>$(VersionNumber)</FileVersion>
-    <InformationalVersion>$(VersionNumber)</InformationalVersion>
+    <InformationalVersion Condition="'$(BetaNumber)' == ''">$(VersionNumber)</InformationalVersion>
+    <InformationalVersion Condition="'$(BetaNumber)' != ''">$(VersionNumber)-beta$(BetaNumber)</InformationalVersion>
+
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
@@ -12,12 +15,12 @@
 
   <!-- Debug configuration for x64 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutputPath>$(SolutionDir)bin\x64\Debug\LumiTrackerApp-$(AssemblyVersion)\</OutputPath>
+    <OutputPath>$(SolutionDir)bin\x64\Debug\LumiTrackerApp-$(InformationalVersion)\</OutputPath>
   </PropertyGroup>
 
   <!-- Release configuration for x64 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutputPath>$(SolutionDir)bin\x64\Release\LumiTrackerApp-$(AssemblyVersion)\</OutputPath>
+    <OutputPath>$(SolutionDir)bin\x64\Release\LumiTrackerApp-$(InformationalVersion)\</OutputPath>
   </PropertyGroup>
 </Project>
 

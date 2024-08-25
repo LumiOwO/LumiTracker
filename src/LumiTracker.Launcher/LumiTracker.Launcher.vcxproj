@@ -119,7 +119,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>$(ProjectDir)Utils.bat $(AssemblyVersion) $(TargetDir)</Command>
+      <Command>$(ProjectDir)Utils.bat $(InformationalVersion) $(TargetDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -139,7 +139,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>$(ProjectDir)Utils.bat $(AssemblyVersion) $(TargetDir)</Command>
+      <Command>$(ProjectDir)Utils.bat $(InformationalVersion) $(TargetDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

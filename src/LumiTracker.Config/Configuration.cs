@@ -226,8 +226,32 @@ namespace LumiTracker.Config
 
         public static string GetAssemblyVersion()
         {
-            Version? version = Assembly.GetExecutingAssembly().GetName().Version;
-            return version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "";
+            var assembly = Assembly.GetExecutingAssembly();
+            // Retrieve the assembly's informational version (includes suffixes like -beta1)
+            string? informationalVersion = assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            string suffix = "";
+            if (informationalVersion != null)
+            {
+                // Find the index of the first non-numeric character after the numeric version
+                int suffixIndex = informationalVersion.IndexOf('-');
+                if (suffixIndex >= 0)
+                {
+                    // Return the suffix part (e.g., "-beta1")
+                    suffix = informationalVersion.Substring(suffixIndex);
+
+                    // Find the index of the '+' character
+                    int plusIndex = suffix.IndexOf('+');
+                    // If '+' is found, truncate the string up to the '+' character
+                    if (plusIndex >= 0)
+                    {
+                        suffix = suffix.Substring(0, plusIndex);
+                    }
+                }
+            }
+
+            Version? version = assembly.GetName().Version;
+            return version != null ? $"{version.Major}.{version.Minor}.{version.Build}{suffix}" : "";
         }
 
         public static JObject LoadJObject(string path)
