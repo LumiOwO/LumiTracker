@@ -22,6 +22,7 @@ def main(publish_dir):
         "show_ui_outside" : False,
         "show_closing_dialog" : True,
         "check_updates_on_startup" : True,
+        "subscribe_to_beta_updates": False,
     }
     cfg.update(reset_configs)
 

@@ -103,6 +103,19 @@
                 NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#KSvDdP00EoNnmox0Lkccs9fenMf"
                 ToolTip="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#KSvDdP00EoNnmox0Lkccs9fenMf" />
         </Grid>
+        
+        <Grid Margin="10,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <CheckBox
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                IsChecked="{Binding ViewModel.CheckSubscribeToBetaUpdates, Mode=TwoWay}"
+                Content="{svs:Localization SubscribeToBetaUpdates}"
+                />
+        </Grid>
 
 
         <Grid Margin="10,20,0,0">

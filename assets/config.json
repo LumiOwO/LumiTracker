@@ -45,5 +45,6 @@
   "capture_type": "BitBlt",
   "show_ui_outside": true,
   "show_closing_dialog": false,
-  "check_updates_on_startup": true
+  "check_updates_on_startup": true,
+  "subscribe_to_beta_updates": false
 }

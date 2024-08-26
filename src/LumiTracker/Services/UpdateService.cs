@@ -260,9 +260,13 @@ namespace LumiTracker.Services
             ContentDialogService.ClearUpdateDialog();
         }
 
-        private readonly string metaUrl = $"https://gitee.com/api/v5/repos/LumiOwO/LumiTracker/releases/latest";
+        private readonly string releaseMetaUrl     = $"https://gitee.com/api/v5/repos/LumiOwO/LumiTracker/releases/latest";
 
-        private readonly string packagesUrl = $"https://github.com/LumiOwO/LumiTracker/releases/download/Packages";
+        private readonly string releasePackagesUrl = $"https://github.com/LumiOwO/LumiTracker/releases/download/Packages";
+        
+        private readonly string betaMetaUrl        = $"https://gitee.com/api/v5/repos/LumiOwO/LumiTracker-Beta/releases/latest";
+
+        private readonly string betaPackagesUrl    = $"https://github.com/LumiOwO/LumiTracker/releases/download/Packages-Beta";
 
         private readonly HttpClient mainClient;
 
@@ -294,13 +298,33 @@ namespace LumiTracker.Services
             var releaseMeta = Configuration.Get<ReleaseMeta>("releaseMeta");
             if (releaseMeta == null)
             {
-                var response = await subClient.GetStringAsync(metaUrl);
+                var response = await subClient.GetStringAsync(releaseMetaUrl);
                 releaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(response);
                 if (releaseMeta == null)
                 {
                     Configuration.Logger.LogWarning("[Update] Invalid release meta from http response.");
                     return false;
                 }
+
+                // Check beta version
+                if (Configuration.Get<bool>("subscribe_to_beta_updates"))
+                {
+                    var betaResponse = await subClient.GetStringAsync(betaMetaUrl);
+                    var betaReleaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(betaResponse);
+                    if (betaReleaseMeta == null)
+                    {
+                        Configuration.Logger.LogWarning("[Update] Invalid beta meta from http response.");
+                        return false;
+                    }
+
+                    if (UpdateUtils.VersionCompare(
+                        releaseMeta.tag_name.TrimStart('v'), 
+                        betaReleaseMeta.tag_name.TrimStart('v')) < 0)
+                    {
+                        releaseMeta = betaReleaseMeta;
+                    }
+                }
+
                 Configuration.SetTemporal("releaseMeta", releaseMeta);
             }
             ctx.ReleaseMeta = releaseMeta;
@@ -345,7 +369,9 @@ namespace LumiTracker.Services
             {
                 Directory.CreateDirectory(Configuration.CacheDir);
             }
-            string bestUrl = await GetBestDownloadUrl();
+            string latestVersion = ctx.ReleaseMeta!.tag_name.TrimStart('v');
+            bool isBeta = latestVersion.Contains("beta");
+            string bestUrl = await GetBestDownloadUrl(isBeta);
 
             long totalBytes = 0;
             List<AttachMeta> downloadMetas = [];
@@ -459,7 +485,6 @@ namespace LumiTracker.Services
             ctx.Indeterminate  = true;
             ctx.ProgressText   = LocalizationSource.Instance["UpdatePrompt_Unpacking"];
 
-            string latestVersion = ctx.ReleaseMeta.tag_name.TrimStart('v');
             string dstDir = Path.Combine(Configuration.RootDir, "LumiTrackerApp-" + latestVersion);
             foreach (var meta in downloadMetas)
             {
@@ -571,10 +596,11 @@ namespace LumiTracker.Services
             "https://mirror.ghproxy.com/",
         ];
 
-        private async Task<string> GetBestDownloadUrl()
+        private async Task<string> GetBestDownloadUrl(bool isBeta)
         {
             double max_speed = 0.0;
             string bestPrefix = ghPrefixs[0];
+            string packagesUrl = isBeta ? betaPackagesUrl : releasePackagesUrl;
             string url = $"{packagesUrl}/DownloadTest";
 
             var tasks = new Task<double>[ghPrefixs.Length];

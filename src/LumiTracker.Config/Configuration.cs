@@ -369,6 +369,14 @@ namespace LumiTracker.Config
             DefaultConfig[key] = JToken.FromObject(value!);
         }
 
+        public static void RemoveTemporal(string key)
+        {
+            if (DefaultConfig.ContainsKey(key))
+            {
+                DefaultConfig.Remove(key);
+            }
+        }
+
         public static bool Save()
         {
             if (UserConfig.Count == 0)

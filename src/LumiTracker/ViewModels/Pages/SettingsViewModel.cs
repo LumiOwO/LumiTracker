@@ -115,5 +115,14 @@ namespace LumiTracker.ViewModels.Pages
         {
             Configuration.Set("check_updates_on_startup", newValue);
         }
+
+        [ObservableProperty]
+        private bool _checkSubscribeToBetaUpdates = Configuration.Get<bool>("subscribe_to_beta_updates");
+
+        partial void OnCheckSubscribeToBetaUpdatesChanged(bool oldValue, bool newValue)
+        {
+            Configuration.Set("subscribe_to_beta_updates", newValue);
+            Configuration.RemoveTemporal("releaseMeta");
+        }
     }
 }

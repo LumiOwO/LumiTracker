@@ -153,6 +153,10 @@
     <value>启动时检查更新</value>
     <comment/>
   </data>
+  <data name="SubscribeToBetaUpdates" xml:space="preserve">
+    <value>订阅Beta版更新</value>
+    <comment/>
+  </data>
   <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
     <value>检查更新</value>
     <comment/>

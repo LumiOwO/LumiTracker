@@ -153,6 +153,10 @@
     <value>Check Updates on Startup</value>
     <comment/>
   </data>
+  <data name="SubscribeToBetaUpdates" xml:space="preserve">
+    <value>Subscribe to Beta Updates</value>
+    <comment/>
+  </data>
   <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
     <value>Check For Update</value>
     <comment/>
