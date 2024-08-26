@@ -51,7 +51,7 @@ namespace LumiTracker.ViewModels.Pages
 
         [ObservableProperty]
         [property: JsonIgnore]
-        private Brush _textColor = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
+        private Brush? _textColor = (SolidColorBrush?)Application.Current?.Resources?["TextFillColorPrimaryBrush"];
     }
 
     public partial class DeckList : ObservableObject
@@ -156,11 +156,11 @@ namespace LumiTracker.ViewModels.Pages
             "decks.json"
         );
 
-        private ISnackbarService SnackbarService;
+        private ISnackbarService? SnackbarService;
 
-        private StyledContentDialogService ContentDialogService;
+        private StyledContentDialogService? ContentDialogService;
 
-        public DeckViewModel(ISnackbarService snackbarService, StyledContentDialogService contentDialogService)
+        public DeckViewModel(ISnackbarService? snackbarService, StyledContentDialogService? contentDialogService)
         {
             /////////////////////////
             // Services

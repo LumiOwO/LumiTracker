@@ -39,7 +39,7 @@ namespace LumiTracker.Models
             SnapshotUri  = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
             Count        = count;
             Opacity      = 1.0;
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current?.Dispatcher.Invoke(() =>
             {
                 CardName = new ();
                 var binding = LocalizationExtension.Create();
@@ -158,7 +158,7 @@ namespace LumiTracker.Models
             }
             OperationCount++;
 
-            Application.Current.Dispatcher.Invoke(() =>
+            var Update = () =>
             {
                 Data.RemoveRange(keysToRemove);
                 foreach (var key in keysToRemove)
@@ -172,7 +172,20 @@ namespace LumiTracker.Models
                     Timestamps.Add(key, timestamp);
                 }
                 Data.AddRange(pairsToUpdate);
-            });
+            };
+
+            if (Application.Current == null)
+            {
+                Update();
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Update();
+                });
+            }
+            
         }
 
         public void Remove(int[] card_ids, bool keep_zero)
@@ -226,7 +239,7 @@ namespace LumiTracker.Models
             }
             OperationCount++;
 
-            Application.Current.Dispatcher.Invoke(() =>
+            var Update = () =>
             {
                 Data.RemoveRange(keysToRemove);
                 foreach (var key in keysToRemove)
@@ -240,7 +253,19 @@ namespace LumiTracker.Models
                     Timestamps.Add(key, timestamp);
                 }
                 Data.AddRange(pairsToUpdate);
-            });
+            };
+
+            if (Application.Current == null)
+            {
+                Update();
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Update();
+                });
+            }
         }
     }
 }

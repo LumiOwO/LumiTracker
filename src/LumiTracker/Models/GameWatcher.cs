@@ -18,6 +18,8 @@ namespace LumiTracker.Models
 
     public class GameWatcher
     {
+        private Task? MainLoopTask = null;
+
         private SpinLockedValue<string> processName = new ("");
 
         private SpinLockedValue<ProcessWatcher> processWatcher = new (null);
@@ -58,7 +60,12 @@ namespace LumiTracker.Models
         public void Start(string name)
         {
             processName.Value = name;
-            Task mainLoop = MainLoop();
+            MainLoopTask = MainLoop();
+        }
+
+        public void Wait()
+        {
+            MainLoopTask?.Wait();
         }
 
         public void ChangeGameClient(string name)

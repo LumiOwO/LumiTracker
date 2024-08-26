@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>LumiTrackerOB</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LumiTracker.Config\LumiTracker.Config.csproj" />
+    <ProjectReference Include="..\LumiTracker.Watcher\LumiTracker.Watcher.csproj" />
+    <ProjectReference Include="..\LumiTracker\LumiTracker.csproj" />
+  </ItemGroup>
+
+</Project>
