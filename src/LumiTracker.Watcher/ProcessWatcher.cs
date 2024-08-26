@@ -91,7 +91,7 @@ namespace LumiTracker.Watcher
 
             if (processes.Count > 1)
             {
-                Configuration.Logger.LogWarning($"Found multiple processes with name: {processName}, using the first one");
+                Configuration.Logger.LogWarning($"Found {processes.Count} processes with name: {processName}, using the first one");
             }
             var proc = processes[0];
 
@@ -121,8 +121,12 @@ namespace LumiTracker.Watcher
             var processes = new List<Process>();
             foreach (var proc in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(processName)))
             {
-                processes.Add(proc);
+                if (proc.MainWindowHandle != IntPtr.Zero)
+                {
+                    processes.Add(proc);
+                }
             }
+
             return processes;
         }
 
