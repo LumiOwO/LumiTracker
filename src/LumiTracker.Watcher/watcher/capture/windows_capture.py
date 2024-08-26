@@ -44,8 +44,10 @@ class WindowsCapture(CaptureBase):
         # Now DpiAwareness enabled, so no need to scale
         # scale = self.GetMonitorScale()
 
-        (client_left, client_top, client_right, client_bottom), self.border_size = self.GetClientRect()
+        (client_left, client_top, client_right, client_bottom), (offset_x, offset_y) = self.GetClientRect()
         self.client_size = (client_right - client_left, client_bottom - client_top)
+        left_border = (self.window_size[0] - self.client_size[0]) // 2
+        self.border_size = (left_border, offset_y)
 
         # LogDebug(window_size=self.window_size, client_size=self.client_size, border_size=self.border_size)
 
