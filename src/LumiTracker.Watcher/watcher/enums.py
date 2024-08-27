@@ -33,6 +33,7 @@ class ETaskType(enum.Enum):
 
     UNSUPPORTED_RATIO = enum.auto()
     CAPTURE_TEST      = enum.auto()
+    LOG_FPS           = enum.auto()
 
 class ERegionType(enum.Enum):
     GAME_START = 0

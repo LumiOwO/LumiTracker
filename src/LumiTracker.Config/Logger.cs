@@ -2,44 +2,123 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Abstractions;
-
-#pragma warning disable CS8618
+using Newtonsoft.Json.Linq;
 
 namespace LumiTracker.Config
 {
+    public class LogHelper
+    {
+        public static readonly string AnsiWhite   = "\x1b[37m";
+        public static readonly string AnsiGray    = "\x1b[37m";
+        public static readonly string AnsiRed     = "\x1b[31m";
+        public static readonly string AnsiGreen   = "\x1b[32m";
+        public static readonly string AnsiBlue    = "\x1b[34m";
+        public static readonly string AnsiCyan    = "\x1b[36m";
+        public static readonly string AnsiMagenta = "\x1b[35m";
+        public static readonly string AnsiYellow  = "\x1b[33m";
+        public static readonly string AnsiOrange  = "\x1b[38;5;208m";
+        public static readonly string AnsiEnd     = "\u001b[39m\u001b[22m";
+
+        public static string GetAnsiColor(LogLevel logLevel) => logLevel switch
+        {
+            LogLevel.Trace       => AnsiGray,
+            LogLevel.Debug       => AnsiCyan,
+            LogLevel.Information => AnsiGreen,
+            LogLevel.Warning     => AnsiYellow,
+            LogLevel.Error       => AnsiRed,
+            LogLevel.Critical    => AnsiMagenta,
+            _                    => AnsiWhite,
+        };
+
+        public static string GetShortLevelStr(LogLevel logLevel) => logLevel switch
+        {
+            LogLevel.Trace       => "[TRACE]",
+            LogLevel.Debug       => "[DEBUG]",
+            LogLevel.Information => " [INFO]",
+            LogLevel.Warning     => " [WARN]",
+            LogLevel.Error       => "[ERROR]",
+            LogLevel.Critical    => "[FATAL]",
+            _                    => "  [LOG]",
+        };
+
+        public static bool ContainsDictOrArray(JToken token)
+        {
+            var jObject = token as JObject;
+            if (jObject == null) return false;
+
+            foreach (var property in jObject.Properties())
+            {
+                if (property.Value is JObject || property.Value is JArray)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static string JsonToConsoleStr(JToken token, bool forceIndent = false)
+        {
+            string res = "";
+            using (var stringWriter = new StringWriter())
+            {
+                bool indented = forceIndent ? true : ContainsDictOrArray(token);
+                var customWriter = new CustomJsonTextWriter(stringWriter)
+                {
+                    Formatting  = indented ? Formatting.Indented : Formatting.None,
+                    Indentation = 2,
+                    IndentChar  = ' ',
+                };
+                var serializer = new JsonSerializer();
+                serializer.Serialize(customWriter, token);
+                res = stringWriter.ToString();
+            }
+            return res;
+        }
+    }
+
+    public class ScopeState
+    {
+        public string Name { get; set; }  = "";
+        public string Color { get; set; } = LogHelper.AnsiWhite;
+    }
+
+    public class ScopeDisposer : IDisposable
+    {
+        private readonly Action _onDispose;
+
+        public ScopeDisposer(Action onDispose)
+        {
+            _onDispose = onDispose;
+        }
+
+        public void Dispose()
+        {
+            _onDispose();
+        }
+    }
+
+    /////////////////////////////
+    /// File Logger Formatting
+    ///
+
     public class FileLogger : ILogger
     {
         private readonly StreamWriter _writer;
         private readonly LogLevel _minLevel;
 
-        private readonly AsyncLocal<string> _currentScope = new AsyncLocal<string>();
+        private readonly AsyncLocal<ScopeState> _currentScope = new AsyncLocal<ScopeState>();
 
         public FileLogger(StreamWriter writer, LogLevel minLevel)
         {
-            _writer = writer;
+            _writer   = writer;
             _minLevel = minLevel;
         }
 
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull
         {
-            var previousScope = _currentScope.Value ?? "";
-            _currentScope.Value = state?.ToString() ?? "";
+            ScopeState previousScope = _currentScope.Value!;
+            _currentScope.Value = (state as ScopeState)!;
             return new ScopeDisposer(() => _currentScope.Value = previousScope);
-        }
-
-        private class ScopeDisposer : IDisposable
-        {
-            private readonly Action _onDispose;
-
-            public ScopeDisposer(Action onDispose)
-            {
-                _onDispose = onDispose;
-            }
-
-            public void Dispose()
-            {
-                _onDispose();
-            }
         }
 
         public bool IsEnabled(LogLevel logLevel)
@@ -50,17 +129,16 @@ namespace LumiTracker.Config
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (!IsEnabled(logLevel))
-            {
                 return;
-            }
 
-            string message = formatter(state, exception);
-            string scope = _currentScope.Value != null ? $"<{_currentScope.Value}>" : "";
-            _writer.WriteLine($"{DateTime.Now} [{logLevel}] {scope}");
-            _writer.WriteLine($"{message}");
+            string message  = formatter(state, exception);
+            string scope    = _currentScope.Value != null ? $"({_currentScope.Value.Name}) " : "";
+            string levelStr = LogHelper.GetShortLevelStr(logLevel);
+
+            _writer.WriteLine($"{DateTime.Now} {scope}{levelStr}> {message}");
             if (exception != null)
             {
-                _writer.WriteLine($"{DateTime.Now} [{logLevel}] {exception.ToString()}");
+                _writer.WriteLine($"{DateTime.Now} {scope}{levelStr}> {exception.ToString()}");
             }
         }
     }
@@ -72,7 +150,7 @@ namespace LumiTracker.Config
 
         public FileLoggerProvider(StreamWriter writer, LogLevel minLevel)
         {
-            _writer = writer;
+            _writer   = writer;
             _minLevel = minLevel;
         }
 
@@ -87,6 +165,58 @@ namespace LumiTracker.Config
         }
     }
 
+    /////////////////////////////
+    /// Console Logger Formatting
+    ///
+
+    public class CustomConsoleFormatter : ConsoleFormatter
+    {
+        public CustomConsoleFormatter() : base("custom")
+        {
+        }
+
+        public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider, TextWriter textWriter)
+        {
+            var scopeString = "";
+            if (scopeProvider != null)
+            {
+                // Use StringWriter to capture scope information
+                using (var stringWriter = new StringWriter())
+                {
+                    scopeProvider.ForEachScope((state, writer) =>
+                    {
+                        var scope = (state as ScopeState)!;
+                        writer.Write($".{scope.Color}({scope.Name}){LogHelper.AnsiEnd}");
+                    }, stringWriter);
+
+                    scopeString = stringWriter.ToString();
+                    if (scopeString.Length > 0)
+                    {
+                        scopeString = scopeString.Substring(1);
+                    }
+                }
+            }
+
+            // Set the color for the log output
+            textWriter.Write($"{scopeString}");
+            textWriter.Write(LogHelper.GetAnsiColor(logEntry.LogLevel));
+            {
+                textWriter.Write($"{LogHelper.GetShortLevelStr(logEntry.LogLevel)}>");
+            }
+            textWriter.Write(LogHelper.AnsiEnd);
+            textWriter.WriteLine($" {logEntry.Formatter(logEntry.State, logEntry.Exception)}");
+        }
+    }
+
+    public class CustomConsoleFormatterOptions : ConsoleFormatterOptions
+    {
+        // Define any custom options here if needed
+    }
+
+    /////////////////////////////
+    /// Json Serialize Formatting
+    ///
+   
     public class CustomJsonTextWriter : JsonTextWriter
     {
         public CustomJsonTextWriter(TextWriter writer) : base(writer)
@@ -105,66 +235,4 @@ namespace LumiTracker.Config
             }
         }
     }
-
-    public class CustomConsoleFormatter : ConsoleFormatter
-    {
-        private static readonly Dictionary<LogLevel, ConsoleColor> LogLevelColors = new Dictionary<LogLevel, ConsoleColor>
-        {
-            { LogLevel.Trace, ConsoleColor.Gray },
-            { LogLevel.Debug, ConsoleColor.Cyan },
-            { LogLevel.Information, ConsoleColor.Green },
-            { LogLevel.Warning, ConsoleColor.Yellow },
-            { LogLevel.Error, ConsoleColor.Red },
-            { LogLevel.Critical, ConsoleColor.Magenta },
-            { LogLevel.None, ConsoleColor.White }
-        };
-
-        private static string GetAnsiColor(LogLevel logLevel) => logLevel switch
-        {
-            LogLevel.Trace       => "\x1b[37m", // Gray
-            LogLevel.Debug       => "\x1b[36m", // Cyan
-            LogLevel.Information => "\x1b[32m", // Green
-            LogLevel.Warning     => "\x1b[33m", // Yellow
-            LogLevel.Error       => "\x1b[31m", // Red
-            LogLevel.Critical    => "\x1b[35m", // Magenta
-            _                    => "\x1b[37m", // Default to White
-        };
-
-        public CustomConsoleFormatter() : base("custom")
-        {
-        }
-
-        public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider, TextWriter textWriter)
-        {
-            var scopeString = "";
-            if (scopeProvider != null)
-            {
-                // Use StringWriter to capture scope information
-                using (var stringWriter = new StringWriter())
-                {
-                    scopeProvider.ForEachScope((scope, writer) =>
-                    {
-                        writer.Write($"<{scope}> ");
-                    }, stringWriter);
-
-                    scopeString = stringWriter.ToString();
-                }
-            }
-
-            // Set the color for the log output
-            textWriter.Write(GetAnsiColor(logEntry.LogLevel));
-            {
-                textWriter.Write($"{DateTime.Now} [{logEntry.LogLevel}] ");
-            }
-            textWriter.Write("\u001b[39m\u001b[22m");
-            textWriter.WriteLine($"{scopeString}");
-            textWriter.WriteLine($"{logEntry.Formatter(logEntry.State, logEntry.Exception)}");
-        }
-    }
-
-    public class CustomConsoleFormatterOptions : ConsoleFormatterOptions
-    {
-        // Define any custom options here if needed
-    }
-
 }

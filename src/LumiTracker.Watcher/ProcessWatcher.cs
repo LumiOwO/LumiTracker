@@ -142,7 +142,7 @@ namespace LumiTracker.Watcher
                     info.hwnd  = hwnd;
                     info.title = GetWindowText(hwnd);
                 }
-                Configuration.Logger.LogDebug($"###Main window: hwnd={info.hwnd}, title={info.title}");
+                Configuration.Logger.LogDebug($"Main window: hwnd={info.hwnd}, title={info.title}");
             }
 
             return info;
@@ -180,6 +180,7 @@ namespace LumiTracker.Watcher
 
         public async Task StartProcessWatcher(string processName)
         {
+            Configuration.Logger.LogInformation($"Begin to find process: {processName}");
             try
             {
                 int interval = Configuration.Get<int>("proc_watch_interval") * 1000;
@@ -288,86 +289,30 @@ namespace LumiTracker.Watcher
             try
             {
                 if (e.Data == null) return;
-                if (Configuration.Get<bool>("DEBUG"))
-                {
-                    Console.WriteLine(e.Data);
-                }
 
                 JObject message = JObject.Parse(e.Data);
-                string message_level = message["level"]!.ToString();
+                string  message_level = message["level"]!.ToString();
+                var     message_data  = message["data"]!;
+
+                bool forceIndent   = (message_level != "DEBUG");
+                string message_str = "@ " + LogHelper.JsonToConsoleStr(message_data, forceIndent);
+
                 if (message_level == "INFO")
                 {
-                    var message_data = message["data"]!;
-
-                    string task_type_name = message_data["type"]!.ToString();
-                    if (!Enum.TryParse(task_type_name, out ETaskType task_type))
-                    {
-                        Configuration.Logger.LogWarning($"[ProcessWatcher] Unknown task type: {task_type_name}\n{message}");
-                    }
-                    else if (task_type == ETaskType.GAME_START)
-                    {
-                        GameStarted?.Invoke();
-                    }
-                    else if (task_type == ETaskType.MY_PLAYED)
-                    {
-                        int card_id = message_data["card_id"]!.ToObject<int>();
-                        MyActionCardPlayed?.Invoke(card_id);
-                    }
-                    else if (task_type == ETaskType.OP_PLAYED)
-                    {
-                        int card_id = message_data["card_id"]!.ToObject<int>();
-                        OpActionCardPlayed?.Invoke(card_id);
-                    }
-                    else if (task_type == ETaskType.GAME_OVER)
-                    {
-                        GameOver?.Invoke();
-                    }
-                    else if (task_type == ETaskType.ROUND)
-                    {
-                        int round = message_data["round"]!.ToObject<int>();
-                        RoundDetected?.Invoke(round);
-                    }
-                    else if (task_type == ETaskType.MY_DRAWN)
-                    {
-                        int[] cards = message_data["cards"]!.ToObject<int[]>()!;
-                        MyCardsDrawn?.Invoke(cards);
-                    }
-                    else if (task_type == ETaskType.MY_CREATE_DECK)
-                    {
-                        int[] cards = message_data["cards"]!.ToObject<int[]>()!;
-                        MyCardsCreateDeck?.Invoke(cards);
-                    }
-                    else if (task_type == ETaskType.OP_CREATE_DECK)
-                    {
-                        int[] cards = message_data["cards"]!.ToObject<int[]>()!;
-                        OpCardsCreateDeck?.Invoke(cards);
-                    }
-                    else if (task_type == ETaskType.UNSUPPORTED_RATIO)
-                    {
-                        int client_width  = message_data["client_width" ]!.ToObject<int>();
-                        int client_height = message_data["client_height"]!.ToObject<int>();
-                        float ratio = 1.0f * client_width / client_height;
-                        Configuration.Logger.LogWarning(
-                            $"[ProcessWatcher] Current resolution is {client_width} x {client_height} with ratio = {ratio}, which is not supported now.");
-                        UnsupportedRatio?.Invoke();
-                    }
-                    else if (task_type == ETaskType.CAPTURE_TEST)
-                    {
-                        string filename = message_data["filename"]!.ToObject<string>()!;
-                        CaptureTestDone?.Invoke(filename);
-                    }
-                    else
-                    {
-                        Configuration.Logger.LogWarning($"[ProcessWatcher] Enum {task_type_name} defined but not handled: {task_type_name}\n{message}");
-                    }
+                    Configuration.Logger.LogInformation(message_str);
+                    ParseBackendMessage(message_data);
+                }
+                else if (message_level == "DEBUG")
+                {
+                    Configuration.Logger.LogDebug(message_str);
                 }
                 else if (message_level == "WARNING")
                 {
-                    Configuration.Logger.LogWarning($"[ProcessWatcher] {message}");
+                    Configuration.Logger.LogWarning(message_str);
                 }
                 else if (message_level == "ERROR")
                 {
-                    Configuration.Logger.LogError($"[ProcessWatcher] {message}");
+                    Configuration.Logger.LogError(message_str);
                 }
             }
             catch (JsonReaderException ex)
@@ -379,6 +324,76 @@ namespace LumiTracker.Watcher
             {
                 Configuration.Logger.LogError($"[ProcessWatcher] {ex.ToString()}");
                 ExceptionHandler?.Invoke(ex);
+            }
+        }
+
+        private void ParseBackendMessage(JToken message_data)
+        {
+            string task_type_name = message_data["type"]!.ToString();
+            if (!Enum.TryParse(task_type_name, out ETaskType task_type))
+            {
+                Configuration.Logger.LogWarning($"[ProcessWatcher] Unknown task type: {task_type_name}\n{message_data}");
+            }
+            else if (task_type == ETaskType.GAME_START)
+            {
+                GameStarted?.Invoke();
+            }
+            else if (task_type == ETaskType.MY_PLAYED)
+            {
+                int card_id = message_data["card_id"]!.ToObject<int>();
+                MyActionCardPlayed?.Invoke(card_id);
+            }
+            else if (task_type == ETaskType.OP_PLAYED)
+            {
+                int card_id = message_data["card_id"]!.ToObject<int>();
+                OpActionCardPlayed?.Invoke(card_id);
+            }
+            else if (task_type == ETaskType.GAME_OVER)
+            {
+                GameOver?.Invoke();
+            }
+            else if (task_type == ETaskType.ROUND)
+            {
+                int round = message_data["round"]!.ToObject<int>();
+                RoundDetected?.Invoke(round);
+            }
+            else if (task_type == ETaskType.MY_DRAWN)
+            {
+                int[] cards = message_data["cards"]!.ToObject<int[]>()!;
+                MyCardsDrawn?.Invoke(cards);
+            }
+            else if (task_type == ETaskType.MY_CREATE_DECK)
+            {
+                int[] cards = message_data["cards"]!.ToObject<int[]>()!;
+                MyCardsCreateDeck?.Invoke(cards);
+            }
+            else if (task_type == ETaskType.OP_CREATE_DECK)
+            {
+                int[] cards = message_data["cards"]!.ToObject<int[]>()!;
+                OpCardsCreateDeck?.Invoke(cards);
+            }
+            else if (task_type == ETaskType.UNSUPPORTED_RATIO)
+            {
+                int client_width  = message_data["client_width"]!.ToObject<int>();
+                int client_height = message_data["client_height"]!.ToObject<int>();
+                float ratio = 1.0f * client_width / client_height;
+                Configuration.Logger.LogWarning(
+                    $"[ProcessWatcher] Current resolution is {client_width} x {client_height} with ratio = {ratio}, which is not supported now.");
+                UnsupportedRatio?.Invoke();
+            }
+            else if (task_type == ETaskType.CAPTURE_TEST)
+            {
+                string filename = message_data["filename"]!.ToObject<string>()!;
+                CaptureTestDone?.Invoke(filename);
+            }
+            else if (task_type == ETaskType.LOG_FPS)
+            {
+                // TODO: add hook for fps logging
+
+            }
+            else
+            {
+                Configuration.Logger.LogWarning($"[ProcessWatcher] Enum {task_type_name} defined but not handled: {task_type_name}\n{message_data}");
             }
         }
     }

@@ -1,8 +1,8 @@
 import time
 import logging
 
-from .config import cfg, LogDebug, LogWarning
-from .enums import EGameState
+from .config import cfg, LogDebug, LogInfo, LogWarning
+from .enums import EGameState, ETaskType
 from .regions import GetRatioType
 from .database import Database
 from .tasks import GameStartTask, CardPlayedTask, GameOverTask, RoundTask, CardFlowTask, StartingHandTask
@@ -190,7 +190,10 @@ class FrameManager:
 
         if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
             fps = self.frame_count / (cur_time - self.prev_log_time)
-            LogDebug(info=f"FPS: {fps}")
+            LogInfo(
+                type=f"{ETaskType.LOG_FPS.name}",
+                fps=f"{fps}"
+                )
             if (not self.first_log) and (self.min_fps - fps >= 5):
                 LogWarning(info=f"Min FPS = {fps}")
                 self.min_fps = fps

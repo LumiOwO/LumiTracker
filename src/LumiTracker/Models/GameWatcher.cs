@@ -140,79 +140,79 @@ namespace LumiTracker.Models
 
         private void OnGenshinWindowFound()
         {
-            Configuration.Logger.LogDebug("OnGenshinWindowFound");
+            Configuration.Logger.LogDebug("[GameWatcher] OnGenshinWindowFound");
             GenshinWindowFound?.Invoke();
         }
 
         private void OnWindowWatcherStart(IntPtr hwnd)
         {
-            Configuration.Logger.LogDebug("OnWindowWatcherStart");
+            Configuration.Logger.LogDebug("[GameWatcher] OnWindowWatcherStart");
             WindowWatcherStart?.Invoke(hwnd);
         }
 
         private void OnWindowWatcherExit()
         {
-            Configuration.Logger.LogDebug("OnWindowWatcherExit");
+            Configuration.Logger.LogDebug("[GameWatcher] OnWindowWatcherExit");
             WindowWatcherExit?.Invoke();
         }
 
         private void OnGameStarted()
         {
-            Configuration.Logger.LogDebug("OnGameStarted");
+            Configuration.Logger.LogDebug("[GameWatcher] OnGameStarted");
             GameStarted?.Invoke();
         }
 
         private void OnMyActionCardPlayed(int card_id)
         {
-            Configuration.Logger.LogDebug("OnMyActionCard");
+            Configuration.Logger.LogDebug("[GameWatcher] OnMyActionCard");
             MyActionCardPlayed?.Invoke(card_id);
         }
 
         private void OnOpActionCardPlayed(int card_id)
         {
-            Configuration.Logger.LogDebug("OnOpActionCard");
+            Configuration.Logger.LogDebug("[GameWatcher] OnOpActionCard");
             OpActionCardPlayed?.Invoke(card_id);
         }
 
         private void OnGameOver()
         {
-            Configuration.Logger.LogDebug("OnGameOver");
+            Configuration.Logger.LogDebug("[GameWatcher] OnGameOver");
             GameOver?.Invoke();
         }
 
         private void OnRoundDetected(int round)
         {
-            Configuration.Logger.LogDebug("OnRoundDetected");
+            Configuration.Logger.LogDebug("[GameWatcher] OnRoundDetected");
             RoundDetected?.Invoke(round);
         }
 
         private void OnMyCardsDrawn(int[] card_ids)
         {
-            Configuration.Logger.LogDebug("OnMyCardsDrawn");
+            Configuration.Logger.LogDebug("[GameWatcher] OnMyCardsDrawn");
             MyCardsDrawn?.Invoke(card_ids);
         }
 
         private void OnMyCardsCreateDeck(int[] card_ids)
         {
-            Configuration.Logger.LogDebug("OnMyCardsCreateDeck");
+            Configuration.Logger.LogDebug("[GameWatcher] OnMyCardsCreateDeck");
             MyCardsCreateDeck?.Invoke(card_ids);
         }
 
         private void OnOpCardsCreateDeck(int[] card_ids)
         {
-            Configuration.Logger.LogDebug("OnOpCardsCreateDeck");
+            Configuration.Logger.LogDebug("[GameWatcher] OnOpCardsCreateDeck");
             OpCardsCreateDeck?.Invoke(card_ids);
         }
 
         private void OnUnsupportedRatio()
         {
-            Configuration.Logger.LogDebug("OnUnsupportedRatio");
+            Configuration.Logger.LogDebug("[GameWatcher] OnUnsupportedRatio");
             UnsupportedRatio?.Invoke();
         }
 
         private void OnCaptureTestDone(string filename)
         {
-            Configuration.Logger.LogDebug("OnCaptureTestDone");
+            Configuration.Logger.LogDebug("[GameWatcher] OnCaptureTestDone");
             CaptureTestDone?.Invoke(filename);
         }
 
