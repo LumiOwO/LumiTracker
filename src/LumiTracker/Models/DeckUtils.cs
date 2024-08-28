@@ -8,18 +8,29 @@ namespace LumiTracker.Models
     {
         public static int[]? DecodeShareCode(string sharecode)
         {
-            // Reference: https://gist.github.com/zyr17/36aae02c77d02602d6089f967027372a#file-deck_str_to_cards_4_2-py
-
-            byte[]? code = null;
+            int[]? res = null;
             try
             {
-                code = Convert.FromBase64String(sharecode);
+                res = _DecodeShareCode(sharecode);
             }
             catch (Exception ex)
             {
                 Configuration.Logger.LogError($"An unexpected error occurred when decoding {sharecode}.\n{ex.ToString()}");
-                return null;
             }
+
+            if (res != null)
+            {
+                Configuration.Logger.LogDebug($"Decoded from {sharecode}: [{string.Join(", ", res)}]");
+            }
+            return res;
+        }
+
+        private static int[]? _DecodeShareCode(string sharecode)
+        {
+            // Reference: https://gist.github.com/zyr17/36aae02c77d02602d6089f967027372a#file-deck_str_to_cards_4_2-py
+
+            byte[]? code = null;
+            code = Convert.FromBase64String(sharecode);
             if (code.Length != 51)
             {
                 return null;
@@ -43,7 +54,7 @@ namespace LumiTracker.Models
 
             // 3. decode by 12-bits stride
             const int NUM_CARDS = 33;
-            int[] internalIds = new int[NUM_CARDS];
+            int[] ids = new int[NUM_CARDS];
             var share_to_internal = Configuration.Database["share_to_internal"]!;
 
             int bitIndex = 0;
@@ -64,9 +75,13 @@ namespace LumiTracker.Models
                 {
                     shareId = ((curByte & 0x0f) << 8 | nextByte) & 0xfff;
                 }
+                ids[i] = shareId;
+            }
 
-                // share id to internal id
-                JToken? jId = share_to_internal[shareId];
+            // 4. share id to internal id
+            for (int i = 0; i < NUM_CARDS; i++)
+            {
+                JToken? jId = share_to_internal[ids[i]];
                 if (jId == null)
                 {
                     return null;
@@ -80,11 +95,11 @@ namespace LumiTracker.Models
                 {
                     id = id - 1;
                 }
-                internalIds[i] = id;
+                ids[i] = id;
             }
             //Configuration.Logger.LogDebug($"{string.Join(", ", internalIds)}");
 
-            return internalIds;
+            return ids;
         }
 
         public static int CharacterCompare(int a_character_id, int b_character_id, bool is_talent = false)

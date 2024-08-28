@@ -10,20 +10,20 @@ namespace LumiTracker.OB
         public static void Main(string[] args)
         {
             // my model
-            DeckViewModel deckViewModel = new DeckViewModel(null, null);
             GameWatcher gameWatcher = new GameWatcher();
-            DeckWindowViewModel my = new DeckWindowViewModel(deckViewModel, gameWatcher);
             using (Configuration.Logger.BeginScope(new ScopeState { Name = "MY", Color = LogHelper.AnsiOrange }))
             {
+                DeckViewModel deckViewModel = new DeckViewModel(null, null);
+                DeckWindowViewModel my = new DeckWindowViewModel(deckViewModel, gameWatcher);
                 gameWatcher.Start("YuanShen.exe");
             }
 
             // my model
-            DeckViewModel opdeckViewModel = new DeckViewModel(null, null);
             GameWatcher opgameWatcher = new GameWatcher();
-            DeckWindowViewModel op = new DeckWindowViewModel(opdeckViewModel, opgameWatcher);
             using (Configuration.Logger.BeginScope(new ScopeState { Name = "OP", Color = LogHelper.AnsiBlue }))
             {
+                DeckViewModel opdeckViewModel = new DeckViewModel(null, null);
+                DeckWindowViewModel op = new DeckWindowViewModel(opdeckViewModel, opgameWatcher);
                 opgameWatcher.Start("YuanShen.exe");
             }
 

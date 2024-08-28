@@ -314,6 +314,16 @@ class EActionCard(enum.Enum):
     Serene = enum.auto()
     IdRatherLoseMoneyMyself = enum.auto()
     Tada = enum.auto()
+    MomentOfWakingAndResolve = enum.auto()
+    TheyCallHerCloudRetainer = enum.auto()
+    FeatherweightFoam = enum.auto()
+    XenochromaticHuntersRay = enum.auto()
+    Yumkasaurus = enum.auto()
+    Koholasaurus = enum.auto()
+    StadiumOfTheSacredFlame = enum.auto()
+    Atea = enum.auto()
+    SaurianDiningBuddies = enum.auto()
+    EdictOfAbsolution = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -328,9 +338,11 @@ class EActionCard(enum.Enum):
     OverchargedBall = enum.auto()
     CrystalShrapnel = enum.auto()
     MelusineSupport = enum.auto()
+    Starwicker = enum.auto()
+    MistBubbleSlime = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 311
+    NumSharables = 321
     NumTokens = NumActions - NumSharables
 
 class ECharacterCard(enum.Enum):
@@ -429,6 +441,9 @@ class ECharacterCard(enum.Enum):
     Chevreuse = enum.auto()
     Navia = enum.auto()
     FrostOperative = enum.auto()
+    Freminet = enum.auto()
+    Xianyun = enum.auto()
+    HydroHilichurlRogue = enum.auto()
     
     NumCharacters = enum.auto()
 

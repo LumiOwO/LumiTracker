@@ -295,7 +295,8 @@ namespace LumiTracker.Watcher
                 var     message_data  = message["data"]!;
 
                 bool forceIndent   = (message_level != "DEBUG");
-                string message_str = "@ " + LogHelper.JsonToConsoleStr(message_data, forceIndent);
+                string message_str = $"{LogHelper.AnsiMagenta}@{LogHelper.AnsiEnd} ";
+                message_str += LogHelper.JsonToConsoleStr(message_data, forceIndent);
 
                 if (message_level == "INFO")
                 {

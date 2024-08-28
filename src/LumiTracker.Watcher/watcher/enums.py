@@ -89,6 +89,7 @@ class EActionCardType(enum.Enum):
     Polearm      = enum.auto()
     Sword        = enum.auto()
     Artifact     = enum.auto()
+    Technique    = enum.auto()
     Location     = enum.auto()
     Companion    = enum.auto()
     Item         = enum.auto()

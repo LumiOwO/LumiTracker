@@ -318,7 +318,7 @@ namespace LumiTracker.ViewModels.Pages
 
             UserDeckList.ActiveIndex = SelectedDeckIndex;
             SaveDeckList();
-            SnackbarService.Show(
+            SnackbarService?.Show(
                 LocalizationSource.Instance["SetAsActiveSuccess_Title"],
                 LocalizationSource.Instance["SetAsActiveSuccess_Message"] + SelectedDeckName,
                 ControlAppearance.Success,
@@ -331,7 +331,7 @@ namespace LumiTracker.ViewModels.Pages
         private async Task OnEditDeckNameClicked()
         {
             Configuration.Logger.LogDebug("OnEditDeckNameClicked");
-            if (SelectedDeckIndex < 0)
+            if (SelectedDeckIndex < 0 || ContentDialogService == null)
             {
                 return;
             }
@@ -358,7 +358,7 @@ namespace LumiTracker.ViewModels.Pages
         private async Task OnReimportDeckClicked()
         {
             Configuration.Logger.LogDebug("OnReimportDeckClicked");
-            if (SelectedDeckIndex < 0)
+            if (SelectedDeckIndex < 0 || ContentDialogService == null)
             {
                 return;
             }
@@ -379,7 +379,7 @@ namespace LumiTracker.ViewModels.Pages
                 }
                 else
                 {
-                    SnackbarService.Show(
+                    SnackbarService?.Show(
                         LocalizationSource.Instance["InvalidSharingCode_Title"],
                         LocalizationSource.Instance["InvalidSharingCode_Message"] + sharecode,
                         ControlAppearance.Danger,
@@ -403,7 +403,7 @@ namespace LumiTracker.ViewModels.Pages
             string sharecode = info.ShareCode;
 
             Clipboard.SetText(sharecode);
-            SnackbarService.Show(
+            SnackbarService?.Show(
                 LocalizationSource.Instance["CopyToClipboard"],
                 $"{sharecode}",
                 ControlAppearance.Success,
@@ -416,6 +416,11 @@ namespace LumiTracker.ViewModels.Pages
         private async Task OnAddNewDeckClicked()
         {
             Configuration.Logger.LogDebug("OnAddNewDeckClicked");
+            if (ContentDialogService == null)
+            {
+                return;
+            }
+
             var (result, sharecode) = await ContentDialogService.ShowTextInputDialogAsync(
                 LocalizationSource.Instance["ImportDeck_Title"], 
                 "",
@@ -434,7 +439,7 @@ namespace LumiTracker.ViewModels.Pages
                 }
                 else
                 {
-                    SnackbarService.Show(
+                    SnackbarService?.Show(
                         LocalizationSource.Instance["InvalidSharingCode_Title"],
                         LocalizationSource.Instance["InvalidSharingCode_Message"] + sharecode,
                         ControlAppearance.Danger,
@@ -449,7 +454,7 @@ namespace LumiTracker.ViewModels.Pages
         private async Task OnDeleteDeckClicked()
         {
             Configuration.Logger.LogDebug("OnDeleteDeckClicked");
-            if (SelectedDeckIndex < 0)
+            if (SelectedDeckIndex < 0 || ContentDialogService == null)
             {
                 return;
             }

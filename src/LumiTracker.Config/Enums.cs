@@ -28,6 +28,7 @@
             "GenshinImpact.exe",
             "Genshin Impact Cloud Game.exe",
             //"PotPlayerMini64.exe",
+            //"wemeetapp.exe",
         ];
     }
 
@@ -49,6 +50,7 @@
         Polearm,
         Sword,
         Artifact,
+        Technique,
         Location,
         Companion,
         Item,
@@ -109,5 +111,6 @@
 
         UNSUPPORTED_RATIO,
         CAPTURE_TEST,
+        LOG_FPS,
     }
 }

@@ -315,6 +315,16 @@ namespace LumiTracker.Config
         Serene,
         IdRatherLoseMoneyMyself,
         Tada,
+        MomentOfWakingAndResolve,
+        TheyCallHerCloudRetainer,
+        FeatherweightFoam,
+        XenochromaticHuntersRay,
+        Yumkasaurus,
+        Koholasaurus,
+        StadiumOfTheSacredFlame,
+        Atea,
+        SaurianDiningBuddies,
+        EdictOfAbsolution,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -329,9 +339,11 @@ namespace LumiTracker.Config
         OverchargedBall,
         CrystalShrapnel,
         MelusineSupport,
+        Starwicker,
+        MistBubbleSlime,
         
         NumActions,
-        NumSharables = 311,
+        NumSharables = 321,
         NumTokens = NumActions - NumSharables,
     }
     
@@ -432,6 +444,9 @@ namespace LumiTracker.Config
         Chevreuse,
         Navia,
         FrostOperative,
+        Freminet,
+        Xianyun,
+        HydroHilichurlRogue,
         
         NumCharacters,
     }
