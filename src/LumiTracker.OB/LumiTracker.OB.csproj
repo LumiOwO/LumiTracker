@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>LumiTrackerOB</AssemblyName>
+    <PublishDir>$(SolutionDir)publish\LumiTracker\LumiTrackerApp-$(InformationalVersion)\</PublishDir>
+    <ApplicationIcon>$(SolutionDir)src\LumiTracker\Assets\LumiTracker.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

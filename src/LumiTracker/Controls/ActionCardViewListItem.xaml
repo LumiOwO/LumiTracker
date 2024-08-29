@@ -83,11 +83,14 @@
             >
             <TextBlock.Effect>
                 <DropShadowEffect 
-                    ShadowDepth="2"
                     Color="Black"
+                    ShadowDepth="0"
+                    Direction="0" 
+                    BlurRadius="4"
                     Opacity="1"
-                    BlurRadius="5"/>
+                    />
             </TextBlock.Effect>
+            
         </TextBlock>
 
 

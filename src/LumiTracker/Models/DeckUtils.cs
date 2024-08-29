@@ -20,7 +20,7 @@ namespace LumiTracker.Models
 
             if (res != null)
             {
-                Configuration.Logger.LogDebug($"Decoded from {sharecode}: [{string.Join(", ", res)}]");
+                Configuration.Logger.LogDebug($"Decoded from {sharecode}:\n[{string.Join(", ", res)}]");
             }
             return res;
         }

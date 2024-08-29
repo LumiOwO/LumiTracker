@@ -41,7 +41,11 @@
     <Resource Include="Assets\LumiTracker.png" />
   </ItemGroup>
 
-  <Target Name="CopyTestDirectory" AfterTargets="Publish">
+  <Target Name="PublishOB" AfterTargets="Publish">
+    <MSBuild Projects="$(SolutionDir)src\LumiTracker.OB\LumiTracker.OB.csproj" Targets="Publish"/>
+  </Target>
+
+  <Target Name="CopyFiles" AfterTargets="PublishOB">
     <RemoveDir Directories="$(PublishDir)watcher" Condition="Exists('$(PublishDir)watcher')" />
     <Exec Command="xcopy /E /I /Y $(TargetDir)watcher $(PublishDir)watcher &gt; nul" />
     <Message Text="Copy of 'watcher' directory to publish folder completed successfully." Importance="high" />

@@ -3,9 +3,29 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace LumiTracker.Config
 {
+    public class CustomJsonTextWriter : JsonTextWriter
+    {
+        public CustomJsonTextWriter(TextWriter writer) : base(writer)
+        {
+        }
+
+        protected override void WriteIndent()
+        {
+            if (WriteState != WriteState.Array)
+            {
+                base.WriteIndent();
+            }
+            else
+            {
+                WriteIndentSpace();
+            }
+        }
+    }
+
     public class LogHelper
     {
         public static readonly string AnsiWhite   = "\x1b[37m";
@@ -17,7 +37,9 @@ namespace LumiTracker.Config
         public static readonly string AnsiMagenta = "\x1b[35m";
         public static readonly string AnsiYellow  = "\x1b[33m";
         public static readonly string AnsiOrange  = "\x1b[38;5;208m";
-        public static readonly string AnsiEnd     = "\u001b[39m\u001b[22m";
+        public static readonly string AnsiEnd     = "\x1b[39m\x1b[22m";
+
+        public static readonly Regex AnsiRegex = new Regex(@"\x1b\[\d{1,3}(;\d{1,3})*m", RegexOptions.Compiled);
 
         public static string GetAnsiColor(LogLevel logLevel) => logLevel switch
         {
@@ -131,9 +153,11 @@ namespace LumiTracker.Config
             if (!IsEnabled(logLevel))
                 return;
 
-            string message  = formatter(state, exception);
             string scope    = _currentScope.Value != null ? $"({_currentScope.Value.Name}) " : "";
             string levelStr = LogHelper.GetShortLevelStr(logLevel);
+
+            string message  = formatter(state, exception);
+            message = LogHelper.AnsiRegex.Replace(message, string.Empty); // Filter ansi color text
 
             _writer.WriteLine($"{DateTime.Now} {scope}{levelStr}> {message}");
             if (exception != null)
@@ -211,28 +235,5 @@ namespace LumiTracker.Config
     public class CustomConsoleFormatterOptions : ConsoleFormatterOptions
     {
         // Define any custom options here if needed
-    }
-
-    /////////////////////////////
-    /// Json Serialize Formatting
-    ///
-   
-    public class CustomJsonTextWriter : JsonTextWriter
-    {
-        public CustomJsonTextWriter(TextWriter writer) : base(writer)
-        {
-        }
-
-        protected override void WriteIndent()
-        {
-            if (WriteState != WriteState.Array)
-            {
-                base.WriteIndent();
-            }
-            else
-            {
-                WriteIndentSpace();
-            }
-        }
     }
 }

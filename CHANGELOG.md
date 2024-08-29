@@ -1,3 +1,12 @@
+# \[[v1.2.3](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.3)\] - 2024.08.29
+### Bug修复
+- ${\color{#ed8e06}{\textbf{[传说]}}}$ 修复了特征提取算法中因窗口分辨率变化导致的Bug；该Bug曾导致金卡的识别准确率大幅下降
+- ${\color{#2a75e4}{\textbf{[史诗]}}}$ 修正了WindowsCapture截帧方式的边界偏移量错误
+- **[普通]** 解决了导入包含新卡牌的分享码时程序闪退的问题
+### 新增功能
+- ${\color{#db3fff}{\textbf{[稀有]}}}$ 添加5.0版本新卡
+- ${\color{#db3fff}{\textbf{[稀有]}}}$ 新增Beta版更新订阅选项；如果您希望帮助我们反馈bug，欢迎订阅~
+
 # \[[v1.2.2](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.2)\] - 2024.08.17
 ### 体验优化
 - ${\color{#db3fff}{\textbf{[史诗]}}}$ 现在，卡牌数量变化时，会有高亮提示

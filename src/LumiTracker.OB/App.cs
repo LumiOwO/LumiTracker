@@ -2,6 +2,7 @@
 using LumiTracker.Models;
 using LumiTracker.ViewModels.Pages;
 using LumiTracker.ViewModels.Windows;
+using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.OB
 {
@@ -24,7 +25,7 @@ namespace LumiTracker.OB
             {
                 DeckViewModel opdeckViewModel = new DeckViewModel(null, null);
                 DeckWindowViewModel op = new DeckWindowViewModel(opdeckViewModel, opgameWatcher);
-                opgameWatcher.Start("YuanShen.exe");
+                opgameWatcher.Start("wemeetapp.exe");
             }
 
             gameWatcher.Wait();
