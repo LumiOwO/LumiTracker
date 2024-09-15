@@ -150,8 +150,6 @@ class FrameManager:
         self.prev_log_time   = time.perf_counter()
         self.prev_frame_time = self.prev_log_time
         self.frame_count     = 0
-        self.min_fps         = 100000
-        self.first_log       = True
 
     def Resize(self, client_width, client_height):
         if client_height == 0:
@@ -194,10 +192,6 @@ class FrameManager:
                 type=f"{ETaskType.LOG_FPS.name}",
                 fps=f"{fps}"
                 )
-            if (not self.first_log) and (self.min_fps - fps >= 5):
-                LogWarning(info=f"Min FPS = {fps}")
-                self.min_fps = fps
 
             self.frame_count   = 0
             self.prev_log_time = cur_time
-            self.first_log     = False

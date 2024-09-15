@@ -202,14 +202,6 @@ namespace LumiTracker.Helpers
             GetClientRect(_dst_hwnd, ref clientRect);
             if (clientRect.Height == 0 || clientRect.Width == 0) return;
 
-            Configuration.Logger.LogDebug(
-                $"bounds: [{bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}], " +
-                $"clientRect: [{clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}]");
-            if (bounds.Height != _lastBounds.Height || bounds.Width != _lastBounds.Width)
-            {
-                Configuration.Logger.LogInformation($"Window size: {clientRect.Width} x {clientRect.Height}");
-            }
-
             POINT clientLeftTop = new POINT { x = clientRect.Left, y = clientRect.Top };
             ClientToScreen(_dst_hwnd, ref clientLeftTop);
 
@@ -227,7 +219,16 @@ namespace LumiTracker.Helpers
 
             // Calculate the scale factor
             float scale = (float)PhysicalHeight / LogicalHeight;
-            Configuration.Logger.LogDebug($"PhysicalHeight={PhysicalHeight}, LogicalHeight={LogicalHeight}, scale={scale}");
+
+            if (bounds.Height != _lastBounds.Height || bounds.Width != _lastBounds.Width)
+            {
+                Configuration.Logger.LogInformation(
+                    $"Game window resized to {clientRect.Width} x {clientRect.Height}, " +
+                    $"clientRect: [{clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}], " +
+                    $"scale=({PhysicalHeight}/{LogicalHeight})={scale}"
+                    );
+            }
+            Configuration.Logger.LogDebug($"Game window moved to [{bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}]");
 
             // Snap to target window
             if (_bOutside)

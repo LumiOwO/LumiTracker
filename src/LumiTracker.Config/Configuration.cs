@@ -114,7 +114,7 @@ namespace LumiTracker.Config
                         options.FormatterName = "custom";
                     })
                     .AddConsoleFormatter<CustomConsoleFormatter, CustomConsoleFormatterOptions>()
-                    .AddProvider(new FileLoggerProvider(_errorWriter, LogLevel.Warning))
+                    .AddProvider(new FileLoggerProvider(_errorWriter, LogLevel.Information))
                     .SetMinimumLevel(DEBUG ? LogLevel.Debug : LogLevel.Information)
                     ;
             });
