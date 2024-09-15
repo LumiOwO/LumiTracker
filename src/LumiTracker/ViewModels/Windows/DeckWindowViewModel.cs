@@ -34,6 +34,20 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private CardList _myDeck;
 
+        [ObservableProperty]
+        private CardList _trackedCards;
+
+        static private readonly HashSet<EActionCard> CardsToTrack = [
+            EActionCard.CalledInForCleanup,
+            EActionCard.UnderseaTreasure,
+            EActionCard.AwakenMyKindred,
+            EActionCard.ForbiddenKnowledge,
+            EActionCard.BonecrunchersEnergyBlock,
+            EActionCard.TaroumarusSavings,
+        ];
+
+        public string ShareCodeOverride { get; set; } = "";
+
         // controls
         [ObservableProperty]
         private bool _gameStarted = false;
@@ -77,18 +91,24 @@ namespace LumiTracker.ViewModels.Windows
         {
             MyActionCardsPlayed = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
             OpActionCardsPlayed = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
+            TrackedCards = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
             Round = 0;
             GameStarted = gameStart;
             if (gameStart)
             {
-                if (DeckViewModel.UserDeckList.ActiveIndex < 0)
+                string sharecode = ShareCodeOverride;
+                int activeIndex  = DeckViewModel.UserDeckList.ActiveIndex;
+                if (sharecode == "" && activeIndex >= 0)
+                {
+                    sharecode = DeckViewModel.UserDeckList.DeckInfos[activeIndex].ShareCode;
+                }
+
+                if (sharecode == "")
                 {
                     MyDeck = new CardList(inGame: true);
                 }
                 else
                 {
-                    int activeIndex = DeckViewModel.UserDeckList.ActiveIndex;
-                    string sharecode = DeckViewModel.UserDeckList.DeckInfos[activeIndex].ShareCode;
                     MyDeck = new CardList(sharecode, inGame: true);
                 }
             }
@@ -132,11 +152,21 @@ namespace LumiTracker.ViewModels.Windows
         private void OnMyCardsDrawn(int[] card_ids)
         {
             MyDeck.Remove(card_ids, keep_zero: true);
+            var tracked = card_ids.Where(x => CardsToTrack.Contains((EActionCard)x)).ToArray();
+            if (tracked != null)
+            {
+                TrackedCards.Remove(tracked, keep_zero: false);
+            }
         }
 
         private void OnMyCardsCreateDeck(int[] card_ids)
         {
             MyDeck.Add(card_ids);
+            var tracked = card_ids.Where(x => CardsToTrack.Contains((EActionCard)x)).ToArray();
+            if (tracked != null)
+            {
+                TrackedCards.Add(card_ids);
+            }
         }
 
         private void OnOpCardsCreateDeck(int[] card_ids)

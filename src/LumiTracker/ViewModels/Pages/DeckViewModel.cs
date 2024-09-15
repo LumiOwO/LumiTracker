@@ -251,6 +251,7 @@ namespace LumiTracker.ViewModels.Pages
             // Decode share code
             DeckInfo info = UserDeckList.DeckInfos[index];
             string sharecode = info.ShareCode;
+            Configuration.Logger.LogDebug($"Select deck[{index}], {UserDeckList.DeckInfos.Count} decks in total");
             DecodeShareCode(info, sharecode);
         }
 

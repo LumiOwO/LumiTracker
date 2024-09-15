@@ -41,6 +41,11 @@ namespace LumiTracker.Config
             "cache"
         );
 
+        public static readonly string AssetsDir = Path.Combine(
+            AppDir,
+            "assets"
+        );
+
         public static readonly string DocumentsDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "LumiTracker"
@@ -63,15 +68,13 @@ namespace LumiTracker.Config
         );
 
         private static readonly string DbFilePath = Path.Combine(
-            AppDir,
-            "assets",
+            AssetsDir,
             "database",
             "db.json"
         );
 
         private static readonly string DefaultConfigPath = Path.Combine(
-            AppDir,
-            "assets",
+            AssetsDir,
             "config.json"
         );
 
@@ -273,14 +276,24 @@ namespace LumiTracker.Config
             }
         }
 
-        public static T Get<T>(string key) 
+        public static JToken? GetToken(string key)
         {
             JToken? value;
             if (!UserConfig.TryGetValue(key, out value) && !DefaultConfig.TryGetValue(key, out value))
             {
+                return default;
+            }
+            return value;
+        }
+
+        public static T Get<T>(string key) 
+        {
+            JToken? token = GetToken(key);
+            if (token == null)
+            {
                 return default!;
             }
-            return value!.ToObject<T>()!;
+            return token.ToObject<T>()!;
         }
 
         public static void Set<T>(string key, T value, bool auto_save = true)

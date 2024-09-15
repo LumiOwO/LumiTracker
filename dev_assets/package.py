@@ -101,7 +101,7 @@ def run_inno_setup(script_path, compiler_path, defines):
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while running Inno Setup: {e}")
 
-def main(publish_dir):
+def main(publish_dir, skip_full):
     root_dir = os.path.join(publish_dir, "LumiTracker")
     app_dir  = ""
     for item in os.listdir(root_dir):
@@ -134,6 +134,8 @@ def main(publish_dir):
     patch_files = get_all_files(app_dir)
     package_separate(files=patch_files, ignored_files=ignored_files, dst_dir=publish_dir, root_dir=app_dir, package_name="Patch", md5s=md5s)
 
+    if skip_full:
+        return
     # ================== Full app ==================
     print("Updating .ini file...")
     ini_file = os.path.join(root_dir, f"LumiTracker.ini")
@@ -162,4 +164,5 @@ def main(publish_dir):
 
 if __name__ == "__main__":
     publish_dir = sys.argv[1]
-    main(publish_dir)
+    skip_full = True if (len(sys.argv) >= 3 and sys.argv[2] == "skip_full") else False
+    main(publish_dir, skip_full)

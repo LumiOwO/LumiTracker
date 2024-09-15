@@ -459,6 +459,10 @@ class Database:
                     cfg.assets_dir, "images", "costs", f'{name}.png'
                     )
                 shutil.copy(src_file, dst_file)
+        
+        # empty image
+        shutil.copy(os.path.join(cfg.cards_dir, 'empty.png'), 
+                    os.path.join(cfg.assets_dir, "images", 'empty.png'))
 
     def _Update(self, save_image_assets):
         self._UpdateControls()
