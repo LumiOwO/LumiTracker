@@ -1,7 +1,7 @@
 from .base import TaskBase
 
 from ..enums import ETaskType, ERegionType
-from ..config import cfg, LogDebug, LogInfo
+from ..config import cfg, LogDebug, LogInfo, LogError
 from ..regions import REGIONS
 from ..feature import CropBox, ActionCardHandler, CardName
 from ..stream_filter import StreamFilter
@@ -292,10 +292,20 @@ class CardFlowTask(CenterCropTask):
             task_type = ETaskType.OP_CREATE_DECK
 
         if task_type != ETaskType.NONE:
-            recorder = self.card_recorder[self.signaled_num_cards]
-            cards = [max(d, key=d.get) for d in recorder]
-            LogInfo(type=task_type.name, cards=cards,
-                    names=[CardName(card, self.db) for card in cards])
+            num_cards = self.signaled_num_cards
+            recorder = self.card_recorder[num_cards]
+            valid = True
+            cards = []
+            for i, d in enumerate(recorder):
+                card = max(d, key=d.get) if d else -1
+                if card == -1:
+                    valid = False
+                    LogError(info=f"{task_type.name}: card[{i}] not detected, {num_cards} in total")
+                cards.append(card)
+
+            if valid:
+                LogInfo(type=task_type.name, cards=cards,
+                        names=[CardName(card, self.db) for card in cards])
         
         # reset
         self.card_recorder[self.signaled_num_cards] = [defaultdict(int) for _ in range(self.signaled_num_cards)]
