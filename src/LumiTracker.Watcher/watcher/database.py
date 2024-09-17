@@ -14,7 +14,7 @@ from collections import defaultdict
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
 from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType
-from .feature import CropBox, ActionCardHandler, FeatureDistance
+from .feature import CropBox, ActionCardHandler, FeatureDistance, GetHashSize
 from .feature import ExtractFeature_Control, ExtractFeature_Digit
 
 def LoadImage(path):
@@ -102,11 +102,8 @@ class Database:
         from .tasks import RoundTask
         for i in range(ctrl_id_first, ctrl_id_last + 1):
             image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
-            main_content, valid = RoundTask.CropMainContent(image)
-            feature = ExtractFeature_Control(main_content)
+            feature = ExtractFeature_Control(image)
             features[i] = feature
-            if cfg.DEBUG_SAVE:
-                SaveImage(main_content, os.path.join(cfg.debug_dir, f"{ECtrlType(i).name.lower()}.png"))
 
         ann = self.CreateAndSaveAnn(features, EAnnType.CTRLS)
         self.anns[EAnnType.CTRLS.value] = ann
@@ -127,15 +124,6 @@ class Database:
             ctrl_ids, dists = self.SearchByFeature(feature, EAnnType.CTRLS)
             LogDebug(info=f"GameOverTest, {dists[0]=}, {ECtrlType(ctrl_ids[0]).name}")
             SaveImage(main_content, os.path.join(cfg.debug_dir, f"GameOverTest_MainContent.png"))
-
-            # Rounds test
-            n_rounds = 14
-            for i in range(n_rounds):
-                image = LoadImage(os.path.join(cfg.debug_dir, f"crop{i + 1}.png"))
-                main_content, valid = RoundTask.CropMainContent(image)
-                feature = ExtractFeature_Control(main_content)
-                ctrl_ids, dists = self.SearchByFeature(feature, EAnnType.CTRLS)
-                LogDebug(info=f"round{i + 1}, {dists[0]=}")
 
 
     def _UpdateActionCards(self, save_image_assets):
@@ -481,7 +469,7 @@ class Database:
         ann_digits = self.CreateAndSaveAnn(digit_hashs, EAnnType.DIGITS)
         self.anns[EAnnType.DIGITS.value] = ann_digits
         if cfg.DEBUG:
-            CheckHashDistances(digit_hashs, name_func=lambda i: str(i))
+            CheckHashDistances(digit_hashs, name_func=lambda i: "")
 
         if save_image_assets:
             # cost images
@@ -514,7 +502,9 @@ class Database:
     def Load(self):
         n_anns = EAnnType.ANN_COUNT.value
         for i in range(n_anns):
-            ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
+            hash_size = GetHashSize(EAnnType(i))
+            ann_index_len = hash_size * hash_size
+            ann = AnnoyIndex(ann_index_len, cfg.ann_metric)
             ann_filename = f"{EAnnType(i).name.lower()}.ann"
             ann.load(os.path.join(cfg.database_dir, ann_filename))
             self.anns[i] = ann
@@ -523,7 +513,9 @@ class Database:
             self.data = json.load(f)
     
     def CreateAndSaveAnn(self, features, ann_type):
-        ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
+        hash_size = GetHashSize(ann_type)
+        index_len = hash_size * hash_size
+        ann = AnnoyIndex(index_len, cfg.ann_metric)
         for i in range(len(features)):
             ann.add_item(i, features[i])
         ann.build(cfg.ann_n_trees)

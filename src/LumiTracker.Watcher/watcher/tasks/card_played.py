@@ -47,6 +47,5 @@ class CardPlayedTask(TaskBase):
                 )
 
         if cfg.DEBUG_SAVE:
-            import cv2
             image = self.card_handler.region_buffer
             SaveImage(image, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}{self.fm.frame_count}.png"))

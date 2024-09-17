@@ -4,6 +4,19 @@ import cv2
 from .config import LogWarning, cfg, LogDebug
 from .enums import EAnnType, EActionCard
 
+def GetHashSize(ann_type):
+    return cfg.hash_size
+    # if ann_type == EAnnType.ACTIONS_A:
+    #     return 10
+    # elif ann_type == EAnnType.ACTIONS_D:
+    #     return 10
+    # elif ann_type == EAnnType.CTRLS:
+    #     return 10
+    # elif ann_type == EAnnType.DIGITS:
+    #     return 10
+    # else:
+    #     return 10
+
 class ImageHash:
     """
     Hash encapsulation. Can be used for dictionary keys and comparisons.
@@ -54,6 +67,23 @@ class ImageHash:
     def __len__(self):
         # Returns the bit length of the hash
         return self.hash.size
+
+def AHash(gray_image, hash_size=8):
+    """
+    Average Hash computation
+
+    Implementation follows https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
+
+    Step by step explanation: https://web.archive.org/web/20171112054354/https://www.safaribooksonline.com/blog/2013/11/26/image-hashing-with-python/ # noqa: E501
+
+    @image must be a PIL instance.
+    @mean how to determine the average luminescence. can try numpy.median instead.
+    """
+    gray_image = cv2.resize(gray_image, (hash_size, hash_size), interpolation=cv2.INTER_AREA)
+
+    avg = np.median(gray_image)
+    diff = gray_image > avg
+    return ImageHash(diff)
 
 def DHash(gray_image, hash_size=8):
     """
@@ -209,14 +239,34 @@ def ExtractFeature_Control(image):
     # to float buffer
     gray_image = gray_image.astype(np.float32) / 255.0
 
-    hash_size = cfg.hash_size
+    hash_size = GetHashSize(EAnnType.CTRLS)
     feature = PHash_D(gray_image, hash_size=hash_size)
     feature = feature.hash.flatten()
 
     return feature
 
+def ExtractFeature_Digit_Binalized(binary):
+    # resize
+    binary = cv2.resize(binary, (160, 160), interpolation=cv2.INTER_LANCZOS4)
+
+    # to float buffer
+    binary = binary.astype(np.float32) / 255.0
+
+    hash_size = GetHashSize(EAnnType.DIGITS)
+    feature = AHash(binary, hash_size=hash_size)
+    feature = feature.hash.flatten()
+
+    return feature
+
 def ExtractFeature_Digit(image):
-    return ExtractFeature_Control(image)
+    # preprocess
+    # to gray image
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
+
+    # binalize
+    _, binary = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    return ExtractFeature_Digit_Binalized(binary)
 
 def ExtractFeature_ActionCard(image):
     # preprocess
@@ -229,7 +279,8 @@ def ExtractFeature_ActionCard(image):
     # to float buffer
     gray_image = gray_image.astype(np.float32) / 255.0
 
-    ahash, dhash = MultiPHash(gray_image, target_size=cfg.feature_image_size, hash_size=cfg.hash_size)
+    hash_size = GetHashSize(EAnnType.ACTIONS_A)
+    ahash, dhash = MultiPHash(gray_image, target_size=cfg.feature_image_size, hash_size=hash_size)
     ahash = ahash.hash.flatten()
     dhash = dhash.hash.flatten()
 
@@ -316,6 +367,12 @@ class ActionCardHandler:
         strict_threshold = cfg.strict_threshold
         dist_a = dists_a[0]
         dist_d = dists_d[0]
+
+        # if card_id_a == 119 or card_id_d == 119:
+        #     import os
+        #     image = self.region_buffer
+        #     cv2.imwrite(os.path.join(cfg.debug_dir, "save", f"{ActionCardHandler.debug_cnt}.png"), image)
+        #     ActionCardHandler.debug_cnt += 1
         
         if dist_d <= strict_threshold: # dhash is more sensitive, so check it first
             card_id = card_id_d
