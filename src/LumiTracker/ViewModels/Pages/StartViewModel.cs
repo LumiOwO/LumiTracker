@@ -122,6 +122,9 @@ namespace LumiTracker.ViewModels.Pages
             EClientType ClientType = Configuration.Get<EClientType>("client_type");
             SelectedClientIndex = (int)ClientType;
 
+            string processName = EClientProcessNames.Values[SelectedClientIndex];
+            Configuration.Logger.LogInformation($"Client = {processName}, CaptureType = {CaptureType.ToString()}");
+
             // Game Watcher State
             GameWatcherState = EGameWatcherState.NoWindowFound;
 
@@ -135,7 +138,7 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
             _gameWatcher.CaptureTestDone    += OnCaptureTestDone;
 
-            _gameWatcher.Start(EClientProcessNames.Values[(int)ClientType]);
+            _gameWatcher.Start(processName);
         }
 
         private void OnGenshinWindowFound()
