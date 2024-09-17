@@ -14,7 +14,8 @@ from collections import defaultdict
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
 from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType
-from .feature import CropBox, ActionCardHandler, ExtractFeature_Control, FeatureDistance
+from .feature import CropBox, ActionCardHandler, FeatureDistance
+from .feature import ExtractFeature_Control, ExtractFeature_Digit
 
 def LoadImage(path):
     return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -107,12 +108,7 @@ class Database:
             if cfg.DEBUG_SAVE:
                 SaveImage(main_content, os.path.join(cfg.debug_dir, f"{ECtrlType(i).name.lower()}.png"))
 
-        ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
-        for i in range(len(features)):
-            ann.add_item(i, features[i])
-        ann.build(cfg.ann_n_trees)
-        ann_filename = f"{EAnnType.CTRLS.name.lower()}.ann"
-        ann.save(os.path.join(cfg.database_dir, ann_filename))
+        ann = self.CreateAndSaveAnn(features, EAnnType.CTRLS)
         self.anns[EAnnType.CTRLS.value] = ann
 
         if cfg.DEBUG:
@@ -180,10 +176,10 @@ class Database:
         handler.OnResize(CropBox(0, 0, 420, 720))
 
         action_cards_dir = os.path.join(cfg.cards_dir, "actions")
-        n_images = len(csv_data)
-        actions  = [None] * n_images
-        ahashs   = [None] * n_images
-        dhashs   = [None] * n_images
+        num_actions = len(csv_data)
+        actions  = [None] * num_actions
+        ahashs   = [None] * num_actions
+        dhashs   = [None] * num_actions
         for image_idx, row in enumerate(csv_data):
             card_id = int(row["id"])
             if image_idx < num_sharable:
@@ -235,12 +231,6 @@ class Database:
             dhashs[card_id]   = dhash
             actions[card_id]  = action
 
-        if cfg.DEBUG:
-            # ahash
-            CheckHashDistances(ahashs, name_func=lambda i: actions[i]["zh-HANS"])
-            # dhash
-            CheckHashDistances(dhashs, name_func=lambda i: actions[i]["zh-HANS"])
-
         print(f"Loaded {len(ahashs)} images from {action_cards_dir}")
         self.data["actions"] = actions
 
@@ -277,6 +267,14 @@ class Database:
         dhashs += dhash_extras
         self.data["extras"] = extras
 
+        if cfg.DEBUG:
+            # ahash
+            CheckHashDistances(ahashs, 
+                lambda i: actions[i if i < num_actions else extras[i - num_actions]]["zh-HANS"])
+            # dhash
+            CheckHashDistances(dhashs, 
+                lambda i: actions[i if i < num_actions else extras[i - num_actions]]["zh-HANS"])
+
         if cfg.DEBUG_SAVE:
             card_id = 211
             image_file = f'action_{card_id}_{actions[card_id]["zh-HANS"]}.png'
@@ -284,21 +282,10 @@ class Database:
             SaveImage(image, os.path.join(cfg.debug_dir, image_file))
             LogDebug(info=f"save {image_file} at {cfg.debug_dir}")
 
-        # cfg.ann_index_len = len(features[0])
-        ann_ahash = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
-        for i in range(len(ahashs)):
-            ann_ahash.add_item(i, ahashs[i])
-        ann_ahash.build(cfg.ann_n_trees)
-        ann_filename = f"{EAnnType.ACTIONS_A.name.lower()}.ann"
-        ann_ahash.save(os.path.join(cfg.database_dir, ann_filename))
+        ann_ahash = self.CreateAndSaveAnn(ahashs, EAnnType.ACTIONS_A)
         self.anns[EAnnType.ACTIONS_A.value] = ann_ahash
 
-        ann_dhash = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
-        for i in range(len(dhashs)):
-            ann_dhash.add_item(i, dhashs[i])
-        ann_dhash.build(cfg.ann_n_trees)
-        ann_filename = f"{EAnnType.ACTIONS_D.name.lower()}.ann"
-        ann_dhash.save(os.path.join(cfg.database_dir, ann_filename))
+        ann_dhash = self.CreateAndSaveAnn(dhashs, EAnnType.ACTIONS_D)
         self.anns[EAnnType.ACTIONS_D.value] = ann_dhash
 
         if cfg.DEBUG_SAVE:
@@ -484,8 +471,20 @@ class Database:
 
         self.data["artifacts_order"] = artifacts_order
 
-        # cost images
+        # digits
+        digit_hashs = [None] * 10
+        for i in range(10):
+            image = LoadImage(os.path.join(cfg.cards_dir, "digits", f"{i}.png"))
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGRA)
+            feature = ExtractFeature_Digit(image)
+            digit_hashs[i] = feature
+        ann_digits = self.CreateAndSaveAnn(digit_hashs, EAnnType.DIGITS)
+        self.anns[EAnnType.DIGITS.value] = ann_digits
+        if cfg.DEBUG:
+            CheckHashDistances(digit_hashs, name_func=lambda i: str(i))
+
         if save_image_assets:
+            # cost images
             for name in ECostType.__members__:
                 src_file = os.path.join(
                     cfg.cards_dir, "costs", f'{name}.png'
@@ -494,10 +493,10 @@ class Database:
                     cfg.assets_dir, "images", "costs", f'{name}.png'
                     )
                 shutil.copy(src_file, dst_file)
-        
-        # empty image
-        shutil.copy(os.path.join(cfg.cards_dir, 'empty.png'), 
-                    os.path.join(cfg.assets_dir, "images", 'empty.png'))
+
+            # empty image
+            shutil.copy(os.path.join(cfg.cards_dir, 'empty.png'), 
+                        os.path.join(cfg.assets_dir, "images", 'empty.png'))
 
     def _Update(self, save_image_assets):
         self._UpdateControls()
@@ -522,7 +521,16 @@ class Database:
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), encoding='utf-8') as f:
             self.data = json.load(f)
-        
+    
+    def CreateAndSaveAnn(self, features, ann_type):
+        ann = AnnoyIndex(cfg.ann_index_len, cfg.ann_metric)
+        for i in range(len(features)):
+            ann.add_item(i, features[i])
+        ann.build(cfg.ann_n_trees)
+        ann_filename = f"{ann_type.name.lower()}.ann"
+        ann.save(os.path.join(cfg.database_dir, ann_filename))
+        return ann
+
     def SearchByFeature(self, feature, ann_type):
         ann = self.anns[ann_type.value]
 
@@ -540,3 +548,4 @@ if __name__ == '__main__':
 
     db = Database()
     db._Update(save_image_assets)
+    print("Database Updated.")

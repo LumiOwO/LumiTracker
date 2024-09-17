@@ -77,6 +77,7 @@ class EAnnType(enum.Enum):
     ACTIONS_A = 0
     ACTIONS_D = enum.auto()
     CTRLS     = enum.auto()
+    DIGITS    = enum.auto()
 
     ANN_COUNT = enum.auto()
 

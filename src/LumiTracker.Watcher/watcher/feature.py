@@ -215,6 +215,9 @@ def ExtractFeature_Control(image):
 
     return feature
 
+def ExtractFeature_Digit(image):
+    return ExtractFeature_Control(image)
+
 def ExtractFeature_ActionCard(image):
     # preprocess
     # to gray image
