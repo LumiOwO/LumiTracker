@@ -37,7 +37,7 @@
   "threshold": 26,
   "strict_threshold": 20,
   "ann_metric": "hamming",
-  "ann_n_trees": 10,
+  "ann_n_trees": 20,
   "lang": "zh-HANS",
   "closing_behavior": "Quit",
   "theme": "Dark",

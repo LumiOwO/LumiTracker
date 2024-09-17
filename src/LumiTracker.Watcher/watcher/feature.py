@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 
-from .config import cfg, LogDebug
-from .enums import EAnnType
+from .config import LogWarning, cfg, LogDebug
+from .enums import EAnnType, EActionCard
 
 class ImageHash:
     """
@@ -253,6 +253,7 @@ class ActionCardHandler:
         self.crop_cfgs      = (cfg.action_crop_box0, cfg.action_crop_box1, cfg.action_crop_box2)
 
         self.frame_buffer   = None
+        self.region_buffer  = None
         self.crop_box       = None  # init when resize
 
     def ExtractCardFeatures(self):
@@ -261,6 +262,7 @@ class ActionCardHandler:
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
+        self.region_buffer = region_buffer
 
         # Crop action card and get feature buffer
         self.feature_buffer[:self.feature_crops[0].height, :self.feature_crops[0].width] = region_buffer[
@@ -281,6 +283,11 @@ class ActionCardHandler:
         # Extract feature
         features = ExtractFeature_ActionCard(self.feature_buffer)
         return features
+    
+    def RemapCardId(self, card_id, db):
+        if card_id >= EActionCard.NumActions.value:
+            card_id = db["extras"][card_id - EActionCard.NumActions.value]
+        return card_id
 
     def Update(self, frame_buffer, db):
         self.frame_buffer = frame_buffer
@@ -289,32 +296,47 @@ class ActionCardHandler:
         card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
         card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
 
-        card_id_a = card_ids_a[0]
-        card_id_d = card_ids_d[0]
+        card_id = -1
+        dist    = max(dists_a[0], dists_d[0])
+        def PackedResult():
+            # if card_id >= 0:
+            #     LogDebug(
+            #         card_a=CardName(card_id_a, db),
+            #         card_d=CardName(card_id_d, db),
+            #         dists=(dists_a[:3], dists_d[:3]))
+            return card_id, dist, (dists_a[:3], dists_d[:3])
+
+        card_id_a = self.RemapCardId(card_ids_a[0], db)
+        card_id_d = self.RemapCardId(card_ids_d[0], db)
 
         threshold = cfg.threshold
         strict_threshold = cfg.strict_threshold
         dist_a = dists_a[0]
         dist_d = dists_d[0]
+        
         if dist_d <= strict_threshold: # dhash is more sensitive, so check it first
             card_id = card_id_d
             dist    = dist_d
-        elif dist_a <= strict_threshold:
+            return PackedResult()
+        if dist_a <= strict_threshold:
             card_id = card_id_a
             dist    = dist_a
-        elif card_id_a == card_id_d and dist_a <= threshold and dist_d <= threshold:
-            card_id = card_id_a
-            dist    = min(dists_a[0], dists_d[0])
-        else:
-            card_id = -1
-            dist    = max(dists_a[0], dists_d[0])
-        # if card_id >= 0:
-        #     LogDebug(
-        #         card_a=CardName(card_id_a, db),
-        #         card_d=CardName(card_id_d, db),
-        #         dists=(dists_a[:3], dists_d[:3]))
+            return PackedResult()
 
-        return card_id, dist, (dists_a[:3], dists_d[:3])
+        # Invalid if AHash detect different card from DHash
+        # Note: Count Down To 3 may need extra logic
+        if card_id_a != card_id_d:
+            return PackedResult()
+        # A too large distance may likely be noise
+        if dist_a > threshold or dist_d > threshold:
+            return PackedResult()
+        # Invalid if 1st nearest AHash differs not much from 2nd nearest AHash
+        if dists_a[1] - dists_a[0] <= 5:
+            return PackedResult()
+
+        card_id = card_id_a
+        dist    = min(dists_a[0], dists_d[0])
+        return PackedResult()
     
     def OnResize(self, crop_box):
         self.crop_box = crop_box

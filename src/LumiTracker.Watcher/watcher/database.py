@@ -24,6 +24,7 @@ def SaveImage(image, path, remove_alpha=False):
         image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
     if image.dtype == np.float32:
         image *= 255
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     cv2.imencode(Path(path).suffix, image)[1].tofile(path)
 
 def CheckHashDistances(hashs, name_func):
@@ -142,12 +143,13 @@ class Database:
 
 
     def _UpdateActionCards(self, save_image_assets):
+        # sharables
         with open(os.path.join(cfg.cards_dir, "actions.csv"), 
                     mode='r', newline='', encoding='utf-8') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             csv_data = [row for row in csv_reader]
         num_sharable = len(csv_data)
-        
+        # tokens
         with open(os.path.join(cfg.cards_dir, "tokens.csv"), 
                     mode='r', newline='', encoding='utf-8') as tokens_file:
             tokens_reader = csv.DictReader(tokens_file)
@@ -239,8 +241,41 @@ class Database:
             # dhash
             CheckHashDistances(dhashs, name_func=lambda i: actions[i]["zh-HANS"])
 
-        LogInfo(info=f"Loaded {len(ahashs)} images from {action_cards_dir}")
+        print(f"Loaded {len(ahashs)} images from {action_cards_dir}")
         self.data["actions"] = actions
+
+        # extras
+        extra_cards_dir = os.path.join(action_cards_dir, "extras")
+        extra_image_names = os.listdir(extra_cards_dir)
+        num_extras = len(extra_image_names)
+        extras = [None] * num_extras
+        ahash_extras = [None] * num_extras
+        dhash_extras = [None] * num_extras
+        for extra_image_name in extra_image_names:
+            info = extra_image_name[:-4] # remove ".png"
+            parts = info.split('_')
+            extra_id  = int(parts[1])
+            mapped_id = int(parts[3])
+            if parts[2] == "token":
+                mapped_id += num_sharable
+
+            extra_path = os.path.join(action_cards_dir, "extras", extra_image_name)
+            image = LoadImage(extra_path)
+            if image is None:
+                LogError(info=f"Failed to load image: {extra_path}")
+                exit(1)
+        
+            handler.frame_buffer = image
+            ahash, dhash = handler.ExtractCardFeatures()
+    
+            extras[extra_id] = mapped_id
+            ahash_extras[extra_id] = ahash
+            dhash_extras[extra_id] = dhash
+
+        print(f"Loaded {len(ahash_extras)} images from {extra_cards_dir}")
+        ahashs += ahash_extras
+        dhashs += dhash_extras
+        self.data["extras"] = extras
 
         if cfg.DEBUG_SAVE:
             card_id = 211
@@ -494,7 +529,10 @@ class Database:
         # !!!!! Must use a large n, or it may not find the optimal result !!!!!
         ids, dists = ann.get_nns_by_vector(feature, n=20, include_distances=True)
         return ids, dists
-
+    
+    def GetFeatureById(self, target_id, ann_type):
+        ann = self.anns[ann_type.value]
+        return np.array(ann.get_item_vector(target_id))
 
 if __name__ == '__main__':
     import sys

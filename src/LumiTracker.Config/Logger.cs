@@ -222,7 +222,7 @@ namespace LumiTracker.Config
             }
 
             // Set the color for the log output
-            textWriter.Write($"{scopeString}");
+            textWriter.Write($"{DateTime.Now.ToString("HH:mm:ss")} {scopeString}");
             textWriter.Write(LogHelper.GetAnsiColor(logEntry.LogLevel));
             {
                 textWriter.Write($"{LogHelper.GetShortLevelStr(logEntry.LogLevel)}>");
