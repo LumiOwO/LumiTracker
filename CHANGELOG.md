@@ -1,3 +1,11 @@
+# \[[v1.2.4](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.4)\] - 2024.09.18
+### Bug修复
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了金色的「骑士团图书馆」无法被识别的问题
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了「幻戏倒计时」打出后记牌器界面崩溃的问题
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 进一步降低了「我方出牌」/「对方出牌」列表中出现不存在的卡牌的概率
+### 程序优化
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 添加了数字识别功能，并已用于回合数识别
+
 # \[[v1.2.3](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.3)\] - 2024.08.29
 ### Bug修复
 - ${\color{#ed8e06}{\textbf{[传说]}}}$ 修复了特征提取算法中因窗口分辨率变化导致的Bug；该Bug曾导致金卡的识别准确率大幅下降
