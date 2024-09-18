@@ -7,13 +7,6 @@ class ECaptureType(enum.Enum):
 
     NumCaptureTypes = enum.auto()
 
-class EGameState(enum.Enum):
-    GameNotStarted  = 0
-    StartingHand    = enum.auto()
-    ActionPhase     = enum.auto()
-    NatureAndWisdom = enum.auto()
-
-
 class ETaskType(enum.Enum):
     NONE              = 0
 

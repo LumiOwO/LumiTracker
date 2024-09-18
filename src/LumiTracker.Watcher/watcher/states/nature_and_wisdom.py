@@ -1,5 +1,4 @@
-from base import GameState
-from ..enums import EGameState
+from .base import GameState, EGameState
 
 class GameStateNatureAndWisdom(GameState):
     def __init__(self, frame_manager):

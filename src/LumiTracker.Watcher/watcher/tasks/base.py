@@ -16,9 +16,6 @@ class TaskBase:
     def PostTick(self):
         pass
 
-    def OnStateTransfer(self, old_state, new_state):
-        pass
-    
     def OnResize(self, client_width, client_height, ratio_type):
         pass
     

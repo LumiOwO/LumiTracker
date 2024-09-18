@@ -1,5 +1,4 @@
-from base import GameState
-from ..enums import EGameState
+from .base import GameState, EGameState
 
 class GameStateStartingHand(GameState):
     def __init__(self, frame_manager):
@@ -24,3 +23,7 @@ class GameStateStartingHand(GameState):
         else:
             state = self.GetState()
         return state
+
+    def OnExit(self, to_state):
+        if to_state == EGameState.ActionPhase:
+            self.fm.starting_hand_task.Flush()

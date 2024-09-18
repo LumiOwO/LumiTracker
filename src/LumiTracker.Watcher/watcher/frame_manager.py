@@ -2,7 +2,7 @@ import time
 import logging
 
 from .config import cfg, LogDebug, LogInfo, LogWarning
-from .enums import EGameState, ETaskType
+from .enums import ETaskType
 from .regions import GetRatioType
 from .database import Database
 
@@ -79,9 +79,11 @@ class FrameManager:
 
         if transfer:
             LogDebug(info=f"GameState: {old_state.name} ---> {new_state.name}")
-            for task in self.tasks:
-                task.OnStateTransfer(old_state, new_state)
+            
+            self.state.OnExit(to_state=new_state)
             self.state = self.states[new_state.value]
+            self.state.OnEnter(from_state=old_state)
+
             self.tasks = self.state.CollectTasks()
 
         # Logs

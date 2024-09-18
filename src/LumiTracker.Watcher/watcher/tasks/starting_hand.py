@@ -1,7 +1,7 @@
 from .card_flow import CenterCropTask
 
-from ..enums import EGameState, ETaskType
-from ..config import cfg, LogDebug, LogInfo
+from ..enums import ETaskType
+from ..config import cfg, LogDebug, LogInfo, LogError
 from ..feature import ActionCardHandler, CardName
 from ..stream_filter import StreamFilter
 
@@ -17,15 +17,6 @@ class StartingHandTask(CenterCropTask):
         # round 0, five cards to detect
         self.cards   = [-1 for _ in range(5)]
         self.filters = [StreamFilter(null_val=-1) for _ in range(5)]
-
-    def OnStateTransfer(self, old_state, new_state):
-        if new_state == EGameState.ActionPhase:
-            LogInfo(
-                type=ETaskType.MY_DRAWN.name, 
-                cards=self.cards,
-                names=[CardName(card, self.db) for card in self.cards])
-
-        self.Reset()
 
     def Tick(self):
         bboxes = self.DetectCenterBoundingBoxes()
@@ -48,3 +39,21 @@ class StartingHandTask(CenterCropTask):
             # record last detected card_id
             if card_id >= 0:
                 self.cards[i] = card_id
+    
+    def Flush(self):
+        res = []
+        for card in self.cards:
+            if card != -1:
+                res.append(card)
+        
+        if len(res) < 5:
+            LogError(
+                info="Not all starting hand cards are detected!", 
+                detected=self.cards)
+        if len(res) > 0:
+            LogInfo(
+                type=ETaskType.MY_DRAWN.name, 
+                cards=res,
+                names=[CardName(card, self.db) for card in res])
+
+        self.Reset()
