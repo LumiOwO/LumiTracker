@@ -17,6 +17,8 @@ from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType
 from .feature import CropBox, ActionCardHandler, FeatureDistance, GetHashSize
 from .feature import ExtractFeature_Control, ExtractFeature_Digit
 
+from .tasks import *
+
 def LoadImage(path):
     return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
 
@@ -87,7 +89,6 @@ class Database:
         # Game over
         ctrl_id_first = ECtrlType.GAME_OVER_FIRST.value
         ctrl_id_last  = ECtrlType.GAME_OVER_LAST.value
-        from .tasks import GameOverTask
         for i in range(ctrl_id_first, ctrl_id_last + 1):
             image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
             main_content, valid = GameOverTask.CropMainContent(image)
@@ -99,7 +100,6 @@ class Database:
         # Round
         ctrl_id_first = ECtrlType.ROUND_FIRST.value
         ctrl_id_last  = ECtrlType.ROUND_LAST.value
-        from .tasks import RoundTask
         for i in range(ctrl_id_first, ctrl_id_last + 1):
             image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
             feature = ExtractFeature_Control(image)
