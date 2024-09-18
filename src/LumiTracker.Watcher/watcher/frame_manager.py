@@ -23,7 +23,7 @@ class FrameManager:
         self.game_over_task     = GameOverTask(self)
         self.round_task         = RoundTask(self)
         self.card_flow_task     = CardFlowTask(self)
-        self.starting_hand_task = StartingHandTask(self)
+        self.starting_hand_task = CardSelectTask(self, 5)
         self.all_tasks = [
             self.game_start_task,   
             self.my_played_task,    
@@ -84,7 +84,7 @@ class FrameManager:
             self.state = self.states[new_state.value]
             self.state.OnEnter(from_state=old_state)
 
-            self.tasks = self.state.CollectTasks()
+        self.tasks = self.state.CollectTasks()
 
         # Logs
         self.frame_count += 1

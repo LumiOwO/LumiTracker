@@ -3,9 +3,9 @@ from .game_start import GameStartTask
 from .game_over import GameOverTask
 from .round import RoundTask
 from .card_flow import CardFlowTask
-from .starting_hand import StartingHandTask
+from .card_select import CardSelectTask
 
 __all__ = [
     "CardPlayedTask", "GameStartTask", "GameOverTask",
-    "RoundTask", "CardFlowTask", "StartingHandTask",
+    "RoundTask", "CardFlowTask", "CardSelectTask",
 ]
