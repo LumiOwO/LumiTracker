@@ -31,7 +31,8 @@ def image():
     task.OnResize(width, height, ratio_type)
 
     task.frame_buffer = image
-    task.Tick(frame_manager)
+    task.fm = frame_manager
+    task.Tick()
     print("Detected:")
     for num, recorder in enumerate(task.card_recorder):
         res = ""
@@ -45,24 +46,30 @@ def image():
                 res += CardName(card_id, frame_manager.db)
         print(f"{num}: {res}")
 
+    # dst = task.thresh
+    # dst = task.center_buffer
     dst = task.frame_buffer
     # dst = cv2.cvtColor(task.my_deck_edges, cv2.COLOR_GRAY2BGRA)
     for box in task.bboxes:
+        # box.left   += task.center_crop.left
+        # box.top    += task.center_crop.top
+        # box.right  += task.center_crop.left
+        # box.bottom += task.center_crop.top
         cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 255, 0), 2)
         # print(box)
-    for box in task.my_deck_bboxes:
-        box.left   += task.my_deck_crop.left
-        box.top    += task.my_deck_crop.top
-        box.right  += task.my_deck_crop.left
-        box.bottom += task.my_deck_crop.top
-        cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
-        # print(box)
-    for box in task.op_deck_bboxes:
-        box.left   += task.op_deck_crop.left
-        box.top    += task.op_deck_crop.top
-        box.right  += task.op_deck_crop.left
-        box.bottom += task.op_deck_crop.top
-        cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
+    # for box in task.my_deck_bboxes:
+    #     box.left   += task.my_deck_crop.left
+    #     box.top    += task.my_deck_crop.top
+    #     box.right  += task.my_deck_crop.left
+    #     box.bottom += task.my_deck_crop.top
+    #     cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
+    #     # print(box)
+    # for box in task.op_deck_bboxes:
+    #     box.left   += task.op_deck_crop.left
+    #     box.top    += task.op_deck_crop.top
+    #     box.right  += task.op_deck_crop.left
+    #     box.bottom += task.op_deck_crop.top
+    #     cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
         # print(box)
     
     plt.imshow(cv2.cvtColor(dst, cv2.COLOR_BGR2RGB))
@@ -85,6 +92,7 @@ def video():
     frame_manager = FrameManager()
     task = GTasks.CardFlow
     task.OnResize(width, height, ERatioType.E16_9)
+    task.fm = frame_manager
 
     cnt = 0
     while True:
@@ -96,7 +104,7 @@ def video():
             break
 
         task.frame_buffer = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
-        task.Tick(frame_manager)
+        task.Tick()
 
         for box in task.bboxes:
             x = box.left

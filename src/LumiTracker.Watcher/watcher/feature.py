@@ -300,6 +300,9 @@ def HashToFeature(hash_str):
 def CardName(card_id, db, lang="zh-HANS"):
     return db["actions"][card_id][lang] if card_id >= 0 else "None"
 
+def CardCost(card_id, db):
+    return db["actions"][card_id]["cost"][0]
+
 
 class ActionCardHandler:
     def __init__(self):

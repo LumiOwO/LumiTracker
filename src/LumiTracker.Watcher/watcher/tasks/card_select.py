@@ -2,7 +2,7 @@ from .card_flow import CenterCropTask
 
 from ..enums import ETaskType
 from ..config import cfg, LogDebug, LogInfo, LogError
-from ..feature import ActionCardHandler, CardName
+from ..feature import ActionCardHandler, CardName, CardCost
 from ..stream_filter import StreamFilter
 
 from collections import Counter
@@ -24,21 +24,18 @@ class CardSelectTask(CenterCropTask):
         self.filters = [StreamFilter(null_val=-1) for _ in range(self.n_cards)]
 
     def Tick(self):
-        bboxes = self.DetectCenterBoundingBoxes()
+        bboxes, costs = self.DetectCenterCards()
         num_bboxes = len(bboxes)
 
         if num_bboxes != self.n_cards:
             return
 
-        for i, box in enumerate(bboxes):
-            box.left   = box.left + self.center_crop.left
-            box.top    = self.flow_anchor.top
-            box.right  = box.left + self.flow_anchor.width
-            box.bottom = box.top  + self.flow_anchor.height
-
+        for i, bbox in enumerate(bboxes):
             card_handler = ActionCardHandler()
-            card_handler.OnResize(box)
+            card_handler.OnResize(bbox)
             card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
+            if card_id >= 0 and costs[i] != CardCost(card_id, self.db):
+                card_id = -1
             card_id = self.filters[i].Filter(card_id, dist=dist)
 
             # record last detected card_id

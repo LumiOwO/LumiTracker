@@ -459,8 +459,8 @@ class Database:
         self.data["artifacts_order"] = artifacts_order
 
         # digits
-        digit_hashs = [None] * 10
-        for i in range(10):
+        digit_hashs = [None] * 20
+        for i in range(20):
             image = LoadImage(os.path.join(cfg.cards_dir, "digits", f"{i}.png"))
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGRA)
             feature = ExtractFeature_Digit(image)

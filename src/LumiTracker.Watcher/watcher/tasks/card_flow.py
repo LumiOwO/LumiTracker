@@ -1,9 +1,10 @@
 from .base import TaskBase
 
-from ..enums import ETaskType, ERegionType
+from ..enums import ETaskType, ERegionType, EAnnType
 from ..config import cfg, LogDebug, LogInfo, LogError
 from ..regions import REGIONS
-from ..feature import CropBox, ActionCardHandler, CardName
+from ..feature import CropBox, ActionCardHandler, CardName, CardCost
+from ..feature import ExtractFeature_Digit_Binalized
 from ..stream_filter import StreamFilter
 
 from collections import deque, defaultdict
@@ -11,6 +12,19 @@ import cv2
 import time
 
 class CenterCropTask(TaskBase):
+    DigitOffsets = [
+        (  0.0      ,  0.0      ), # 0
+        ( -0.083333 , -0.005464 ), # 1
+        (  0.0      ,  0.0      ), # 2
+        ( -0.007576 , -0.005495 ), # 3
+        ( -0.006536 , -0.005464 ), # 4
+        ( -0.007519 ,  0.0      ), # 5
+        (  0.0      , -0.010753 ), # 6
+        ( -0.007194 ,  0.0      ), # 7
+        ( -0.007042 , -0.005464 ), # 8
+        ( -0.007299 , -0.016304 ), # 9
+    ]
+
     def __init__(self, frame_manager):
         super().__init__(frame_manager)
         self.center_crop   = None
@@ -31,7 +45,7 @@ class CenterCropTask(TaskBase):
         height = round(client_height * box[3])
         self.flow_anchor = CropBox(left, top, left + width, top + height)
 
-    def DetectCenterBoundingBoxes(self):
+    def DetectCenterCards(self):
         center_buffer = self.frame_buffer[
             self.center_crop.top  : self.center_crop.bottom, 
             self.center_crop.left : self.center_crop.right
@@ -43,84 +57,66 @@ class CenterCropTask(TaskBase):
         gray = cv2.cvtColor(center_buffer, cv2.COLOR_BGR2GRAY)
 
         # Thresholding
-        _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+        _, thresh = cv2.threshold(gray, 65, 255, cv2.THRESH_BINARY_INV)
 
         # Find contours
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Filter and draw bounding boxes around the detected cards
-        FILTER_H = self.center_crop.height * 0.5
+        FILTER_H = self.center_crop.height * 0.6
+        FILTER_W = FILTER_H * 1.5
         filtered_bboxes = []
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if h < FILTER_H:
+            if h < FILTER_H or w >= FILTER_W:
                 continue
-            # ratio = w / h
-            # if ratio < 0.55 or ratio > 0.75:
-            #     continue
             filtered_bboxes.append(CropBox(x, y, x + w, y + h))
-            
         if not filtered_bboxes:
-            return []
+            return [], []
         
         # sort the boxes
         if len(filtered_bboxes) > 1:
             filtered_bboxes.sort(key=lambda box: box.left)
+
+        # detect digits
+        detected = []
+        costs = []
+        for bbox in filtered_bboxes:
+            # digit should crop from binary image
+            binary = thresh[bbox.top:bbox.bottom, bbox.left:bbox.right]
+            feature = ExtractFeature_Digit_Binalized(binary)
+            results, dists = self.db.SearchByFeature(feature, EAnnType.DIGITS)
+            digit = results[0] % 10 if dists[0] <= cfg.threshold else -1
+            # Note: Currently, no card costs larger than 5
+            if digit >= 0 and digit <= 5:
+                # LogDebug(digit=digit, results=results[:3], dists=dists[:3])
+                detected.append(bbox)
+                costs.append(digit)
         
-        # merge bboxes
-        MERGED_W_MIN = self.center_crop.width  * 0.1
-        MERGED_W_MAX = self.center_crop.width  * 0.2
-        MERGED_H_MIN = self.center_crop.height * 0.95
-        MERGE_DIST   = self.center_crop.width  * 0.14
-        def ValidMergedBox(bbox):
-            return bbox.width > MERGED_W_MIN and bbox.width < MERGED_W_MAX and bbox.height > MERGED_H_MIN
-
-        current_bbox = filtered_bboxes[0]
+        # find card bbox anchored by the digit's bbox
         bboxes = []
-        for bbox in filtered_bboxes[1:]:
-            dist = bbox.left - current_bbox.left
-            if dist < MERGE_DIST:
-                current_bbox.Merge(bbox)
-            else:
-                # filter noise
-                if ValidMergedBox(current_bbox):
-                    bboxes.append(current_bbox)
-                current_bbox = bbox
-        if ValidMergedBox(current_bbox):
-            bboxes.append(current_bbox)
+        for i in range(len(costs)):
+            cost = costs[i]
+            bbox = detected[i]
 
-        def AtCenter(center_x):
-            return abs(center_x / self.center_crop.width - 0.5) < 0.1
+            offset = CenterCropTask.DigitOffsets[cost]
+            dx = round(offset[0] * bbox.width)
+            center_x = bbox.left + bbox.width // 2 - dx
 
-        num_bboxes = len(bboxes)
-        if num_bboxes == 1:
-            center_x = bboxes[0].left + bboxes[0].width / 2
-            if not AtCenter(center_x):
-                bboxes = []
-        elif num_bboxes > 1:
-            center_sum = 0
-            center_sum += bboxes[0].left + bboxes[0].width / 2
-            center_sum += bboxes[1].left + bboxes[1].width / 2
-            # check distance between cards
-            prev_dist = bboxes[1].right - bboxes[0].right
-            for i in range(2, num_bboxes):
-                dist = bboxes[i].right - bboxes[i - 1].right
-                if abs(dist - prev_dist) > 10:
-                    # invalid
-                    bboxes = []
-                    break
-                prev_dist = dist
-                center_sum += bboxes[i].left + bboxes[i].width / 2
-            center_x = center_sum / num_bboxes
-            if bboxes and (not AtCenter(center_x)):
-                bboxes = []
+            bbox.left   = center_x  - self.flow_anchor.left + self.center_crop.left
+            bbox.top    = self.flow_anchor.top
+            bbox.right  = bbox.left + self.flow_anchor.width
+            bbox.bottom = bbox.top  + self.flow_anchor.height
+            bboxes.append(bbox)
 
         if cfg.DEBUG:
+            # if costs:
+            #     LogDebug(info="[DetectCenterCards]", costs=costs)
             self.thresh = thresh
             self.bboxes = bboxes
             self.gray = gray
 
-        return bboxes
+        return bboxes, costs
 
 class CardFlowTask(CenterCropTask):
     def __init__(self, frame_manager):
@@ -131,7 +127,7 @@ class CardFlowTask(CenterCropTask):
     
     def Reset(self):
         # round 1 ~ n
-        self.MAX_NUM_CARDS = 6
+        self.MAX_NUM_CARDS = 10
         self.filter        = StreamFilter(null_val=0)
         self.card_recorder = [[]]
         for i in range(self.MAX_NUM_CARDS):
@@ -160,12 +156,12 @@ class CardFlowTask(CenterCropTask):
         self.op_deck_crop = CropBox(left, top, left + width, top + height)
 
     def Tick(self):
-        self._DetectRound()
+        self._DetectCards()
         self._DumpDetected()
 
-    def _DetectRound(self):
+    def _DetectCards(self):
         # center
-        bboxes = self.DetectCenterBoundingBoxes()
+        bboxes, costs = self.DetectCenterCards()
         num_bboxes = len(bboxes)
 
         if cfg.DEBUG:
@@ -173,15 +169,12 @@ class CardFlowTask(CenterCropTask):
             debug_bboxes = []
         recorder = self.card_recorder[num_bboxes]
         invalid_count = 0
-        for i, box in enumerate(bboxes):
-            box.left   = box.left + self.center_crop.left
-            box.top    = self.flow_anchor.top
-            box.right  = box.left + self.flow_anchor.width
-            box.bottom = box.top  + self.flow_anchor.height
-
+        for i, bbox in enumerate(bboxes):
             card_handler = ActionCardHandler()
-            card_handler.OnResize(box)
+            card_handler.OnResize(bbox)
             card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
+            if card_id >= 0 and costs[i] != CardCost(card_id, self.db):
+                card_id = -1
 
             if card_id >= 0:
                 recorder[i][card_id] += 1
@@ -189,13 +182,13 @@ class CardFlowTask(CenterCropTask):
                 invalid_count += 1
 
             if cfg.DEBUG:
-                debug_bboxes.append(box)
+                debug_bboxes.append(bbox)
                 detected.append((card_id, dists))
 
         if cfg.DEBUG:
             self.bboxes = debug_bboxes
             # if detected:
-            #     LogDebug(center=[(CardName(card_id, self.db), card[1]) for card in detected])
+            #     LogDebug(center=[(CardName(card_id, self.db), dists) for card_id, dists in detected])
 
         timestamp = time.perf_counter()
         # my deck

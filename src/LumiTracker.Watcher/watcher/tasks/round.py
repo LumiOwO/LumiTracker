@@ -68,7 +68,7 @@ class RoundTask(TaskBase):
             content = binary[bbox.top:bbox.bottom, bbox.left:bbox.right]
             feature = ExtractFeature_Digit_Binalized(content)
             results, dists = self.db.SearchByFeature(feature, EAnnType.DIGITS)
-            digit = results[0] if dists[0] <= cfg.strict_threshold else -1
+            digit = results[0] % 10 if dists[0] <= cfg.threshold else -1
             if digit >= 0:
                 # LogDebug(digit=digit, dists=dists[:3])
                 cur_round += digit * base
