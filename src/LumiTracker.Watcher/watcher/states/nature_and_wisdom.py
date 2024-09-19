@@ -1,4 +1,4 @@
-from .base import GameState, EGameState
+from .base import GameState, EGameState, GTasks
 
 class GameStateNatureAndWisdom(GameState):
     def __init__(self, frame_manager):
@@ -9,8 +9,8 @@ class GameStateNatureAndWisdom(GameState):
     
     def CollectTasks(self):
         return [
-            self.fm.game_start_task,
-            self.fm.game_over_task,
+            GTasks.GameStart,
+            GTasks.GameOver,
             ]
     
     def Next(self):

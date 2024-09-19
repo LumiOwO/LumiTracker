@@ -1,4 +1,4 @@
-from .base import GameState, EGameState
+from .base import GameState, EGameState, GTasks
 
 class GameStateStartingHand(GameState):
     def __init__(self, frame_manager):
@@ -9,10 +9,10 @@ class GameStateStartingHand(GameState):
     
     def CollectTasks(self):
         return [
-            self.fm.game_start_task, 
-            self.fm.game_over_task, 
-            self.fm.starting_hand_task,
-            self.fm.round_task,
+            GTasks.GameStart, 
+            GTasks.GameOver, 
+            GTasks.StartingHand,
+            GTasks.Round,
             ]
     
     def Next(self):
@@ -26,4 +26,4 @@ class GameStateStartingHand(GameState):
 
     def OnExit(self, to_state):
         if to_state == EGameState.ActionPhase:
-            self.fm.starting_hand_task.Flush()
+            GTasks.StartingHand.Flush()

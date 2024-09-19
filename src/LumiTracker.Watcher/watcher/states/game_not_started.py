@@ -1,4 +1,4 @@
-from .base import GameState, EGameState
+from .base import GameState, EGameState, GTasks
 
 class GameStateGameNotStarted(GameState):
     def __init__(self, frame_manager):
@@ -8,7 +8,7 @@ class GameStateGameNotStarted(GameState):
         return EGameState.GameNotStarted
     
     def CollectTasks(self):
-        return [self.fm.game_start_task]
+        return [GTasks.GameStart]
     
     def Next(self):
         if self.fm.game_started:

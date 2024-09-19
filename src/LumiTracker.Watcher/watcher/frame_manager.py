@@ -3,10 +3,8 @@ import logging
 
 from .config import cfg, LogDebug, LogInfo, LogWarning
 from .enums import ETaskType
-from .regions import GetRatioType
 from .database import Database
 
-from .tasks import *
 from .states import *
 
 class FrameManager:
@@ -17,22 +15,7 @@ class FrameManager:
         self.db = db
 
         # tasks
-        self.game_start_task    = GameStartTask(self)
-        self.my_played_task     = CardPlayedTask(self, is_op=False)
-        self.op_played_task     = CardPlayedTask(self, is_op=True)
-        self.game_over_task     = GameOverTask(self)
-        self.round_task         = RoundTask(self)
-        self.card_flow_task     = CardFlowTask(self)
-        self.starting_hand_task = CardSelectTask(self, 5)
-        self.all_tasks = [
-            self.game_start_task,   
-            self.my_played_task,    
-            self.op_played_task,    
-            self.game_over_task,    
-            self.round_task,        
-            self.card_flow_task,    
-            self.starting_hand_task,
-        ]
+        GTasks.Init(self)
 
         # game states for state machine
         self.states = [
@@ -57,11 +40,7 @@ class FrameManager:
         if client_height == 0:
             return
 
-        # Update ratio
-        ratio_type = GetRatioType(client_width, client_height)
-        
-        for task in self.all_tasks:
-            task.OnResize(client_width, client_height, ratio_type)
+        GTasks.OnResize(client_width, client_height)
 
     def OnFrameArrived(self, frame_buffer):
         # Note: No PreTick & PostTick is needed right now. 
@@ -71,11 +50,11 @@ class FrameManager:
 
         # State transfer
         old_state = self.state.GetState()
-        if self.game_start_task.detected:
+        if GTasks.GameStart.detected:
             new_state = EGameState.StartingHand
         else:
             new_state = self.state.Next()
-        transfer = (self.game_start_task.detected) or (new_state != old_state)
+        transfer = (GTasks.GameStart.detected) or (new_state != old_state)
 
         if transfer:
             LogDebug(info=f"GameState: {old_state.name} ---> {new_state.name}")

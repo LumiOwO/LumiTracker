@@ -1,4 +1,4 @@
-from .base import GameState, EGameState
+from .base import GameState, EGameState, GTasks
 
 class GameStateActionPhase(GameState):
     def __init__(self, frame_manager):
@@ -9,12 +9,12 @@ class GameStateActionPhase(GameState):
     
     def CollectTasks(self):
         return [
-            self.fm.game_start_task, 
-            self.fm.game_over_task, 
-            self.fm.my_played_task, 
-            self.fm.op_played_task, 
-            self.fm.round_task, 
-            self.fm.card_flow_task
+            GTasks.GameStart, 
+            GTasks.GameOver, 
+            GTasks.MyPlayed, 
+            GTasks.OpPlayed, 
+            GTasks.Round, 
+            GTasks.CardFlow
             ]
 
     def Next(self):

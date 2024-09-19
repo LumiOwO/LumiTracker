@@ -1,13 +1,14 @@
 from ..enums import ERatioType
 from ..frame_manager import FrameManager
 from ..regions import GetRatioType
+from ..states import GTasks
 
 import cv2
 import sys
 
 def main(test_round):
     frame_manager = FrameManager()
-    task = frame_manager.round_task
+    task = GTasks.Round
 
     image_path = f'temp/control_Round{test_round}.png'
     # image_path = f'temp/Snipaste_2024-06-25_00-21-23.png'

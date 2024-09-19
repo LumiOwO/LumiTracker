@@ -1,11 +1,12 @@
 from ..enums import ERatioType
 from ..frame_manager import FrameManager
+from ..states import GTasks
 
 import cv2
 
 def main():
     frame_manager = FrameManager()
-    task = frame_manager.game_over_task
+    task = GTasks.GameOver
 
     image_path = 'temp/Snipaste_2024-06-23_18-33-58.png'
     image = cv2.imread(image_path)

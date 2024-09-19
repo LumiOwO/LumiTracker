@@ -4,6 +4,7 @@ cfg.DEBUG = True
 from ..regions import GetRatioType
 from ..frame_manager import FrameManager
 from ..feature import CardName
+from ..states import GTasks
 
 import logging
 import os
@@ -17,7 +18,7 @@ import matplotlib.pyplot as plt
 
 def image():
     frame_manager = FrameManager()
-    task = frame_manager.card_flow_task
+    task = GTasks.CardFlow
     frame_manager.round = 1
 
     image_path = 'temp/Snipaste_2024-08-03_15-42-23.png'
@@ -82,7 +83,7 @@ def video():
     out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
     frame_manager = FrameManager()
-    task = frame_manager.card_flow_task
+    task = GTasks.CardFlow
     task.OnResize(width, height, ERatioType.E16_9)
 
     cnt = 0
