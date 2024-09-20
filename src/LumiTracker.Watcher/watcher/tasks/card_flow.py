@@ -1,13 +1,12 @@
 from .base import TaskBase
 
 from ..enums import ETaskType, ERegionType, EAnnType
-from ..config import cfg, LogDebug, LogInfo, LogError
+from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..regions import REGIONS
 from ..feature import CropBox, ActionCardHandler, CardName, CardCost
 from ..feature import ExtractFeature_Digit_Binalized
 from ..stream_filter import StreamFilter
 
-from overrides import override
 from collections import deque, defaultdict
 import cv2
 import time

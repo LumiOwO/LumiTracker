@@ -42,3 +42,13 @@ def LogWarning(message_dict=None, indent=None, **kwargs):
 
 def LogError(message_dict=None, indent=None, **kwargs):
     _Log(logging.error, message_dict, indent, **kwargs)
+
+
+def _override(func):
+    """@override decorator - does nothing"""
+    return func
+
+if cfg.DEBUG:
+    from overrides import override
+else:
+    override = _override

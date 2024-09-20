@@ -1,11 +1,10 @@
 from .card_flow import CenterCropTask
 
 from ..enums import ETaskType
-from ..config import cfg, LogDebug, LogInfo, LogError
+from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..feature import ActionCardHandler, CardName, CardCost
 from ..stream_filter import StreamFilter
 
-from overrides import override
 from collections import Counter
 
 class CardSelectTask(CenterCropTask):

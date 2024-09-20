@@ -1,13 +1,12 @@
 from .base import TaskBase
 
 from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
-from ..config import cfg, LogDebug, LogInfo
+from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import CropBox, ExtractFeature_Control, ExtractFeature_Digit_Binalized
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
-from overrides import override
 import numpy as np
 import logging
 import os

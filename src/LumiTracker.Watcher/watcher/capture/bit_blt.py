@@ -6,9 +6,8 @@ import win32ui
 import win32con
 
 import numpy as np
-from overrides import override
 
-from ..config import cfg, LogWarning
+from ..config import cfg, override, LogWarning
 from .base import CaptureBase
 
 
