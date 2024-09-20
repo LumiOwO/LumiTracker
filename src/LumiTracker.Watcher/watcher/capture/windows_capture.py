@@ -41,8 +41,8 @@ class WindowsCapture(CaptureBase):
         self.capture.start()
 
     @override
-    def OnResize(self, window_width, window_height):
-        self.window_size = (window_width, window_height)
+    def OnResize(self, width, height):
+        self.window_size = (width, height)
 
         # !!! Must consider DPI scale !!!
         # https://blog.csdn.net/frostime/article/details/104798061

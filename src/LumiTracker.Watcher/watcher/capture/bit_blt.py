@@ -70,7 +70,8 @@ class BitBlt(CaptureBase):
             self.WaitForFrameRateLimit(elapsed_time=dt)
     
     @override
-    def OnResize(self, client_width, client_height):
+    def OnResize(self, width, height):
+        client_width, client_height = width, height
         self.DestroyBitmap()
         self.CreateBitmap(client_width, client_height)
         self.frame_manager.Resize(client_width, client_height)

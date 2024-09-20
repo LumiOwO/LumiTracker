@@ -56,7 +56,7 @@ class CaptureBase(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def OnResize(self, client_width, client_height):
+    def OnResize(self, width, height):
         raise NotImplementedError()
 
     def BeforeFrameArrived(self):
