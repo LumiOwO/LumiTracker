@@ -3,8 +3,9 @@ from windows_capture import Frame, InternalCaptureControl
 
 import time
 import logging
+from overrides import override
 
-from ..config import cfg, override, LogDebug
+from ..config import cfg, LogDebug
 from .base import CaptureBase
 
 class WindowsCapture(CaptureBase):

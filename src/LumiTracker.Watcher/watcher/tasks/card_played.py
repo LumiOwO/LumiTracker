@@ -2,12 +2,13 @@ from .base import TaskBase
 from ..stream_filter import StreamFilter
 
 from ..enums import EAnnType, ETaskType, ERegionType
-from ..config import cfg, override, LogDebug, LogInfo
+from ..config import cfg, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import ActionCardHandler, CropBox, CardName
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
+from overrides import override
 import numpy as np
 import logging
 import os

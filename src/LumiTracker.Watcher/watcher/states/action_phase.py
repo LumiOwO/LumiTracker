@@ -1,5 +1,6 @@
 from .base import GameState, EGameState, GTasks
-from ..config import cfg, override
+from ..config import cfg
+from overrides import override
 
 class GameStateActionPhase(GameState):
     def __init__(self, frame_manager):
