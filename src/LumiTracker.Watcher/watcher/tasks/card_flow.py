@@ -1,7 +1,7 @@
 from .base import TaskBase
 
 from ..enums import ETaskType, ERegionType, EAnnType
-from ..config import cfg, LogDebug, LogInfo, LogError
+from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..regions import REGIONS
 from ..feature import CropBox, ActionCardHandler, CardName, CardCost
 from ..feature import ExtractFeature_Digit_Binalized
@@ -30,6 +30,7 @@ class CenterCropTask(TaskBase):
         self.center_crop   = None
         self.flow_anchor   = None
 
+    @override
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.CENTER]        # left, top, width, height
         left   = round(client_width  * box[0])
@@ -125,6 +126,7 @@ class CardFlowTask(CenterCropTask):
         self.op_deck_crop  = None
         self.Reset()
     
+    @override
     def Reset(self):
         # round 1 ~ n
         self.MAX_NUM_CARDS = 10
@@ -138,6 +140,7 @@ class CardFlowTask(CenterCropTask):
         self.my_deck_queue = deque()
         self.op_deck_queue = deque()
 
+    @override
     def OnResize(self, client_width, client_height, ratio_type):
         super().OnResize(client_width, client_height, ratio_type)
 
@@ -155,6 +158,7 @@ class CardFlowTask(CenterCropTask):
         height = round(client_height * box[3])
         self.op_deck_crop = CropBox(left, top, left + width, top + height)
 
+    @override
     def Tick(self):
         self._DetectCards()
         self._DumpDetected()

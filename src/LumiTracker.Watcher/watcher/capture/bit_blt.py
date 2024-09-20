@@ -7,7 +7,7 @@ import win32con
 
 import numpy as np
 
-from ..config import cfg, LogWarning
+from ..config import cfg, override, LogWarning
 from .base import CaptureBase
 
 
@@ -25,11 +25,13 @@ class BitBlt(CaptureBase):
         self.width   = 0
         self.height  = 0
 
+    @override
     def OnStart(self, hwnd):
         # Get window device context
         self.hdc   = win32gui.GetWindowDC(hwnd)
         self.memdc = win32gui.CreateCompatibleDC(self.hdc)
 
+    @override
     def OnClosed(self):
         # Clean up
         self.DestroyBitmap()
@@ -44,6 +46,7 @@ class BitBlt(CaptureBase):
         except win32ui.error as e:
             LogWarning(info=f"Error releasing hdc, maybe the reason is the closed hwnd")
 
+    @override
     def MainLoop(self):
         while True:
             start_time = time.perf_counter()
@@ -65,6 +68,7 @@ class BitBlt(CaptureBase):
             dt = time.perf_counter() - start_time
             self.WaitForFrameRateLimit(elapsed_time=dt)
     
+    @override
     def OnResize(self, client_width, client_height):
         self.DestroyBitmap()
         self.CreateBitmap(client_width, client_height)

@@ -4,7 +4,7 @@ from windows_capture import Frame, InternalCaptureControl
 import time
 import logging
 
-from ..config import cfg, LogDebug
+from ..config import cfg, override, LogDebug
 from .base import CaptureBase
 
 class WindowsCapture(CaptureBase):
@@ -20,6 +20,7 @@ class WindowsCapture(CaptureBase):
 
         self.prev_frame_time = time.perf_counter()
 
+    @override
     def OnStart(self, hwnd):
         # Every Error From on_closed and on_frame_arrived Will End Up Here
         self.capture = windows_capture.WindowsCapture(
@@ -30,12 +31,15 @@ class WindowsCapture(CaptureBase):
         self.capture.event(self.on_frame_arrived)
         self.capture.event(self.on_closed)
 
+    @override
     def OnClosed(self):
         LogDebug(info=f"Window Capture Session Closed")
 
+    @override
     def MainLoop(self):
         self.capture.start()
 
+    @override
     def OnResize(self, window_width, window_height):
         self.window_size = (window_width, window_height)
 

@@ -1,14 +1,14 @@
 from .card_flow import CenterCropTask
 
 from ..enums import ETaskType
-from ..config import cfg, LogDebug, LogInfo, LogError
+from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..feature import ActionCardHandler, CardName, CardCost
 from ..stream_filter import StreamFilter
 
 from collections import Counter
 
 class CardSelectTask(CenterCropTask):
-    def __init__(self, frame_manager, n_cards, prev_cards=None):
+    def __init__(self, frame_manager, n_cards=1, prev_cards=None):
         super().__init__(frame_manager)
         self.n_cards     = n_cards
         self.prev_counts = None
@@ -16,13 +16,19 @@ class CardSelectTask(CenterCropTask):
         self.filters     = []
         
         prev_cards = [] if prev_cards is None else prev_cards
-        self.Reset(prev_cards)
+        self._Reset(n_cards, prev_cards)
 
-    def Reset(self, prev_cards):
+    def _Reset(self, n_cards, prev_cards):
+        self.n_cards     = n_cards
         self.prev_counts = Counter(prev_cards)
         self.cards   = [-1 for _ in range(self.n_cards)]
         self.filters = [StreamFilter(null_val=-1) for _ in range(self.n_cards)]
 
+    @override
+    def Reset(self):
+        self._Reset(self.n_cards, [])
+
+    @override
     def Tick(self):
         bboxes, costs = self.DetectCenterCards()
         num_bboxes = len(bboxes)
@@ -70,4 +76,4 @@ class CardSelectTask(CenterCropTask):
                 cards=create,
                 names=[CardName(card, self.db) for card in create])
 
-        self.Reset([])
+        self.Reset()

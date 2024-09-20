@@ -21,7 +21,7 @@ def image():
     task = GTasks.CardFlow
     frame_manager.round = 1
 
-    image_path = 'temp/Snipaste_2024-08-03_15-42-23.png'
+    image_path = 'temp/Snipaste_2024-09-19_23-59-53.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     

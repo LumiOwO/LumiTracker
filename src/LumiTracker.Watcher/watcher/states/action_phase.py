@@ -1,12 +1,15 @@
 from .base import GameState, EGameState, GTasks
+from ..config import cfg, override
 
 class GameStateActionPhase(GameState):
     def __init__(self, frame_manager):
         super().__init__(frame_manager)
-    
+
+    @override
     def GetState(self):
         return EGameState.ActionPhase
-    
+
+    @override
     def CollectTasks(self):
         return [
             GTasks.GameStart, 
@@ -17,6 +20,7 @@ class GameStateActionPhase(GameState):
             GTasks.CardFlow
             ]
 
+    @override
     def Next(self):
         # TODO: add NatureAndWisdom
         if not self.fm.game_started:

@@ -1,7 +1,7 @@
 from .base import TaskBase
 
 from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
-from ..config import cfg, LogDebug, LogInfo
+from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import CropBox, ExtractFeature_Control
 from ..database import SaveImage
@@ -25,9 +25,11 @@ class GameOverTask(TaskBase):
         self.crop_box  = None  # init when resize
         self.Reset()
 
+    @override
     def Reset(self):
         self.filter = StreamFilter(null_val=EGameResult.Null)
     
+    @override
     def OnResize(self, client_width, client_height, ratio_type):
         box    = REGIONS[ratio_type][ERegionType.GAME_OVER]
         left   = round(client_width  * box[0])
@@ -37,6 +39,7 @@ class GameOverTask(TaskBase):
 
         self.crop_box = CropBox(left, top, left + width, top + height)
 
+    @override
     def Tick(self):
         buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 

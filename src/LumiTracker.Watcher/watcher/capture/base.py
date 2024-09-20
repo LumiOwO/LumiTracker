@@ -3,6 +3,7 @@ import win32api
 import ctypes
 from datetime import datetime
 import os
+from abc import ABC, abstractmethod
 
 from ..config import cfg, LogDebug, LogInfo
 from ..enums import ETaskType
@@ -20,7 +21,7 @@ winmm.timeBeginPeriod.restype = ctypes.c_uint
 winmm.timeEndPeriod.argtypes = [ctypes.c_uint]
 winmm.timeEndPeriod.restype = ctypes.c_uint
 
-class CaptureBase:
+class CaptureBase(ABC):
     def __init__(self):
         self.hwnd           = 0
         self.frame_manager  = None
@@ -42,15 +43,19 @@ class CaptureBase:
         self.OnClosed()
         self.input_manager.Close()
     
+    @abstractmethod
     def OnStart(self, hwnd):
         raise NotImplementedError()
 
+    @abstractmethod
     def OnClosed(self):
         raise NotImplementedError()
 
+    @abstractmethod
     def MainLoop(self):
         raise NotImplementedError()
 
+    @abstractmethod
     def OnResize(self, client_width, client_height):
         raise NotImplementedError()
 

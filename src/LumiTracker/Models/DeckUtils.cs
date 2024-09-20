@@ -128,7 +128,6 @@ namespace LumiTracker.Models
 
             /////////////////////////
             // special cases
-            // TODO: change to enum
             if (is_talent)
             {
                 // 琳妮特天赋 和 散兵天赋，不知为何反了；琳妮特在前

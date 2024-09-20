@@ -42,3 +42,9 @@ def LogWarning(message_dict=None, indent=None, **kwargs):
 
 def LogError(message_dict=None, indent=None, **kwargs):
     _Log(logging.error, message_dict, indent, **kwargs)
+
+
+def override(func):
+    # @override decorator
+    # just a comment, actually do nothing
+    return func
