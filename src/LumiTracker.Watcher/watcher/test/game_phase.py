@@ -1,17 +1,21 @@
+from ..config import cfg
+cfg.DEBUG = True
+
 from ..enums import ERatioType
 from ..frame_manager import FrameManager
-from ..regions import GetRatioType
 from ..states import GTasks
+from ..regions import GetRatioType
 
 import cv2
-import sys
+import logging
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+import matplotlib.pyplot as plt
 
-def main(test_round):
+def main():
     frame_manager = FrameManager()
-    task = GTasks.Round
+    task = GTasks.GamePhase
 
-    image_path = f'temp/control_Round{test_round}.png'
-    # image_path = f'temp/Snipaste_2024-06-25_00-21-23.png'
+    image_path = 'temp/Snipaste_2024-09-21_21-42-49.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -24,9 +28,8 @@ def main(test_round):
     task.fm = frame_manager
     task.Tick()
 
-    # cv2.imshow('Image', task.buffer)
-    # cv2.waitKey(0)
+    plt.imshow(cv2.cvtColor(task.buffer, cv2.COLOR_BGR2RGB))
+    plt.show()
 
 if __name__ == "__main__":
-    test_round = int(sys.argv[1])
-    main(test_round)
+    main()

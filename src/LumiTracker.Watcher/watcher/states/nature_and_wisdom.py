@@ -1,5 +1,7 @@
 from .base import GameState, EGameState, GTasks
 from ..config import cfg, override, LogDebug
+from ..enums import EGamePhase
+from ..feature import CardName
 
 import enum
 import time
@@ -56,8 +58,8 @@ class GameStateNatureAndWisdom(GameState):
     def Next(self):
         if not self.fm.game_started:
             state = EGameState.GameNotStarted
-        # elif GTasks.GamePhase: # TODO: add game phase task
-        #     state = EGameState.ActionPhase
+        elif GTasks.GamePhase.phase_signal == EGamePhase.Action:
+            state = EGameState.ActionPhase
         else:
             state = self.GetState()
         return state
@@ -65,6 +67,12 @@ class GameStateNatureAndWisdom(GameState):
     @override
     def OnEnter(self, from_state):
         self.Reset()
+        LogDebug(info=f"[NatureAndWisdom] Stage: {self.EStage.Draw.name}")
+    
+    @override
+    def OnExit(self, to_state):
+        if to_state == EGameState.ActionPhase:
+            GTasks.NatureAndWisdom_Select.Flush()
 
     def Reset(self):
         self.stage      = self.EStage.Draw
@@ -88,7 +96,10 @@ class GameStateNatureAndWisdom(GameState):
 
         self.stage = self.EStage.Count
         GTasks.NatureAndWisdom_Count.Reset()
-        LogDebug(info=f"[NatureAndWisdom] {self.EStage.Draw.name} ---> {self.EStage.Count.name}")
+        LogDebug(
+            info=f"[NatureAndWisdom] Stage: {self.EStage.Draw.name} ---> {self.EStage.Count.name}",
+            drawn=CardName(self.drawn_card, self.fm.db)
+            )
 
     def HandleCountStage(self):
         task = GTasks.NatureAndWisdom_Count
@@ -106,7 +117,11 @@ class GameStateNatureAndWisdom(GameState):
         self.num_select = num_cards
         self.stage = self.EStage.Select
         GTasks.NatureAndWisdom_Select._Reset(num_cards, cards)
-        LogDebug(info=f"[NatureAndWisdom] {self.EStage.Count.name} ---> {self.EStage.Select.name}, {num_cards=}")
+        LogDebug(
+            info=f"[NatureAndWisdom] Stage: {self.EStage.Count.name} ---> {self.EStage.Select.name}",
+            num_cards=num_cards, 
+            initial=[CardName(card, self.fm.db) for card in cards]
+            )
 
     def HandleSelectStage(self):
         pass

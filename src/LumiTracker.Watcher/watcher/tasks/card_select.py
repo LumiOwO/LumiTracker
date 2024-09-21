@@ -5,7 +5,63 @@ from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..feature import ActionCardHandler, CardName
 from ..stream_filter import StreamFilter
 
-from collections import Counter
+class Counter:
+    def __init__(self, data=None):
+        self.data = {}
+        self.update(data)
+
+    def update(self, data):
+        """Update counts for elements in a list, dict, or increment a single key."""
+        if data is None:
+            return
+
+        if isinstance(data, dict):
+            for key, count in data.items():
+                self.data[key] = self.data.get(key, 0) + count
+        elif isinstance(data, list):
+            for key in data:
+                self.data[key] = self.data.get(key, 0) + 1
+        else:
+            # For other types (int, str, float), increment the count for the key
+            key = data
+            self.data[key] = self.data.get(key, 0) + 1
+
+    def keys(self):
+        """Return an iterable of keys."""
+        return self.data.keys()
+
+    def items(self):
+        """Return an iterable of key-value pairs."""
+        return self.data.items()
+
+    def __getitem__(self, key):
+        """Return the count for the given key, defaulting to 0 if not found."""
+        return self.data.get(key, 0)
+
+    def __setitem__(self, key, value):
+        """Set the count for the given key."""
+        self.data[key] = value
+    
+    def __delitem__(self, key):
+        """Remove the item with the specified key."""
+        if key in self.data:
+            del self.data[key]
+    
+    def __contains__(self, key):
+        """Check if the key is in the counter."""
+        return key in self.data
+
+    def __sub__(self, other):
+        """Subtract counts from another Counter, allowing negative values."""
+        result = Counter()
+        all_keys = set(self.data.keys()).union(other.data.keys())
+        for key in all_keys:
+            result[key] = self[key] - other[key]
+        return result
+
+    def __repr__(self):
+        """Return a string representation of the Counter."""
+        return f"Counter({self.data})"
 
 class CardSelectTask(CenterCropTask):
     def __init__(self, frame_manager, n_cards=1, prev_cards=None):
@@ -62,6 +118,7 @@ class CardSelectTask(CenterCropTask):
         diff   = cur_counts - self.prev_counts
         drawn  = []
         create = []
+        # LogDebug(diff=f"{diff}")
         for card_id, count in diff.items():
             if count > 0:
                 drawn  += [card_id] * count

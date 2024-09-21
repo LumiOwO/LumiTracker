@@ -7,6 +7,10 @@ class ECaptureType(enum.Enum):
 
     NumCaptureTypes = enum.auto()
 
+class EGamePhase(enum.Enum):
+    Null   = 0
+    Action = enum.auto()
+
 class ETaskType(enum.Enum):
     NONE              = 0
 
@@ -33,6 +37,7 @@ class ERegionType(enum.Enum):
     MY_PLAYED  = enum.auto()
     OP_PLAYED  = enum.auto()
     GAME_OVER  = enum.auto()
+    PHASE      = enum.auto()
     ROUND      = enum.auto()
     CENTER     = enum.auto()
     FLOW_ANCHOR= enum.auto()
@@ -47,8 +52,10 @@ class ERatioType(enum.Enum):
     E12_5  = enum.auto()
 
 class ECtrlType(enum.Enum):
+    # game start
     GAME_START              = 0
 
+    # game over
     GAME_OVER_WIN_ZH_HANS   = enum.auto()
     GAME_OVER_LOSE_ZH_HANS  = enum.auto()
 
@@ -59,10 +66,17 @@ class ECtrlType(enum.Enum):
     GAME_OVER_FIRST         = GAME_OVER_WIN_FIRST
     GAME_OVER_LAST          = GAME_OVER_LOSE_LAST
 
+    # round
     ROUND_ZH_HANS   = enum.auto()
 
     ROUND_FIRST     = ROUND_ZH_HANS
     ROUND_LAST      = ROUND_ZH_HANS
+
+    # action phase
+    PHASE_ACTION_ZH_HANS = enum.auto()
+
+    PHASE_ACTION_FIRST   = PHASE_ACTION_ZH_HANS
+    PHASE_ACTION_LAST    = PHASE_ACTION_ZH_HANS
 
     CTRL_FEATURES_COUNT = enum.auto()
 

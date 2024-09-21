@@ -75,37 +75,21 @@ class Database:
         self.data[key] = value
     
     def _UpdateControls(self):
+        LogDebug(ctrl_types=[(e.name, e.value) for e in ECtrlType], indent=2)
+
         n_controls = ECtrlType.CTRL_FEATURES_COUNT.value
         features = [None] * n_controls
 
-        # Game start
-        ctrl_id = ECtrlType.GAME_START.value
-        image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{ctrl_id}.png"))
-        feature = ExtractFeature_Control(image)
-        features[ctrl_id] = feature
-
-        # Game over
-        ctrl_id_first = ECtrlType.GAME_OVER_FIRST.value
-        ctrl_id_last  = ECtrlType.GAME_OVER_LAST.value
-        for i in range(ctrl_id_first, ctrl_id_last + 1):
-            from .tasks import GameOverTask
-            image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
-            main_content, valid = GameOverTask.CropMainContent(image)
-            feature = ExtractFeature_Control(main_content)
-            features[i] = feature
-            if cfg.DEBUG_SAVE:
-                SaveImage(main_content, os.path.join(cfg.debug_dir, f"{ECtrlType(i).name.lower()}.png"))
-
-        # Round
-        ctrl_id_first = ECtrlType.ROUND_FIRST.value
-        ctrl_id_last  = ECtrlType.ROUND_LAST.value
-        for i in range(ctrl_id_first, ctrl_id_last + 1):
-            image = LoadImage(os.path.join(cfg.cards_dir, "controls", f"control_{i}.png"))
+        controls_dir = os.path.join(cfg.cards_dir, "controls")
+        for i in range(n_controls):
+            image = LoadImage(os.path.join(controls_dir, f"control_{i}.png"))
             feature = ExtractFeature_Control(image)
             features[i] = feature
 
         ann = self.CreateAndSaveAnn(features, EAnnType.CTRLS)
         self.anns[EAnnType.CTRLS.value] = ann
+
+        print(f"Loaded {n_controls} images from {controls_dir}")
 
         if cfg.DEBUG:
             CheckHashDistances(features, name_func=lambda i: ECtrlType(i).name.lower())
@@ -117,6 +101,7 @@ class Database:
             LogDebug(info=f'{game_start_test_path}, {dists[0]=}, {ECtrlType(ctrl_ids[0]).name}')
 
             # Game over test
+            from .tasks import GameOverTask
             image = LoadImage(os.path.join(cfg.debug_dir, f"GameOverTest.png"))
             main_content, valid = GameOverTask.CropMainContent(image)
             feature = ExtractFeature_Control(main_content)

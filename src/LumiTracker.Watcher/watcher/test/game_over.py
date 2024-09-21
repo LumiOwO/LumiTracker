@@ -1,6 +1,7 @@
 from ..enums import ERatioType
 from ..frame_manager import FrameManager
 from ..states import GTasks
+from ..regions import GetRatioType
 
 import cv2
 
@@ -13,11 +14,13 @@ def main():
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
     height, width = image.shape[:2]
-    print(width, height)
-    task.OnResize(width, height, ERatioType.E16_9)
+    ratio_type = GetRatioType(width, height)
+    print(width, height, ratio_type)
+    task.OnResize(width, height, ratio_type)
 
     task.frame_buffer = image
-    task.Tick(frame_manager)
+    task.fm = frame_manager
+    task.Tick()
 
 if __name__ == "__main__":
     main()

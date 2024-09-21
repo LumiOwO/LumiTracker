@@ -32,6 +32,8 @@ def _Log(log_func, message_dict, indent, **kwargs):
     log_func(json.dumps(message_dict, indent=indent, ensure_ascii=False))
 
 def LogDebug(message_dict=None, indent=None, **kwargs):
+    if not cfg.DEBUG:
+        return
     _Log(logging.debug, message_dict, indent, **kwargs)
 
 def LogInfo(message_dict=None, indent=None, **kwargs):

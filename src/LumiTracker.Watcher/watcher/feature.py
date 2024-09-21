@@ -240,11 +240,7 @@ class CropBox:
         """ Check whether this box is inside the other box. """
         return self.left >= other.left and self.top >= other.top and self.right <= other.right and self.bottom <= other.bottom
 
-def ExtractFeature_Control(image):
-    # preprocess
-    # to gray image
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
-
+def ExtractFeature_Control_Grayed(gray_image):
     # histogram equalization
     gray_image = cv2.equalizeHist(gray_image)
 
@@ -256,6 +252,12 @@ def ExtractFeature_Control(image):
     feature = feature.hash.flatten()
 
     return feature
+
+def ExtractFeature_Control(image):
+    # to gray image
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
+
+    return ExtractFeature_Control_Grayed(gray_image)
 
 def ExtractFeature_Digit_Binalized(binary):
     # resize
