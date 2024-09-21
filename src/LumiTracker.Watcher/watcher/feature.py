@@ -220,13 +220,17 @@ class CropBox:
         return self.bottom - self.top
     
     def __repr__(self):
-        return f"CropBox(left={self.left}, top={self.top}, right={self.right}, bottom={self.bottom})"
+        return f"CropBox([L={self.left}, T={self.top}, R={self.right}, B={self.bottom}], [W={self.width}, H={self.height}])"
 
     def Merge(self, other):
         self.left   = min(self.left  , other.left)
         self.top    = min(self.top   , other.top)
         self.right  = max(self.right , other.right)
         self.bottom = max(self.bottom, other.bottom)
+
+    def Inside(self, other):
+        """ Check whether this box is inside the other box. """
+        return self.left >= other.left and self.top >= other.top and self.right <= other.right and self.bottom <= other.bottom
 
 def ExtractFeature_Control(image):
     # preprocess

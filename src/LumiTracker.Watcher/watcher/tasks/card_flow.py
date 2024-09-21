@@ -81,7 +81,6 @@ class CenterCropTask(TaskBase):
 
         # detect digits
         detected = []
-        costs = []
         for bbox in filtered_bboxes:
             # digit should crop from binary image
             binary = thresh[bbox.top:bbox.bottom, bbox.left:bbox.right]
@@ -91,15 +90,13 @@ class CenterCropTask(TaskBase):
             # Note: Currently, no card costs larger than 5
             if digit >= 0 and digit <= 5:
                 # LogDebug(digit=digit, results=results[:3], dists=dists[:3])
-                detected.append(bbox)
-                costs.append(digit)
+                detected.append((digit, bbox))
         
         # find card bbox anchored by the digit's bbox
         bboxes = []
-        for i in range(len(costs)):
-            cost = costs[i]
-            bbox = detected[i]
-
+        costs  = []
+        frame_buffer_box = CropBox(0, 0, self.frame_buffer.shape[1], self.frame_buffer.shape[0])
+        for cost, bbox in detected:
             offset = CenterCropTask.DigitOffsets[cost]
             dx = round(offset[0] * bbox.width)
             center_x = bbox.left + bbox.width // 2 - dx
@@ -108,7 +105,10 @@ class CenterCropTask(TaskBase):
             bbox.top    = self.flow_anchor.top
             bbox.right  = bbox.left + self.flow_anchor.width
             bbox.bottom = bbox.top  + self.flow_anchor.height
-            bboxes.append(bbox)
+
+            if bbox.Inside(frame_buffer_box):
+                bboxes.append(bbox)
+                costs.append(cost)
 
         if cfg.DEBUG:
             # if costs:
