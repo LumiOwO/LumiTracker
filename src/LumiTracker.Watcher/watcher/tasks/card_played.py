@@ -41,7 +41,8 @@ class CardPlayedTask(TaskBase):
             if (True) and (card_id != -1):
                 LogDebug(info=f'{dists=}, {self.task_type.name}: {CardName(card_id, self.db)}')
         card_id = self.filter.Filter(card_id, dist=dist)
-        self.card_id = card_id
+
+        self.card_id_signal = card_id
 
         if card_id >= 0:
             LogInfo(

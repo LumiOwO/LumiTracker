@@ -42,9 +42,10 @@ class GTasks():
         cls.MyPlayed     = CardPlayedTask(frame_manager, is_op=False)
         cls.OpPlayed     = CardPlayedTask(frame_manager, is_op=True)
         cls.CardFlow     = CardFlowTask(frame_manager)
+        cls.GamePhase    = GameOverTask(frame_manager) # TODO: add game phase task
 
         cls.NatureAndWisdom_Draw   = CardSelectTask(frame_manager, 1)
-        cls.NatureAndWisdom_Count  = CardFlowTask(frame_manager)
+        cls.NatureAndWisdom_Count  = CardFlowTask(frame_manager, need_dump=False)
         cls.NatureAndWisdom_Select = CardSelectTask(frame_manager)
 
     @classmethod

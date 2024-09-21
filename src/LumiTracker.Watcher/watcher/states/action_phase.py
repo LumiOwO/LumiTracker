@@ -1,5 +1,6 @@
 from .base import GameState, EGameState, GTasks
 from ..config import cfg, override
+from ..enums import EActionCard
 
 class GameStateActionPhase(GameState):
     def __init__(self, frame_manager):
@@ -22,9 +23,10 @@ class GameStateActionPhase(GameState):
 
     @override
     def Next(self):
-        # TODO: add NatureAndWisdom
         if not self.fm.game_started:
             state = EGameState.GameNotStarted
+        elif GTasks.MyPlayed.card_id_signal == EActionCard.NatureAndWisdom.value:
+            state = EGameState.NatureAndWisdom
         else:
             state = self.GetState()
         return state

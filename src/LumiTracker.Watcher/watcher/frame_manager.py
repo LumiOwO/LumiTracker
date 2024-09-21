@@ -57,7 +57,7 @@ class FrameManager:
         transfer = (GTasks.GameStart.detected) or (new_state != old_state)
 
         if transfer:
-            LogDebug(info=f"GameState: {old_state.name} ---> {new_state.name}")
+            LogDebug(info=f"[GameState] {old_state.name} ---> {new_state.name}")
             
             self.state.OnExit(to_state=new_state)
             self.state = self.states[new_state.value]

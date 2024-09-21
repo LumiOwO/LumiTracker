@@ -218,7 +218,15 @@ class CropBox:
     @property
     def height(self):
         return self.bottom - self.top
-    
+
+    @property
+    def center_x(self):
+        return self.left + self.width // 2
+
+    @property
+    def center_y(self):
+        return self.top + self.height // 2
+
     def __repr__(self):
         return f"CropBox([L={self.left}, T={self.top}, R={self.right}, B={self.bottom}], [W={self.width}, H={self.height}])"
 

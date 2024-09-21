@@ -46,7 +46,7 @@ class GameOverTask(TaskBase):
             self.crop_box.left : self.crop_box.right
         ]
 
-        main_content, valid = GameOverTask.CropMainContent(buffer)
+        main_content, valid = self.CropMainContent(buffer)
         if not valid:
             return
 
@@ -74,6 +74,7 @@ class GameOverTask(TaskBase):
             if cfg.DEBUG_SAVE:
                 SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
 
+    @staticmethod
     def CropMainContent(buffer):
         # Convert to grayscale
         gray = cv2.cvtColor(buffer, cv2.COLOR_BGRA2GRAY)

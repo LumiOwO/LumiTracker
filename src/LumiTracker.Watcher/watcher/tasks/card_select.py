@@ -2,7 +2,7 @@ from .card_flow import CenterCropTask
 
 from ..enums import ETaskType
 from ..config import cfg, override, LogDebug, LogInfo, LogError
-from ..feature import ActionCardHandler, CardName, CardCost
+from ..feature import ActionCardHandler, CardName
 from ..stream_filter import StreamFilter
 
 from collections import Counter
@@ -40,13 +40,16 @@ class CardSelectTask(CenterCropTask):
             card_handler = ActionCardHandler()
             card_handler.OnResize(bbox)
             card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
-            if card_id >= 0 and costs[i] != CardCost(card_id, self.db):
-                card_id = -1
             card_id = self.filters[i].Filter(card_id, dist=dist)
 
             # record last detected card_id
             if card_id >= 0:
                 self.cards[i] = card_id
+        
+        # if cfg.DEBUG:
+        #     LogDebug(
+        #         cards=self.cards,
+        #         names=[CardName(card, self.db) for card in self.cards])
     
     def Flush(self):
         cur_counts = Counter(self.cards)

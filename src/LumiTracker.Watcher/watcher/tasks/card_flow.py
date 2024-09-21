@@ -3,7 +3,7 @@ from .base import TaskBase
 from ..enums import ETaskType, ERegionType, EAnnType
 from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..regions import REGIONS
-from ..feature import CropBox, ActionCardHandler, CardName, CardCost
+from ..feature import CropBox, ActionCardHandler, CardName
 from ..feature import ExtractFeature_Digit_Binalized
 from ..stream_filter import StreamFilter
 
@@ -88,27 +88,14 @@ class CenterCropTask(TaskBase):
             results, dists = self.db.SearchByFeature(feature, EAnnType.DIGITS)
             digit = results[0] % 10 if dists[0] <= cfg.threshold else -1
             # Note: Currently, no card costs larger than 5
-            if digit >= 0 and digit <= 5:
+            # Maybe there will be debuffs that add costs to cards in the future
+            if digit >= 0 and digit <= 6:
                 # LogDebug(digit=digit, results=results[:3], dists=dists[:3])
                 detected.append((digit, bbox))
-        
-        # find card bbox anchored by the digit's bbox
+
         bboxes = []
         costs  = []
-        frame_buffer_box = CropBox(0, 0, self.frame_buffer.shape[1], self.frame_buffer.shape[0])
-        for cost, bbox in detected:
-            offset = CenterCropTask.DigitOffsets[cost]
-            dx = round(offset[0] * bbox.width)
-            center_x = bbox.left + bbox.width // 2 - dx
-
-            bbox.left   = center_x  - self.flow_anchor.left + self.center_crop.left
-            bbox.top    = self.flow_anchor.top
-            bbox.right  = bbox.left + self.flow_anchor.width
-            bbox.bottom = bbox.top  + self.flow_anchor.height
-
-            if bbox.Inside(frame_buffer_box):
-                bboxes.append(bbox)
-                costs.append(cost)
+        valid = self.ValidateDetectedBBoxes(detected, bboxes, costs)
 
         if cfg.DEBUG:
             # if costs:
@@ -117,13 +104,70 @@ class CenterCropTask(TaskBase):
             self.bboxes = bboxes
             self.gray = gray
 
-        return bboxes, costs
+        if valid:
+            return bboxes, costs
+        else:
+            return [], []
+
+    def ValidateDetectedBBoxes(self, detected, bboxes, costs):
+        """
+            Find card bboxes anchored by the digit's bbox.
+            Check if bboxes are valid by these conditions:
+            1. Must be center-aligned
+            2. Distance between each must be close to the same
+        """
+        if not detected:
+            return False
+
+        frame_width, frame_height = self.frame_buffer.shape[1], self.frame_buffer.shape[0]
+        frame_buffer_box = CropBox(0, 0, frame_width, frame_height)
+
+        average_x = 0
+        prev_digit_x = -1
+        ref_dist = -1
+        for cost, bbox in detected:
+            offset = CenterCropTask.DigitOffsets[cost]
+            dx = round(offset[0] * bbox.width)
+            digit_x = bbox.center_x - dx
+
+            bbox.left   = digit_x - self.flow_anchor.left + self.center_crop.left
+            bbox.top    = self.flow_anchor.top
+            bbox.right  = bbox.left + self.flow_anchor.width
+            bbox.bottom = bbox.top  + self.flow_anchor.height
+
+            # Note: Filter out the cards that intersect with the screen boundary.
+            # These cards can still be valid if the feature buffer region is within the screen.
+            # Currently, just skip them instead of regarding as invalid detection.
+            if not bbox.Inside(frame_buffer_box):
+                continue
+            
+            dist = -1 if (prev_digit_x == -1) else (digit_x - prev_digit_x)
+            if ref_dist != -1 and abs(dist - ref_dist) > 0.1 * ref_dist:
+                return False
+
+            bboxes.append(bbox)
+            costs.append(cost)
+            if ref_dist == -1 and dist != -1:
+                ref_dist = dist
+            average_x += bbox.center_x / frame_width
+            prev_digit_x = digit_x
+
+        if not bboxes:
+            return False
+
+        average_x /= len(bboxes)
+        # LogDebug(average_x=average_x, count=len(bboxes))
+        if average_x < 0.48 or average_x > 0.52:
+            return False
+        
+        return True
 
 class CardFlowTask(CenterCropTask):
-    def __init__(self, frame_manager):
+    def __init__(self, frame_manager, need_dump=True):
         super().__init__(frame_manager)
         self.my_deck_crop  = None
         self.op_deck_crop  = None
+        self.need_dump     = need_dump
         self.Reset()
     
     @override
@@ -161,7 +205,8 @@ class CardFlowTask(CenterCropTask):
     @override
     def Tick(self):
         self._DetectCards()
-        self._DumpDetected()
+        if self.need_dump:
+            self._DumpDetected()
 
     def _DetectCards(self):
         # center
@@ -177,8 +222,6 @@ class CardFlowTask(CenterCropTask):
             card_handler = ActionCardHandler()
             card_handler.OnResize(bbox)
             card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
-            if card_id >= 0 and costs[i] != CardCost(card_id, self.db):
-                card_id = -1
 
             if card_id >= 0:
                 recorder[i][card_id] += 1
@@ -290,21 +333,27 @@ class CardFlowTask(CenterCropTask):
 
         if task_type != ETaskType.NONE:
             num_cards = self.signaled_num_cards
-            recorder = self.card_recorder[num_cards]
-            valid = True
-            cards = []
-            for i, d in enumerate(recorder):
-                card = max(d, key=d.get) if d else -1
-                if card == -1:
-                    valid = False
-                    LogError(info=f"{task_type.name}: card[{i}] not detected, {num_cards} in total")
-                cards.append(card)
-
+            cards, valid = self.GetRecordedCards(num_cards)
             if valid:
-                LogInfo(type=task_type.name, cards=cards,
+                LogInfo(type=task_type.name, 
+                        cards=cards,
                         names=[CardName(card, self.db) for card in cards])
-        
+            else:
+                LogError(info=f"{task_type.name}: Some cards are not detected.", 
+                        cards=cards,
+                        names=[CardName(card, self.db) for card in cards])
+
         # reset
         self.card_recorder[self.signaled_num_cards] = [defaultdict(int) for _ in range(self.signaled_num_cards)]
         self.signaled_num_cards = 0
         self.signaled_timestamp = 0 
+
+    def GetRecordedCards(self, num_cards):
+        valid = True
+        cards = [-1] * num_cards
+        for i, d in enumerate(self.card_recorder[num_cards]):
+            card = max(d, key=d.get) if d else -1
+            if card == -1:
+                valid = False
+            cards[i] = card
+        return cards, valid
