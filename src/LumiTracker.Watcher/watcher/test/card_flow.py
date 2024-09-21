@@ -34,7 +34,7 @@ def image():
     task.fm = frame_manager
     task.Tick()
     print("Detected:")
-    for num, recorder in enumerate(task.card_recorder):
+    for num, recorder in task.card_recorder.items():
         res = ""
         for i in range(num):
             if i > 0:

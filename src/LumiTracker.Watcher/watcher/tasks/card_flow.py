@@ -172,12 +172,8 @@ class CardFlowTask(CenterCropTask):
     
     @override
     def Reset(self):
-        # round 1 ~ n
-        self.MAX_NUM_CARDS = 10
         self.filter        = StreamFilter(null_val=0)
-        self.card_recorder = [[]]
-        for i in range(self.MAX_NUM_CARDS):
-            self.card_recorder.append([defaultdict(int) for _ in range(i + 1)])
+        self.card_recorder = {}
         
         self.signaled_num_cards = 0
         self.signaled_timestamp = 0 
@@ -205,6 +201,9 @@ class CardFlowTask(CenterCropTask):
     @override
     def Tick(self):
         self._DetectCards()
+        self._DetectDeck(is_op=False)
+        self._DetectDeck(is_op=True)
+
         if self.need_dump:
             self._DumpDetected()
 
@@ -216,7 +215,11 @@ class CardFlowTask(CenterCropTask):
         if cfg.DEBUG:
             detected = []
             debug_bboxes = []
-        recorder = self.card_recorder[num_bboxes]
+        recorder = self.card_recorder.get(num_bboxes, [])
+        if not recorder:
+            recorder = [defaultdict(int) for _ in range(num_bboxes)]
+            self.card_recorder[num_bboxes] = recorder
+
         invalid_count = 0
         for i, bbox in enumerate(bboxes):
             card_handler = ActionCardHandler()
@@ -237,25 +240,12 @@ class CardFlowTask(CenterCropTask):
             # if detected:
             #     LogDebug(center=[(CardName(card_id, self.db), dists) for card_id, dists in detected])
 
-        timestamp = time.perf_counter()
-        # my deck
-        my_drawn_detected = self._DetectDeck(is_op=False)
-        if my_drawn_detected:
-            # LogDebug(my_drawn_detected=my_drawn_detected)
-            self.my_deck_queue.append(timestamp)
-        
-        # op deck
-        op_drawn_detected = self._DetectDeck(is_op=True)
-        if op_drawn_detected:
-            # LogDebug(op_drawn_detected=op_drawn_detected)
-            self.op_deck_queue.append(timestamp)
-
         # stream filtering
         num_cards = num_bboxes if invalid_count != num_bboxes else 0
         num_cards = self.filter.Filter(num_cards, dist=0)
         if num_cards > 0:
             self.signaled_num_cards = num_cards
-            self.signaled_timestamp = timestamp
+            self.signaled_timestamp = time.perf_counter()
 
     def _DetectDeck(self, is_op):
         deck_crop = self.op_deck_crop if is_op else self.my_deck_crop
@@ -296,7 +286,10 @@ class CardFlowTask(CenterCropTask):
                 self.op_deck_edges  = edges
                 self.op_deck_bboxes = bboxes
         
-        return True if bboxes else False
+        if bboxes:
+            dst_queue = self.op_deck_queue if is_op else self.my_deck_queue
+            # LogDebug(drawn_detected=True, is_op=is_op)
+            dst_queue.append(time.perf_counter())
 
     def _DumpDetected(self):
         # dump if signaled
@@ -343,15 +336,21 @@ class CardFlowTask(CenterCropTask):
                         cards=cards,
                         names=[CardName(card, self.db) for card in cards])
 
-        # reset
-        self.card_recorder[self.signaled_num_cards] = [defaultdict(int) for _ in range(self.signaled_num_cards)]
+        # Reset
+        # Assume that within the time range of 1 operation, there will be only 1 count detected.
+        # Therefore, when the dump ends, all recorded cards should be reset.
+        self.card_recorder = {}
         self.signaled_num_cards = 0
         self.signaled_timestamp = 0 
 
     def GetRecordedCards(self, num_cards):
+        recorder = self.card_recorder.get(num_cards, [])
+        if not recorder:
+            return [], False
+
         valid = True
         cards = [-1] * num_cards
-        for i, d in enumerate(self.card_recorder[num_cards]):
+        for i, d in enumerate(recorder):
             card = max(d, key=d.get) if d else -1
             if card == -1:
                 valid = False
