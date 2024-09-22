@@ -125,6 +125,10 @@
     <value>七圣召唤记牌器</value>
     <comment/>
   </data>
+  <data name="DeckWindowTitle" xml:space="preserve">
+    <value>记牌界面</value>
+    <comment/>
+  </data>
   <data name="Start" xml:space="preserve">
     <value>启动</value>
     <comment/>

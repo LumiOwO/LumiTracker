@@ -1,15 +1,12 @@
 ﻿using LumiTracker.Helpers;
 using LumiTracker.Config;
 using LumiTracker.ViewModels.Windows;
-using Microsoft.Extensions.DependencyInjection;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Navigation;
-using Wpf.Ui;
-using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 using LumiTracker.Controls;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
 
 namespace LumiTracker.Views.Windows
 {
@@ -30,11 +27,31 @@ namespace LumiTracker.Views.Windows
 
         public DeckWindow(DeckWindowViewModel viewModel)
         {
+            Loaded += DeckWindow_Loaded;
+
             ShowActivated = false;
             ViewModel     = viewModel;
             DataContext   = this;
 
             InitializeComponent();
+        }
+
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MARGINS
+        {
+            public int Left, Right, Top, Bottom;
+        }
+
+        private void DeckWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            IntPtr hwnd = new WindowInteropHelper(this).Handle;
+            HwndSource.FromHwnd(hwnd).CompositionTarget.BackgroundColor = Colors.Transparent;
+
+            MARGINS margins = new MARGINS() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
+            DwmExtendFrameIntoClientArea(hwnd, ref margins);
         }
 
         public void AttachTo(IntPtr hwnd)
@@ -53,6 +70,7 @@ namespace LumiTracker.Views.Windows
             if (!ViewModel.IsShowing)
             {
                 Show();
+                MainContent.Visibility = Visibility.Visible;
                 ViewModel.IsShowing = true;
             }
         }
@@ -60,7 +78,8 @@ namespace LumiTracker.Views.Windows
         {
             if (ViewModel.IsShowing)
             {
-                Hide();
+                //Hide();
+                MainContent.Visibility = Visibility.Hidden;
                 ViewModel.IsShowing = false;
             }
         }

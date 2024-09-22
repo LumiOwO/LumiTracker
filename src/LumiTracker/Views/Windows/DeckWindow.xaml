@@ -11,10 +11,9 @@
     xmlns:svs="clr-namespace:LumiTracker.Services"
     xmlns:ctrls="clr-namespace:LumiTracker.Controls"
     mc:Ignorable="d"
-    Title="DeckWindow" 
+    Title="{svs:Localization DeckWindowTitle}" 
     ShowInTaskbar="False"
     WindowStyle="None"
-    AllowsTransparency="True"
     ResizeMode="NoResize"
     Height="600" Width="400">
 
@@ -45,6 +44,7 @@
         Width="{Binding Width}"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Bottom"
+        x:Name="MainContent" 
         >
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />

@@ -125,6 +125,10 @@
     <value>Genshin TCG Deck Tracker</value>
     <comment/>
   </data>
+  <data name="DeckWindowTitle" xml:space="preserve">
+    <value>Deck Window</value>
+    <comment/>
+  </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>
     <comment/>
