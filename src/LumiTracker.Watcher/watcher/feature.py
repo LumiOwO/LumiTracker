@@ -312,6 +312,8 @@ def HashToFeature(hash_str):
     return feature
 
 def CardName(card_id, db, lang="zh-HANS"):
+    if card_id >= EActionCard.NumActions.value:
+        card_id = db["extras"][card_id - EActionCard.NumActions.value]
     return db["actions"][card_id][lang] if card_id >= 0 else "None"
 
 def CardCost(card_id, db):
@@ -360,12 +362,18 @@ class ActionCardHandler:
             card_id = db["extras"][card_id - EActionCard.NumActions.value]
         return card_id
 
-    def Update(self, frame_buffer, db):
+    def Update(self, frame_buffer, db, _debug=False):
         self.frame_buffer = frame_buffer
 
         ahash, dhash = self.ExtractCardFeatures()
         card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
         card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
+
+        # if _debug:
+        #     LogDebug(
+        #         name_a=CardName(card_ids_a[0], db), dists_a=dists_a[:3],
+        #         name_d=CardName(card_ids_d[0], db), dists_d=dists_d[:3],
+        #         )
 
         card_id = -1
         dist    = max(dists_a[0], dists_d[0])
@@ -385,6 +393,7 @@ class ActionCardHandler:
         dist_a = dists_a[0]
         dist_d = dists_d[0]
 
+        # Debug: write card image buffer
         # if card_id_a == 119 or card_id_d == 119:
         #     import os
         #     image = self.region_buffer

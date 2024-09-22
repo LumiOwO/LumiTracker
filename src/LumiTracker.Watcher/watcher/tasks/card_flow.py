@@ -163,10 +163,14 @@ class CenterCropTask(TaskBase):
         return True
 
 class CardFlowTask(CenterCropTask):
-    def __init__(self, frame_manager, need_dump=True):
+    WAIT_TIME        = 1.2  # seconds
+    QUEUE_TIME_RANGE = 5.0  # seconds
+
+    def __init__(self, frame_manager, need_deck=True, need_dump=True):
         super().__init__(frame_manager)
         self.my_deck_crop  = None
         self.op_deck_crop  = None
+        self.need_deck     = need_deck
         self.need_dump     = need_dump
         self.Reset()
     
@@ -201,8 +205,10 @@ class CardFlowTask(CenterCropTask):
     @override
     def Tick(self):
         self._DetectCards()
-        self._DetectDeck(is_op=False)
-        self._DetectDeck(is_op=True)
+
+        if self.need_deck:
+            self._DetectDeck(is_op=False)
+            self._DetectDeck(is_op=True)
 
         if self.need_dump:
             self._DumpDetected()
@@ -235,13 +241,14 @@ class CardFlowTask(CenterCropTask):
                 debug_bboxes.append(bbox)
                 detected.append((card_id, dists))
 
+        num_cards = num_bboxes if invalid_count != num_bboxes else 0
+
         if cfg.DEBUG:
             self.bboxes = debug_bboxes
             # if detected:
             #     LogDebug(center=[(CardName(card_id, self.db), dists) for card_id, dists in detected])
 
         # stream filtering
-        num_cards = num_bboxes if invalid_count != num_bboxes else 0
         num_cards = self.filter.Filter(num_cards, dist=0)
         if num_cards > 0:
             self.signaled_num_cards = num_cards
@@ -285,41 +292,55 @@ class CardFlowTask(CenterCropTask):
                 self.op_deck_buffer = deck_buffer
                 self.op_deck_edges  = edges
                 self.op_deck_bboxes = bboxes
-        
+
         if bboxes:
             dst_queue = self.op_deck_queue if is_op else self.my_deck_queue
             # LogDebug(drawn_detected=True, is_op=is_op)
-            dst_queue.append(time.perf_counter())
+            timestamp = time.perf_counter()
+            while len(dst_queue) > 0 and (timestamp - dst_queue[0] > self.QUEUE_TIME_RANGE):
+                dst_queue.popleft()
+            dst_queue.append(timestamp)
 
     def _DumpDetected(self):
         # dump if signaled
         if self.signaled_num_cards == 0:
             return
-        WAIT_TIME = 1.2  # seconds
-        if time.perf_counter() - self.signaled_timestamp < WAIT_TIME:
+        if time.perf_counter() - self.signaled_timestamp < self.WAIT_TIME:
             return
-        
+        # LogDebug(signal_time=self.signaled_timestamp)
+
         task_type = ETaskType.NONE
-        while len(self.my_deck_queue) > 0:
-            timestamp = self.my_deck_queue[0]
-            if timestamp > self.signaled_timestamp + WAIT_TIME:
+        idx = 0
+        while idx < len(self.my_deck_queue):
+            # Get my deck timestamps and remove outdated ones.
+            timestamp = self.my_deck_queue[idx]
+            if timestamp < self.signaled_timestamp:
+                self.my_deck_queue.popleft()
+            else:
+                idx += 1
+            # LogDebug(my=timestamp)
+
+            if timestamp > self.signaled_timestamp + self.WAIT_TIME:
                 break
-            self.my_deck_queue.popleft()
             if task_type != ETaskType.NONE:
                 continue
-
-            if timestamp < self.signaled_timestamp - WAIT_TIME:
+            if timestamp < self.signaled_timestamp - self.WAIT_TIME:
                 continue
             task_type = ETaskType.MY_DRAWN if timestamp < self.signaled_timestamp else ETaskType.MY_CREATE_DECK
-        
-        while len(self.op_deck_queue) > 0:
-            timestamp = self.op_deck_queue[0]
-            if timestamp > self.signaled_timestamp + WAIT_TIME:
+
+        idx = 0
+        while idx < len(self.op_deck_queue):
+            # Get op deck timestamps and remove outdated ones.
+            timestamp = self.op_deck_queue[idx]
+            if timestamp < self.signaled_timestamp:
+                self.op_deck_queue.popleft()
+            else:
+                idx += 1
+
+            if timestamp > self.signaled_timestamp + self.WAIT_TIME:
                 break
-            self.op_deck_queue.popleft()
             if task_type != ETaskType.NONE:
                 continue
-
             if timestamp < self.signaled_timestamp:
                 continue
             task_type = ETaskType.OP_CREATE_DECK
@@ -335,6 +356,10 @@ class CardFlowTask(CenterCropTask):
                 LogError(info=f"{task_type.name}: Some cards are not detected.", 
                         cards=cards,
                         names=[CardName(card, self.db) for card in cards])
+        # cards, valid = self.GetRecordedCards(self.signaled_num_cards)
+        # LogDebug(type=task_type.name, 
+        #         cards=cards,
+        #         names=[CardName(card, self.db) for card in cards])
 
         # Reset
         # Assume that within the time range of 1 operation, there will be only 1 count detected.

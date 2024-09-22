@@ -45,7 +45,7 @@ class GTasks():
         cls.GamePhase    = GamePhaseTask(frame_manager)
 
         cls.NatureAndWisdom_Draw   = CardSelectTask(frame_manager, 1)
-        cls.NatureAndWisdom_Count  = CardFlowTask(frame_manager, need_dump=False)
+        cls.NatureAndWisdom_Count  = CardFlowTask(frame_manager, need_deck=False, need_dump=False)
         cls.NatureAndWisdom_Select = CardSelectTask(frame_manager)
 
     @classmethod
