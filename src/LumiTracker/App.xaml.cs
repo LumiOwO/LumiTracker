@@ -115,6 +115,8 @@ namespace LumiTracker
                 return;
             }
 
+            Configuration.Logger.LogInformation($"App Version: LumiTrackerApp-{Configuration.GetAssemblyVersion()}");
+
             // Start listening for pipe messages asynchronously
             Task.Run(() => ListenForPipeMessagesAsync());
 

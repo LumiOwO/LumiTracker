@@ -260,6 +260,8 @@ namespace LumiTracker.OB
     {
         public static void Main(string[] args)
         {
+            Configuration.Logger.LogInformation($"App Version: LumiTrackerOB-{Configuration.GetAssemblyVersion()}");
+
             GameWatcherOBProxy myProxy = new GameWatcherOBProxy("MY", LogHelper.AnsiOrange);
             GameWatcherOBProxy opProxy = new GameWatcherOBProxy("OP", LogHelper.AnsiBlue);
 
