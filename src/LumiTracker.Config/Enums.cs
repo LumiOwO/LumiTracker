@@ -16,20 +16,13 @@
     {
         YuanShen,
         Global,
-        Cloud,
+        CloudPC,
+        CloudWeb,
+        NumClientTypes,
 
-        NumClientTypes
-    }
-
-    public class EClientProcessNames
-    {
-        public static readonly string[] Values = [
-            "YuanShen.exe",
-            "GenshinImpact.exe",
-            "Genshin Impact Cloud Game.exe",
-            //"PotPlayerMini64.exe",
-            //"wemeetapp.exe",
-        ];
+        // Extra types, not displayed in the app
+        Video,
+        WeMeet,
     }
 
     public enum ECaptureType : int
@@ -112,5 +105,27 @@
         UNSUPPORTED_RATIO,
         CAPTURE_TEST,
         LOG_FPS,
+    }
+
+    public static class EnumHelpers
+    {
+        public static string[] GetClientProcessList(EClientType clientType)
+        {
+            return clientType switch
+            {
+                EClientType.YuanShen => ["YuanShen.exe"],
+                EClientType.Global   => ["GenshinImpact.exe"],
+                EClientType.CloudPC  => ["Genshin Impact Cloud Game.exe" /*,"PotPlayerMini64.exe"*/],
+                EClientType.CloudWeb => ["chrome.exe", "firefox.exe", "msedge.exe"],
+                EClientType.Video    => ["PotPlayerMini64.exe"],
+                EClientType.WeMeet   => ["wemeetapp.exe"],
+                _ => ["YuanShen.exe"] // the default case
+            };
+        }
+
+        public static bool IsCloudGame(EClientType clientType)
+        {
+            return (clientType == EClientType.CloudPC) || (clientType == EClientType.CloudWeb);
+        }
     }
 }

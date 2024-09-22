@@ -3,12 +3,12 @@
     "tokens": "D:/_data/七圣/test"
   },
   "MY": {
-    "process": "YuanShen.exe",
+    "client": "YuanShen",
     "deck": "F0AhxHEMF5Ax2XoNF5GwWaMVCpAx3jMPFECB9EgPGGERCIEQGIFBioQYGKFRCoUQDKAA",
     "max_tracked_tokens": 3
   },
   "OP": {
-    "process": "wemeetapp.exe",
+    "client": "WeMeet",
     "deck": "F0AhxHEMF5AB2XoNF5GwWaMVCpAx3jMPFECB9EgPGGERCIEQGIFBioQYGKFRCoUQDKAA",
     "max_tracked_tokens": 3
   }

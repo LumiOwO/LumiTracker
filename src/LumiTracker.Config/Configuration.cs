@@ -293,7 +293,14 @@ namespace LumiTracker.Config
             {
                 return default!;
             }
-            return token.ToObject<T>()!;
+            try
+            {
+                return token.ToObject<T>()!;
+            }
+            catch
+            {
+                return default!;
+            }
         }
 
         public static void Set<T>(string key, T value, bool auto_save = true)

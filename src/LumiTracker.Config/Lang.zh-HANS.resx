@@ -261,8 +261,12 @@
     <value>原神国际服</value>
     <comment/>
   </data>
-  <data name="ClientType_Cloud" xml:space="preserve">
-    <value>云·原神</value>
+  <data name="ClientType_CloudPC" xml:space="preserve">
+    <value>云·原神-客户端</value>
+    <comment/>
+  </data>
+  <data name="ClientType_CloudWeb" xml:space="preserve">
+    <value>云·原神-网页版</value>
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
@@ -287,6 +291,10 @@
   </data>
   <data name="CaptureType_CloudGameHint" xml:space="preserve">
     <value>* 云原神只能用这种截帧方法</value>
+    <comment/>
+  </data>
+  <data name="CaptureType_CloudGameHint_Web" xml:space="preserve">
+    <value>* 只支持Chrome、Firefox或Edge浏览器，且必须进入全屏模式</value>
     <comment/>
   </data>
   <data name="CaptureType_TestDoneTitle" xml:space="preserve">

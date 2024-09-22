@@ -176,10 +176,15 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnUnsupportedRatio()
         {
-            System.Windows.MessageBox.Show(
-                $"{LocalizationSource.Instance["UnsupportedRatioWarning"]}\n{LocalizationSource.Instance["SupportedRatioInfo"]}", 
-                $"{LocalizationSource.Instance["AppName"]}", 
-                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            EClientType clientType = Configuration.Get<EClientType>("client_type");
+            // Ignore MessageBox popup when client is web browser
+            if (clientType != EClientType.CloudWeb)
+            {
+                System.Windows.MessageBox.Show(
+                    $"{LocalizationSource.Instance["UnsupportedRatioWarning"]}\n{LocalizationSource.Instance["SupportedRatioInfo"]}", 
+                    $"{LocalizationSource.Instance["AppName"]}", 
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            }
         }
 
         private void OnWindowWatcherExit()

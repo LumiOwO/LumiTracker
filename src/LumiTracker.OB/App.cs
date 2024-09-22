@@ -66,7 +66,14 @@ namespace LumiTracker.OB
                 {
                     return default!;
                 }
-                return token.ToObject<T>()!;
+                try
+                {
+                    return token.ToObject<T>()!;
+                }
+                catch
+                {
+                    return default!;
+                }
             }
         }
 
@@ -222,7 +229,7 @@ namespace LumiTracker.OB
         public void Start()
         {
             using var scopeGuard = Configuration.Logger.BeginScope(OBScopeState);
-            OBGameWatcher.Start(OBProxyConfig.Get<string>("process"));
+            OBGameWatcher.Start(OBProxyConfig.Get<EClientType>("client"));
         }
 
         public void Wait()

@@ -173,26 +173,30 @@ namespace LumiTracker.Watcher
             }
         }
 
-        public void Start(string processName)
+        public void Start(EClientType clientType)
         {
-            _processWatcherTask = StartProcessWatcher(processName);
+            _processWatcherTask = StartProcessWatcher(clientType);
         }
 
-        public async Task StartProcessWatcher(string processName)
+        public async Task StartProcessWatcher(EClientType clientType)
         {
-            Configuration.Logger.LogInformation($"Begin to find process: {processName}");
+            string[] processList = EnumHelpers.GetClientProcessList(clientType);
+            Configuration.Logger.LogInformation($"Begin to find process: [{string.Join(", ", processList)}]");
             try
             {
                 int interval = Configuration.Get<int>("proc_watch_interval") * 1000;
                 while (!ShouldCancel.Value)
                 {
-                    var info = FindProcessWindow(processName);
-                    if (info.hwnd != IntPtr.Zero)
+                    foreach (string processName in processList)
                     {
-                        _windowWatcherTask = StartWindowWatcher(info, processName, interval);
-                        await _windowWatcherTask;
+                        var info = FindProcessWindow(processName);
+                        if (info.hwnd != IntPtr.Zero)
+                        {
+                            _windowWatcherTask = StartWindowWatcher(info, clientType, interval);
+                            await _windowWatcherTask;
+                            break;
+                        }
                     }
-
                     await Task.Delay(interval);
                 }
             }
@@ -203,14 +207,13 @@ namespace LumiTracker.Watcher
             }
         }
 
-        public async Task StartWindowWatcher(WindowInfo info, string processName, int interval)
+        public async Task StartWindowWatcher(WindowInfo info, EClientType clientType, int interval)
         {
             Configuration.Logger.LogInformation($"Begin to start window watcher");
 
             //////////////////////////
             // Prepare start info
-            string captureType = 
-                processName == EClientProcessNames.Values[(int)EClientType.Cloud] ?
+            string captureType = EnumHelpers.IsCloudGame(clientType) ?
                 ECaptureType.WindowsCapture.ToString() :
                 Configuration.Get<ECaptureType>("capture_type").ToString();
 
@@ -405,7 +408,7 @@ namespace LumiTracker.Watcher
         public static void Main(string[] args)
         {
             var processWatcher = new ProcessWatcher();
-            processWatcher.Start("YuanShen.exe");
+            processWatcher.Start(EClientType.YuanShen);
         }
     }
 

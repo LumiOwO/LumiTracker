@@ -44,6 +44,9 @@ namespace LumiTracker.ViewModels.Pages
         private LocalizationTextItem _cloudGameHint = new ();
 
         [ObservableProperty]
+        private LocalizationTextItem _cloudGameHint_Web = new();
+
+        [ObservableProperty]
         private bool _captureSelectionEnabled = true;
 
         [ObservableProperty]
@@ -51,10 +54,21 @@ namespace LumiTracker.ViewModels.Pages
 
         partial void OnSelectedClientIndexChanged(int oldValue, int newValue)
         {
-            if (newValue == (int)EClientType.Cloud)
+            if (newValue == (int)EClientType.CloudPC)
             {
                 var binding = LocalizationExtension.Create("CaptureType_CloudGameHint");
                 BindingOperations.SetBinding(CloudGameHint, LocalizationTextItem.TextProperty, binding);
+                BindingOperations.ClearBinding(CloudGameHint_Web, LocalizationTextItem.TextProperty);
+                CloudGameHint_Web.Text = "";
+                SelectedCaptureIndex = (int)ECaptureType.WindowsCapture;
+                CaptureSelectionEnabled = false;
+            }
+            else if (newValue == (int)EClientType.CloudWeb)
+            {
+                var binding = LocalizationExtension.Create("CaptureType_CloudGameHint");
+                BindingOperations.SetBinding(CloudGameHint, LocalizationTextItem.TextProperty, binding);
+                binding = LocalizationExtension.Create("CaptureType_CloudGameHint_Web");
+                BindingOperations.SetBinding(CloudGameHint_Web, LocalizationTextItem.TextProperty, binding);
                 SelectedCaptureIndex = (int)ECaptureType.WindowsCapture;
                 CaptureSelectionEnabled = false;
             }
@@ -62,6 +76,8 @@ namespace LumiTracker.ViewModels.Pages
             {
                 BindingOperations.ClearBinding(CloudGameHint, LocalizationTextItem.TextProperty);
                 CloudGameHint.Text = "";
+                BindingOperations.ClearBinding(CloudGameHint_Web, LocalizationTextItem.TextProperty);
+                CloudGameHint_Web.Text = "";
                 SelectedCaptureIndex = (int)Configuration.Get<ECaptureType>("capture_type");
                 CaptureSelectionEnabled = true;
             }
@@ -122,8 +138,7 @@ namespace LumiTracker.ViewModels.Pages
             EClientType ClientType = Configuration.Get<EClientType>("client_type");
             SelectedClientIndex = (int)ClientType;
 
-            string processName = EClientProcessNames.Values[SelectedClientIndex];
-            Configuration.Logger.LogInformation($"Client = {processName}, CaptureType = {CaptureType.ToString()}");
+            Configuration.Logger.LogInformation($"ClientType = {ClientType.ToString()}, CaptureType = {CaptureType.ToString()}");
 
             // Game Watcher State
             GameWatcherState = EGameWatcherState.NoWindowFound;
@@ -138,7 +153,7 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
             _gameWatcher.CaptureTestDone    += OnCaptureTestDone;
 
-            _gameWatcher.Start(processName);
+            _gameWatcher.Start(ClientType);
         }
 
         private void OnGenshinWindowFound()
@@ -167,19 +182,18 @@ namespace LumiTracker.ViewModels.Pages
         {
             EClientType  SelectedClientType  = (EClientType)SelectedClientIndex;
             ECaptureType SelectedCaptureType = (ECaptureType)SelectedCaptureIndex;
-            string processName = EClientProcessNames.Values[(int)SelectedClientType];
-            Configuration.Logger.LogInformation($"Client = {processName}, CaptureType = {SelectedCaptureType.ToString()}");
+            Configuration.Logger.LogInformation($"ClientType = {SelectedClientType.ToString()}, CaptureType = {SelectedCaptureType.ToString()}");
 
             GameWatcherState = EGameWatcherState.NoWindowFound;
 
             Configuration.Set("client_type",  SelectedClientType.ToString(), auto_save: false);
-            if (SelectedClientType != EClientType.Cloud)
+            if (!EnumHelpers.IsCloudGame(SelectedClientType))
             {
                 Configuration.Set("capture_type", SelectedCaptureType.ToString(), auto_save: false);
             }
             Configuration.Save();
 
-            _gameWatcher.ChangeGameClient(processName);
+            _gameWatcher.ChangeGameClient(SelectedClientType);
         }
 
         [RelayCommand]

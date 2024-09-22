@@ -261,8 +261,12 @@
     <value>[Global] Genshin</value>
     <comment/>
   </data>
-  <data name="ClientType_Cloud" xml:space="preserve">
-    <value>[CN] Cloud</value>
+  <data name="ClientType_CloudPC" xml:space="preserve">
+    <value>[CN] Cloud PC</value>
+    <comment/>
+  </data>
+  <data name="ClientType_CloudWeb" xml:space="preserve">
+    <value>[CN] Cloud Web</value>
     <comment/>
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
@@ -287,6 +291,10 @@
   </data>
   <data name="CaptureType_CloudGameHint" xml:space="preserve">
     <value>* This is the only available method for cloud game.</value>
+    <comment/>
+  </data>
+  <data name="CaptureType_CloudGameHint_Web" xml:space="preserve">
+    <value>* Only supports Chrome, Firefox, or Edge browsers with fullscreen mode.</value>
     <comment/>
   </data>
   <data name="CaptureType_TestDoneTitle" xml:space="preserve">

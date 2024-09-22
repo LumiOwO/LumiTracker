@@ -142,7 +142,6 @@
             </Grid.ColumnDefinitions>
             <TextBlock
                 Grid.Column="1"
-                x:Name="CaptureTestStateText"
                 Margin="8,0,0,0"
                 FontSize="12"
                 VerticalAlignment="Center"
@@ -152,6 +151,26 @@
                     ConverterParameter=Collapsed
                     }"
                 Text="{Binding ViewModel.CloudGameHint.Text, Mode=OneWay}" />
+        </Grid>
+
+        <Grid 
+            Margin="0, 6, 0, 0"
+            VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Column="1"
+                Margin="8,0,0,0"
+                FontSize="12"
+                VerticalAlignment="Center"
+                Foreground="Gray"
+                Visibility="{Binding ViewModel.CloudGameHint_Web.Text,
+                    Converter={StaticResource StringToVisibilityConverter},
+                    ConverterParameter=Collapsed
+                    }"
+                Text="{Binding ViewModel.CloudGameHint_Web.Text, Mode=OneWay}" />
         </Grid>
 
         <Grid 
