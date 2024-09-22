@@ -41,6 +41,19 @@ class GameOverTask(TaskBase):
 
     @override
     def Tick(self):
+        res, dist = self.DetectGameResult()
+        res = self.filter.Filter(res, dist)
+
+        if res != EGameResult.Null:
+            self.fm.game_started = False
+
+            LogInfo(
+                info=f"Game Over, last dist in window = {dist}",
+                type=f"{self.task_type.name}",
+                is_win=(res == EGameResult.Win),
+                )
+
+    def DetectGameResult(self):
         buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
@@ -48,7 +61,7 @@ class GameOverTask(TaskBase):
 
         main_content, valid = self.CropMainContent(buffer)
         if not valid:
-            return
+            return EGameResult.Null, 100
 
         feature = ExtractFeature_Control(main_content)
         ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
@@ -61,18 +74,10 @@ class GameOverTask(TaskBase):
             res = EGameResult.Lose
         else:
             res = EGameResult.Null
-        res = self.filter.Filter(res, dist)
 
-        if res != EGameResult.Null:
-            self.fm.game_started = False
-
-            LogInfo(
-                info=f"Game Over, last dist in window = {dists[0]}",
-                type=f"{self.task_type.name}",
-                is_win=(res == EGameResult.Win),
-                )
-            if cfg.DEBUG_SAVE:
-                SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
+        if cfg.DEBUG_SAVE:
+            SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
+        return res, dist
 
     @staticmethod
     def CropMainContent(buffer):

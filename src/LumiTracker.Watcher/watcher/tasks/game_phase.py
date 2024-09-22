@@ -33,6 +33,16 @@ class GamePhaseTask(TaskBase):
 
     @override
     def Tick(self):
+        res, dist = self.DetectGamePhase()
+        res = self.filter.Filter(res, dist)
+
+        self.phase_signal = res
+
+        # LogDebug(
+        #     info=f"Game Phase detected: {res}",
+        #     )
+
+    def DetectGamePhase(self):
         buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
@@ -48,6 +58,8 @@ class GamePhaseTask(TaskBase):
         right   = np.max(white_x)
         top     = np.min(white_y)
         bottom  = np.max(white_y)
+        if (right - left <= cfg.hash_size) or (bottom - top <= cfg.hash_size):
+            return None, False
         content = gray[top:bottom, left:right]
 
         feature = ExtractFeature_Control_Grayed(content)
@@ -59,14 +71,8 @@ class GamePhaseTask(TaskBase):
             res = EGamePhase.Action
         else:
             res = EGamePhase.Null
-        res = self.filter.Filter(res, dist)
 
-        self.phase_signal = res
-
-        # LogDebug(
-        #     info=f"Game Phase detected: {res}",
-        #     )
         if cfg.DEBUG_SAVE:
             SaveImage(buffer[top:bottom, left:right], os.path.join(cfg.debug_dir, "save", f"{res.name}.png"))
-
+        return res, dist
 
