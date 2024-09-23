@@ -10,6 +10,7 @@ from ..stream_filter import StreamFilter
 from collections import deque, defaultdict
 import cv2
 import time
+import numpy as np
 
 class CenterCropTask(TaskBase):
     DigitOffsets = [
@@ -29,6 +30,7 @@ class CenterCropTask(TaskBase):
         super().__init__(frame_manager)
         self.center_crop   = None
         self.flow_anchor   = None
+        self.DILATE_KERNEL = None
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
@@ -46,6 +48,9 @@ class CenterCropTask(TaskBase):
         height = round(client_height * box[3])
         self.flow_anchor = CropBox(left, top, left + width, top + height)
 
+        size = 3 if client_height < 800 else 5
+        self.DILATE_KERNEL = np.ones((size, size), np.uint8)
+
     def DetectCenterCards(self):
         center_buffer = self.frame_buffer[
             self.center_crop.top  : self.center_crop.bottom, 
@@ -58,7 +63,11 @@ class CenterCropTask(TaskBase):
         gray = cv2.cvtColor(center_buffer, cv2.COLOR_BGR2GRAY)
 
         # Thresholding
-        _, thresh = cv2.threshold(gray, 80, 255, cv2.THRESH_BINARY_INV)
+        _, thresh = cv2.threshold(gray, 75, 255, cv2.THRESH_BINARY_INV)
+
+        # Dilation, in case of unconnected border
+        # this will make the bbox a little bit larger, should crop the margin later
+        thresh = cv2.dilate(thresh, self.DILATE_KERNEL, iterations=1)
 
         # Find contours
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -82,15 +91,35 @@ class CenterCropTask(TaskBase):
         # detect digits
         detected = []
         for bbox in filtered_bboxes:
-            # digit should crop from binary image
-            binary = thresh[bbox.top:bbox.bottom, bbox.left:bbox.right]
+            binary = gray[bbox.top:bbox.bottom, bbox.left:bbox.right]
+            # local histogram equalization
+            binary = cv2.equalizeHist(binary)
+            # Thresholding
+            _, binary = cv2.threshold(binary, 60, 255, cv2.THRESH_BINARY_INV)
+            # Get main content, crop margins
+            white_y, white_x = np.where(binary == 255)
+            if white_y.size == 0 or white_x.size == 0:
+                continue
+            left    = np.min(white_x)
+            right   = np.max(white_x) + 1
+            top     = np.min(white_y)
+            bottom  = np.max(white_y) + 1
+            if bottom - top < FILTER_H or right - left >= FILTER_W:
+                continue
+            binary  = binary[top:bottom, left:right]
+            # cv2.imshow("image", binary)
+            # cv2.waitKey(0)
+
             feature = ExtractFeature_Digit_Binalized(binary)
             results, dists = self.db.SearchByFeature(feature, EAnnType.DIGITS)
             digit = results[0] % 10 if dists[0] <= cfg.threshold else -1
-            # Note: Currently, no card costs larger than 5
+            # LogDebug(digit=digit, results=results[:3], dists=dists[:3])
+
+            # Currently, no card costs larger than 5
             # Maybe there will be debuffs that add costs to cards in the future
             if digit >= 0 and digit <= 6:
-                # LogDebug(digit=digit, results=results[:3], dists=dists[:3])
+                # No need to remove margin from bbox 
+                # because dilation add nearly the same margin to 4 directions
                 detected.append((digit, bbox))
 
         bboxes = []

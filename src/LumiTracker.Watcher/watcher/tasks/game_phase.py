@@ -54,12 +54,14 @@ class GamePhaseTask(TaskBase):
 
         # get (y, x) of white pixel
         white_y, white_x = np.where(binary == 255)
+        if white_y.size == 0 or white_x.size == 0:
+            return EGamePhase.Null, 100
         left    = np.min(white_x)
-        right   = np.max(white_x)
+        right   = np.max(white_x) + 1
         top     = np.min(white_y)
-        bottom  = np.max(white_y)
+        bottom  = np.max(white_y) + 1
         if (right - left <= cfg.hash_size) or (bottom - top <= cfg.hash_size):
-            return None, False
+            return EGamePhase.Null, 100
         content = gray[top:bottom, left:right]
 
         feature = ExtractFeature_Control_Grayed(content)

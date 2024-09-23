@@ -369,6 +369,7 @@ class ActionCardHandler:
         card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
         card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
 
+        # _debug = True
         # if _debug:
         #     LogDebug(
         #         name_a=CardName(card_ids_a[0], db), dists_a=dists_a[:3],

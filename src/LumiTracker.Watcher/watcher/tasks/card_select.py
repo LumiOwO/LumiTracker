@@ -5,6 +5,8 @@ from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..feature import ActionCardHandler, CardName
 from ..stream_filter import StreamFilter
 
+import itertools
+
 class Counter:
     def __init__(self, data=None):
         self.data = {}
@@ -54,7 +56,7 @@ class Counter:
     def __sub__(self, other):
         """Subtract counts from another Counter, allowing negative values."""
         result = Counter()
-        all_keys = set(self.data.keys()).union(other.data.keys())
+        all_keys = dict.fromkeys(itertools.chain(self.data.keys(), other.data.keys())).keys()
         for key in all_keys:
             result[key] = self[key] - other[key]
         return result
@@ -125,7 +127,6 @@ class CardSelectTask(CenterCropTask):
             elif count < 0:
                 create += [card_id] * (-count)
 
-        # use dict to store cards, so the order is not preserved
         if drawn:
             LogInfo(
                 type=ETaskType.MY_DRAWN.name,
