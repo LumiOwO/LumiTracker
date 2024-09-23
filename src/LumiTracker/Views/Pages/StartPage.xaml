@@ -154,7 +154,7 @@
         </Grid>
 
         <Grid 
-            Margin="0, 6, 0, 0"
+            Margin="0, 2, 0, 0"
             VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120" />

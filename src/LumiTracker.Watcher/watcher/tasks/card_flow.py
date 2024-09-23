@@ -58,7 +58,7 @@ class CenterCropTask(TaskBase):
         gray = cv2.cvtColor(center_buffer, cv2.COLOR_BGR2GRAY)
 
         # Thresholding
-        _, thresh = cv2.threshold(gray, 65, 255, cv2.THRESH_BINARY_INV)
+        _, thresh = cv2.threshold(gray, 80, 255, cv2.THRESH_BINARY_INV)
 
         # Find contours
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -217,6 +217,7 @@ class CardFlowTask(CenterCropTask):
         # center
         bboxes, costs = self.DetectCenterCards()
         num_bboxes = len(bboxes)
+        # LogDebug(num_bboxes=num_bboxes)
 
         if cfg.DEBUG:
             detected = []

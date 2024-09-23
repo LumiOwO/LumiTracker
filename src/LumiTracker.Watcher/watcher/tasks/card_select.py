@@ -125,6 +125,7 @@ class CardSelectTask(CenterCropTask):
             elif count < 0:
                 create += [card_id] * (-count)
 
+        # use dict to store cards, so the order is not preserved
         if drawn:
             LogInfo(
                 type=ETaskType.MY_DRAWN.name,

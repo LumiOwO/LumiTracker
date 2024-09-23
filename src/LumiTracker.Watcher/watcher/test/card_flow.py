@@ -21,7 +21,7 @@ def image():
     task = GTasks.CardFlow
     frame_manager.round = 1
 
-    image_path = 'temp/Snipaste_2024-09-19_23-59-53.png'
+    image_path = 'temp/Snipaste_2024-09-23_22-28-25.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -46,9 +46,9 @@ def image():
                 res += CardName(card_id, frame_manager.db)
         print(f"{num}: {res}")
 
-    # dst = task.thresh
+    dst = task.thresh
     # dst = task.center_buffer
-    dst = task.frame_buffer
+    # dst = task.frame_buffer
     # dst = cv2.cvtColor(task.my_deck_edges, cv2.COLOR_GRAY2BGRA)
     for box in task.bboxes:
         # box.left   += task.center_crop.left
