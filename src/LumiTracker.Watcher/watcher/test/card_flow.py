@@ -16,12 +16,11 @@ logging.getLogger('matplotlib').setLevel(logging.WARNING)
 import matplotlib.pyplot as plt
 
 
-def image():
+def image(image_path='temp/Snipaste_2024-09-24_01-48-21.png'):
     frame_manager = FrameManager()
     task = GTasks.CardFlow
     frame_manager.round = 1
 
-    image_path = 'temp/Snipaste_2024-09-24_01-38-47.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -46,9 +45,9 @@ def image():
                 res += CardName(card_id, frame_manager.db)
         print(f"{num}: {res}")
 
-    dst = task.thresh
+    # dst = task.thresh
     # dst = task.center_buffer
-    # dst = task.frame_buffer
+    dst = task.frame_buffer
     # dst = cv2.cvtColor(task.my_deck_edges, cv2.COLOR_GRAY2BGRA)
     for box in task.bboxes:
         # box.left   += task.center_crop.left
@@ -136,6 +135,8 @@ def video():
 if __name__ == "__main__":
     test_func = sys.argv[1]
     if test_func == "image":
-        image()
+        # image()
+        for i in range(0, 20):
+            image(f"temp/center{i + 1}.png")
     elif test_func == "video":
         video()

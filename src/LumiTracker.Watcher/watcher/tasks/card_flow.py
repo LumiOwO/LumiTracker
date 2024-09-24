@@ -30,7 +30,7 @@ class CenterCropTask(TaskBase):
         super().__init__(frame_manager)
         self.center_crop   = None
         self.flow_anchor   = None
-        self.DILATE_KERNEL = None
+        self.KERNEL        = None
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
@@ -48,8 +48,8 @@ class CenterCropTask(TaskBase):
         height = round(client_height * box[3])
         self.flow_anchor = CropBox(left, top, left + width, top + height)
 
-        size = 3 if client_height < 800 else 5
-        self.DILATE_KERNEL = np.ones((size, size), np.uint8)
+        size = (5, 3) if client_height < 800 else (7, 5)
+        self.KERNEL = np.ones(size, np.uint8)
 
     def DetectCenterCards(self):
         center_buffer = self.frame_buffer[
@@ -65,37 +65,66 @@ class CenterCropTask(TaskBase):
         # Thresholding
         _, thresh = cv2.threshold(gray, 75, 255, cv2.THRESH_BINARY_INV)
 
-        # Dilation, in case of unconnected border
-        # this will make the bbox a little bit larger, should crop the margin later
-        thresh = cv2.dilate(thresh, self.DILATE_KERNEL, iterations=1)
+        # Close unconnected border
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, self.KERNEL, iterations=1)
 
         # Find contours
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Filter and draw bounding boxes around the detected cards
-        FILTER_H = self.center_crop.height * 0.6
-        FILTER_W = FILTER_H * 1.5
+        # Filter, get the possible bboxes of digits
+        FILTER_H = self.center_crop.height * 0.5
+        FILTER_W = FILTER_H * 2.0
         filtered_bboxes = []
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if h < FILTER_H or w >= FILTER_W:
+            if h < FILTER_H or w >= FILTER_W or w <= 1:
                 continue
             filtered_bboxes.append(CropBox(x, y, x + w, y + h))
         if not filtered_bboxes:
             return [], []
         
-        # sort the boxes
+        # sort the bboxes
         if len(filtered_bboxes) > 1:
             filtered_bboxes.sort(key=lambda box: box.left)
+        
+        # Merge intersect bboxes
+        def CanMerge(a, b):
+            if a.right < b.left or a.bottom < b.top or a.top > b.bottom:
+                return False
+            merged_width = max(a.right, b.right) - min(a.left, b.left)
+            if merged_width >= FILTER_W:
+                return False
+            return True
+
+        merged_bboxes = []
+        current_bbox = filtered_bboxes[0]
+        for bbox in filtered_bboxes[1:]:
+            if CanMerge(current_bbox, bbox):
+                current_bbox.Merge(bbox)
+            else:
+                merged_bboxes.append(current_bbox)
+                current_bbox = bbox
+        merged_bboxes.append(current_bbox)
 
         # detect digits
         detected = []
-        for bbox in filtered_bboxes:
-            binary = gray[bbox.top:bbox.bottom, bbox.left:bbox.right]
-            # local histogram equalization
-            binary = cv2.equalizeHist(binary)
+        for bbox in merged_bboxes:
+            content = gray[bbox.top:bbox.bottom, bbox.left:bbox.right]
+            # Find the threshold using the cdf of histogram
+            # this is actually a form of local histogram equalization
+            hist = np.zeros((256,), dtype=np.float32)
+            cv2.calcHist([content], [0], None, [256], [0, 256], hist=hist)
+            hist_sum = hist.sum()
+            if hist_sum == 0:
+                continue
+            hist /= hist_sum
+            cdf = hist.cumsum()
+            thres = min(np.searchsorted(cdf, 0.20), 255)
+            # LogDebug(thres=f"{thres}")
+
             # Thresholding
-            _, binary = cv2.threshold(binary, 60, 255, cv2.THRESH_BINARY_INV)
+            _, binary = cv2.threshold(content, thres, 255, cv2.THRESH_BINARY_INV)
+
             # Get main content, crop margins
             white_y, white_x = np.where(binary == 255)
             if white_y.size == 0 or white_x.size == 0:
@@ -110,16 +139,27 @@ class CenterCropTask(TaskBase):
             # cv2.imshow("image", binary)
             # cv2.waitKey(0)
 
+            # Extract feature
             feature = ExtractFeature_Digit_Binalized(binary)
             results, dists = self.db.SearchByFeature(feature, EAnnType.DIGITS)
-            digit = results[0] % 10 if dists[0] <= cfg.threshold else -1
+            # 10 ~ 19 is for card cost's digit, which is outlined
+            digit = results[0]
+            if digit < 10 or digit > 19 or dists[0] > cfg.threshold:
+                digit = -1
+            else:
+                digit -= 10
             # LogDebug(digit=digit, results=results[:3], dists=dists[:3])
 
-            # Currently, no card costs larger than 5
+            # Note: Currently, no card costs larger than 5
             # Maybe there will be debuffs that add costs to cards in the future
             if digit >= 0 and digit <= 6:
-                # No need to remove margin from bbox 
-                # because dilation add nearly the same margin to 4 directions
+                # Remove margin from bbox 
+                # Order is important here! bbox.width & bbox.height will be changed
+                # LogDebug(margin=f"{(left, top, bbox.width - right, bbox.height - bottom)}")
+                bbox.right  -= max(bbox.width  - right, 0)
+                bbox.bottom -= max(bbox.height - bottom, 0)
+                bbox.left   += max(left, 0)
+                bbox.top    += max(top, 0)
                 detected.append((digit, bbox))
 
         bboxes = []

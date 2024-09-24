@@ -35,7 +35,7 @@ REGIONS = {
         ERegionType.PHASE      : ( 0.4500, 0.4800, 0.1000, 0.0400 ),
         ERegionType.ROUND      : ( 0.4670, 0.5420, 0.0645, 0.0310 ),
         ERegionType.CENTER     : ( 0.0700, 0.3380, 0.8600, 0.0500 ),
-        ERegionType.FLOW_ANCHOR: ( 0.0080, 0.3350, 0.1070, 0.3280 ), # (margin to digit center, margin to card top, card width, card height)
+        ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3350, 0.1070, 0.3280 ), # (margin to digit center, margin to card top, card width, card height)
         ERegionType.MY_DECK    : ( 0.0000, 0.5550, 0.3250, 0.2750 ),
         ERegionType.OP_DECK    : ( 0.0000, 0.1700, 0.3250, 0.2750 ),
     },
@@ -48,7 +48,7 @@ REGIONS = {
         ERegionType.PHASE      : ( 0.4500, 0.4800, 0.1000, 0.0400 ),
         ERegionType.ROUND      : ( 0.4670, 0.5370, 0.0665, 0.0280 ),
         ERegionType.CENTER     : ( 0.0700, 0.3540, 0.8600, 0.0500 ),
-        ERegionType.FLOW_ANCHOR: ( 0.0080, 0.3550, 0.1035, 0.2850 ),
+        ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3550, 0.1035, 0.2850 ),
         ERegionType.MY_DECK    : ( 0.0000, 0.5550, 0.3250, 0.2750 ),
         ERegionType.OP_DECK    : ( 0.0000, 0.1700, 0.3250, 0.2750 ),
     },
@@ -74,7 +74,7 @@ REGIONS = {
         ERegionType.PHASE      : ( 0.4500, 0.4790, 0.1000, 0.0400 ),
         ERegionType.ROUND      : ( 0.4680, 0.5422, 0.0605, 0.0325 ),
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
-        ERegionType.FLOW_ANCHOR: ( 0.0054, 0.3350, 0.0800, 0.3280 ),
+        ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0780, 0.3280 ),
         ERegionType.MY_DECK    : ( 0.1200, 0.5550, 0.2500, 0.2750 ),
         ERegionType.OP_DECK    : ( 0.0000, 0.1700, 0.3250, 0.2750 ),
     },
