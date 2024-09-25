@@ -162,8 +162,11 @@ namespace LumiTracker.Helpers
             if (bounds != _lastBounds)
             {
                 Rect clientRect = SnapToWindow(bounds);
+                if (bounds.Width != _lastBounds.Width || bounds.Height != _lastBounds.Height)
+                {
+                    GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height);
+                }
                 _lastBounds = bounds;
-                GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height);
             }
             //Configuration.Logger.LogDebug($"bounds: {bounds.Width}, {bounds.Height}");
             //Configuration.Logger.LogDebug($"_lastBounds: {_lastBounds.Width}, {_lastBounds.Height}");
