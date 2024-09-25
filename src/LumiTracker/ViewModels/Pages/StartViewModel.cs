@@ -32,6 +32,18 @@ namespace LumiTracker.ViewModels.Pages
         private Brush _gameWatcherStateBrush = Brushes.DarkGray;
 
         [ObservableProperty]
+        private float _FPS = 0.0f;
+
+        [ObservableProperty]
+        private string _FPSText = "";
+
+        [ObservableProperty]
+        private Brush _FPSBrush = Brushes.LimeGreen;
+
+        [ObservableProperty]
+        private Visibility _FPSVisibility = Visibility.Collapsed;
+
+        [ObservableProperty]
         private string[] _captureTypes = new string[(int)ECaptureType.NumCaptureTypes];
 
         [ObservableProperty]
@@ -91,22 +103,48 @@ namespace LumiTracker.ViewModels.Pages
             if (newValue == EGameWatcherState.NoWindowFound)
             {
                 GameWatcherStateBrush = Brushes.DarkGray;
-                CaptureTestButtonVisibility = Visibility.Collapsed;
+                FPSVisibility = CaptureTestButtonVisibility = Visibility.Collapsed;
             }
             else if (newValue == EGameWatcherState.WindowNotForeground)
             {
                 GameWatcherStateBrush = Brushes.DarkOrange;
-                CaptureTestButtonVisibility = Visibility.Collapsed;
+                FPSVisibility = CaptureTestButtonVisibility = Visibility.Collapsed;
             }
             else if (newValue == EGameWatcherState.WindowWatcherStarted)
             {
                 GameWatcherStateBrush = Brushes.LimeGreen;
-                CaptureTestButtonVisibility = Visibility.Visible;
+                FPSVisibility = CaptureTestButtonVisibility = Visibility.Visible;
+                FPS = -1;
             }
             else
             {
                 GameWatcherStateBrush = Brushes.DarkGray;
-                CaptureTestButtonVisibility = Visibility.Collapsed;
+                FPSVisibility = CaptureTestButtonVisibility = Visibility.Collapsed;
+            }
+        }
+
+        partial void OnFPSChanged(float oldValue, float newValue)
+        {
+            if (newValue < 20)
+            {
+                FPSBrush = Brushes.Red;
+            }
+            else if (newValue < 30)
+            {
+                FPSBrush = Brushes.Yellow;
+            }
+            else
+            {
+                FPSBrush = Brushes.LimeGreen;
+            }
+
+            if (newValue < 0)
+            {
+                FPSText = "FPS : -";
+            }
+            else
+            {
+                FPSText = $"FPS : {newValue:F1}";
             }
         }
 
@@ -152,6 +190,7 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.WindowWatcherStart += OnWindowWatcherStart;
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
             _gameWatcher.CaptureTestDone    += OnCaptureTestDone;
+            _gameWatcher.LogFPS             += OnLogFPS;
 
             _gameWatcher.Start(ClientType);
         }
@@ -217,6 +256,11 @@ namespace LumiTracker.ViewModels.Pages
             {
                 Task task = _contentDialogService.ShowCaptureTestDialogAsync(filename);
             });
+        }
+
+        public void OnLogFPS(float fps)
+        {
+            FPS = fps;
         }
     }
 }

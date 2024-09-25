@@ -52,6 +52,8 @@ namespace LumiTracker.Models
 
         public event OnCaptureTestDoneCallback?     CaptureTestDone;
 
+        public event OnLogFPSCallback?              LogFPS;
+
         public GameWatcher()
         {
 
@@ -114,6 +116,7 @@ namespace LumiTracker.Models
                 watcher.OpCardsCreateDeck  += OnOpCardsCreateDeck;
                 watcher.UnsupportedRatio   += OnUnsupportedRatio;
                 watcher.CaptureTestDone    += OnCaptureTestDone;
+                watcher.LogFPS             += OnLogFPS;
                 watcher.ExceptionHandler   += OnException;
                 processWatcher.Value = watcher;
 
@@ -214,6 +217,12 @@ namespace LumiTracker.Models
         {
             Configuration.Logger.LogDebug("[GameWatcher] OnCaptureTestDone");
             CaptureTestDone?.Invoke(filename);
+        }
+
+        private void OnLogFPS(float fps)
+        {
+            //Configuration.Logger.LogDebug("[GameWatcher] OnLogFPS");
+            LogFPS?.Invoke(fps);
         }
 
         private void OnException(Exception e)

@@ -35,6 +35,7 @@ class FrameManager:
         self.prev_log_time   = time.perf_counter()
         self.prev_frame_time = self.prev_log_time
         self.frame_count     = 0
+        self.fps_interval    = cfg.LOG_INTERVAL / 10
 
     def Resize(self, client_width, client_height):
         if client_height == 0:
@@ -69,7 +70,7 @@ class FrameManager:
         self.frame_count += 1
         cur_time = time.perf_counter()
 
-        if cur_time - self.prev_log_time >= cfg.LOG_INTERVAL:
+        if cur_time - self.prev_log_time >= self.fps_interval:
             fps = self.frame_count / (cur_time - self.prev_log_time)
             LogInfo(
                 type=f"{ETaskType.LOG_FPS.name}",

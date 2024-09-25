@@ -45,6 +45,8 @@ namespace LumiTracker.Watcher
 
     public delegate void OnCaptureTestDoneCallback(string filename);
 
+    public delegate void OnLogFPSCallback(float fps);
+
     public delegate void ExceptionHandlerCallback(Exception ex);
 
     public class ProcessWatcher : IAsyncDisposable
@@ -62,6 +64,7 @@ namespace LumiTracker.Watcher
         public event OnOpCardsCreateDeckCallback?  OpCardsCreateDeck;
         public event OnUnsupportedRatioCallback?   UnsupportedRatio;
         public event OnCaptureTestDoneCallback?    CaptureTestDone;
+        public event OnLogFPSCallback?             LogFPS;
         public event ExceptionHandlerCallback?     ExceptionHandler;
 
 
@@ -155,6 +158,8 @@ namespace LumiTracker.Watcher
             return GetWindowText(hWnd, Buff, nChars) > 0 ? Buff.ToString() : "";
         }
 
+        private static readonly float LOG_INTERVAL = Configuration.Get<float>("LOG_INTERVAL");
+        private SpinLockedValue<long> _last_fps_time = new(Stopwatch.GetTimestamp());
         private SpinLockedValue<bool> ShouldCancel = new (false);
         private Task? _processWatcherTask;
         private Task? _windowWatcherTask;
@@ -303,8 +308,7 @@ namespace LumiTracker.Watcher
 
                 if (message_level == "INFO")
                 {
-                    Configuration.Logger.LogInformation(message_str);
-                    ParseBackendMessage(message_data);
+                    ParseBackendMessage(message_data, message_str);
                 }
                 else if (message_level == "DEBUG")
                 {
@@ -331,10 +335,17 @@ namespace LumiTracker.Watcher
             }
         }
 
-        private void ParseBackendMessage(JToken message_data)
+        private void ParseBackendMessage(JToken message_data, string message_str)
         {
             string task_type_name = message_data["type"]!.ToString();
-            if (!Enum.TryParse(task_type_name, out ETaskType task_type))
+            bool valid_task_type = Enum.TryParse(task_type_name, out ETaskType task_type);
+
+            if (!valid_task_type || task_type != ETaskType.LOG_FPS)
+            {
+                Configuration.Logger.LogInformation(message_str);
+            }
+
+            if (!valid_task_type)
             {
                 Configuration.Logger.LogWarning($"[ProcessWatcher] Unknown task type: {task_type_name}\n{message_data}");
             }
@@ -392,8 +403,16 @@ namespace LumiTracker.Watcher
             }
             else if (task_type == ETaskType.LOG_FPS)
             {
-                // TODO: add hook for fps logging
+                long cur_fps_time = Stopwatch.GetTimestamp();
+                float elapsedSeconds = (cur_fps_time - _last_fps_time.Value) / (float)Stopwatch.Frequency;
+                if (elapsedSeconds >= LOG_INTERVAL)
+                {
+                    Configuration.Logger.LogInformation(message_str);
+                    _last_fps_time.Value = cur_fps_time;
+                }
 
+                float fps = message_data["fps"]!.ToObject<float>()!;
+                LogFPS?.Invoke(fps);
             }
             else
             {
