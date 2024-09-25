@@ -44,6 +44,10 @@ class FrameManager:
         GTasks.OnResize(client_width, client_height)
 
     def OnFrameArrived(self, frame_buffer):
+        # skip invalid frames
+        if frame_buffer.size == 0:
+            return
+
         # Note: No PreTick & PostTick is needed right now. 
         for task in self.tasks:
             task.SetFrameBuffer(frame_buffer)

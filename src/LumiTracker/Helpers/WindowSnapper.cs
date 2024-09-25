@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using LumiTracker.Config;
@@ -15,6 +7,8 @@ using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.Helpers
 {
+    public delegate void OnGenshinWindowResizedCallback(int width, int height);
+
     // https://stackoverflow.com/questions/32806280/attach-wpf-window-to-the-window-of-another-process
     public class WindowSnapper
     {
@@ -123,6 +117,8 @@ namespace LumiTracker.Helpers
         private IntPtr          _dst_hwnd;
         private bool            _bOutside;
 
+        public event OnGenshinWindowResizedCallback? GenshinWindowResized;
+
         public WindowSnapper(DeckWindow window, IntPtr hwnd, bool bOutside)
         {
             _lastBounds     = new Rect();
@@ -131,6 +127,8 @@ namespace LumiTracker.Helpers
             _src_hwnd       = new WindowInteropHelper(window).Handle;
             _dst_hwnd       = hwnd;
             _bOutside       = bOutside;
+
+            GenshinWindowResized += window.OnGenshinWindowResized;
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
@@ -163,7 +161,9 @@ namespace LumiTracker.Helpers
             var bounds = GetWindowBounds(_dst_hwnd);
             if (bounds != _lastBounds)
             {
-                SnapToWindow(bounds);
+                Rect clientRect = SnapToWindow(bounds);
+                _lastBounds = bounds;
+                GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height);
             }
             //Configuration.Logger.LogDebug($"bounds: {bounds.Width}, {bounds.Height}");
             //Configuration.Logger.LogDebug($"_lastBounds: {_lastBounds.Width}, {_lastBounds.Height}");
@@ -195,12 +195,12 @@ namespace LumiTracker.Helpers
             _lastForeground = foregroundHwnd;
         }
 
-        private void SnapToWindow(Rect bounds)
+        private Rect SnapToWindow(Rect bounds)
         {
             // Get client rect
             Rect clientRect = new Rect();
             GetClientRect(_dst_hwnd, ref clientRect);
-            if (clientRect.Height == 0 || clientRect.Width == 0) return;
+            if (clientRect.Height == 0 || clientRect.Width == 0) return clientRect;
 
             POINT clientLeftTop = new POINT { x = clientRect.Left, y = clientRect.Top };
             ClientToScreen(_dst_hwnd, ref clientLeftTop);
@@ -246,8 +246,7 @@ namespace LumiTracker.Helpers
                 _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
             }
 
-
-            _lastBounds = bounds;
+            return clientRect;
         }
 
         private Rect GetWindowBounds(IntPtr handle)

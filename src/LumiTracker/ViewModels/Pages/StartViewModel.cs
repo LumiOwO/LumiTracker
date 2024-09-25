@@ -10,7 +10,7 @@ namespace LumiTracker.ViewModels.Pages
 {
     public partial class StartViewModel : ObservableObject
     {
-        private IDeckWindow _deckWindow;
+        private DeckWindow _deckWindow;
 
         private GameWatcher _gameWatcher;
 
@@ -42,6 +42,9 @@ namespace LumiTracker.ViewModels.Pages
 
         [ObservableProperty]
         private Visibility _FPSVisibility = Visibility.Collapsed;
+
+        [ObservableProperty]
+        private bool _isGenshinWindowMinimized = false;
 
         [ObservableProperty]
         private string[] _captureTypes = new string[(int)ECaptureType.NumCaptureTypes];
@@ -148,9 +151,17 @@ namespace LumiTracker.ViewModels.Pages
             }
         }
 
+        partial void OnIsGenshinWindowMinimizedChanged(bool oldValue, bool newValue)
+        {
+            if (newValue)
+            {
+                FPS = 0.0f;
+            }
+        }
+
         public StartViewModel(IDeckWindow deckWindow, GameWatcher gameWatcher, StyledContentDialogService contentDialogService)
         {
-            _deckWindow  = deckWindow;
+            _deckWindow  = (deckWindow as DeckWindow)!;
             _gameWatcher = gameWatcher;
             _contentDialogService = contentDialogService;
         }
@@ -184,6 +195,7 @@ namespace LumiTracker.ViewModels.Pages
             // Show UI outside
             ShowUIOutside = Configuration.Get<bool>("show_ui_outside");
             _deckWindow.SetbOutside(ShowUIOutside);
+            _deckWindow.GenshinWindowResized += OnGenshinWindowResized;
 
             // Start game watcher
             _gameWatcher.GenshinWindowFound += OnGenshinWindowFound;
@@ -214,6 +226,11 @@ namespace LumiTracker.ViewModels.Pages
 
             _deckWindow.Detach();
             _deckWindow.HideWindow();
+        }
+
+        private void OnGenshinWindowResized(int width, int height)
+        {
+            IsGenshinWindowMinimized = (width == 0 || height == 0);
         }
 
         [RelayCommand]
@@ -247,6 +264,8 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         public async Task OnCaptureTest()
         {
+            if (IsGenshinWindowMinimized)
+                return;
             await _gameWatcher.DumpToBackend(Configuration.LogDir);
         }
 
