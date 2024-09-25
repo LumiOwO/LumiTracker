@@ -144,11 +144,11 @@ class CenterCropTask(TaskBase):
             results, dists = self.db.SearchByFeature(feature, EAnnType.DIGITS)
             # 10 ~ 19 is for card cost's digit, which is outlined
             digit = results[0]
-            if digit < 10 or digit > 19 or dists[0] > cfg.threshold:
+            if digit < 10 or digit > 19 or dists[0] > cfg.strict_threshold:
                 digit = -1
             else:
                 digit -= 10
-            # LogDebug(digit=digit, results=results[:3], dists=dists[:3])
+                # LogDebug(digit=digit, results=results[:3], dists=dists[:3])
 
             # Note: Currently, no card costs larger than 5
             # Maybe there will be debuffs that add costs to cards in the future

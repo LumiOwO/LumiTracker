@@ -73,7 +73,7 @@ class RoundTask(TaskBase):
             results, dists = self.db.SearchByFeature(feature, EAnnType.DIGITS)
             # 0 ~ 9 is for round's digit, which is solid
             digit = results[0]
-            if digit < 0 or digit > 9 or dists[0] > cfg.threshold:
+            if digit < 0 or digit > 9 or dists[0] > cfg.strict_threshold:
                 digit = -1
 
             # accumulate

@@ -68,7 +68,7 @@ class ImageHash:
         # Returns the bit length of the hash
         return self.hash.size
 
-def AHash(gray_image, hash_size=8):
+def AHash(gray_image, hash_size=8, mean=np.median):
     """
     Average Hash computation
 
@@ -76,12 +76,11 @@ def AHash(gray_image, hash_size=8):
 
     Step by step explanation: https://web.archive.org/web/20171112054354/https://www.safaribooksonline.com/blog/2013/11/26/image-hashing-with-python/ # noqa: E501
 
-    @image must be a PIL instance.
-    @mean how to determine the average luminescence. can try numpy.median instead.
+    Reference: https://github.com/JohannesBuchner/imagehash/blob/master/imagehash/__init__.py
     """
     gray_image = cv2.resize(gray_image, (hash_size, hash_size), interpolation=cv2.INTER_AREA)
 
-    avg = np.median(gray_image)
+    avg = mean(gray_image)
     diff = gray_image > avg
     return ImageHash(diff)
 
@@ -267,7 +266,7 @@ def ExtractFeature_Digit_Binalized(binary):
     binary = binary.astype(np.float32) / 255.0
 
     hash_size = GetHashSize(EAnnType.DIGITS)
-    feature = AHash(binary, hash_size=hash_size)
+    feature = AHash(binary, hash_size=hash_size, mean=np.mean)
     feature = feature.hash.flatten()
 
     return feature
