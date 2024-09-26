@@ -9,7 +9,7 @@ namespace LumiTracker.Models
     public enum EGameWatcherState
     {
         NoWindowFound,
-        WindowNotForeground,
+        StartingWindowWatcher,
         WindowWatcherStarted,
 
         NumGameWatcherStates,

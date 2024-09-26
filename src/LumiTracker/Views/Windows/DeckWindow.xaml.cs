@@ -68,10 +68,10 @@ namespace LumiTracker.Views.Windows
             _snapper = null;
         }
 
-        public void OnGenshinWindowResized(int width, int height)
+        public void OnGenshinWindowResized(int width, int height, bool isMinimized)
         {
-            Configuration.Logger.LogDebug($"[DeckWindow] OnGenshinWindowResized: {width} x {height}");
-            GenshinWindowResized?.Invoke(width, height);
+            Configuration.Logger.LogDebug($"[DeckWindow] OnGenshinWindowResized: {width} x {height}, isMinimized = {isMinimized}");
+            GenshinWindowResized?.Invoke(width, height, isMinimized);
         }
 
         public void ShowWindow()

@@ -108,7 +108,7 @@ namespace LumiTracker.ViewModels.Pages
                 GameWatcherStateBrush = Brushes.DarkGray;
                 FPSVisibility = CaptureTestButtonVisibility = Visibility.Collapsed;
             }
-            else if (newValue == EGameWatcherState.WindowNotForeground)
+            else if (newValue == EGameWatcherState.StartingWindowWatcher)
             {
                 GameWatcherStateBrush = Brushes.DarkOrange;
                 FPSVisibility = CaptureTestButtonVisibility = Visibility.Collapsed;
@@ -209,7 +209,7 @@ namespace LumiTracker.ViewModels.Pages
 
         private void OnGenshinWindowFound()
         {
-            GameWatcherState = EGameWatcherState.WindowNotForeground;
+            GameWatcherState = EGameWatcherState.StartingWindowWatcher;
         }
 
         private void OnWindowWatcherStart(IntPtr hwnd)
@@ -228,9 +228,9 @@ namespace LumiTracker.ViewModels.Pages
             _deckWindow.HideWindow();
         }
 
-        private void OnGenshinWindowResized(int width, int height)
+        private void OnGenshinWindowResized(int width, int height, bool isMinimized)
         {
-            IsGenshinWindowMinimized = (width == 0 || height == 0);
+            IsGenshinWindowMinimized = isMinimized;
         }
 
         [RelayCommand]

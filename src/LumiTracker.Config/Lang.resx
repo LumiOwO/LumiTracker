@@ -273,12 +273,16 @@
     <value>Detecting game window...</value>
     <comment/>
   </data>
-  <data name="GameWatcherState_WindowNotForeground" xml:space="preserve">
-    <value>Game window not in the foreground</value>
+  <data name="GameWatcherState_StartingWindowWatcher" xml:space="preserve">
+    <value>Launching LumiTracker...</value>
     <comment/>
   </data>
   <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
     <value>LumiTracker started</value>
+    <comment/>
+  </data>
+  <data name="MinimizedNotification" xml:space="preserve">
+    <value>Screen capture is not possible when the game window is minimized</value>
     <comment/>
   </data>
   <data name="CaptureType" xml:space="preserve">

@@ -21,7 +21,8 @@
 
     <Page.Resources>
         <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
-        
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
     </Page.Resources>
         
 
@@ -83,6 +84,32 @@
                 Foreground="{Binding ViewModel.GameWatcherStateBrush, Mode=OneWay}"
                 Text="{Binding ViewModel.GameWatcherStateText.Text, Mode=OneWay}" />
         </Grid>
+
+        <StackPanel 
+            Margin="125, 10, 0, 0"
+            Orientation="Horizontal">
+            <ui:SymbolIcon 
+                Foreground="Red"
+                FontWeight="Bold"
+                FontSize="20"
+                Symbol="Warning24"
+                Visibility="{Binding ViewModel.IsGenshinWindowMinimized,
+                    Converter={StaticResource BooleanToVisibilityConverter},
+                    ConverterParameter=Collapsed
+                    }"
+                />
+            <TextBlock
+                Margin="5, 0, 0, 0"
+                Foreground="Red"
+                FontWeight="Bold"
+                FontSize="16"
+                Text="{svs:Localization MinimizedNotification}"
+                Visibility="{Binding ViewModel.IsGenshinWindowMinimized,
+                    Converter={StaticResource BooleanToVisibilityConverter},
+                    ConverterParameter=Collapsed
+                    }"
+                />
+        </StackPanel>
 
         <Grid 
             Margin="0, 15, 0, 0"

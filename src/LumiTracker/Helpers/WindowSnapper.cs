@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.Helpers
 {
-    public delegate void OnGenshinWindowResizedCallback(int width, int height);
+    public delegate void OnGenshinWindowResizedCallback(int width, int height, bool isMinimized);
 
     // https://stackoverflow.com/questions/32806280/attach-wpf-window-to-the-window-of-another-process
     public class WindowSnapper
@@ -108,6 +108,9 @@ namespace LumiTracker.Helpers
         static extern bool GetClientRect(IntPtr hWnd, ref Rect lpRect);
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool IsIconic(IntPtr hWnd);
 
         private DispatcherTimer _timer;
         private Rect            _lastBounds;
@@ -116,6 +119,7 @@ namespace LumiTracker.Helpers
         private IntPtr          _src_hwnd;
         private IntPtr          _dst_hwnd;
         private bool            _bOutside;
+        private bool            _isFirstTick;
 
         public event OnGenshinWindowResizedCallback? GenshinWindowResized;
 
@@ -127,6 +131,7 @@ namespace LumiTracker.Helpers
             _src_hwnd       = new WindowInteropHelper(window).Handle;
             _dst_hwnd       = hwnd;
             _bOutside       = bOutside;
+            _isFirstTick    = true;
 
             GenshinWindowResized += window.OnGenshinWindowResized;
 
@@ -138,12 +143,14 @@ namespace LumiTracker.Helpers
 
         public void Attach()
         {
+            _isFirstTick = true;
             _timer.Start();
         }
 
         public void Detach()
         {
             _timer.Stop();
+            _isFirstTick = false;
         }
 
         public void SetbOutside(bool bOutside)
@@ -159,12 +166,13 @@ namespace LumiTracker.Helpers
         private void Tick()
         {
             var bounds = GetWindowBounds(_dst_hwnd);
-            if (bounds != _lastBounds)
+            if (_isFirstTick || bounds != _lastBounds)
             {
                 Rect clientRect = SnapToWindow(bounds);
                 if (bounds.Width != _lastBounds.Width || bounds.Height != _lastBounds.Height)
                 {
-                    GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height);
+                    bool isMinimized = IsIconic(_dst_hwnd);
+                    GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height, isMinimized);
                 }
                 _lastBounds = bounds;
             }
@@ -196,6 +204,7 @@ namespace LumiTracker.Helpers
             }
 
             _lastForeground = foregroundHwnd;
+            _isFirstTick = false;
         }
 
         private Rect SnapToWindow(Rect bounds)

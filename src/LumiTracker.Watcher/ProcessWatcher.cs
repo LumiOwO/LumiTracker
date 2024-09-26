@@ -68,9 +68,6 @@ namespace LumiTracker.Watcher
         public event ExceptionHandlerCallback?     ExceptionHandler;
 
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetForegroundWindow();
-
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
         [DllImport("user32.dll")]
@@ -105,13 +102,6 @@ namespace LumiTracker.Watcher
                 return res;
             }
             GenshinWindowFound?.Invoke();
-
-            var foregroundHwnd = GetForegroundWindow();
-            if (info.hwnd != foregroundHwnd)
-            {
-                Configuration.Logger.LogDebug($"Window for process '{processName}' (PID: {proc.Id}) is not foreground");
-                return res;
-            }
 
             Configuration.Logger.LogInformation($"Window title for process '{processName}' (PID: {proc.Id}): {info.title}");
             

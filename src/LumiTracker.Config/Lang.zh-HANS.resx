@@ -273,12 +273,16 @@
     <value>正在检测游戏窗口...</value>
     <comment/>
   </data>
-  <data name="GameWatcherState_WindowNotForeground" xml:space="preserve">
-    <value>游戏窗口未置于前台</value>
+  <data name="GameWatcherState_StartingWindowWatcher" xml:space="preserve">
+    <value>记牌器启动中...</value>
     <comment/>
   </data>
   <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
     <value>记牌器已启动</value>
+    <comment/>
+  </data>
+  <data name="MinimizedNotification" xml:space="preserve">
+    <value>当前画面无法捕获，请不要将游戏窗口最小化！</value>
     <comment/>
   </data>
   <data name="CaptureType" xml:space="preserve">
