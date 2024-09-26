@@ -95,7 +95,6 @@ class BitBlt(CaptureBase):
             client_width  = client_right - client_left
             client_height = client_bot   - client_top
             if client_width == 0 or client_height == 0:
-                self.frame_manager.prev_log_time = time.perf_counter()
                 return (None, BitBlt.MINIMIZED)
 
             if client_width != self.width or client_height != self.height:
