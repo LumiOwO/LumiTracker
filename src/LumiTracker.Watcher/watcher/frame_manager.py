@@ -38,7 +38,7 @@ class FrameManager:
         self.fps_interval    = cfg.LOG_INTERVAL / 10
 
     def Resize(self, client_width, client_height):
-        if client_height == 0:
+        if client_width == 0 or client_height == 0:
             return
 
         GTasks.OnResize(client_width, client_height)

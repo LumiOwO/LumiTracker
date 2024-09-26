@@ -66,7 +66,11 @@ class WindowsCapture(CaptureBase):
 
         left   = self.border_size[0]
         top    = self.border_size[1]
-        frame  = frame.crop(left, top, left + self.client_size[0], top + self.client_size[1])
+        right  = left + self.client_size[0]
+        bottom = top  + self.client_size[1]
+        if right > frame.width or bottom > frame.height:
+            return
+        frame  = frame.crop(left, top, right, bottom)
 
         self.OnFrameArrived(frame.frame_buffer)
 
