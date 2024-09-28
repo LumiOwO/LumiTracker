@@ -368,6 +368,11 @@ class ActionCardHandler:
         card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
         card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
 
+        card_id_a = card_ids_a[0]
+        card_id_d = card_ids_d[0]
+        dist_a    = dists_a[0]
+        dist_d    = dists_d[0]
+
         # _debug = True
         # if _debug:
         #     LogDebug(
@@ -375,8 +380,15 @@ class ActionCardHandler:
         #         name_d=CardName(card_ids_d[0], db), dists_d=dists_d[:3],
         #         )
 
+        # Debug: write card image buffer
+        # if card_id_a == 119 or card_id_d == 119:
+        #     import os
+        #     image = self.region_buffer
+        #     cv2.imwrite(os.path.join(cfg.debug_dir, "save", f"{ActionCardHandler.debug_cnt}.png"), image)
+        #     ActionCardHandler.debug_cnt += 1
+
         card_id = -1
-        dist    = max(dists_a[0], dists_d[0])
+        dist    = max(dist_a, dist_d)
         def PackedResult():
             # if card_id >= 0:
             #     LogDebug(
@@ -385,29 +397,22 @@ class ActionCardHandler:
             #         dists=(dists_a[:3], dists_d[:3]))
             return card_id, dist, (dists_a[:3], dists_d[:3])
 
-        card_id_a = self.RemapCardId(card_ids_a[0], db)
-        card_id_d = self.RemapCardId(card_ids_d[0], db)
-
-        threshold = cfg.threshold
+        # Early return if the distance is below the strict threshold.
+        # extra cards should be ignored here
+        threshold        = cfg.threshold
         strict_threshold = cfg.strict_threshold
-        dist_a = dists_a[0]
-        dist_d = dists_d[0]
-
-        # Debug: write card image buffer
-        # if card_id_a == 119 or card_id_d == 119:
-        #     import os
-        #     image = self.region_buffer
-        #     cv2.imwrite(os.path.join(cfg.debug_dir, "save", f"{ActionCardHandler.debug_cnt}.png"), image)
-        #     ActionCardHandler.debug_cnt += 1
-        
-        if dist_d <= strict_threshold: # dhash is more sensitive, so check it first
+        if dist_d <= strict_threshold and card_id_d < EActionCard.NumActions.value:
+            # dhash is more sensitive, so check it first
             card_id = card_id_d
             dist    = dist_d
             return PackedResult()
-        if dist_a <= strict_threshold:
+        if dist_a <= strict_threshold and card_id_a < EActionCard.NumActions.value:
             card_id = card_id_a
             dist    = dist_a
             return PackedResult()
+
+        card_id_a = self.RemapCardId(card_id_a, db)
+        card_id_d = self.RemapCardId(card_id_d, db)
 
         # Invalid if AHash detect different card from DHash
         # Note: Count Down To 3 may need extra logic
