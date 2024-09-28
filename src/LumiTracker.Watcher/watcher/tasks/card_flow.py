@@ -349,8 +349,18 @@ class CardFlowTask(CenterCropTask):
             if h < FILTER_H or w < FILTER_W_MIN or w > FILTER_W_MAX:
                 continue
             ratio = w / h
-            if ratio < 1.5:
+            if ratio < 1.6 or ratio > 1.9:
                 continue
+            # LogDebug(is_op=is_op, info="ratio passed")
+
+            # Approximate the contour
+            epsilon = 0.1 * cv2.arcLength(contour, True) # roughly to a rectangle
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            # LogDebug(is_op=is_op, edges=len(approx))
+            if len(approx) > 4: # not rectangle
+                continue
+
+            # LogDebug(is_op=is_op, ratio=ratio)
             bboxes.append(CropBox(x, y, x + w, y + h))
 
         if cfg.DEBUG:
