@@ -52,7 +52,7 @@ namespace LumiTracker.Helpers
             {
                 return none;
             }
-            return Configuration.Database["actions"]![card_id]![Configuration.Get<string>("lang")]!.ToString();
+            return Configuration.GetActionCardName(card_id);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

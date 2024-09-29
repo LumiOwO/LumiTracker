@@ -276,6 +276,24 @@ namespace LumiTracker.Config
             }
         }
 
+        public static string GetCharacterName(int c_id, bool is_short)
+        {
+            if (c_id >= (int)ECharacterCard.NumCharacters)
+                return "None";
+
+            string key = Get<string>("lang");
+            if (is_short) key += "_short";
+            return Database["characters"]![c_id]![key]!.ToString();
+        }
+
+        public static string GetActionCardName(int card_id)
+        {
+            if (card_id >= (int)EActionCard.NumActions)
+                return "None";
+
+            return Database["actions"]![card_id]![Get<string>("lang")]!.ToString();
+        }
+
         public static JToken? GetToken(string key)
         {
             JToken? value;

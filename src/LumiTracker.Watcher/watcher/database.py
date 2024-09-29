@@ -305,10 +305,12 @@ class Database:
         characters = [None] * num_characters
         for i, row in enumerate(data):
             character = {
-                "zh-HANS"    : row["zh-HANS"],
-                "en-US"      : row["en-US"],
-                "element"    : EElementType[row["element"]].value,
-                "is_monster" : True if row["is_monster"] == "1" else False,
+                "zh-HANS"      : row["zh-HANS"],
+                "en-US"        : row["en-US"],
+                "zh-HANS_short": row["zh-HANS_short"],
+                "en-US_short"  : row["en-US_short"],
+                "element"      : EElementType[row["element"]].value,
+                "is_monster"   : True if row["is_monster"] == "1" else False,
             }
             characters[i] = character
             talent_id = int(row["talent_id"])

@@ -434,6 +434,13 @@ namespace LumiTracker.ViewModels.Pages
                 bool success = DecodeShareCode(info, sharecode);
                 if (success)
                 {
+                    string deckName = "";
+                    foreach (int c_id in info.Characters)
+                    {
+                        if (deckName != "") deckName += "+";
+                        deckName += Configuration.GetCharacterName(c_id, is_short: true);
+                    }
+                    info.Name = deckName;
                     UserDeckList.DeckInfos.Add(info);
                     SelectedDeckIndex = UserDeckList.DeckInfos.Count - 1;
                     SaveDeckList();
