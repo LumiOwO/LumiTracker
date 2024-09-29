@@ -213,10 +213,10 @@ namespace LumiTracker.Models
             UnsupportedRatio?.Invoke();
         }
 
-        private void OnCaptureTestDone(string filename)
+        private void OnCaptureTestDone(string filename, int width, int height)
         {
             Configuration.Logger.LogDebug("[GameWatcher] OnCaptureTestDone");
-            CaptureTestDone?.Invoke(filename);
+            CaptureTestDone?.Invoke(filename, width, height);
         }
 
         private void OnLogFPS(float fps)

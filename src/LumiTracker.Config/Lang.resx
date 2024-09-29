@@ -301,8 +301,8 @@
     <value>* Only supports Chrome, Firefox, or Edge browsers with fullscreen mode.</value>
     <comment/>
   </data>
-  <data name="CaptureType_TestDoneTitle" xml:space="preserve">
-    <value>Capture Result</value>
+  <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
+    <value>Client Resolution : </value>
     <comment/>
   </data>
   <data name="MyPlayedCards" xml:space="preserve">

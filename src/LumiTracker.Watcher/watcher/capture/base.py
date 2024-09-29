@@ -70,6 +70,8 @@ class CaptureBase(ABC):
             LogInfo(
                 type=f"{ETaskType.CAPTURE_TEST.name}",
                 filename=filename,
+                width=frame_buffer.shape[1],
+                height=frame_buffer.shape[0],
                 )
 
         # frame_buffer: 4-channels, BGRX

@@ -269,11 +269,11 @@ namespace LumiTracker.ViewModels.Pages
             await _gameWatcher.DumpToBackend(Configuration.LogDir);
         }
 
-        public void OnCaptureTestDone(string filename)
+        public void OnCaptureTestDone(string filename, int width, int height)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Task task = _contentDialogService.ShowCaptureTestDialogAsync(filename);
+                Task task = _contentDialogService.ShowCaptureTestDialogAsync(filename, width, height);
             });
         }
 

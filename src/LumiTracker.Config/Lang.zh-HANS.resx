@@ -301,8 +301,8 @@
     <value>* 只支持Chrome、Firefox或Edge浏览器，且必须进入全屏模式</value>
     <comment/>
   </data>
-  <data name="CaptureType_TestDoneTitle" xml:space="preserve">
-    <value>截帧结果</value>
+  <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
+    <value>画面分辨率 : </value>
     <comment/>
   </data>
   <data name="MyPlayedCards" xml:space="preserve">

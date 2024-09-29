@@ -182,21 +182,16 @@ namespace LumiTracker.Services
             }
         }
 
-        public async Task<ContentDialogResult> ShowCaptureTestDialogAsync(string filename)
+        public async Task<ContentDialogResult> ShowCaptureTestDialogAsync(string filename, int width, int height)
         {
             // Init
-            var content = new Wpf.Ui.Controls.Image();
-            content.Source = new BitmapImage(new Uri(Path.Combine(Configuration.LogDir, filename), UriKind.Absolute));
-            content.CornerRadius = new CornerRadius(4);
-            content.BorderBrush  = new SolidColorBrush(Color.FromArgb(0x33, 0x00, 0x00, 0x00));
-            content.VerticalAlignment = VerticalAlignment.Center;
-            content.Stretch   = Stretch.Uniform;
-            content.MaxHeight = 350;
+            var content = new CaptureTestDialogContent();
+            content.CapturedImage.Source = new BitmapImage(new Uri(Path.Combine(Configuration.LogDir, filename), UriKind.Absolute));
 
             // Show dialog
             var dialog = new ContentDialog()
             {
-                Title   = LocalizationSource.Instance["CaptureType_TestDoneTitle"],
+                Title   = $"{LocalizationSource.Instance["CaptureType_FrameSizePrompt"]} {width} x {height}",
                 Content = content,
                 CloseButtonText = LocalizationSource.Instance["OK"],
                 CloseButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
@@ -204,6 +199,7 @@ namespace LumiTracker.Services
                 IsPrimaryButtonEnabled   = false,
                 IsSecondaryButtonEnabled = false,
             };
+            dialog.DialogMargin = new Thickness(0, -20, 0, -5);
             ContentDialogResult result = await MainService.ShowAsync(dialog, default);
 
             return result;

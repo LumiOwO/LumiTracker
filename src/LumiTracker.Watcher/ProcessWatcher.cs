@@ -43,7 +43,7 @@ namespace LumiTracker.Watcher
 
     public delegate void OnUnsupportedRatioCallback();
 
-    public delegate void OnCaptureTestDoneCallback(string filename);
+    public delegate void OnCaptureTestDoneCallback(string filename, int width, int height);
 
     public delegate void OnLogFPSCallback(float fps);
 
@@ -389,7 +389,9 @@ namespace LumiTracker.Watcher
             else if (task_type == ETaskType.CAPTURE_TEST)
             {
                 string filename = message_data["filename"]!.ToObject<string>()!;
-                CaptureTestDone?.Invoke(filename);
+                int width  = message_data["width"]!.ToObject<int>();
+                int height = message_data["height"]!.ToObject<int>();
+                CaptureTestDone?.Invoke(filename, width, height);
             }
             else if (task_type == ETaskType.LOG_FPS)
             {
