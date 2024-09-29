@@ -123,9 +123,9 @@
             };
         }
 
-        public static bool IsCloudGame(EClientType clientType)
+        public static bool BitBltUnavailable(EClientType clientType)
         {
-            return (clientType == EClientType.CloudPC) || (clientType == EClientType.CloudWeb);
+            return (clientType == EClientType.CloudPC) || (clientType == EClientType.CloudWeb) || (clientType == EClientType.Video);
         }
     }
 }

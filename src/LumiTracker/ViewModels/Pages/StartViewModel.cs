@@ -243,7 +243,7 @@ namespace LumiTracker.ViewModels.Pages
             GameWatcherState = EGameWatcherState.NoWindowFound;
 
             Configuration.Set("client_type",  SelectedClientType.ToString(), auto_save: false);
-            if (!EnumHelpers.IsCloudGame(SelectedClientType))
+            if (!EnumHelpers.BitBltUnavailable(SelectedClientType))
             {
                 Configuration.Set("capture_type", SelectedCaptureType.ToString(), auto_save: false);
             }

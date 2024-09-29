@@ -265,7 +265,7 @@ namespace LumiTracker.Watcher
 
             //////////////////////////
             // Prepare start info
-            string captureType = EnumHelpers.IsCloudGame(clientType) ?
+            string captureType = EnumHelpers.BitBltUnavailable(clientType) ?
                 ECaptureType.WindowsCapture.ToString() :
                 Configuration.Get<ECaptureType>("capture_type").ToString();
 
