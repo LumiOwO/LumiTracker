@@ -115,7 +115,7 @@
             {
                 EClientType.YuanShen => ["YuanShen.exe"],
                 EClientType.Global   => ["GenshinImpact.exe"],
-                EClientType.CloudPC  => ["Genshin Impact Cloud Game.exe" /*,"PotPlayerMini64.exe"*/],
+                EClientType.CloudPC  => ["Genshin Impact Cloud Game.exe"],
                 EClientType.CloudWeb => ["chrome.exe", "firefox.exe", "msedge.exe"],
                 EClientType.Video    => ["PotPlayerMini64.exe"],
                 EClientType.WeMeet   => ["wemeetapp.exe"],

@@ -178,7 +178,7 @@ namespace LumiTracker.ViewModels.Windows
         {
             EClientType clientType = Configuration.Get<EClientType>("client_type");
             // Ignore MessageBox popup when client is web browser
-            if (clientType != EClientType.CloudWeb)
+            if (clientType != EClientType.CloudWeb && clientType != EClientType.WeMeet)
             {
                 System.Windows.MessageBox.Show(
                     $"{LocalizationSource.Instance["UnsupportedRatioWarning"]}\n{LocalizationSource.Instance["SupportedRatioInfo"]}", 

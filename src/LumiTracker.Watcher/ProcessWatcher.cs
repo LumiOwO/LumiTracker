@@ -73,6 +73,30 @@ namespace LumiTracker.Watcher
         [DllImport("user32.dll")]
         private static extern bool IsWindow(IntPtr hWnd);
 
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
         public ProcessWatcher()
         {
 
@@ -82,60 +106,93 @@ namespace LumiTracker.Watcher
         {
             var res = new WindowInfo();
 
-            var processes = GetProcessByName(processName);
-            if (processes.Count == 0)
+            //////////////////////////
+            // Find process id by name
+            var pids = new HashSet<uint>();
+            foreach (var proc in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(processName)))
+            {
+                pids.Add((uint)proc.Id);
+            }
+            if (pids.Count == 0)
             {
                 Configuration.Logger.LogDebug($"No process found with name: {processName}");
                 return res;
             }
+            //Configuration.Logger.LogDebug($"Found {pids.Count} processes with name: {processName}");
 
-            if (processes.Count > 1)
+            //////////////////////////
+            // Find hwnd by process id
+            var hwnds = GetWindowHandlesByPids(pids);
+            if (hwnds.Count == 0 || hwnds[0] == 0)
             {
-                Configuration.Logger.LogWarning($"Found {processes.Count} processes with name: {processName}, using the first one");
-            }
-            var proc = processes[0];
-
-            var info = GetMainWindowInfo(proc);
-            if (info.hwnd == 0)
-            {
-                Configuration.Logger.LogDebug($"No windows found for process '{processName}' (PID: {proc.Id})");
+                Configuration.Logger.LogDebug($"No window found for process '{processName}' (PIDs: [{string.Join(',', pids)}])");
                 return res;
             }
+            // GetProcessByName() ensures that the first process has the largest window
+            var hwnd = hwnds[0];
+            if (hwnds.Count > 1)
+            {
+                Configuration.Logger.LogWarning($"Found {hwnds.Count} windows with name: {processName}, using the largest one.");
+            }
+
+            //////////////////////////
+            // Get window info by hwnd
+            var info = GetMainWindowInfo(hwnd);
             GenshinWindowFound?.Invoke();
 
-            Configuration.Logger.LogInformation($"Window title for process '{processName}' (PID: {proc.Id}): {info.title}");
+            Configuration.Logger.LogInformation($"Window title for process '{processName}' (hwnd: {hwnd}): {info.title}");
             
             res = info;
             return res;
         }
 
-        private List<Process> GetProcessByName(string processName)
+        private List<IntPtr> GetWindowHandlesByPids(HashSet<uint> processIds)
         {
-            var processes = new List<Process>();
-            foreach (var proc in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(processName)))
+            int largestArea  = 0;
+            int largestIndex = 0;
+
+            var windowHandles = new List<IntPtr>();
+            EnumWindows((hwnd, lParam) =>
             {
-                if (proc.MainWindowHandle != IntPtr.Zero)
+                uint id;
+                GetWindowThreadProcessId(hwnd, out id);
+                if (!IsWindowVisible(hwnd) || !processIds.Contains(id)) return true; // Continue enumerating
+
+                var rect = new RECT();
+                GetClientRect(hwnd, out rect);
+                int area = (rect.Right - rect.Left) * (rect.Bottom - rect.Top);
+                // Check if it's the largest
+                if (area > largestArea)
                 {
-                    processes.Add(proc);
+                    largestArea  = area;
+                    largestIndex = windowHandles.Count;
                 }
+                //Configuration.Logger.LogDebug($"{area}, {hwnd}");
+
+                windowHandles.Add(hwnd);
+                return true; // Continue enumerating
+            }, IntPtr.Zero);
+
+
+            // Swap the largest window to index 0
+            if (largestIndex > 0)
+            {
+                IntPtr temp = windowHandles[largestIndex];
+                windowHandles[largestIndex] = windowHandles[0];
+                windowHandles[0] = temp;
             }
 
-            return processes;
+            return windowHandles;
         }
 
-        private WindowInfo GetMainWindowInfo(Process process)
+        private WindowInfo GetMainWindowInfo(IntPtr hwnd)
         {
             var info = new WindowInfo();
 
-            if (process != null)
+            if (IsWindow(hwnd))
             {
-                IntPtr hwnd = process.MainWindowHandle;
-                if (IsWindow(hwnd))
-                {
-                    info.hwnd  = hwnd;
-                    info.title = GetWindowText(hwnd);
-                }
-                Configuration.Logger.LogDebug($"Main window: hwnd={info.hwnd}, title={info.title}");
+                info.hwnd  = hwnd;
+                info.title = GetWindowText(hwnd);
             }
 
             return info;
