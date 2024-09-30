@@ -1,3 +1,21 @@
+# \[[v1.2.5](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.5)\] - 2024.09.30
+
+### 体验优化
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 优化截帧测试按钮，并显示实时帧率，方便大家确认记牌功能是否正常启动
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 新增牌组时，以角色的名称组合作为牌组的默认名称
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 支持网页版云原神
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ OBS等录屏软件可以正常捕获到记牌器窗口了
+
+### Bug修复
+- ${\color{#ed8e06}{\textbf{[传说]}}}$ 可以正确处理「草与智慧」了
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 修复了连续多次过牌时，第二次及以后的牌没有被记录到的问题
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了卡牌识别失败后程序崩溃的问题
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了窗口最小化后，恢复窗口大小时有概率闪退的问题
+
+### 程序优化
+- ${\color{#ed8e06}{\textbf{[传说]}}}$ 修复WindowsCapture截帧方式下，报错无堆栈信息导致无法定位出错位置的问题
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 重构中心区域卡牌的检测逻辑，提升识别准确度
+
 # \[[v1.2.4](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.4)\] - 2024.09.18
 ### Bug修复
 - ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了金色的「骑士团图书馆」无法被识别的问题

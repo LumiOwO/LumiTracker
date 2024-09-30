@@ -159,10 +159,11 @@ namespace LumiTracker.Config
             string message  = formatter(state, exception);
             message = LogHelper.AnsiRegex.Replace(message, string.Empty); // Filter ansi color text
 
-            _writer.WriteLine($"{DateTime.Now} {scope}{levelStr}> {message}");
+            string timeStr = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
+            _writer.WriteLine($"{scope}{timeStr} {levelStr}> {message}");
             if (exception != null)
             {
-                _writer.WriteLine($"{DateTime.Now} {scope}{levelStr}> {exception.ToString()}");
+                _writer.WriteLine($"{scope}{timeStr} {levelStr}> {exception.ToString()}");
             }
         }
     }
@@ -216,16 +217,16 @@ namespace LumiTracker.Config
                     scopeString = stringWriter.ToString();
                     if (scopeString.Length > 0)
                     {
-                        scopeString = scopeString.Substring(1);
+                        scopeString = scopeString.Substring(1) + " ";
                     }
                 }
             }
 
             // Set the color for the log output
-            textWriter.Write($"{DateTime.Now.ToString("HH:mm:ss")} {scopeString}");
+            textWriter.Write($"{scopeString}");
             textWriter.Write(LogHelper.GetAnsiColor(logEntry.LogLevel));
             {
-                textWriter.Write($"{LogHelper.GetShortLevelStr(logEntry.LogLevel)}>");
+                textWriter.Write($"{DateTime.Now.ToString("HH:mm:ss.fff")} {LogHelper.GetShortLevelStr(logEntry.LogLevel)}>");
             }
             textWriter.Write(LogHelper.AnsiEnd);
             textWriter.WriteLine($" {logEntry.Formatter(logEntry.State, logEntry.Exception)}");
