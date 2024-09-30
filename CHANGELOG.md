@@ -1,3 +1,6 @@
+# \[[v1.2.6](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.6)\] - 2024.10.01
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复「草与智慧」漏掉了摸到的第一张牌的问题
+
 # \[[v1.2.5](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.5)\] - 2024.09.30
 
 ### 体验优化

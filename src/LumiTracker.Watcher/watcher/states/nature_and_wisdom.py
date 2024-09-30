@@ -85,6 +85,7 @@ class GameStateNatureAndWisdom(GameState):
         if self.drawn_card == -1:
             card_id = GTasks.NatureAndWisdom_Draw.cards[0]
             if card_id != -1:
+                GTasks.NatureAndWisdom_Draw.Flush()
                 self.drawn_card = card_id
                 self.drawn_time = time.perf_counter()
             return
