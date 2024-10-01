@@ -42,6 +42,12 @@ namespace LumiTracker.Views.Windows
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
 
+        [DllImport("user32.dll")]
+        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
         [StructLayout(LayoutKind.Sequential)]
         public struct MARGINS
         {
@@ -55,6 +61,13 @@ namespace LumiTracker.Views.Windows
 
             MARGINS margins = new MARGINS() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
             DwmExtendFrameIntoClientArea(hwnd, ref margins);
+
+            // Set the window to be layered, so it can be captured by OBS with AllowsTransparency="True"
+            // Note: OBS must use Windows Capture to capture this window
+            const int GWL_EXSTYLE = -20;
+            const int WS_EX_LAYERED = 0x80000;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
         }
 
         public void AttachTo(IntPtr hwnd)

@@ -1,3 +1,6 @@
+# \[[v1.2.7](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.7)\] - 2024.10.01
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了记牌器界面显示在游戏窗口内时，无法点击到回合结束按钮的问题
+
 # \[[v1.2.6](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.6)\] - 2024.10.01
 - ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复「草与智慧」漏掉了摸到的第一张牌的问题
 

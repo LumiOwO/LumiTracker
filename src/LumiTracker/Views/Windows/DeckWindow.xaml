@@ -14,6 +14,8 @@
     Title="{svs:Localization DeckWindowTitle}" 
     ShowInTaskbar="False"
     WindowStyle="None"
+    AllowsTransparency="True"
+    Background="Transparent"
     ResizeMode="NoResize"
     Height="600" Width="400">
 
