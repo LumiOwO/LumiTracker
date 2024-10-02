@@ -112,13 +112,13 @@ class Database:
 
     def _UpdateActionCards(self, save_image_assets):
         # sharables
-        with open(os.path.join(cfg.cards_dir, "actions.csv"), 
+        with open(os.path.join(cfg.cards_dir, "generated", "actions.csv"), 
                     mode='r', newline='', encoding='utf-8') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             csv_data = [row for row in csv_reader]
         num_sharable = len(csv_data)
         # tokens
-        with open(os.path.join(cfg.cards_dir, "tokens.csv"), 
+        with open(os.path.join(cfg.cards_dir, "generated", "tokens.csv"), 
                     mode='r', newline='', encoding='utf-8') as tokens_file:
             tokens_reader = csv.DictReader(tokens_file)
             for row in tokens_reader:
@@ -295,7 +295,7 @@ class Database:
         return num_sharable
 
     def _UpdateCharacters(self, save_image_assets):
-        with open(os.path.join(cfg.cards_dir, "characters.csv"), 
+        with open(os.path.join(cfg.cards_dir, "generated", "characters.csv"), 
                     mode='r', newline='', encoding='utf-8') as csv_file:
             reader = csv.DictReader(csv_file)
             data = [row for row in reader]
@@ -417,7 +417,7 @@ class Database:
 
     def _UpdateExtraInfos(self):
         # share code
-        with open(os.path.join(cfg.cards_dir, "share_code.csv"), 
+        with open(os.path.join(cfg.cards_dir, "generated", "share_code.csv"), 
                     mode='r', newline='', encoding='utf-8') as share_code_file:
             share_code_reader = csv.DictReader(share_code_file)
             share_code_data = [row for row in share_code_reader]
@@ -434,7 +434,7 @@ class Database:
         self.data["share_to_internal"] = share_to_internal
 
         # artifacts
-        with open(os.path.join(cfg.cards_dir, "artifacts.csv"), 
+        with open(os.path.join(cfg.cards_dir, "generated", "artifacts.csv"), 
                     mode='r', newline='', encoding='utf-8') as artifacts_file:
             artifacts_reader = csv.DictReader(artifacts_file)
             artifacts_data = [row for row in artifacts_reader]
