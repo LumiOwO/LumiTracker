@@ -60,45 +60,45 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string"/>
-              <xsd:attribute name="type" type="xsd:string"/>
-              <xsd:attribute name="mimetype" type="xsd:string"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string"/>
-              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -119,365 +119,365 @@
   </resheader>
   <data name="AppName" xml:space="preserve">
     <value>LumiTracker</value>
-    <comment/>
+    <comment />
   </data>
   <data name="AppSubTitle" xml:space="preserve">
     <value>七圣召唤记牌器</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeckWindowTitle" xml:space="preserve">
     <value>记牌界面</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Start" xml:space="preserve">
     <value>启动</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Rank" xml:space="preserve">
     <value>段位</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Loading" xml:space="preserve">
     <value>加载中...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="About" xml:space="preserve">
     <value>关于</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Settings" xml:space="preserve">
     <value>设置</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Update" xml:space="preserve">
     <value>更新</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CheckUpdatesOnStartup" xml:space="preserve">
     <value>启动时检查更新</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SubscribeToBetaUpdates" xml:space="preserve">
     <value>订阅Beta版更新</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
     <value>检查更新</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Fetching" xml:space="preserve">
     <value>获取最新版本...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_AlreadyLatest" xml:space="preserve">
     <value>已是最新版本</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_UpdateAvailable" xml:space="preserve">
     <value>检测到新版本</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
     <value>更新失败，请重试；若仍未成功，请尝试以管理员身份运行</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Manual" xml:space="preserve">
     <value>手动更新</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
     <value>立即更新</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Later" xml:space="preserve">
     <value>暂不更新</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Connecting" xml:space="preserve">
     <value>连接中...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Retrying" xml:space="preserve">
     <value>网络错误，重新连接中...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Downloading" xml:space="preserve">
     <value>下载中...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Unpacking" xml:space="preserve">
     <value>解压中...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Complete" xml:space="preserve">
     <value>更新完成！</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Language" xml:space="preserve">
     <value>语言</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClosingBehavior" xml:space="preserve">
     <value>关闭窗口时</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClosingBehavior_Quit" xml:space="preserve">
     <value>退出程序</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClosingBehavior_Minimize" xml:space="preserve">
     <value>最小化到系统托盘</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Theme" xml:space="preserve">
     <value>主题</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Theme_Light" xml:space="preserve">
     <value>浅色</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Theme_Dark" xml:space="preserve">
     <value>深色</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Tray_Quit" xml:space="preserve">
     <value>退出</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Tray_Home" xml:space="preserve">
     <value>主界面</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType" xml:space="preserve">
     <value>客户端类型</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType_YuanShen" xml:space="preserve">
     <value>原神</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType_Global" xml:space="preserve">
     <value>原神国际服</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType_CloudPC" xml:space="preserve">
     <value>云·原神-客户端</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType_CloudWeb" xml:space="preserve">
     <value>云·原神-网页版</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
     <value>正在检测游戏窗口...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GameWatcherState_StartingWindowWatcher" xml:space="preserve">
     <value>记牌器启动中...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
     <value>记牌器已启动</value>
-    <comment/>
+    <comment />
   </data>
   <data name="MinimizedNotification" xml:space="preserve">
     <value>当前画面无法捕获，请不要将游戏窗口最小化！</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CaptureType" xml:space="preserve">
     <value>截帧方法</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CaptureType_Test" xml:space="preserve">
     <value>测试</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CaptureType_CloudGameHint" xml:space="preserve">
     <value>* 云原神只能用这种截帧方法</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CaptureType_CloudGameHint_Web" xml:space="preserve">
     <value>* 只支持Chrome、Firefox或Edge浏览器，且必须进入全屏模式</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
     <value>画面分辨率 : </value>
-    <comment/>
+    <comment />
   </data>
   <data name="MyPlayedCards" xml:space="preserve">
     <value>我方出牌</value>
-    <comment/>
+    <comment />
   </data>
   <data name="OpPlayedCards" xml:space="preserve">
     <value>对方出牌</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Instruction" xml:space="preserve">
     <value>使用说明</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Instruction1" xml:space="preserve">
     <value>如果检测不到对局开始，请尝试更换截帧方法；</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Instruction2" xml:space="preserve">
     <value>请不要将游戏窗口最小化！最小化时无法捕获窗口内容；</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Instruction3" xml:space="preserve">
-    <value>全屏模式下，需要在游戏内的设置 -> 图像 -> 显示模式中，将「独占全屏」改为「无边框」。</value>
-    <comment/>
+    <value>全屏模式下，需要在游戏内的设置 -&gt; 图像 -&gt; 显示模式中，将「独占全屏」改为「无边框」。</value>
+    <comment />
   </data>
   <data name="SupportedRatioInfo" xml:space="preserve">
 <value>目前支持的窗口比例：
 - 16:9
 - 16:10
 - 21:9 系列（包括 64:27、43:18、12:5）</value>
-    <comment/>
+    <comment />
   </data>
   <data name="FreeDeclaration" xml:space="preserve">
     <value>此软件为开源软件，并且完全免费。如果你是付费获得的，说明你被骗了！</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SafeDeclaration" xml:space="preserve">
     <value>工作原理基于计算机视觉，不涉及任何对游戏本体内存数据的读取和修改。</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UnsupportedRatioWarning" xml:space="preserve">
     <value>当前游戏窗口的分辨率暂时不受支持。</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Round" xml:space="preserve">
     <value>回合</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GameNotStarted" xml:space="preserve">
     <value>对局未开始</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ShowUIOutside" xml:space="preserve">
     <value>记牌器界面显示在窗口外侧</value>
-    <comment/>
+    <comment />
   </data>
   <data name="NotShowAgain" xml:space="preserve">
     <value>不再显示此对话框</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClosingDialogTitle" xml:space="preserve">
     <value>关闭窗口</value>
-    <comment/>
+    <comment />
   </data>
   <data name="OK" xml:space="preserve">
     <value>确定</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>取消</value>
-    <comment/>
+    <comment />
   </data>
   <data name="MyDeck" xml:space="preserve">
     <value>我的牌库</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeckPageTitle" xml:space="preserve">
     <value>牌组</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DefaultDeckName" xml:space="preserve">
     <value>&lt;未命名牌组&gt;</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SetAsActiveDeck" xml:space="preserve">
     <value>设为出战牌组</value>
-    <comment/>
+    <comment />
   </data>
   <data name="EditDeckName" xml:space="preserve">
     <value>编辑牌组名称</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ReimportDeck" xml:space="preserve">
     <value>重新导入牌组</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ShareDeck" xml:space="preserve">
     <value>分享牌组</value>
-    <comment/>
+    <comment />
   </data>
   <data name="AddNewDeck" xml:space="preserve">
     <value>添加牌组</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeleteDeck" xml:space="preserve">
     <value>删除牌组</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DocumentationLink" xml:space="preserve">
     <value>说明文档</value>
-    <comment/>
+    <comment />
   </data>
   <data name="FeedbackLink" xml:space="preserve">
     <value>问题反馈</value>
-    <comment/>
+    <comment />
   </data>
   <data name="BiliBiliLink" xml:space="preserve">
     <value>B站主页</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GithubLink" xml:space="preserve">
     <value>Github</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CopyToClipboard" xml:space="preserve">
     <value>分享码已复制到剪贴板</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Paste" xml:space="preserve">
     <value>粘贴</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ImportDeck_Title" xml:space="preserve">
     <value>使用分享码导入牌组</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ImportDeck_Placeholder" xml:space="preserve">
     <value>请输入分享码</value>
-    <comment/>
+    <comment />
   </data>
   <data name="EditDeckName_Title" xml:space="preserve">
     <value>编辑牌组名称</value>
-    <comment/>
+    <comment />
   </data>
   <data name="EditDeckName_Placeholder" xml:space="preserve">
-    <value>请输入备注名</value>
-    <comment/>
+    <value>在此输入你的牌组名称</value>
+    <comment />
   </data>
   <data name="InvalidSharingCode_Title" xml:space="preserve">
     <value>分享码导入失败</value>
-    <comment/>
+    <comment />
   </data>
   <data name="InvalidSharingCode_Message" xml:space="preserve">
     <value>无效的分享码：</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SetAsActiveSuccess_Title" xml:space="preserve">
     <value>设置成功</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SetAsActiveSuccess_Message" xml:space="preserve">
     <value>当前出战牌组：</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeleteConfirm_Title" xml:space="preserve">
     <value>确定要删除这套牌组吗？</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeleteConfirm_Message" xml:space="preserve">
     <value>牌组名称：</value>
-    <comment/>
+    <comment />
   </data>
   <data name="None" xml:space="preserve">
     <value>无</value>
-    <comment/>
+    <comment />
   </data>
 </root>

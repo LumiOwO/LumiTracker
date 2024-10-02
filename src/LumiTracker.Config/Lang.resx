@@ -60,45 +60,45 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string"/>
-              <xsd:attribute name="type" type="xsd:string"/>
-              <xsd:attribute name="mimetype" type="xsd:string"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string"/>
-              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -119,361 +119,365 @@
   </resheader>
   <data name="AppName" xml:space="preserve">
     <value>LumiTracker</value>
-    <comment/>
+    <comment />
   </data>
   <data name="AppSubTitle" xml:space="preserve">
     <value>Genshin TCG Deck Tracker</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeckWindowTitle" xml:space="preserve">
     <value>Deck Window</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Rank" xml:space="preserve">
     <value>Rank</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Loading" xml:space="preserve">
     <value>Loading...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="About" xml:space="preserve">
     <value>About</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Update" xml:space="preserve">
     <value>Update</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CheckUpdatesOnStartup" xml:space="preserve">
     <value>Check Updates on Startup</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SubscribeToBetaUpdates" xml:space="preserve">
     <value>Subscribe to Beta Updates</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
     <value>Check For Update</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Fetching" xml:space="preserve">
     <value>Fetching latest version...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_AlreadyLatest" xml:space="preserve">
     <value>Already latest</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_UpdateAvailable" xml:space="preserve">
     <value>An update is available</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
-    <value>Update failed, please retry; If it still fails, try running as admin.</value>
-    <comment/>
+    <value>Update failed, please retry; If it still fails, try running as admin</value>
+    <comment />
   </data>
   <data name="UpdatePrompt_Manual" xml:space="preserve">
     <value>Manual Update</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
     <value>Update Now</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Later" xml:space="preserve">
     <value>Remind Me Later</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Connecting" xml:space="preserve">
     <value>Connecting...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Retrying" xml:space="preserve">
     <value>Network Error, Retrying...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Downloading" xml:space="preserve">
     <value>Downloading...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Unpacking" xml:space="preserve">
     <value>Unpacking...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UpdatePrompt_Complete" xml:space="preserve">
     <value>Update Complete!</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Language" xml:space="preserve">
     <value>Language</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClosingBehavior" xml:space="preserve">
     <value>Close Behavior</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClosingBehavior_Quit" xml:space="preserve">
     <value>Quit</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClosingBehavior_Minimize" xml:space="preserve">
     <value>Minimize to System Tray</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Theme" xml:space="preserve">
     <value>Theme</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Theme_Light" xml:space="preserve">
     <value>Light</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Theme_Dark" xml:space="preserve">
     <value>Dark</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Tray_Quit" xml:space="preserve">
     <value>Quit</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Tray_Home" xml:space="preserve">
     <value>Home</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType" xml:space="preserve">
     <value>Client Type</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType_YuanShen" xml:space="preserve">
     <value>[CN] YuanShen</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType_Global" xml:space="preserve">
     <value>[Global] Genshin</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType_CloudPC" xml:space="preserve">
     <value>[CN] Cloud PC</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClientType_CloudWeb" xml:space="preserve">
     <value>[CN] Cloud Web</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
     <value>Detecting game window...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GameWatcherState_StartingWindowWatcher" xml:space="preserve">
     <value>Launching LumiTracker...</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
     <value>LumiTracker started</value>
-    <comment/>
+    <comment />
   </data>
   <data name="MinimizedNotification" xml:space="preserve">
-    <value>Screen capture is not possible when the game window is minimized</value>
-    <comment/>
+    <value>Screen capture is not possible when the game window is minimized!</value>
+    <comment />
   </data>
   <data name="CaptureType" xml:space="preserve">
     <value>Capture Type</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CaptureType_Test" xml:space="preserve">
     <value>Test</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CaptureType_CloudGameHint" xml:space="preserve">
-    <value>* This is the only available method for cloud game.</value>
-    <comment/>
+    <value>* This is the only available method for cloud game</value>
+    <comment />
   </data>
   <data name="CaptureType_CloudGameHint_Web" xml:space="preserve">
-    <value>* Only supports Chrome, Firefox, or Edge browsers with fullscreen mode.</value>
-    <comment/>
+    <value>* Only supports Chrome, Firefox, or Edge browsers with fullscreen mode</value>
+    <comment />
   </data>
   <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
     <value>Client Resolution : </value>
-    <comment/>
+    <comment />
   </data>
   <data name="MyPlayedCards" xml:space="preserve">
     <value>My Played</value>
-    <comment/>
+    <comment />
   </data>
   <data name="OpPlayedCards" xml:space="preserve">
     <value>Op Played</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Instruction" xml:space="preserve">
     <value>Instruction</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Instruction1" xml:space="preserve">
     <value>If duel not detected, consider trying a different capture method;</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Instruction2" xml:space="preserve">
     <value>Do not minimize the game window! Capture is not available when minimized;</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Instruction3" xml:space="preserve">
-    <value>If fullscreen, change "Fullscreen" to "Borderless" in Genshin's Settings -> Graphics -> Display Mode;</value>
-    <comment/>
+    <value>If fullscreen, change "Fullscreen" to "Borderless" in Genshin's Settings -&gt; Graphics -&gt; Display Mode.</value>
+    <comment />
   </data>
   <data name="SupportedRatioInfo" xml:space="preserve">
 <value>Supported aspect ratios:
 - 16:9
 - 16:10
 - 21:9 series (including 64:27, 43:18, 12:5)</value>
-    <comment/>
+    <comment />
   </data>
   <data name="FreeDeclaration" xml:space="preserve">
     <value>This software is open-source and completely free. If you paid for it, you have been scammed!</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SafeDeclaration" xml:space="preserve">
     <value>LumiTracker uses computer vision without reading or modifying the game's memory.</value>
-    <comment/>
+    <comment />
   </data>
   <data name="UnsupportedRatioWarning" xml:space="preserve">
     <value>Current resolution of game window is not supported.</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Round" xml:space="preserve">
     <value>Round</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GameNotStarted" xml:space="preserve">
     <value>Duel Not Started</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ShowUIOutside" xml:space="preserve">
     <value>Display UI outside the window</value>
-    <comment/>
+    <comment />
   </data>
   <data name="NotShowAgain" xml:space="preserve">
     <value>Don't show this again</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ClosingDialogTitle" xml:space="preserve">
     <value>Exit Application</value>
-    <comment/>
+    <comment />
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
-    <comment/>
+    <comment />
   </data>
   <data name="MyDeck" xml:space="preserve">
     <value>My Deck</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeckPageTitle" xml:space="preserve">
     <value>Deck</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DefaultDeckName" xml:space="preserve">
     <value>&lt;Untitled&gt;</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SetAsActiveDeck" xml:space="preserve">
     <value>Set Active</value>
-    <comment/>
+    <comment />
   </data>
   <data name="EditDeckName" xml:space="preserve">
     <value>Edit Name</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ReimportDeck" xml:space="preserve">
     <value>Reimport</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ShareDeck" xml:space="preserve">
     <value>Share</value>
-    <comment/>
+    <comment />
   </data>
   <data name="AddNewDeck" xml:space="preserve">
     <value>Import</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeleteDeck" xml:space="preserve">
     <value>Delete</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DocumentationLink" xml:space="preserve">
     <value>Documentation</value>
-    <comment/>
+    <comment />
   </data>
   <data name="FeedbackLink" xml:space="preserve">
     <value>Feedback</value>
-    <comment/>
+    <comment />
   </data>
   <data name="BiliBiliLink" xml:space="preserve">
     <value>Bilibili</value>
-    <comment/>
+    <comment />
   </data>
   <data name="GithubLink" xml:space="preserve">
     <value>Github</value>
-    <comment/>
+    <comment />
   </data>
   <data name="CopyToClipboard" xml:space="preserve">
     <value>Sharing Code copied to the clipboard</value>
-    <comment/>
+    <comment />
   </data>
   <data name="Paste" xml:space="preserve">
     <value>Paste</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ImportDeck_Title" xml:space="preserve">
     <value>Use Sharing Code to import deck</value>
-    <comment/>
+    <comment />
   </data>
   <data name="ImportDeck_Placeholder" xml:space="preserve">
     <value>Please enter Sharing Code</value>
-    <comment/>
+    <comment />
   </data>
   <data name="EditDeckName_Title" xml:space="preserve">
     <value>Edit Deck Name</value>
-    <comment/>
+    <comment />
+  </data>
+  <data name="EditDeckName_Placeholder" xml:space="preserve">
+    <value>Enter Your Deck Name Here</value>
+    <comment />
   </data>
   <data name="InvalidSharingCode_Title" xml:space="preserve">
     <value>Failed to import the Sharing Code</value>
-    <comment/>
+    <comment />
   </data>
   <data name="InvalidSharingCode_Message" xml:space="preserve">
-    <value>Invalid Sharing Code: </value>
-    <comment/>
+    <value>Invalid Sharing Code:</value>
+    <comment />
   </data>
   <data name="SetAsActiveSuccess_Title" xml:space="preserve">
     <value>Success</value>
-    <comment/>
+    <comment />
   </data>
   <data name="SetAsActiveSuccess_Message" xml:space="preserve">
-    <value>Current Active Deck: </value>
-    <comment/>
+    <value>Current Active Deck:</value>
+    <comment />
   </data>
   <data name="DeleteConfirm_Title" xml:space="preserve">
     <value>Delete this Deck?</value>
-    <comment/>
+    <comment />
   </data>
   <data name="DeleteConfirm_Message" xml:space="preserve">
-    <value>Deck Name: </value>
-    <comment/>
+    <value>Deck Name:</value>
+    <comment />
   </data>
   <data name="None" xml:space="preserve">
     <value>None</value>
-    <comment/>
+    <comment />
   </data>
 </root>

@@ -61,6 +61,24 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to About.
+        /// </summary>
+        public static string About {
+            get {
+                return ResourceManager.GetString("About", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import.
+        /// </summary>
+        public static string AddNewDeck {
+            get {
+                return ResourceManager.GetString("AddNewDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LumiTracker.
         /// </summary>
         public static string AppName {
@@ -70,11 +88,788 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to LumiTracker - Genshin TCG Deck Tracker.
+        ///   Looks up a localized string similar to Genshin TCG Deck Tracker.
         /// </summary>
-        public static string AppTitle {
+        public static string AppSubTitle {
             get {
-                return ResourceManager.GetString("AppTitle", resourceCulture);
+                return ResourceManager.GetString("AppSubTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bilibili.
+        /// </summary>
+        public static string BiliBiliLink {
+            get {
+                return ResourceManager.GetString("BiliBiliLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Capture Type.
+        /// </summary>
+        public static string CaptureType {
+            get {
+                return ResourceManager.GetString("CaptureType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to * This is the only available method for cloud game.
+        /// </summary>
+        public static string CaptureType_CloudGameHint {
+            get {
+                return ResourceManager.GetString("CaptureType_CloudGameHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to * Only supports Chrome, Firefox, or Edge browsers with fullscreen mode.
+        /// </summary>
+        public static string CaptureType_CloudGameHint_Web {
+            get {
+                return ResourceManager.GetString("CaptureType_CloudGameHint_Web", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Resolution : .
+        /// </summary>
+        public static string CaptureType_FrameSizePrompt {
+            get {
+                return ResourceManager.GetString("CaptureType_FrameSizePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test.
+        /// </summary>
+        public static string CaptureType_Test {
+            get {
+                return ResourceManager.GetString("CaptureType_Test", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check Updates on Startup.
+        /// </summary>
+        public static string CheckUpdatesOnStartup {
+            get {
+                return ResourceManager.GetString("CheckUpdatesOnStartup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Type.
+        /// </summary>
+        public static string ClientType {
+            get {
+                return ResourceManager.GetString("ClientType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [CN] Cloud PC.
+        /// </summary>
+        public static string ClientType_CloudPC {
+            get {
+                return ResourceManager.GetString("ClientType_CloudPC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [CN] Cloud Web.
+        /// </summary>
+        public static string ClientType_CloudWeb {
+            get {
+                return ResourceManager.GetString("ClientType_CloudWeb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Global] Genshin.
+        /// </summary>
+        public static string ClientType_Global {
+            get {
+                return ResourceManager.GetString("ClientType_Global", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [CN] YuanShen.
+        /// </summary>
+        public static string ClientType_YuanShen {
+            get {
+                return ResourceManager.GetString("ClientType_YuanShen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close Behavior.
+        /// </summary>
+        public static string ClosingBehavior {
+            get {
+                return ResourceManager.GetString("ClosingBehavior", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minimize to System Tray.
+        /// </summary>
+        public static string ClosingBehavior_Minimize {
+            get {
+                return ResourceManager.GetString("ClosingBehavior_Minimize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quit.
+        /// </summary>
+        public static string ClosingBehavior_Quit {
+            get {
+                return ResourceManager.GetString("ClosingBehavior_Quit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exit Application.
+        /// </summary>
+        public static string ClosingDialogTitle {
+            get {
+                return ResourceManager.GetString("ClosingDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sharing Code copied to the clipboard.
+        /// </summary>
+        public static string CopyToClipboard {
+            get {
+                return ResourceManager.GetString("CopyToClipboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deck.
+        /// </summary>
+        public static string DeckPageTitle {
+            get {
+                return ResourceManager.GetString("DeckPageTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deck Window.
+        /// </summary>
+        public static string DeckWindowTitle {
+            get {
+                return ResourceManager.GetString("DeckWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;Untitled&gt;.
+        /// </summary>
+        public static string DefaultDeckName {
+            get {
+                return ResourceManager.GetString("DefaultDeckName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deck Name:.
+        /// </summary>
+        public static string DeleteConfirm_Message {
+            get {
+                return ResourceManager.GetString("DeleteConfirm_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete this Deck?.
+        /// </summary>
+        public static string DeleteConfirm_Title {
+            get {
+                return ResourceManager.GetString("DeleteConfirm_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string DeleteDeck {
+            get {
+                return ResourceManager.GetString("DeleteDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Documentation.
+        /// </summary>
+        public static string DocumentationLink {
+            get {
+                return ResourceManager.GetString("DocumentationLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit Name.
+        /// </summary>
+        public static string EditDeckName {
+            get {
+                return ResourceManager.GetString("EditDeckName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter Your Deck Name Here.
+        /// </summary>
+        public static string EditDeckName_Placeholder {
+            get {
+                return ResourceManager.GetString("EditDeckName_Placeholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit Deck Name.
+        /// </summary>
+        public static string EditDeckName_Title {
+            get {
+                return ResourceManager.GetString("EditDeckName_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Feedback.
+        /// </summary>
+        public static string FeedbackLink {
+            get {
+                return ResourceManager.GetString("FeedbackLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This software is open-source and completely free. If you paid for it, you have been scammed!.
+        /// </summary>
+        public static string FreeDeclaration {
+            get {
+                return ResourceManager.GetString("FreeDeclaration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duel Not Started.
+        /// </summary>
+        public static string GameNotStarted {
+            get {
+                return ResourceManager.GetString("GameNotStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detecting game window....
+        /// </summary>
+        public static string GameWatcherState_NoWindowFound {
+            get {
+                return ResourceManager.GetString("GameWatcherState_NoWindowFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Launching LumiTracker....
+        /// </summary>
+        public static string GameWatcherState_StartingWindowWatcher {
+            get {
+                return ResourceManager.GetString("GameWatcherState_StartingWindowWatcher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LumiTracker started.
+        /// </summary>
+        public static string GameWatcherState_WindowWatcherStarted {
+            get {
+                return ResourceManager.GetString("GameWatcherState_WindowWatcherStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Github.
+        /// </summary>
+        public static string GithubLink {
+            get {
+                return ResourceManager.GetString("GithubLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please enter Sharing Code.
+        /// </summary>
+        public static string ImportDeck_Placeholder {
+            get {
+                return ResourceManager.GetString("ImportDeck_Placeholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use Sharing Code to import deck.
+        /// </summary>
+        public static string ImportDeck_Title {
+            get {
+                return ResourceManager.GetString("ImportDeck_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Instruction.
+        /// </summary>
+        public static string Instruction {
+            get {
+                return ResourceManager.GetString("Instruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If duel not detected, consider trying a different capture method;.
+        /// </summary>
+        public static string Instruction1 {
+            get {
+                return ResourceManager.GetString("Instruction1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not minimize the game window! Capture is not available when minimized;.
+        /// </summary>
+        public static string Instruction2 {
+            get {
+                return ResourceManager.GetString("Instruction2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If fullscreen, change &quot;Fullscreen&quot; to &quot;Borderless&quot; in Genshin&apos;s Settings -&gt; Graphics -&gt; Display Mode..
+        /// </summary>
+        public static string Instruction3 {
+            get {
+                return ResourceManager.GetString("Instruction3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Sharing Code:.
+        /// </summary>
+        public static string InvalidSharingCode_Message {
+            get {
+                return ResourceManager.GetString("InvalidSharingCode_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to import the Sharing Code.
+        /// </summary>
+        public static string InvalidSharingCode_Title {
+            get {
+                return ResourceManager.GetString("InvalidSharingCode_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        public static string Language {
+            get {
+                return ResourceManager.GetString("Language", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading....
+        /// </summary>
+        public static string Loading {
+            get {
+                return ResourceManager.GetString("Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Screen capture is not possible when the game window is minimized!.
+        /// </summary>
+        public static string MinimizedNotification {
+            get {
+                return ResourceManager.GetString("MinimizedNotification", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to My Deck.
+        /// </summary>
+        public static string MyDeck {
+            get {
+                return ResourceManager.GetString("MyDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to My Played.
+        /// </summary>
+        public static string MyPlayedCards {
+            get {
+                return ResourceManager.GetString("MyPlayedCards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string None {
+            get {
+                return ResourceManager.GetString("None", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Don&apos;t show this again.
+        /// </summary>
+        public static string NotShowAgain {
+            get {
+                return ResourceManager.GetString("NotShowAgain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        public static string OK {
+            get {
+                return ResourceManager.GetString("OK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Op Played.
+        /// </summary>
+        public static string OpPlayedCards {
+            get {
+                return ResourceManager.GetString("OpPlayedCards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paste.
+        /// </summary>
+        public static string Paste {
+            get {
+                return ResourceManager.GetString("Paste", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rank.
+        /// </summary>
+        public static string Rank {
+            get {
+                return ResourceManager.GetString("Rank", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reimport.
+        /// </summary>
+        public static string ReimportDeck {
+            get {
+                return ResourceManager.GetString("ReimportDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Round.
+        /// </summary>
+        public static string Round {
+            get {
+                return ResourceManager.GetString("Round", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LumiTracker uses computer vision without reading or modifying the game&apos;s memory..
+        /// </summary>
+        public static string SafeDeclaration {
+            get {
+                return ResourceManager.GetString("SafeDeclaration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set Active.
+        /// </summary>
+        public static string SetAsActiveDeck {
+            get {
+                return ResourceManager.GetString("SetAsActiveDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current Active Deck:.
+        /// </summary>
+        public static string SetAsActiveSuccess_Message {
+            get {
+                return ResourceManager.GetString("SetAsActiveSuccess_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Success.
+        /// </summary>
+        public static string SetAsActiveSuccess_Title {
+            get {
+                return ResourceManager.GetString("SetAsActiveSuccess_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string Settings {
+            get {
+                return ResourceManager.GetString("Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Share.
+        /// </summary>
+        public static string ShareDeck {
+            get {
+                return ResourceManager.GetString("ShareDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display UI outside the window.
+        /// </summary>
+        public static string ShowUIOutside {
+            get {
+                return ResourceManager.GetString("ShowUIOutside", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start.
+        /// </summary>
+        public static string Start {
+            get {
+                return ResourceManager.GetString("Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subscribe to Beta Updates.
+        /// </summary>
+        public static string SubscribeToBetaUpdates {
+            get {
+                return ResourceManager.GetString("SubscribeToBetaUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supported aspect ratios:
+        ///- 16:9
+        ///- 16:10
+        ///- 21:9 series (including 64:27, 43:18, 12:5).
+        /// </summary>
+        public static string SupportedRatioInfo {
+            get {
+                return ResourceManager.GetString("SupportedRatioInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Theme.
+        /// </summary>
+        public static string Theme {
+            get {
+                return ResourceManager.GetString("Theme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dark.
+        /// </summary>
+        public static string Theme_Dark {
+            get {
+                return ResourceManager.GetString("Theme_Dark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light.
+        /// </summary>
+        public static string Theme_Light {
+            get {
+                return ResourceManager.GetString("Theme_Light", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Home.
+        /// </summary>
+        public static string Tray_Home {
+            get {
+                return ResourceManager.GetString("Tray_Home", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quit.
+        /// </summary>
+        public static string Tray_Quit {
+            get {
+                return ResourceManager.GetString("Tray_Quit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current resolution of game window is not supported..
+        /// </summary>
+        public static string UnsupportedRatioWarning {
+            get {
+                return ResourceManager.GetString("UnsupportedRatioWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update.
+        /// </summary>
+        public static string Update {
+            get {
+                return ResourceManager.GetString("Update", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Already latest.
+        /// </summary>
+        public static string UpdatePrompt_AlreadyLatest {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_AlreadyLatest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check For Update.
+        /// </summary>
+        public static string UpdatePrompt_CheckForUpdate {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_CheckForUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Complete!.
+        /// </summary>
+        public static string UpdatePrompt_Complete {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Complete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connecting....
+        /// </summary>
+        public static string UpdatePrompt_Connecting {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Connecting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading....
+        /// </summary>
+        public static string UpdatePrompt_Downloading {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Downloading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update failed, please retry; If it still fails, try running as admin.
+        /// </summary>
+        public static string UpdatePrompt_Failed {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fetching latest version....
+        /// </summary>
+        public static string UpdatePrompt_Fetching {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Fetching", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remind Me Later.
+        /// </summary>
+        public static string UpdatePrompt_Later {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Later", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manual Update.
+        /// </summary>
+        public static string UpdatePrompt_Manual {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Manual", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Network Error, Retrying....
+        /// </summary>
+        public static string UpdatePrompt_Retrying {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Retrying", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unpacking....
+        /// </summary>
+        public static string UpdatePrompt_Unpacking {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_Unpacking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An update is available.
+        /// </summary>
+        public static string UpdatePrompt_UpdateAvailable {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_UpdateAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Now.
+        /// </summary>
+        public static string UpdatePrompt_UpdateNow {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_UpdateNow", resourceCulture);
             }
         }
     }
