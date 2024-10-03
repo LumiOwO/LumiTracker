@@ -1,8 +1,6 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Services;
-using LumiTracker.ViewModels.Windows;
-using System.Globalization;
-using Wpf.Ui;
+using System.Windows.Data;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
@@ -13,7 +11,10 @@ namespace LumiTracker.ViewModels.Pages
         private bool _isInitialized = false;
 
         [ObservableProperty]
-        private ELanguage _currentLanguage;
+        private LocalizationTextItem[] _languageNames = new LocalizationTextItem[(int)ELanguage.NumLanguages];
+
+        [ObservableProperty]
+        private int _selectedLanguageIndex = -1;
 
         [ObservableProperty]
         private EClosingBehavior _currentClosingBehavior;
@@ -41,8 +42,30 @@ namespace LumiTracker.ViewModels.Pages
 
         private void InitializeViewModel()
         {
-            Enum.TryParse(Configuration.Get<string>("lang").Replace('-', '_'), out ELanguage curLang);
-            CurrentLanguage        = curLang;
+            // languages
+            for (ELanguage i = 0; i < ELanguage.NumLanguages; i++)
+            {
+                var textItem = new LocalizationTextItem();
+                if (i == ELanguage.FollowSystem)
+                {
+                    var binding = LocalizationExtension.Create("FollowSystem");
+                    BindingOperations.SetBinding(textItem, LocalizationTextItem.TextProperty, binding);
+                }
+                else
+                {
+                    textItem.Text = EnumHelpers.GetLanguageUtf8Name(i);
+                }
+                LanguageNames[(int)i] = textItem;
+            }
+            if (Configuration.IsLanguageFollowSystem())
+            {
+                SelectedLanguageIndex = (int)ELanguage.FollowSystem;
+            }
+            else
+            {
+                SelectedLanguageIndex = (int)Configuration.GetELanguage();
+            }
+
             CurrentClosingBehavior = Configuration.Get<EClosingBehavior>("closing_behavior");
             CurrentTheme           = Configuration.Get<ApplicationTheme>("theme");
 
@@ -50,11 +73,11 @@ namespace LumiTracker.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void OnChangeLanguage(string lang)
+        private void OnChangeLanguage()
         {
-            Enum.TryParse(lang.Replace('-', '_'), out ELanguage curLang);
-            CurrentLanguage = curLang;
-            
+            ELanguage SelectedClientType = (ELanguage)SelectedLanguageIndex;
+            string lang = SelectedClientType.ToLanguageName();
+
             Configuration.Set("lang", lang);
             _localizationService.ChangeLanguage(lang);
         }

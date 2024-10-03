@@ -480,4 +480,7 @@
     <value>无</value>
     <comment />
   </data>
+  <data name="FollowSystem" xml:space="preserve">
+    <value>跟随系统</value>
+  </data>
 </root>

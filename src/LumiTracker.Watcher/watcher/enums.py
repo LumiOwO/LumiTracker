@@ -1,6 +1,14 @@
 import enum
 from ._enums_gen import EActionCard, ECharacterCard
 
+class ELanguage(enum.Enum):
+    FollowSystem = 0
+    zh_HANS      = enum.auto()
+    en_US        = enum.auto()
+    ja_JP        = enum.auto()
+
+    NumLanguages = enum.auto()
+
 class ECaptureType(enum.Enum):
     BitBlt          = 0
     WindowsCapture  = enum.auto()

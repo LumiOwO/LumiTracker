@@ -4,6 +4,9 @@ using LumiTracker.Config;
 using LumiTracker.Models;
 using System.Windows.Controls;
 using LumiTracker.ViewModels.Pages;
+using LumiTracker.Services;
+using System.Windows.Data;
+using LumiTracker.Helpers;
 
 #pragma warning disable CS8618
 
@@ -23,6 +26,9 @@ namespace LumiTracker.ViewModels.Windows
 
         [ObservableProperty]
         private bool _isShowing = false;
+
+        [ObservableProperty]
+        private LocalizationTextItem _deckWindowTitle = new ();
 
         // data
         [ObservableProperty]
@@ -69,6 +75,10 @@ namespace LumiTracker.ViewModels.Windows
 
         public DeckWindowViewModel(DeckViewModel deckViewModel, GameWatcher gameWatcher)
         {
+            var binding = LocalizationExtension.Create("DeckWindowTitle");
+            binding.Converter = new OverlayWindowTitleNameConverter();
+            BindingOperations.SetBinding(DeckWindowTitle, LocalizationTextItem.TextProperty, binding);
+
             _deckViewModel = deckViewModel;
             _gameWatcher   = gameWatcher;
 

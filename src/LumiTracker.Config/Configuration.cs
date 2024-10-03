@@ -276,12 +276,31 @@ namespace LumiTracker.Config
             }
         }
 
+        public static bool IsLanguageFollowSystem()
+        {
+            ELanguage curLang = Get<string>("lang")?.ToELanguage() ?? ELanguage.FollowSystem;
+            return curLang == ELanguage.FollowSystem;
+        }
+
+        public static string GetLanguageName()
+        {
+            // Ensures that no invalid name will be returned
+            return EnumHelpers.ParseLanguageName(Get<string>("lang"));
+        }
+
+        public static ELanguage GetELanguage()
+        {
+            // Ensures that no invalid ELanguage will be returned
+            // And ELanguage.FollowSystem will not be returned
+            return GetLanguageName().ToELanguage();
+        }
+
         public static string GetCharacterName(int c_id, bool is_short)
         {
             if (c_id >= (int)ECharacterCard.NumCharacters)
                 return "None";
 
-            string key = Get<string>("lang");
+            string key = GetLanguageName();
             if (is_short) key += "_short";
             return Database["characters"]![c_id]![key]!.ToString();
         }
@@ -291,7 +310,7 @@ namespace LumiTracker.Config
             if (card_id >= (int)EActionCard.NumActions)
                 return "None";
 
-            return Database["actions"]![card_id]![Get<string>("lang")]!.ToString();
+            return Database["actions"]![card_id]![GetLanguageName()]!.ToString();
         }
 
         public static JToken? GetToken(string key)

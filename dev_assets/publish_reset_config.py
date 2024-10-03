@@ -14,7 +14,7 @@ def main(publish_dir):
         "DEBUG" : False,
         "DEBUG_SAVE" : False,
         "frame_limit" : 50,
-        "lang" : "zh-HANS",
+        "lang" : "FollowSystem",
         "closing_behavior" : "Minimize",
         "theme" : "Dark",
         "client_type" : "YuanShen",

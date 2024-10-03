@@ -11,7 +11,7 @@
     xmlns:svs="clr-namespace:LumiTracker.Services"
     xmlns:ctrls="clr-namespace:LumiTracker.Controls"
     mc:Ignorable="d"
-    Title="{svs:Localization DeckWindowTitle}" 
+    Title="{Binding Path=ViewModel.DeckWindowTitle.Text}"
     ShowInTaskbar="False"
     WindowStyle="None"
     AllowsTransparency="True"

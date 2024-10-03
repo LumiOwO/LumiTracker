@@ -10,6 +10,7 @@
     xmlns:cfg="clr-namespace:LumiTracker.Config;assembly=LumiTracker.Config"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:svs="clr-namespace:LumiTracker.Services"
+    xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     Title="{svs:Localization Settings}"
     d:DataContext="{d:DesignInstance local:SettingsPage,
                                      IsDesignTimeCreatable=False}"
@@ -133,26 +134,26 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Grid.Column="0" />
-            <RadioButton
+            <ComboBox
                 Grid.Column="1"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Margin="0,0,0,0"
-                Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
-                CommandParameter="zh-HANS"
-                Content="简体中文"
-                GroupName="languageSelect"
-                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=zh_HANS, Mode=OneWay}" />
-            <RadioButton
-                Grid.Column="2"
-                Margin="0,0,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Command="{Binding ViewModel.ChangeLanguageCommand, Mode=OneWay}"
-                CommandParameter="en-US"
-                Content="English"
-                GroupName="languageSelect"
-                IsChecked="{Binding ViewModel.CurrentLanguage, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=en_US, Mode=OneWay}" />
+                x:Name="CaptureTypeComboBox"
+                HorizontalAlignment="Stretch"
+                SelectedIndex="{Binding ViewModel.SelectedLanguageIndex, Mode=TwoWay}"
+                ItemsSource="{Binding ViewModel.LanguageNames, Mode=OneWay}"
+                >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type svs:LocalizationTextItem}">
+                        <ContentPresenter Content="{Binding Text}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectionChanged">
+                        <b:InvokeCommandAction 
+                        Command="{Binding ViewModel.ChangeLanguageCommand}"
+                        />
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </ComboBox>
         </Grid>
 
         <Grid Margin="10,20,0,0">

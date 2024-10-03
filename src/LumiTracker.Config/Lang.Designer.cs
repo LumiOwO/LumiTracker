@@ -358,6 +358,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Follow System.
+        /// </summary>
+        public static string FollowSystem {
+            get {
+                return ResourceManager.GetString("FollowSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This software is open-source and completely free. If you paid for it, you have been scammed!.
         /// </summary>
         public static string FreeDeclaration {

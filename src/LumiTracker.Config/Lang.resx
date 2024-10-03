@@ -480,4 +480,7 @@
     <value>None</value>
     <comment />
   </data>
+  <data name="FollowSystem" xml:space="preserve">
+    <value>Follow System</value>
+  </data>
 </root>

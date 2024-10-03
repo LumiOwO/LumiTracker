@@ -1,9 +1,15 @@
-﻿namespace LumiTracker.Config
+﻿using System.Globalization;
+
+namespace LumiTracker.Config
 {
     public enum ELanguage : int
     {
+        FollowSystem,
         zh_HANS,
         en_US,
+        ja_JP,
+
+        NumLanguages,
     }
 
     public enum EClosingBehavior : int
@@ -126,6 +132,69 @@
         public static bool BitBltUnavailable(EClientType clientType)
         {
             return (clientType == EClientType.CloudPC) || (clientType == EClientType.CloudWeb) || (clientType == EClientType.Video);
+        }
+
+        public static string ToLanguageName(this ELanguage lang)
+        {
+            return lang.ToString().Replace('_', '-');
+        }
+
+        public static ELanguage ToELanguage(this string lang)
+        {
+            ELanguage curLang;
+            if (Enum.TryParse(lang.Replace('-', '_'), out curLang) && curLang < ELanguage.NumLanguages)
+            {
+                return curLang;
+            }
+            else
+            {
+                return ELanguage.FollowSystem;
+            }
+        }
+
+        public static string GetLanguageUtf8Name(ELanguage lang)
+        {
+            return lang switch
+            {
+                ELanguage.zh_HANS => "简体中文",
+                ELanguage.en_US   => "English",
+                ELanguage.ja_JP   => "日本語",
+                _ => LocalizationSource.Instance["FollowSystem"],
+            };
+        }
+
+        public static string LanguageNameShortToFull(string name)
+        {
+            return name switch
+            {
+                "zh" => "zh-HANS",
+                "en" => "en-US",
+                "ja" => "ja-JP",
+                _ => "en-US",
+            };
+        }
+
+        // This function always return an valid language name
+        public static string ParseLanguageName(string? lang)
+        {
+            if (lang != null && lang.Length == 2)
+            {
+                lang = LanguageNameShortToFull(lang);
+            }
+            ELanguage curLang = lang?.ToELanguage() ?? ELanguage.FollowSystem;
+            if (curLang != ELanguage.FollowSystem)
+            {
+                return curLang.ToLanguageName();
+            }
+            // Follow system
+            lang = LanguageNameShortToFull(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+            curLang = lang.ToELanguage();
+            if (curLang != ELanguage.FollowSystem)
+            {
+                return curLang.ToLanguageName();
+            }
+            // Default to english
+            return "en-US";
         }
     }
 }

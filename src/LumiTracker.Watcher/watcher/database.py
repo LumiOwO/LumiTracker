@@ -13,7 +13,7 @@ from pathlib import Path
 from collections import defaultdict
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
-from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType
+from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType, ELanguage
 from .feature import CropBox, ActionCardHandler, FeatureDistance, GetHashSize
 from .feature import ExtractFeature_Control, ExtractFeature_Digit
 
@@ -192,11 +192,18 @@ class Database:
                 cost = int(row["cost"])
             cost_type = ECostType[cost_type].value
 
+            name_langs = {}
+            for lang in range(ELanguage.NumLanguages.value):
+                lang = ELanguage(lang)
+                if lang == ELanguage.FollowSystem:
+                    continue
+                lang_name = lang.name.replace('_', '-')
+                name_langs[lang_name] = row[lang_name].strip()
+
             action = {
-                "zh-HANS" : row["zh-HANS"],
-                "en-US"   : row["en-US"],
-                "type"    : EActionCardType[row["type"]].value,
-                "cost"    : (cost, cost_type),
+                **name_langs,
+                "type" : EActionCardType[row["type"]].value,
+                "cost" : (cost, cost_type),
             }
 
             ahashs[card_id]   = ahash
@@ -304,13 +311,19 @@ class Database:
         talent_to_character = {}
         characters = [None] * num_characters
         for i, row in enumerate(data):
+            name_langs = {}
+            for lang in range(ELanguage.NumLanguages.value):
+                lang = ELanguage(lang)
+                if lang == ELanguage.FollowSystem:
+                    continue
+                lang_name = lang.name.replace('_', '-')
+                name_langs[lang_name] = row[lang_name].strip()
+                name_langs[lang_name + "_short"] = row[lang_name + "_short"].strip()
+
             character = {
-                "zh-HANS"      : row["zh-HANS"],
-                "en-US"        : row["en-US"],
-                "zh-HANS_short": row["zh-HANS_short"],
-                "en-US_short"  : row["en-US_short"],
-                "element"      : EElementType[row["element"]].value,
-                "is_monster"   : True if row["is_monster"] == "1" else False,
+                **name_langs,
+                "element"    : EElementType[row["element"]].value,
+                "is_monster" : True if row["is_monster"] == "1" else False,
             }
             characters[i] = character
             talent_id = int(row["talent_id"])

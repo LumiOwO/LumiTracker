@@ -43,6 +43,20 @@ namespace LumiTracker.Helpers
         }
     }
 
+    public class OverlayWindowTitleNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string title = (value as string)!;
+            return $"{LocalizationSource.Instance["AppName"]} - {title}";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class ActionCardNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

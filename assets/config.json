@@ -37,7 +37,7 @@
   "strict_threshold": 19,
   "ann_metric": "hamming",
   "ann_n_trees": 20,
-  "lang": "zh-HANS",
+  "lang": "FollowSystem",
   "closing_behavior": "Quit",
   "theme": "Dark",
   "client_type": "YuanShen",
