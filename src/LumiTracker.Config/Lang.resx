@@ -158,7 +158,7 @@
     <comment />
   </data>
   <data name="SubscribeToBetaUpdates" xml:space="preserve">
-    <value>Subscribe to Beta Updates</value>
+    <value>Join Preview Release Channel</value>
     <comment />
   </data>
   <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
@@ -250,7 +250,7 @@
     <comment />
   </data>
   <data name="ClientType" xml:space="preserve">
-    <value>Client Type</value>
+    <value>Genshin Client</value>
     <comment />
   </data>
   <data name="ClientType_YuanShen" xml:space="preserve">

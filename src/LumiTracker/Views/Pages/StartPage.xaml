@@ -29,7 +29,7 @@
     <StackPanel>
         <Grid VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="150" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -86,7 +86,7 @@
         </Grid>
 
         <StackPanel 
-            Margin="125, 10, 0, 0"
+            Margin="155, 10, 0, 0"
             Orientation="Horizontal">
             <ui:SymbolIcon 
                 Foreground="Red"
@@ -115,7 +115,7 @@
             Margin="0, 15, 0, 0"
             VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="150" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -185,7 +185,7 @@
             Margin="0, 6, 0, 0"
             VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="150" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock
@@ -205,7 +205,7 @@
             Margin="0, 2, 0, 0"
             VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="150" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock
@@ -274,6 +274,7 @@
             FontSize="15"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
+            TextWrapping="Wrap"
             Grid.Column="0" />
         <TextBlock 
             Margin="17,10,0,2" 
@@ -281,6 +282,7 @@
             FontSize="15"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
+            TextWrapping="Wrap"
             Grid.Column="0" />
         <TextBlock 
             Margin="17,10,0,2" 
@@ -288,6 +290,7 @@
             FontSize="15"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
+            TextWrapping="Wrap"
             Grid.Column="0" />
 
         <ui:HyperlinkButton

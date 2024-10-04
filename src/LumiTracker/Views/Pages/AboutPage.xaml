@@ -30,12 +30,14 @@
             Text="{svs:Localization FreeDeclaration}" 
             FontSize="17"
             FontWeight="Bold"
+            TextWrapping="Wrap"
             />
 
         <TextBlock 
             Margin="5,20,0,2" 
             Text="{svs:Localization SafeDeclaration}" 
             FontSize="17"
+            TextWrapping="Wrap"
             />
 
         <ui:HyperlinkButton

@@ -169,7 +169,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Client Type.
+        ///   Looks up a localized string similar to Genshin Client.
         /// </summary>
         public static string ClientType {
             get {
@@ -682,7 +682,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Subscribe to Beta Updates.
+        ///   Looks up a localized string similar to Join Preview Release Channel.
         /// </summary>
         public static string SubscribeToBetaUpdates {
             get {

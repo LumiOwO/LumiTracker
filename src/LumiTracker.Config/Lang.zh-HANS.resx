@@ -158,7 +158,7 @@
     <comment />
   </data>
   <data name="SubscribeToBetaUpdates" xml:space="preserve">
-    <value>订阅Beta版更新</value>
+    <value>加入预览版更新渠道</value>
     <comment />
   </data>
   <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
@@ -250,23 +250,23 @@
     <comment />
   </data>
   <data name="ClientType" xml:space="preserve">
-    <value>客户端类型</value>
+    <value>原神客户端</value>
     <comment />
   </data>
   <data name="ClientType_YuanShen" xml:space="preserve">
-    <value>原神</value>
+    <value>国服</value>
     <comment />
   </data>
   <data name="ClientType_Global" xml:space="preserve">
-    <value>原神国际服</value>
+    <value>国际服</value>
     <comment />
   </data>
   <data name="ClientType_CloudPC" xml:space="preserve">
-    <value>云·原神-客户端</value>
+    <value>云原神-客户端</value>
     <comment />
   </data>
   <data name="ClientType_CloudWeb" xml:space="preserve">
-    <value>云·原神-网页版</value>
+    <value>云原神-网页版</value>
     <comment />
   </data>
   <data name="GameWatcherState_NoWindowFound" xml:space="preserve">

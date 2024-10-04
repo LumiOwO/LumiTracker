@@ -123,4 +123,274 @@
   <data name="None" xml:space="preserve">
     <value>無</value>
   </data>
+  <data name="AppSubTitle" xml:space="preserve">
+    <value>七聖召喚カードレコーダー</value>
+  </data>
+  <data name="DeckWindowTitle" xml:space="preserve">
+    <value>カードレコーダー画面</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>起動</value>
+  </data>
+  <data name="Rank" xml:space="preserve">
+    <value>ランク</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>読み込み中...</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>概要</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="CheckUpdatesOnStartup" xml:space="preserve">
+    <value>起動時に更新を確認する</value>
+  </data>
+  <data name="SubscribeToBetaUpdates" xml:space="preserve">
+    <value>プレビューリリースチャンネルに参加する</value>
+  </data>
+  <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
+    <value>更新を確認</value>
+  </data>
+  <data name="UpdatePrompt_Fetching" xml:space="preserve">
+    <value>最新バージョンをダウンロードする...</value>
+  </data>
+  <data name="UpdatePrompt_AlreadyLatest" xml:space="preserve">
+    <value>今は最新バージョンです</value>
+  </data>
+  <data name="UpdatePrompt_UpdateAvailable" xml:space="preserve">
+    <value>最新バージョンがあります</value>
+  </data>
+  <data name="UpdatePrompt_Failed" xml:space="preserve">
+    <value>更新に失敗しました。もう一度お試しください。まだ失敗した場合は、管理者モードで実行してください</value>
+  </data>
+  <data name="UpdatePrompt_Manual" xml:space="preserve">
+    <value>手動更新</value>
+  </data>
+  <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
+    <value>今すぐ更新</value>
+  </data>
+  <data name="UpdatePrompt_Later" xml:space="preserve">
+    <value>今回更新しない</value>
+  </data>
+  <data name="UpdatePrompt_Connecting" xml:space="preserve">
+    <value>接続中...</value>
+  </data>
+  <data name="UpdatePrompt_Retrying" xml:space="preserve">
+    <value>ネットワークエラー、再接続中...</value>
+  </data>
+  <data name="UpdatePrompt_Downloading" xml:space="preserve">
+    <value>ダウンロード中...</value>
+  </data>
+  <data name="UpdatePrompt_Unpacking" xml:space="preserve">
+    <value>解凍中...</value>
+  </data>
+  <data name="UpdatePrompt_Complete" xml:space="preserve">
+    <value>アップデート完了！</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="FollowSystem" xml:space="preserve">
+    <value>システムに従う</value>
+  </data>
+  <data name="ClosingBehavior" xml:space="preserve">
+    <value>閉じる時</value>
+  </data>
+  <data name="ClosingBehavior_Quit" xml:space="preserve">
+    <value>終了をする</value>
+  </data>
+  <data name="ClosingBehavior_Minimize" xml:space="preserve">
+    <value>システムトレイに最小化する</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>テーマ</value>
+  </data>
+  <data name="Theme_Light" xml:space="preserve">
+    <value>ライト</value>
+  </data>
+  <data name="Theme_Dark" xml:space="preserve">
+    <value>ダーク</value>
+  </data>
+  <data name="Tray_Quit" xml:space="preserve">
+    <value>終了</value>
+  </data>
+  <data name="Tray_Home" xml:space="preserve">
+    <value>ホーム</value>
+  </data>
+  <data name="ClientType" xml:space="preserve">
+    <value>原神クライアント</value>
+  </data>
+  <data name="ClientType_YuanShen" xml:space="preserve">
+    <value>中国公式</value>
+  </data>
+  <data name="ClientType_Global" xml:space="preserve">
+    <value>グローバル公式</value>
+  </data>
+  <data name="ClientType_CloudPC" xml:space="preserve">
+    <value>クラウド版 - アプリ（中国）</value>
+  </data>
+  <data name="ClientType_CloudWeb" xml:space="preserve">
+    <value>クラウド版 - WEB（中国）</value>
+  </data>
+  <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
+    <value>ゲーム画面を検知しています...</value>
+  </data>
+  <data name="GameWatcherState_StartingWindowWatcher" xml:space="preserve">
+    <value>起動中...</value>
+  </data>
+  <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
+    <value>起動済</value>
+  </data>
+  <data name="MinimizedNotification" xml:space="preserve">
+    <value>ゲーム画面が検知できません。ゲーム画面を最小化しないでください！</value>
+  </data>
+  <data name="CaptureType" xml:space="preserve">
+    <value>キャプチャー方法</value>
+  </data>
+  <data name="CaptureType_Test" xml:space="preserve">
+    <value>テスト</value>
+  </data>
+  <data name="CaptureType_CloudGameHint" xml:space="preserve">
+    <value>* クラウド版原神はこのキャプチャー方法しか利用できません</value>
+  </data>
+  <data name="CaptureType_CloudGameHint_Web" xml:space="preserve">
+    <value>* 現在は画面を最大化したChrome、firefox、Edge以外のブラウザーを使用することはできません</value>
+  </data>
+  <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
+    <value>画面解像度 : </value>
+  </data>
+  <data name="MyPlayedCards" xml:space="preserve">
+    <value>自分使用</value>
+  </data>
+  <data name="OpPlayedCards" xml:space="preserve">
+    <value>相手使用</value>
+  </data>
+  <data name="Instruction" xml:space="preserve">
+    <value>使い方</value>
+  </data>
+  <data name="Instruction1" xml:space="preserve">
+    <value>試合が検知できない場合は別のキャプチャー方法に切り替えてください；</value>
+  </data>
+  <data name="Instruction2" xml:space="preserve">
+    <value>ゲーム画面を最小化しないでください。最小化しているときはゲーム画面を検知できません；</value>
+  </data>
+  <data name="Instruction3" xml:space="preserve">
+    <value>原神の表示モードをフルスクリーンにしている場合は、原神の設定→画面→表示モードでボーダーレスに変更してください。</value>
+  </data>
+  <data name="SupportedRatioInfo" xml:space="preserve">
+    <value>現在サポートされているウィンドウ比率：
+- 16:9
+- 16:10
+- 21:9 シリーズ（64:27、43:18、12:5を含む）</value>
+  </data>
+  <data name="FreeDeclaration" xml:space="preserve">
+    <value>このソフトウェアはオープンソースで完全に無料です。もしお金を払っている場合、だまされています！</value>
+  </data>
+  <data name="SafeDeclaration" xml:space="preserve">
+    <value>動作原理はコンピュータビジョンに基づいており、ゲーム本体のメモリデータの読み取りや変更は一切含まれません。</value>
+  </data>
+  <data name="UnsupportedRatioWarning" xml:space="preserve">
+    <value>現在のウィンドウ比率はサポートされていません。</value>
+  </data>
+  <data name="Round" xml:space="preserve">
+    <value>ラウンド</value>
+  </data>
+  <data name="GameNotStarted" xml:space="preserve">
+    <value>試合は始まっていません</value>
+  </data>
+  <data name="ShowUIOutside" xml:space="preserve">
+    <value>ゲーム画面外にレコーダーを表示する</value>
+  </data>
+  <data name="NotShowAgain" xml:space="preserve">
+    <value>このダイアログを今後表示しない</value>
+  </data>
+  <data name="ClosingDialogTitle" xml:space="preserve">
+    <value>ウィンドウを閉じる</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>確定</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="MyDeck" xml:space="preserve">
+    <value>デッキ</value>
+  </data>
+  <data name="DeckPageTitle" xml:space="preserve">
+    <value>デッキ</value>
+  </data>
+  <data name="DefaultDeckName" xml:space="preserve">
+    <value>&lt;名前なし&gt;</value>
+  </data>
+  <data name="SetAsActiveDeck" xml:space="preserve">
+    <value>出撃設定</value>
+  </data>
+  <data name="EditDeckName" xml:space="preserve">
+    <value>名を編集</value>
+  </data>
+  <data name="ReimportDeck" xml:space="preserve">
+    <value>再インポート</value>
+  </data>
+  <data name="ShareDeck" xml:space="preserve">
+    <value>シェア</value>
+  </data>
+  <data name="AddNewDeck" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="DeleteDeck" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="DocumentationLink" xml:space="preserve">
+    <value>説明書</value>
+  </data>
+  <data name="FeedbackLink" xml:space="preserve">
+    <value>フィードバック</value>
+  </data>
+  <data name="BiliBiliLink" xml:space="preserve">
+    <value>Bilibili</value>
+  </data>
+  <data name="GithubLink" xml:space="preserve">
+    <value>Github</value>
+  </data>
+  <data name="CopyToClipboard" xml:space="preserve">
+    <value>クリップボードにシェアコードをコピーしました</value>
+  </data>
+  <data name="Paste" xml:space="preserve">
+    <value>ペースト</value>
+  </data>
+  <data name="ImportDeck_Title" xml:space="preserve">
+    <value>シェアコードでデッキをインポートする</value>
+  </data>
+  <data name="ImportDeck_Placeholder" xml:space="preserve">
+    <value>シェアコードを入力してください</value>
+  </data>
+  <data name="EditDeckName_Title" xml:space="preserve">
+    <value>デッキ名を編集</value>
+  </data>
+  <data name="InvalidSharingCode_Title" xml:space="preserve">
+    <value>シェアコードのインポートが失敗しました</value>
+  </data>
+  <data name="InvalidSharingCode_Message" xml:space="preserve">
+    <value>無効なシェアコード：</value>
+  </data>
+  <data name="SetAsActiveSuccess_Title" xml:space="preserve">
+    <value>設定成功</value>
+  </data>
+  <data name="SetAsActiveSuccess_Message" xml:space="preserve">
+    <value>出撃中のデッキ:</value>
+  </data>
+  <data name="DeleteConfirm_Title" xml:space="preserve">
+    <value>このデッキを削除しますか？</value>
+  </data>
+  <data name="DeleteConfirm_Message" xml:space="preserve">
+    <value>デッキ名：</value>
+  </data>
+  <data name="EditDeckName_Placeholder" xml:space="preserve">
+    <value>ここでデッキ名を入力</value>
+  </data>
 </root>
