@@ -105,6 +105,7 @@ namespace LumiTracker.ViewModels.Pages
 
             if (newValue == EGameWatcherState.NoWindowFound)
             {
+                IsGenshinWindowMinimized = false;
                 GameWatcherStateBrush = Brushes.DarkGray;
                 FPSVisibility = CaptureTestButtonVisibility = Visibility.Collapsed;
             }

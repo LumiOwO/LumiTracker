@@ -29,22 +29,29 @@
     <StackPanel>
         <Grid VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="Auto" MinWidth="100" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
             <TextBlock 
-                Margin="0,0,0,2" 
+                Margin="0,0,20,2" 
                 Text="{svs:Localization ClientType}" 
                 FontSize="15"
                 FontWeight="Bold"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
+                Grid.Row="0"
                 Grid.Column="0" />
 
             <ComboBox
+                Grid.Row="0"
                 Grid.Column="1"
                 x:Name="ClientTypeComboBox"
                 HorizontalAlignment="Stretch"
@@ -73,66 +80,79 @@
                 Fill="{Binding ViewModel.GameWatcherStateBrush, Mode=OneWay}" 
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Center"
+                Grid.Row="0"
                 Grid.Column="2"
                 />
             
             <TextBlock
+                Grid.Row="0"
                 Grid.Column="3"
                 x:Name="GameWatcherStateText"
                 Margin="8,0,0,0"
+                HorizontalAlignment="Left" 
                 VerticalAlignment="Center"
                 Foreground="{Binding ViewModel.GameWatcherStateBrush, Mode=OneWay}"
                 Text="{Binding ViewModel.GameWatcherStateText.Text, Mode=OneWay}" />
-        </Grid>
 
-        <StackPanel 
-            Margin="155, 10, 0, 0"
-            Orientation="Horizontal">
-            <ui:SymbolIcon 
-                Foreground="Red"
-                FontWeight="Bold"
-                FontSize="20"
-                Symbol="Warning24"
-                Visibility="{Binding ViewModel.IsGenshinWindowMinimized,
-                    Converter={StaticResource BooleanToVisibilityConverter},
-                    ConverterParameter=Collapsed
-                    }"
-                />
-            <TextBlock
-                Margin="5, 0, 0, 0"
-                Foreground="Red"
-                FontWeight="Bold"
-                FontSize="16"
-                Text="{svs:Localization MinimizedNotification}"
-                Visibility="{Binding ViewModel.IsGenshinWindowMinimized,
-                    Converter={StaticResource BooleanToVisibilityConverter},
-                    ConverterParameter=Collapsed
-                    }"
-                />
-        </StackPanel>
+            <StackPanel 
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="3"
+                Margin="0, 10, 0, 0"
+                Orientation="Horizontal">
+                <ui:SymbolIcon 
+                    Foreground="Red"
+                    FontWeight="Bold"
+                    FontSize="20"
+                    Symbol="Warning24"
+                    Visibility="{Binding ViewModel.IsGenshinWindowMinimized,
+                        Converter={StaticResource BooleanToVisibilityConverter},
+                        ConverterParameter=Collapsed
+                        }"
+                    />
+                <TextBlock
+                    Margin="5, 0, 0, 0"
+                    Foreground="Red"
+                    FontWeight="Bold"
+                    FontSize="16"
+                    Text="{svs:Localization MinimizedNotification}"
+                    Visibility="{Binding ViewModel.IsGenshinWindowMinimized,
+                        Converter={StaticResource BooleanToVisibilityConverter},
+                        ConverterParameter=Collapsed
+                        }"
+                    />
+            </StackPanel>
+        </Grid>
 
         <Grid 
             Margin="0, 15, 0, 0"
             VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="Auto" MinWidth="100" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
             <TextBlock 
-                Margin="0,0,0,2" 
+                Margin="0,0,20,2" 
                 Text="{svs:Localization CaptureType}" 
                 FontSize="15"
                 FontWeight="Bold"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
+                Grid.Row="0"
                 Grid.Column="0" />
 
             <ComboBox
+                Grid.Row="0"
                 Grid.Column="1"
                 x:Name="CaptureTypeComboBox"
                 HorizontalAlignment="Stretch"
@@ -150,6 +170,7 @@
             </ComboBox>
 
             <ui:Button 
+                Grid.Row="0"
                 Grid.Column="2"
                 Margin="15, 0, 0, 0"
                 Height="30"
@@ -162,6 +183,7 @@
             </ui:Button>
 
             <Ellipse 
+                Grid.Row="0"
                 Grid.Column="3"
                 Margin="18,0,0,0" 
                 Width="9" Height="9" 
@@ -172,25 +194,21 @@
                 />
 
             <TextBlock
+                Grid.Row="0"
                 Grid.Column="4"
                 x:Name="FPSText"
                 Margin="8,0,0,0"
+                HorizontalAlignment="Left" 
                 VerticalAlignment="Center"
                 Visibility="{Binding ViewModel.FPSVisibility, Mode=OneWay}"
                 Foreground="{Binding ViewModel.FPSBrush, Mode=OneWay}"
                 Text="{Binding ViewModel.FPSText, Mode=OneWay}" />
-        </Grid>
 
-        <Grid 
-            Margin="0, 6, 0, 0"
-            VerticalAlignment="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
             <TextBlock
+                Grid.Row="1"
                 Grid.Column="1"
-                Margin="8,0,0,0"
+                Grid.ColumnSpan="4"
+                Margin="4,6,0,0"
                 FontSize="12"
                 VerticalAlignment="Center"
                 Foreground="Gray"
@@ -199,18 +217,12 @@
                     ConverterParameter=Collapsed
                     }"
                 Text="{Binding ViewModel.CloudGameHint.Text, Mode=OneWay}" />
-        </Grid>
 
-        <Grid 
-            Margin="0, 2, 0, 0"
-            VerticalAlignment="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
             <TextBlock
+                Grid.Row="2"
                 Grid.Column="1"
-                Margin="8,0,0,0"
+                Grid.ColumnSpan="4"
+                Margin="4,2,0,0"
                 FontSize="12"
                 VerticalAlignment="Center"
                 Foreground="Gray"
