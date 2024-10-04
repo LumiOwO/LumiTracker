@@ -1,5 +1,4 @@
 ﻿using LumiTracker.Config;
-using Microsoft.Win32;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -41,7 +40,6 @@ namespace LumiTracker.Services
     public interface ILocalizationService
     {
         void ChangeLanguage(string lang);
-        void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e);
     }
 
     public class LocalizationService : ILocalizationService
@@ -50,18 +48,6 @@ namespace LumiTracker.Services
         {
             lang = EnumHelpers.ParseLanguageName(lang);
             LocalizationSource.Instance.CurrentCulture = new CultureInfo(lang);
-        }
-
-        public void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
-        {
-            if (e.Category == UserPreferenceCategory.Locale)
-            {
-                if (Configuration.IsLanguageFollowSystem())
-                {
-                    string lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
-                    ChangeLanguage(lang);
-                }
-            }
         }
     }
 }

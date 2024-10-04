@@ -7,7 +7,6 @@ using LumiTracker.Views.Pages;
 using System.Windows.Input;
 using System.Windows.Data;
 using LumiTracker.Helpers;
-using Microsoft.Win32;
 
 namespace LumiTracker.ViewModels.Windows
 {
@@ -127,7 +126,6 @@ namespace LumiTracker.ViewModels.Windows
                 _serviceProvider.GetService(typeof(ILocalizationService)) as ILocalizationService
             )!;
             localizationService.ChangeLanguage(Configuration.GetLanguageName());
-            SystemEvents.UserPreferenceChanged += localizationService.OnUserPreferenceChanged;
         }
     }
 }

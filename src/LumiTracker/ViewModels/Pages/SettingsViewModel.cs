@@ -1,6 +1,6 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Services;
-using System.Windows.Data;
+using System.Globalization;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
@@ -48,8 +48,8 @@ namespace LumiTracker.ViewModels.Pages
                 var textItem = new LocalizationTextItem();
                 if (i == ELanguage.FollowSystem)
                 {
-                    var binding = LocalizationExtension.Create("FollowSystem");
-                    BindingOperations.SetBinding(textItem, LocalizationTextItem.TextProperty, binding);
+                    string lang = EnumHelpers.ParseLanguageName(null);
+                    textItem.Text = Lang.ResourceManager.GetString("FollowSystem", new CultureInfo(lang))!;
                 }
                 else
                 {
