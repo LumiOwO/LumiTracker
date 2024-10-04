@@ -240,8 +240,10 @@ class CropBox:
         return self.left >= other.left and self.top >= other.top and self.right <= other.right and self.bottom <= other.bottom
 
 def ExtractFeature_Control_Grayed(gray_image):
-    # histogram equalization
-    gray_image = cv2.equalizeHist(gray_image)
+    # binalize
+    _, gray_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # cv2.imshow("image", gray_image)
+    # cv2.waitKey(0)
 
     # to float buffer
     gray_image = gray_image.astype(np.float32) / 255.0

@@ -4,12 +4,15 @@ from ..states import GTasks
 from ..regions import GetRatioType
 
 import cv2
+import logging
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+import matplotlib.pyplot as plt
 
 def main():
     frame_manager = FrameManager()
     task = GTasks.GameOver
 
-    image_path = 'temp/Snipaste_2024-06-23_18-33-58.png'
+    image_path = 'temp/Snipaste_2024-06-23_20-55-03.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -21,6 +24,9 @@ def main():
     task.frame_buffer = image
     task.fm = frame_manager
     task.Tick()
+
+    plt.imshow(cv2.cvtColor(task.buffer, cv2.COLOR_BGR2RGB))
+    plt.show()
 
 if __name__ == "__main__":
     main()

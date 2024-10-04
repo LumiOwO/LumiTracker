@@ -82,7 +82,8 @@ class Database:
 
         controls_dir = os.path.join(cfg.cards_dir, "controls")
         for i in range(n_controls):
-            image = LoadImage(os.path.join(controls_dir, f"control_{i}.png"))
+            name = ECtrlType(i).name.lower()
+            image = LoadImage(os.path.join(controls_dir, f"control_{name}.png"))
             feature = ExtractFeature_Control(image)
             features[i] = feature
 

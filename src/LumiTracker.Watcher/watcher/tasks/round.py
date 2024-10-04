@@ -104,10 +104,9 @@ class RoundTask(TaskBase):
         content = buffer[remain_bbox.top:remain_bbox.bottom, remain_bbox.left:remain_bbox.right]
         feature = ExtractFeature_Control(content)
         ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
-        found = (dists[0] <= cfg.strict_threshold) and (
-            ctrl_ids[0] >= ECtrlType.ROUND_FIRST.value) and (ctrl_ids[0] <= ECtrlType.ROUND_LAST.value)
+        found = (dists[0] <= cfg.strict_threshold) and ECtrlType.IsRound(ctrl_ids[0])
 
-        # LogDebug(found=found, cur_round=cur_round)
+        # LogDebug(found=found, dists=dists[:3], cur_round=cur_round)
 
         if cfg.DEBUG_SAVE:
             SaveImage(content, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))

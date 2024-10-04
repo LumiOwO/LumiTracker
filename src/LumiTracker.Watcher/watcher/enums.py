@@ -61,32 +61,65 @@ class ERatioType(enum.Enum):
 
 class ECtrlType(enum.Enum):
     # game start
-    GAME_START              = 0
+    GAME_START = 0
 
     # game over
-    GAME_OVER_WIN_ZH_HANS   = enum.auto()
-    GAME_OVER_LOSE_ZH_HANS  = enum.auto()
+    GAME_OVER_WIN_ZH     = enum.auto()
+    GAME_OVER_WIN_EN     = enum.auto()
+    GAME_OVER_WIN_JA     = enum.auto()
+    GAME_OVER_LOSE_ZH    = enum.auto()
+    GAME_OVER_LOSE_EN    = enum.auto()
+    GAME_OVER_LOSE_JA    = enum.auto()
 
-    GAME_OVER_WIN_FIRST     = GAME_OVER_WIN_ZH_HANS
-    GAME_OVER_WIN_LAST      = GAME_OVER_WIN_ZH_HANS
-    GAME_OVER_LOSE_FIRST    = GAME_OVER_LOSE_ZH_HANS
-    GAME_OVER_LOSE_LAST     = GAME_OVER_LOSE_ZH_HANS
-    GAME_OVER_FIRST         = GAME_OVER_WIN_FIRST
-    GAME_OVER_LAST          = GAME_OVER_LOSE_LAST
+    GAME_OVER_WIN_FIRST  = GAME_OVER_WIN_ZH
+    GAME_OVER_WIN_LAST   = GAME_OVER_WIN_JA
+    GAME_OVER_LOSE_FIRST = GAME_OVER_LOSE_ZH
+    GAME_OVER_LOSE_LAST  = GAME_OVER_LOSE_JA
+    GAME_OVER_FIRST      = GAME_OVER_WIN_FIRST
+    GAME_OVER_LAST       = GAME_OVER_LOSE_LAST
 
     # round
-    ROUND_ZH_HANS   = enum.auto()
+    ROUND_ZH    = enum.auto()
+    ROUND_EN    = enum.auto()
+    ROUND_JA    = enum.auto()
 
-    ROUND_FIRST     = ROUND_ZH_HANS
-    ROUND_LAST      = ROUND_ZH_HANS
+    ROUND_FIRST = ROUND_ZH
+    ROUND_LAST  = ROUND_JA
 
     # action phase
-    PHASE_ACTION_ZH_HANS = enum.auto()
+    PHASE_ACTION_ZH    = enum.auto()
+    PHASE_ACTION_EN    = enum.auto()
+    PHASE_ACTION_JA    = enum.auto()
 
-    PHASE_ACTION_FIRST   = PHASE_ACTION_ZH_HANS
-    PHASE_ACTION_LAST    = PHASE_ACTION_ZH_HANS
+    PHASE_ACTION_FIRST = PHASE_ACTION_ZH
+    PHASE_ACTION_LAST  = PHASE_ACTION_JA
 
     CTRL_FEATURES_COUNT = enum.auto()
+
+    @staticmethod
+    def IsGameStart(ctrl_id):
+        return ctrl_id == ECtrlType.GAME_START.value
+
+    @staticmethod
+    def IsGameWin(ctrl_id):
+        return (ctrl_id >= ECtrlType.GAME_OVER_WIN_FIRST.value) and (ctrl_id <= ECtrlType.GAME_OVER_WIN_LAST.value)
+    
+    @staticmethod
+    def IsGameLose(ctrl_id):
+        return (ctrl_id >= ECtrlType.GAME_OVER_LOSE_FIRST.value) and (ctrl_id <= ECtrlType.GAME_OVER_LOSE_LAST.value)
+    
+    @staticmethod
+    def IsGameOver(ctrl_id):
+        return (ctrl_id >= ECtrlType.GAME_OVER_FIRST.value) and (ctrl_id <= ECtrlType.GAME_OVER_LAST.value)
+    
+    @staticmethod
+    def IsRound(ctrl_id):
+        return (ctrl_id >= ECtrlType.ROUND_FIRST.value) and (ctrl_id <= ECtrlType.ROUND_LAST.value)
+
+    @staticmethod
+    def IsPhaseAction(ctrl_id):
+        return (ctrl_id >= ECtrlType.PHASE_ACTION_FIRST.value) and (ctrl_id <= ECtrlType.PHASE_ACTION_LAST.value)
+
 
 class EAnnType(enum.Enum):
     ACTIONS_A = 0

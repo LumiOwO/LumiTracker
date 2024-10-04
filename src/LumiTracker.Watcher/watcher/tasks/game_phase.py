@@ -47,6 +47,7 @@ class GamePhaseTask(TaskBase):
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
+        # self.buffer = buffer
 
         gray = cv2.cvtColor(buffer, cv2.COLOR_BGRA2GRAY)
 
@@ -69,10 +70,12 @@ class GamePhaseTask(TaskBase):
         ctrl_id, dist = ctrl_ids[0], dists[0]
         if dist > cfg.strict_threshold:
             res = EGamePhase.Null
-        elif (ctrl_id >= ECtrlType.PHASE_ACTION_FIRST.value) and (ctrl_id <= ECtrlType.PHASE_ACTION_LAST.value):
+        elif ECtrlType.IsPhaseAction(ctrl_id):
             res = EGamePhase.Action
         else:
             res = EGamePhase.Null
+
+        # LogDebug(res=f"{res}", dists=dists[:3])
 
         if cfg.DEBUG_SAVE:
             SaveImage(buffer[top:bottom, left:right], os.path.join(cfg.debug_dir, "save", f"{res.name}.png"))

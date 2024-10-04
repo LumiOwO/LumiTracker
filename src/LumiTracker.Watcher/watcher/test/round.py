@@ -5,6 +5,9 @@ from ..states import GTasks
 
 import cv2
 import sys
+import logging
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+import matplotlib.pyplot as plt
 
 def main(test_round):
     frame_manager = FrameManager()
@@ -24,8 +27,8 @@ def main(test_round):
     task.fm = frame_manager
     task.Tick()
 
-    # cv2.imshow('Image', task.buffer)
-    # cv2.waitKey(0)
+    plt.imshow(cv2.cvtColor(task.buffer, cv2.COLOR_BGR2RGB))
+    plt.show()
 
 if __name__ == "__main__":
     test_round = int(sys.argv[1])
