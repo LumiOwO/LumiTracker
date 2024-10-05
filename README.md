@@ -20,7 +20,10 @@
 
 ---
 
-- [ ] 多语言支持
+- [x] 多语言支持
+  - [x] 简体中文
+  - [x] 英语
+  - [x] 日语
 - [x] 应用内更新
 - [x] 云原神支持
 
@@ -61,6 +64,8 @@
 - [Swordfish.NET.CollectionsV3](https://github.com/stewienj/SwordfishCollections)
 
 ## 致谢
+感谢[@豆沙包](https://space.bilibili.com/771364)在日语翻译中提供的帮助！
+
 特别感谢以下开源项目，对本项目给予了极大的启发：
 - [Hearthstone-Deck-Tracker](https://github.com/HearthSim/Hearthstone-Deck-Tracker)
 - [BetterGI](https://github.com/babalae/better-genshin-impact)

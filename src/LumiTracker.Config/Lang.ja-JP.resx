@@ -244,7 +244,7 @@
     <value>起動中...</value>
   </data>
   <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
-    <value>起動済</value>
+    <value>起動済み</value>
   </data>
   <data name="MinimizedNotification" xml:space="preserve">
     <value>ゲーム画面が検知できません。ゲーム画面を最小化しないでください！</value>

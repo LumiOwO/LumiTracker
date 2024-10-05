@@ -118,6 +118,13 @@ namespace LumiTracker.Services
             var releaseContent = new LatestReleaseDialogContent();
             string title = ctx.ReleaseMeta!.tag_name;
             string text  = ctx.ReleaseMeta!.body;
+            // Get update info of current language
+            string[] textMultiLangs = text.Split("----------");
+            if (textMultiLangs.Length == (int)ELanguage.NumLanguages - 1)
+            {
+                text = textMultiLangs[(int)Configuration.GetELanguage() - 1];
+                text = text.TrimStart();
+            }
             MarkdownParser.ParseMarkdown(releaseContent.RichTextBox.Document, text);
 
             // Show latest release info dialog

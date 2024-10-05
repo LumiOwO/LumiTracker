@@ -1,3 +1,9 @@
+# \[[v1.2.8](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.8)\] - 2024.10.05
+### 新增功能
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 现在，游戏内显示语言为英语或日语时，可以正常识别了
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 语言设置中，新增了「跟随系统」选项
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 记牌器已添加日语文本（感谢 [@豆沙包](https://space.bilibili.com/771364) 提供的帮助！）
+
 # \[[v1.2.7](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.7)\] - 2024.10.01
 - ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了记牌器界面显示在游戏窗口内时，无法点击到回合结束按钮的问题
 

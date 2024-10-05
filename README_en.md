@@ -4,7 +4,6 @@
 
 [中文](README.md) | English | [Documentation](https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe)
 
-# ** English card names are on the way!! **
 
 ## Features
 
@@ -21,7 +20,10 @@
 
 ---
 
-- [ ] Multi-language support
+- [x] Multi-language support
+  - [x] Chinese Simplified
+  - [x] English
+  - [x] Japanese
 - [x] In-app updates
 - [x] Support for Genshin Impact Cloud Game
 
@@ -63,6 +65,7 @@ Please try running the program as an administrator.
 - [Swordfish.NET.CollectionsV3](https://github.com/stewienj/SwordfishCollections)
 
 ## Acknowledgments
+Thanks to [@豆沙包](https://space.bilibili.com/771364) for the help with Japanese translation!
 
 A special thanks to the following open-source projects for providing significant inspiration to this project:
 
