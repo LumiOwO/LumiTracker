@@ -9,7 +9,7 @@ namespace LumiTracker.Config
         en_US,
         ja_JP,
 
-        NumLanguages,
+        NumELanguages,
     }
 
     public enum EClosingBehavior : int
@@ -142,7 +142,7 @@ namespace LumiTracker.Config
         public static ELanguage ToELanguage(this string lang)
         {
             ELanguage curLang;
-            if (Enum.TryParse(lang.Replace('-', '_'), out curLang) && curLang < ELanguage.NumLanguages)
+            if (Enum.TryParse(lang.Replace('-', '_'), out curLang) && curLang < ELanguage.NumELanguages)
             {
                 return curLang;
             }

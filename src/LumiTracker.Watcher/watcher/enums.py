@@ -7,7 +7,7 @@ class ELanguage(enum.Enum):
     en_US        = enum.auto()
     ja_JP        = enum.auto()
 
-    NumLanguages = enum.auto()
+    NumELanguages = enum.auto()
 
 class ECaptureType(enum.Enum):
     BitBlt          = 0

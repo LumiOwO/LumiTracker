@@ -11,7 +11,7 @@ namespace LumiTracker.ViewModels.Pages
         private bool _isInitialized = false;
 
         [ObservableProperty]
-        private LocalizationTextItem[] _languageNames = new LocalizationTextItem[(int)ELanguage.NumLanguages];
+        private LocalizationTextItem[] _languageNames = new LocalizationTextItem[(int)ELanguage.NumELanguages];
 
         [ObservableProperty]
         private int _selectedLanguageIndex = -1;
@@ -43,7 +43,7 @@ namespace LumiTracker.ViewModels.Pages
         private void InitializeViewModel()
         {
             // languages
-            for (ELanguage i = 0; i < ELanguage.NumLanguages; i++)
+            for (ELanguage i = 0; i < ELanguage.NumELanguages; i++)
             {
                 var textItem = new LocalizationTextItem();
                 if (i == ELanguage.FollowSystem)

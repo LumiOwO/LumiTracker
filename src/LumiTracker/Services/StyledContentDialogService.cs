@@ -120,7 +120,7 @@ namespace LumiTracker.Services
             string text  = ctx.ReleaseMeta!.body;
             // Get update info of current language
             string[] textMultiLangs = text.Split("----------");
-            if (textMultiLangs.Length == (int)ELanguage.NumLanguages - 1)
+            if (textMultiLangs.Length == (int)ELanguage.NumELanguages - 1)
             {
                 text = textMultiLangs[(int)Configuration.GetELanguage() - 1];
                 text = text.TrimStart();

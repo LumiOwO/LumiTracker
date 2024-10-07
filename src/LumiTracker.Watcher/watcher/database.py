@@ -194,7 +194,7 @@ class Database:
             cost_type = ECostType[cost_type].value
 
             name_langs = {}
-            for lang in range(ELanguage.NumLanguages.value):
+            for lang in range(ELanguage.NumELanguages.value):
                 lang = ELanguage(lang)
                 if lang == ELanguage.FollowSystem:
                     continue
@@ -313,7 +313,7 @@ class Database:
         characters = [None] * num_characters
         for i, row in enumerate(data):
             name_langs = {}
-            for lang in range(ELanguage.NumLanguages.value):
+            for lang in range(ELanguage.NumELanguages.value):
                 lang = ELanguage(lang)
                 if lang == ELanguage.FollowSystem:
                     continue
