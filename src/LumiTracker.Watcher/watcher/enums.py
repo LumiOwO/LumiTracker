@@ -9,6 +9,17 @@ class ELanguage(enum.Enum):
 
     NumELanguages = enum.auto()
 
+class EClientType(enum.Enum):
+    YuanShen       = 0
+    Global         = enum.auto()
+    CloudPC        = enum.auto()
+    CloudWeb       = enum.auto()
+    NumClientTypes = enum.auto()
+
+    # Extra types, not displayed in the app
+    Video          = enum.auto()
+    WeMeet         = enum.auto()
+
 class ECaptureType(enum.Enum):
     BitBlt          = 0
     WindowsCapture  = enum.auto()

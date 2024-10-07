@@ -287,7 +287,7 @@ namespace LumiTracker.Watcher
             var startInfo = new ProcessStartInfo
             {
                 FileName = Path.Combine(Configuration.AppDir, "python", "python.exe"),
-                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {captureType} {(canHideBorder ? 1 : 0)} {port}",
+                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {captureInfo.ClientType} {captureType} {(canHideBorder ? 1 : 0)} {port}",
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
@@ -390,7 +390,14 @@ namespace LumiTracker.Watcher
 
         private void ParseBackendMessage(JToken message_data, string message_str)
         {
-            string task_type_name = message_data["type"]!.ToString();
+            JObject? message_obj = message_data as JObject;
+            if (message_obj == null || !message_obj.TryGetValue("type", out JToken? typeValue))
+            {
+                Configuration.Logger.LogInformation(message_str);
+                return;
+            }
+
+            string task_type_name = typeValue!.ToString();
             bool valid_task_type = Enum.TryParse(task_type_name, out ETaskType task_type);
 
             if (!valid_task_type || task_type != ETaskType.LOG_FPS)

@@ -10,7 +10,7 @@ class WindowWatcher:
         self.hwnd    = 0
         self.capture = None
 
-    def Start(self, hwnd, capture, port):
+    def Start(self, hwnd, capture, port, client_type):
         PROCESS_PER_MONITOR_DPI_AWARE = 2
         try:
             ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
@@ -20,18 +20,20 @@ class WindowWatcher:
         self.hwnd = hwnd
         self.capture = capture
 
-        self.capture.Start(hwnd, port)
+        self.capture.Start(hwnd, port, client_type)
 
 if __name__ == '__main__':
-    assert len(sys.argv) == 5, "Wrong number of arguments"
+    assert len(sys.argv) == 6, "Wrong number of arguments"
     hwnd            = int(sys.argv[1])
-    capture_type    = sys.argv[2]
-    can_hide_border = int(sys.argv[3])
-    port            = int(sys.argv[4])
+    client_type     = sys.argv[2]
+    capture_type    = sys.argv[3]
+    can_hide_border = int(sys.argv[4])
+    port            = int(sys.argv[5])
 
     LogDebug(
         info="WindowWatcher start",
         hwnd=hwnd, 
+        client_type=client_type,
         capture_type=capture_type, 
         can_hide_border=can_hide_border,
         port=port
@@ -47,4 +49,4 @@ if __name__ == '__main__':
         raise NotImplementedError()
 
     window_watcher = WindowWatcher()
-    window_watcher.Start(hwnd, capture, port)
+    window_watcher.Start(hwnd, capture, port, client_type)
