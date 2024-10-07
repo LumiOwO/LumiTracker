@@ -20,6 +20,11 @@ namespace LumiTracker.OB
             "ob"
         );
 
+        public static readonly string CaptureDir = Path.Combine(
+            WorkingDir,
+            "capture"
+        );
+
         private static readonly string ConfigPath = Path.Combine(
             Configuration.AppDir,
             "assets",
@@ -120,6 +125,7 @@ namespace LumiTracker.OB
             OBGameWatcher.MyCardsCreateDeck  += OnMyCardsCreateDeck;
             OBGameWatcher.WindowWatcherStart += OnWindowWatcherStart;
             OBGameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
+            OBGameWatcher.CaptureTestDone    += OnCaptureTestDone;
         }
 
         private void ResetOBData()
@@ -207,12 +213,17 @@ namespace LumiTracker.OB
 
             OBSnapper = new WindowSnapper(null, hwnd, false);
             OBSnapper.Attach();
+            OBSnapper.GenshinWindowResized += OnGenshinWindowResized;
         }
 
         private void OnWindowWatcherExit()
         {
-            OBSnapper?.Detach();
-            OBSnapper = null;
+            if (OBSnapper != null)
+            {
+                OBSnapper.GenshinWindowResized -= OnGenshinWindowResized;
+                OBSnapper.Detach();
+                OBSnapper = null;
+            }
 
             ResetOBData();
         }
@@ -225,6 +236,38 @@ namespace LumiTracker.OB
         private void OnMyCardsCreateDeck(int[] card_ids)
         {
             UpdateOBData();
+        }
+
+        private void OnGenshinWindowResized(int width, int height, bool isMinimized)
+        {
+            if (isMinimized) return;
+
+            // Run a capture test whenever the window resized
+            Task.Run(async () =>
+            {
+                await Task.Delay(1000); // Delay for 1000 milliseconds (1 second)
+                await OBGameWatcher.DumpToBackend(Configuration.LogDir);
+            });
+        }
+
+        private void OnCaptureTestDone(string filename, int width, int height)
+        {
+            if (!Directory.Exists(OBConfig.CaptureDir))
+            {
+                Directory.CreateDirectory(OBConfig.CaptureDir);
+            }
+
+            string src = Path.Combine(Configuration.LogDir, filename);
+            string dst = Path.Combine(OBConfig.CaptureDir, $"{OBScopeState.Name}_{filename}");
+            try
+            {
+                File.Move(src, dst, overwrite: true);
+                Configuration.Logger.LogInformation($"[OnCaptureTestDone] CaptureTest saved at {OBScopeState.Name}_{filename}");
+            }
+            catch (IOException ex)
+            {
+                Configuration.Logger.LogError($"[OnCaptureTestDone] An error occurred: {ex.Message}");
+            }
         }
     }
 }
