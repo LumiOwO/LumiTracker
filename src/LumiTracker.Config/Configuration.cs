@@ -26,9 +26,11 @@ namespace LumiTracker.Config
 
         private StreamWriter _errorWriter;
 
+        public static readonly string AppName = Assembly.GetEntryAssembly()!.GetName().Name!;
+
         // Directories
         public static readonly string AppDir = Path.GetFullPath(Path.GetDirectoryName(
-            Assembly.GetExecutingAssembly().Location
+            Assembly.GetEntryAssembly()!.Location
         )!);
 
         public static readonly string RootDir = Path.GetFullPath(Path.Combine(
@@ -83,10 +85,15 @@ namespace LumiTracker.Config
             "config.json"
         );
 
-        private static readonly string LogFilePath = Path.Combine(
+        private static string LogFilePath = Path.Combine(
             LogDir,
             "error.log"
         );
+
+        public static void SetCustomLogFilePath(string path)
+        {
+            LogFilePath = path;
+        }
 
         private Configuration()
         {
@@ -122,6 +129,8 @@ namespace LumiTracker.Config
                     ;
             });
             _logger = loggerFactory.CreateLogger<Configuration>();
+
+            _logger.LogInformation($"App Version: {AppName}-{GetAssemblyVersion()}");
         }
 
         private static IniSettings LoadIniSettings(string path)
@@ -157,7 +166,7 @@ namespace LumiTracker.Config
 
         public static string GetAssemblyVersion()
         {
-            var assembly = Assembly.GetExecutingAssembly();
+            var assembly = Assembly.GetEntryAssembly()!;
             // Retrieve the assembly's informational version (includes suffixes like -beta1)
             string? informationalVersion = assembly
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;

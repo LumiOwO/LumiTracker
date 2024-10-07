@@ -25,6 +25,11 @@ namespace LumiTracker.OB
             "capture"
         );
 
+        public static readonly string OBLogFilePath = Path.Combine(
+            WorkingDir,
+            "error.log"
+        );
+
         private static readonly string ConfigPath = Path.Combine(
             Configuration.AppDir,
             "assets",

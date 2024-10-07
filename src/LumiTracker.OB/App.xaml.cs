@@ -38,12 +38,19 @@ namespace LumiTracker.OB
             return _host.Services.GetService(typeof(T)) as T;
         }
 
+        private AppSingleInstanceGuard SingleInstanceGuard = new();
+
         /// <summary>
         /// Occurs when the application is loading.
         /// </summary>
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            Configuration.Logger.LogInformation($"App Version: LumiTrackerOB-{Configuration.GetAssemblyVersion()}");
+            Configuration.SetCustomLogFilePath(OBConfig.OBLogFilePath);
+            SingleInstanceGuard.Init(this);
+            if (!SingleInstanceGuard.IsAppRunning)
+            {
+                return;
+            }
 
             GameWatcherOBProxy myProxy = new GameWatcherOBProxy("MY", LogHelper.AnsiOrange);
             GameWatcherOBProxy opProxy = new GameWatcherOBProxy("OP", LogHelper.AnsiBlue);
@@ -59,8 +66,12 @@ namespace LumiTracker.OB
         /// </summary>
         private async void OnExit(object sender, ExitEventArgs e)
         {
-            await _host.StopAsync();
+            if (!SingleInstanceGuard.IsAppRunning)
+            {
+                return;
+            }
 
+            await _host.StopAsync();
             _host.Dispose();
         }
 

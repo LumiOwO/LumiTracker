@@ -17,7 +17,6 @@ using LumiTracker.Config;
 using LumiTracker.Models;
 using Wpf.Ui.Appearance;
 using Microsoft.Win32;
-using System.IO.Pipes;
 using System.Diagnostics;
 
 namespace LumiTracker
@@ -96,7 +95,7 @@ namespace LumiTracker
             return _host.Services.GetService(typeof(T)) as T;
         }
 
-        private static Mutex? mutex = null;
+        private AppSingleInstanceGuard SingleInstanceGuard = new ();
 
         /// <summary>
         /// Occurs when the application is loading.
@@ -104,21 +103,11 @@ namespace LumiTracker
         private void OnStartup(object sender, StartupEventArgs e)
         {
             // Ensure Singleton
-            string appName = Assembly.GetExecutingAssembly().GetName().Name!;
-            bool createdNew;
-            mutex = new Mutex(true, appName, out createdNew);
-            if (!createdNew)
+            SingleInstanceGuard.Init(this);
+            if (!SingleInstanceGuard.IsAppRunning)
             {
-                // Application is already running
-                SignalFirstInstance();
-                Application.Current.Shutdown();
                 return;
             }
-
-            Configuration.Logger.LogInformation($"App Version: LumiTrackerApp-{Configuration.GetAssemblyVersion()}");
-
-            // Start listening for pipe messages asynchronously
-            Task.Run(() => ListenForPipeMessagesAsync());
 
             if (e.Args.Length == 1 && e.Args[0] == "just_updated")
             {
@@ -140,8 +129,12 @@ namespace LumiTracker
         /// </summary>
         private async void OnExit(object sender, ExitEventArgs e)
         {
-            await _host.StopAsync();
+            if (!SingleInstanceGuard.IsAppRunning)
+            {
+                return;
+            }
 
+            await _host.StopAsync();
             _host.Dispose();
 
             if (Configuration.Get<bool>("restart"))
@@ -201,58 +194,6 @@ namespace LumiTracker
                     // Other session switch reasons
                     break;
             }
-        }
-
-        private void SignalFirstInstance()
-        {
-            try
-            {
-                using (NamedPipeClientStream client = new NamedPipeClientStream(".", "Pipe_" + Assembly.GetExecutingAssembly().GetName().Name, PipeDirection.Out))
-                {
-                    client.Connect(1000); // Try to connect for 1 second
-                    using (StreamWriter writer = new StreamWriter(client))
-                    {
-                        writer.WriteLine("Activate");
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // Just exit
-            }
-        }
-
-        private async Task ListenForPipeMessagesAsync()
-        {
-            while (true)
-            {
-                using (NamedPipeServerStream server = new NamedPipeServerStream("Pipe_" + Assembly.GetExecutingAssembly().GetName().Name, PipeDirection.In))
-                {
-                    await server.WaitForConnectionAsync();
-
-                    using (StreamReader reader = new StreamReader(server))
-                    {
-                        string? message = await reader.ReadLineAsync();
-                        if (message != null && message == "Activate")
-                        {
-                            Dispatcher.Invoke(() => BringToFront());
-                        }
-                    }
-                }
-            }
-        }
-
-        private void BringToFront()
-        {
-            var mainWindow = Application.Current.MainWindow;
-            if (mainWindow.WindowState == WindowState.Minimized)
-            {
-                mainWindow.WindowState = WindowState.Normal;
-            }
-            mainWindow.Activate();
-            mainWindow.Topmost = true;  // set topmost
-            mainWindow.Topmost = false; // remove topmost
-            mainWindow.Focus();         // set focus
         }
     }
 }
