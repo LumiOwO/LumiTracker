@@ -19,6 +19,12 @@ namespace LumiTracker.Watcher
         public string title { get; set; } = "";
     }
 
+    public struct CaptureInfo
+    {
+        public EClientType ClientType { get; set; }
+        public ECaptureType CaptureType { get; set; }
+    }
+
     public delegate void OnGenshinWindowFoundCallback();
 
     public delegate void OnWindowWatcherStartCallback(IntPtr hwnd);
@@ -225,14 +231,14 @@ namespace LumiTracker.Watcher
             }
         }
 
-        public void Start(EClientType clientType)
+        public void Start(CaptureInfo captureInfo)
         {
-            _processWatcherTask = StartProcessWatcher(clientType);
+            _processWatcherTask = StartProcessWatcher(captureInfo);
         }
 
-        public async Task StartProcessWatcher(EClientType clientType)
+        public async Task StartProcessWatcher(CaptureInfo captureInfo)
         {
-            string[] processList = EnumHelpers.GetClientProcessList(clientType);
+            string[] processList = EnumHelpers.GetClientProcessList(captureInfo.ClientType);
             Configuration.Logger.LogInformation($"Begin to find process: [{string.Join(", ", processList)}]");
             try
             {
@@ -244,7 +250,7 @@ namespace LumiTracker.Watcher
                         var info = FindProcessWindow(processName);
                         if (info.hwnd != IntPtr.Zero)
                         {
-                            _windowWatcherTask = StartWindowWatcher(info, clientType, interval);
+                            _windowWatcherTask = StartWindowWatcher(info, captureInfo, interval);
                             await _windowWatcherTask;
                             break;
                         }
@@ -259,15 +265,15 @@ namespace LumiTracker.Watcher
             }
         }
 
-        public async Task StartWindowWatcher(WindowInfo info, EClientType clientType, int interval)
+        public async Task StartWindowWatcher(WindowInfo info, CaptureInfo captureInfo, int interval)
         {
             Configuration.Logger.LogInformation($"Begin to start window watcher");
 
             //////////////////////////
             // Prepare start info
-            string captureType = EnumHelpers.BitBltUnavailable(clientType) ?
+            string captureType = EnumHelpers.BitBltUnavailable(captureInfo.ClientType) ?
                 ECaptureType.WindowsCapture.ToString() :
-                Configuration.Get<ECaptureType>("capture_type").ToString();
+                captureInfo.CaptureType.ToString();
 
             bool canHideBorder = ApiInformation.IsPropertyPresent(
                 "Windows.Graphics.Capture.GraphicsCaptureSession", "IsBorderRequired");
@@ -476,7 +482,7 @@ namespace LumiTracker.Watcher
         public static void Main(string[] args)
         {
             var processWatcher = new ProcessWatcher();
-            processWatcher.Start(EClientType.YuanShen);
+            processWatcher.Start( new CaptureInfo { ClientType = EClientType.YuanShen, CaptureType = ECaptureType.BitBlt } );
         }
     }
 

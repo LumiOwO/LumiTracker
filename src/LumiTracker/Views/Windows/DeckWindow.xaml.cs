@@ -7,7 +7,6 @@ using Wpf.Ui.Controls;
 using LumiTracker.Controls;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.Views.Windows
 {
@@ -23,8 +22,6 @@ namespace LumiTracker.Views.Windows
     public partial class DeckWindow : IDeckWindow
     {
         private WindowSnapper? _snapper;
-
-        public event OnGenshinWindowResizedCallback? GenshinWindowResized;
 
         public DeckWindowViewModel ViewModel { get; }
 
@@ -75,16 +72,19 @@ namespace LumiTracker.Views.Windows
             _snapper = new WindowSnapper(this, hwnd, Configuration.Get<bool>("show_ui_outside"));
             _snapper.Attach();
         }
+
         public void Detach()
         {
             _snapper?.Detach();
             _snapper = null;
         }
 
-        public void OnGenshinWindowResized(int width, int height, bool isMinimized)
+        public WindowSnapper? Snapper
         {
-            Configuration.Logger.LogDebug($"[DeckWindow] OnGenshinWindowResized: {width} x {height}, isMinimized = {isMinimized}");
-            GenshinWindowResized?.Invoke(width, height, isMinimized);
+            get
+            {
+                return _snapper;
+            }
         }
 
         public void ShowWindow()

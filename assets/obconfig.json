@@ -3,12 +3,14 @@
     "tokens": "D:/_data/七圣/test"
   },
   "MY": {
-    "client": "YuanShen",
+    "client_type": "YuanShen",
+    "capture_type": "BitBlt",
     "deck": "F0AhxHEMF5Ax2XoNF5GwWaMVCpAx3jMPFECB9EgPGGERCIEQGIFBioQYGKFRCoUQDKAA",
     "max_tracked_tokens": 3
   },
   "OP": {
-    "client": "WeMeet",
+    "client_type": "WeMeet",
+    "capture_type": "BitBlt",
     "deck": "F0AhxHEMF5AB2XoNF5GwWaMVCpAx3jMPFECB9EgPGGERCIEQGIFBioQYGKFRCoUQDKAA",
     "max_tracked_tokens": 3
   }

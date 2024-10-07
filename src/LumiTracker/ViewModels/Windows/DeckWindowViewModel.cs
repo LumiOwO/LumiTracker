@@ -186,7 +186,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnUnsupportedRatio()
         {
-            EClientType clientType = Configuration.Get<EClientType>("client_type");
+            EClientType clientType = _gameWatcher.ClientType;
             // Ignore MessageBox popup when client is web browser
             if (clientType != EClientType.CloudWeb && clientType != EClientType.WeMeet)
             {

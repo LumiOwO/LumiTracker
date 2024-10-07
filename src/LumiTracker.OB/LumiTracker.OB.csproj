@@ -1,13 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AssemblyName>LumiTrackerOB</AssemblyName>
-    <PublishDir>$(SolutionDir)publish\LumiTracker\LumiTrackerApp-$(InformationalVersion)\</PublishDir>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>$(SolutionDir)src\LumiTracker\Assets\LumiTracker.ico</ApplicationIcon>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Copyright>Copyright (c) 2024 LumiOwO</Copyright>
+    <Authors>LumiOwO@hotmail.com</Authors>
+    <PackageProjectUrl>https://github.com/LumiOwO/LumiTracker</PackageProjectUrl>
+    <PublishDir>$(SolutionDir)publish\LumiTracker\LumiTrackerApp-$(InformationalVersion)\</PublishDir>
+    <AssemblyName>LumiTrackerOB</AssemblyName>
   </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2592.51" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Swordfish.NET.CollectionsV3" Version="3.3.12" />
+    <PackageReference Include="WPF-UI" Version="3.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0 " />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2 " />
+    <PackageReference Include="WPF-UI.Tray" Version="3.0.4" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LumiTracker.Config\LumiTracker.Config.csproj" />

@@ -1,10 +1,11 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Helpers;
 using LumiTracker.Models;
 using LumiTracker.ViewModels.Pages;
 using LumiTracker.ViewModels.Windows;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using System.Diagnostics;
+using System.IO;
 
 namespace LumiTracker.OB
 {
@@ -92,6 +93,7 @@ namespace LumiTracker.OB
         private DeckViewModel OBDeckViewModel;
         private DeckWindowViewModel OBDeckWindowViewModel;
         private GameWatcher OBGameWatcher;
+        private WindowSnapper? OBSnapper;
 
         private ScopeState OBScopeState;
         private string OBDataDir;
@@ -112,11 +114,12 @@ namespace LumiTracker.OB
 
             ResetOBData();
 
-            OBGameWatcher.GameStarted       += OnGameStarted;
-            OBGameWatcher.GameOver          += OnGameOver;
-            OBGameWatcher.MyCardsDrawn      += OnMyCardsDrawn;
-            OBGameWatcher.MyCardsCreateDeck += OnMyCardsCreateDeck;
-            OBGameWatcher.WindowWatcherExit += OnWindowWatcherExit;
+            OBGameWatcher.GameStarted        += OnGameStarted;
+            OBGameWatcher.GameOver           += OnGameOver;
+            OBGameWatcher.MyCardsDrawn       += OnMyCardsDrawn;
+            OBGameWatcher.MyCardsCreateDeck  += OnMyCardsCreateDeck;
+            OBGameWatcher.WindowWatcherStart += OnWindowWatcherStart;
+            OBGameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
         }
 
         private void ResetOBData()
@@ -136,6 +139,7 @@ namespace LumiTracker.OB
                 Configuration.Logger.LogError($"OB data reset failed at {OBDataDir}, you can delete it manually. Error: {ex.Message}");
             }
         }
+
         private void UpdateOBData()
         {
             var tracked = OBDeckWindowViewModel.TrackedCards.Data;
@@ -149,25 +153,29 @@ namespace LumiTracker.OB
                     token_id = it.Current.Key - (int)EActionCard.NumSharables;
                 }
 
-                string imageLinkPath = Path.Combine(OBDataDir, $"token{i}.png");
-                string countTextPath = Path.Combine(OBDataDir, $"token{i}.txt");
-                string targetPath;
+                string imageFileForOBS = Path.Combine(OBDataDir, $"token{i}.png");
+                string countFileForOBS = Path.Combine(OBDataDir, $"token{i}.txt");
+                string imageSrcPath;
                 if (token_id >= 0)
                 {
-                    targetPath = Path.Combine(OBConfig.ResDirToken, $"{token_id}.png");
+                    imageSrcPath = Path.Combine(OBConfig.ResDirToken, $"{token_id}.png");
                 }
                 else
                 {
-                    targetPath = Path.Combine(Configuration.AssetsDir, "images", "empty.png");
+                    imageSrcPath = Path.Combine(Configuration.AssetsDir, "images", "empty.png");
                 }
 
-                if (File.Exists(imageLinkPath))
+                try
                 {
-                    File.Delete(imageLinkPath);
+                    File.Copy(imageSrcPath, imageFileForOBS, overwrite: true);
+                    Configuration.Logger.LogDebug($"[File.Copy] {imageSrcPath} --> {imageFileForOBS} success.");
                 }
-                CreateLink(imageLinkPath, targetPath);
+                catch (Exception ex)
+                {
+                    Configuration.Logger.LogError($"[File.Copy] {imageSrcPath} --> {imageFileForOBS} failed: {ex.Message}");
+                }
 
-                using (StreamWriter writer = new StreamWriter(countTextPath, append: false))
+                using (StreamWriter writer = new StreamWriter(countFileForOBS, append: false))
                 {
                     if (token_id >= 0)
                     {
@@ -177,64 +185,10 @@ namespace LumiTracker.OB
             }
         }
 
-        public static void CreateLink(string linkPath, string targetPath)
-        {
-            try
-            {
-                bool isDirectory = Directory.Exists(targetPath);
-                bool isFile = File.Exists(targetPath);
-                if (!isDirectory && !isFile)
-                {
-                    throw new ArgumentException($"Target path does not exist.");
-                }
-
-                string arguments;
-                if (isDirectory)
-                {
-                    arguments = $"/C mklink /J \"{linkPath}\" \"{targetPath}\""; // Junction for directories
-                }
-                else
-                {
-                    arguments = $"/C mklink \"{linkPath}\" \"{targetPath}\""; // Symbolic link for files
-                }
-
-                Process process = new Process();
-                process.StartInfo.FileName  = "cmd.exe";
-                process.StartInfo.Arguments = arguments;
-                process.StartInfo.RedirectStandardOutput = false;
-                process.StartInfo.RedirectStandardError  = true;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.CreateNoWindow  = true;
-
-                process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => { Configuration.Logger.LogError(e.Data); };
-                
-                process.Start();
-                process.WaitForExit();
-
-                if (process.ExitCode == 0)
-                {
-                    Configuration.Logger.LogDebug($"Link {linkPath} --> {targetPath} success.");
-                }
-                else
-                {
-                    throw new ArgumentException($"Process exit with code {process.ExitCode}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Configuration.Logger.LogError($"Link {linkPath} --> {targetPath} failed: {ex.Message}");
-            }
-        }
-
         public void Start()
         {
             using var scopeGuard = Configuration.Logger.BeginScope(OBScopeState);
-            OBGameWatcher.Start(OBProxyConfig.Get<EClientType>("client"));
-        }
-
-        public void Wait()
-        {
-            OBGameWatcher.Wait();
+            OBGameWatcher.Start(OBProxyConfig.Get<EClientType>("client_type"), OBProxyConfig.Get<ECaptureType>("capture_type"));
         }
 
         private void OnGameStarted()
@@ -247,8 +201,19 @@ namespace LumiTracker.OB
             ResetOBData();
         }
 
+        private void OnWindowWatcherStart(IntPtr hwnd)
+        {
+            ResetOBData();
+
+            OBSnapper = new WindowSnapper(null, hwnd, false);
+            OBSnapper.Attach();
+        }
+
         private void OnWindowWatcherExit()
         {
+            OBSnapper?.Detach();
+            OBSnapper = null;
+
             ResetOBData();
         }
 
@@ -260,23 +225,6 @@ namespace LumiTracker.OB
         private void OnMyCardsCreateDeck(int[] card_ids)
         {
             UpdateOBData();
-        }
-    }
-
-    public class OBApp
-    {
-        public static void Main(string[] args)
-        {
-            Configuration.Logger.LogInformation($"App Version: LumiTrackerOB-{Configuration.GetAssemblyVersion()}");
-
-            GameWatcherOBProxy myProxy = new GameWatcherOBProxy("MY", LogHelper.AnsiOrange);
-            GameWatcherOBProxy opProxy = new GameWatcherOBProxy("OP", LogHelper.AnsiBlue);
-
-            myProxy.Start();
-            opProxy.Start();
-
-            myProxy.Wait();
-            opProxy.Wait();
         }
     }
 }

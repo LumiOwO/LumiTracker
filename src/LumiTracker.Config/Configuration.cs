@@ -27,14 +27,14 @@ namespace LumiTracker.Config
         private StreamWriter _errorWriter;
 
         // Directories
-        public static readonly string AppDir = Path.GetDirectoryName(
+        public static readonly string AppDir = Path.GetFullPath(Path.GetDirectoryName(
             Assembly.GetExecutingAssembly().Location
-        )!;
+        )!);
 
-        public static readonly string RootDir = Path.Combine(
+        public static readonly string RootDir = Path.GetFullPath(Path.Combine(
             AppDir,
             ".."
-        );
+        ));
 
         public static readonly string CacheDir = Path.Combine(
             AppDir,
@@ -46,10 +46,10 @@ namespace LumiTracker.Config
             "assets"
         );
 
-        public static readonly string DocumentsDir = Path.Combine(
+        public static readonly string DocumentsDir = Path.GetFullPath(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "LumiTracker"
-        );
+        ));
 
         public static readonly string ConfigDir = Path.Combine(
             DocumentsDir,

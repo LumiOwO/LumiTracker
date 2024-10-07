@@ -196,7 +196,6 @@ namespace LumiTracker.ViewModels.Pages
             // Show UI outside
             ShowUIOutside = Configuration.Get<bool>("show_ui_outside");
             _deckWindow.SetbOutside(ShowUIOutside);
-            _deckWindow.GenshinWindowResized += OnGenshinWindowResized;
 
             // Start game watcher
             _gameWatcher.GenshinWindowFound += OnGenshinWindowFound;
@@ -205,7 +204,7 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.CaptureTestDone    += OnCaptureTestDone;
             _gameWatcher.LogFPS             += OnLogFPS;
 
-            _gameWatcher.Start(ClientType);
+            _gameWatcher.Start(ClientType, CaptureType);
         }
 
         private void OnGenshinWindowFound()
@@ -219,12 +218,14 @@ namespace LumiTracker.ViewModels.Pages
 
             _deckWindow.ShowWindow();
             _deckWindow.AttachTo(hwnd);
+            _deckWindow.Snapper!.GenshinWindowResized += OnGenshinWindowResized;
         }
 
         private void OnWindowWatcherExit()
         {
             GameWatcherState = EGameWatcherState.NoWindowFound;
 
+            _deckWindow.Snapper!.GenshinWindowResized -= OnGenshinWindowResized;
             _deckWindow.Detach();
             _deckWindow.HideWindow();
         }
@@ -250,7 +251,7 @@ namespace LumiTracker.ViewModels.Pages
             }
             Configuration.Save();
 
-            _gameWatcher.ChangeGameClient(SelectedClientType);
+            _gameWatcher.ChangeGameClient(SelectedClientType, SelectedCaptureType);
         }
 
         [RelayCommand]

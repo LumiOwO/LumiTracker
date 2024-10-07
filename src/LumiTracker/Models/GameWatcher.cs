@@ -20,7 +20,7 @@ namespace LumiTracker.Models
     {
         private Task? MainLoopTask = null;
 
-        private SpinLockedValue<EClientType> clientType = new (EClientType.YuanShen);
+        private SpinLockedValue<CaptureInfo> info = new (default);
 
         private SpinLockedValue<ProcessWatcher> processWatcher = new (null);
 
@@ -59,21 +59,21 @@ namespace LumiTracker.Models
 
         }
 
-        public void Start(EClientType type)
+        public void Start(EClientType clientType, ECaptureType captureType)
         {
-            clientType.Value = type;
+            info.Value = new CaptureInfo { ClientType = clientType, CaptureType = captureType};
             MainLoopTask = MainLoop();
         }
 
-        public void Wait()
+        public void ChangeGameClient(EClientType clientType, ECaptureType captureType)
         {
-            MainLoopTask?.Wait();
+            info.Value = new CaptureInfo { ClientType = clientType, CaptureType = captureType };
+            StopCurrentProcessWatcher();
         }
 
-        public void ChangeGameClient(EClientType type)
+        public EClientType ClientType
         {
-            clientType.Value = type;
-            StopCurrentProcessWatcher();
+            get { return info.Value.ClientType; }
         }
 
         public async Task DumpToBackend(string message)
@@ -120,7 +120,7 @@ namespace LumiTracker.Models
                 watcher.ExceptionHandler   += OnException;
                 processWatcher.Value = watcher;
 
-                watcher.Start(clientType.Value!);
+                watcher.Start(info.Value!);
             }
         }
 

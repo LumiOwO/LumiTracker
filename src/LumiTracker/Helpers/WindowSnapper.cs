@@ -115,7 +115,7 @@ namespace LumiTracker.Helpers
         private DispatcherTimer _timer;
         private Rect            _lastBounds;
         private IntPtr          _lastForeground;
-        private DeckWindow      _src_window;
+        private DeckWindow?     _src_window;
         private IntPtr          _src_hwnd;
         private IntPtr          _dst_hwnd;
         private bool            _bOutside;
@@ -123,17 +123,15 @@ namespace LumiTracker.Helpers
 
         public event OnGenshinWindowResizedCallback? GenshinWindowResized;
 
-        public WindowSnapper(DeckWindow window, IntPtr hwnd, bool bOutside)
+        public WindowSnapper(DeckWindow? window, IntPtr hwnd, bool bOutside)
         {
             _lastBounds     = new Rect();
             _lastForeground = 0;
             _src_window     = window;
-            _src_hwnd       = new WindowInteropHelper(window).Handle;
+            _src_hwnd       = window != null ? new WindowInteropHelper(window).Handle : IntPtr.Zero;
             _dst_hwnd       = hwnd;
             _bOutside       = bOutside;
             _isFirstTick    = true;
-
-            GenshinWindowResized += window.OnGenshinWindowResized;
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
@@ -169,11 +167,6 @@ namespace LumiTracker.Helpers
             if (_isFirstTick || bounds != _lastBounds)
             {
                 Rect clientRect = SnapToWindow(bounds);
-                if (bounds.Width != _lastBounds.Width || bounds.Height != _lastBounds.Height)
-                {
-                    bool isMinimized = IsIconic(_dst_hwnd);
-                    GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height, isMinimized);
-                }
                 _lastBounds = bounds;
             }
             //Configuration.Logger.LogDebug($"bounds: {bounds.Width}, {bounds.Height}");
@@ -181,25 +174,29 @@ namespace LumiTracker.Helpers
             //Configuration.Logger.LogDebug($"_src_window.Height: {_src_window.Height}");
 
             var foregroundHwnd = GetForegroundWindow();
-            if (_bOutside)
+
+            if (_src_window != null) 
             {
-                _src_window.ShowWindow();
-                if (foregroundHwnd != _lastForeground && foregroundHwnd == _dst_hwnd)
+                if (_bOutside)
                 {
-                    // Set to topmost once
-                    _src_window.Topmost = true;
-                    _src_window.Topmost = false;
-                }
-            }
-            else
-            {
-                if (foregroundHwnd != _src_hwnd && foregroundHwnd != _dst_hwnd)
-                {
-                    _src_window.HideWindow();
+                    _src_window.ShowWindow();
+                    if (foregroundHwnd != _lastForeground && foregroundHwnd == _dst_hwnd)
+                    {
+                        // Set to topmost once
+                        _src_window.Topmost = true;
+                        _src_window.Topmost = false;
+                    }
                 }
                 else
                 {
-                    _src_window.ShowWindow();
+                    if (foregroundHwnd != _src_hwnd && foregroundHwnd != _dst_hwnd)
+                    {
+                        _src_window.HideWindow();
+                    }
+                    else
+                    {
+                        _src_window.ShowWindow();
+                    }
                 }
             }
 
@@ -234,28 +231,33 @@ namespace LumiTracker.Helpers
 
             if (bounds.Height != _lastBounds.Height || bounds.Width != _lastBounds.Width)
             {
+                bool isMinimized = IsIconic(_dst_hwnd);
                 Configuration.Logger.LogInformation(
-                    $"Game window resized to {clientRect.Width} x {clientRect.Height}, " +
+                    $"Game window resized to {clientRect.Width} x {clientRect.Height}, isMinimized: {isMinimized}, " +
                     $"clientRect: [{clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}], " +
                     $"scale=({PhysicalHeight}/{LogicalHeight})={scale}"
                     );
+                GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height, isMinimized);
             }
             Configuration.Logger.LogDebug($"Game window moved to [{bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}]");
 
             // Snap to target window
-            if (_bOutside)
+            if (_src_window != null)
             {
-                _src_window.Width  = clientRect.Width  / scale * 0.18;
-                _src_window.Height = bounds.Height     / scale;
-                _src_window.Left   = clientLeftTop.x   / scale + clientRect.Width  / scale;
-                _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
-            }
-            else
-            {
-                _src_window.Width  = clientRect.Width  / scale * 0.18;
-                _src_window.Height = bounds.Height     / scale;
-                _src_window.Left   = clientLeftTop.x   / scale;
-                _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
+                if (_bOutside)
+                {
+                    _src_window.Width  = clientRect.Width  / scale * 0.18;
+                    _src_window.Height = bounds.Height     / scale;
+                    _src_window.Left   = clientLeftTop.x   / scale + clientRect.Width  / scale;
+                    _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
+                }
+                else
+                {
+                    _src_window.Width  = clientRect.Width  / scale * 0.18;
+                    _src_window.Height = bounds.Height     / scale;
+                    _src_window.Left   = clientLeftTop.x   / scale;
+                    _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
+                }
             }
 
             return clientRect;
