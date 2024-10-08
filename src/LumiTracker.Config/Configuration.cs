@@ -306,8 +306,8 @@ namespace LumiTracker.Config
 
         public static string GetCharacterName(int c_id, bool is_short)
         {
-            if (c_id >= (int)ECharacterCard.NumCharacters)
-                return "None";
+            if (c_id < 0 || c_id >= (int)ECharacterCard.NumCharacters)
+                return LocalizationSource.Instance["UnknownCard"];
 
             string key = GetLanguageName();
             if (is_short) key += "_short";
@@ -316,8 +316,8 @@ namespace LumiTracker.Config
 
         public static string GetActionCardName(int card_id)
         {
-            if (card_id >= (int)EActionCard.NumActions)
-                return "None";
+            if (card_id < 0 || card_id >= (int)EActionCard.NumActions)
+                return LocalizationSource.Instance["UnknownCard"];
 
             return Database["actions"]![card_id]![GetLanguageName()]!.ToString();
         }

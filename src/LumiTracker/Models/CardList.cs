@@ -29,10 +29,15 @@ namespace LumiTracker.Models
         {
             Parent       = parent;
 
-            var info = Configuration.Database["actions"]![card_id]!;
-            var jCost    = info["cost"]!;
-            var cost     = jCost[0]!.ToObject<int>();
-            var costType = jCost[1]!.ToObject<ECostType>();
+            ECostType costType = ECostType.Any;
+            int cost = -1;
+            if (card_id >= 0 && card_id < (int)EActionCard.NumActions)
+            {
+                var info  = Configuration.Database["actions"]![card_id]!;
+                var jCost = info["cost"]!;
+                cost      = jCost[0]!.ToObject<int>();
+                costType  = jCost[1]!.ToObject<ECostType>();
+            }
 
             Cost         = cost;
             CostTypeUri  = $"pack://siteoforigin:,,,/assets/images/costs/{costType.ToString()}.png";

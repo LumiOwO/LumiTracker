@@ -26,7 +26,10 @@ namespace LumiTracker.ViewModels.Pages
 
         public AvatarView(int character_id)
         {
-            var info = Configuration.Database["characters"]![character_id]!;
+            // Note: character_id may be invalid
+            // if (character_id >= 0 && character_id < (int)ECharacterCard.NumCharacters)
+            // ...
+
             AvatarUri = $"pack://siteoforigin:,,,/assets/images/avatars/{character_id}.png";
             AvatarImageVisibility = Visibility.Visible;
         }

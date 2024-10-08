@@ -61,10 +61,10 @@ namespace LumiTracker.Helpers
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string none = LocalizationSource.Instance["None"];
+            string unknown = LocalizationSource.Instance["UnknownCard"];
             if (parameter is not int card_id || card_id < 0 || card_id >= (int)EActionCard.NumActions)
             {
-                return none;
+                return unknown;
             }
             return Configuration.GetActionCardName(card_id);
         }

@@ -81,11 +81,19 @@ namespace LumiTracker.Models
             // 4. share id to internal id
             for (int i = 0; i < NUM_CARDS; i++)
             {
+                int share_id = ids[i];
+                if (share_id < 0 || share_id >= share_to_internal.Count())
+                {
+                    ids[i] = -1;
+                    continue;
+                }
                 JToken? jId = share_to_internal[ids[i]];
                 if (jId == null)
                 {
-                    return null;
+                    ids[i] = -1;
+                    continue;
                 }
+
                 int id = jId.ToObject<int>();
                 if (id < 0)
                 {
@@ -104,6 +112,22 @@ namespace LumiTracker.Models
 
         public static int CharacterCompare(int a_character_id, int b_character_id, bool is_talent = false)
         {
+            // Invalid id should be at the end
+            bool a_invalid = (a_character_id < 0 || a_character_id >= (int)ECharacterCard.NumCharacters);
+            bool b_invalid = (b_character_id < 0 || b_character_id >= (int)ECharacterCard.NumCharacters);
+            if (a_invalid && b_invalid)
+            {
+                return a_character_id.CompareTo(b_character_id);
+            }
+            else if (a_invalid)
+            {
+                return 1;
+            }
+            else if (b_invalid)
+            {
+                return -1;
+            }
+
             var characters = Configuration.Database["characters"]!;
             var a_info = characters[a_character_id]!;
             var b_info = characters[b_character_id]!;
@@ -160,6 +184,22 @@ namespace LumiTracker.Models
 
         public static int ActionCardCompare(int a_card_id, int b_card_id)
         {
+            // Invalid id should be at the end
+            bool a_invalid = (a_card_id < 0 || a_card_id >= (int)EActionCard.NumActions);
+            bool b_invalid = (b_card_id < 0 || b_card_id >= (int)EActionCard.NumActions);
+            if (a_invalid && b_invalid)
+            {
+                return a_card_id.CompareTo(b_card_id);
+            }
+            else if (a_invalid)
+            {
+                return 1;
+            }
+            else if (b_invalid)
+            {
+                return -1;
+            }
+
             var actions = Configuration.Database["actions"]!;
             var a_info = actions[a_card_id]!;
             var b_info = actions[b_card_id]!;

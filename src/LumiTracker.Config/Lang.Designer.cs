@@ -748,6 +748,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unknown Card.
+        /// </summary>
+        public static string UnknownCard {
+            get {
+                return ResourceManager.GetString("UnknownCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Current resolution of game window is not supported..
         /// </summary>
         public static string UnsupportedRatioWarning {

@@ -313,12 +313,17 @@ def HashToFeature(hash_str):
     return feature
 
 def CardName(card_id, db, lang="zh-HANS"):
+    if card_id < 0:
+        return "None"
     if card_id >= EActionCard.NumActions.value:
-        card_id = db["extras"][card_id - EActionCard.NumActions.value]
+        extra_id = card_id - EActionCard.NumActions.value
+        if extra_id >= len(db["extras"]):
+            return "None"
+        card_id = db["extras"][extra_id]
     return db["actions"][card_id][lang] if card_id >= 0 else "None"
 
 def CardCost(card_id, db):
-    return db["actions"][card_id]["cost"][0]
+    return db["actions"][card_id]["cost"][0] if card_id >= 0 else -1
 
 
 class ActionCardHandler:

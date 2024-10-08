@@ -483,4 +483,7 @@
   <data name="FollowSystem" xml:space="preserve">
     <value>跟随系统</value>
   </data>
+  <data name="UnknownCard" xml:space="preserve">
+    <value>未知卡牌</value>
+  </data>
 </root>

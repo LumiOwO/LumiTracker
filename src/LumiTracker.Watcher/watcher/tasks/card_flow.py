@@ -428,14 +428,11 @@ class CardFlowTask(CenterCropTask):
         if task_type != ETaskType.NONE:
             num_cards = self.signaled_num_cards
             cards, valid = self.GetRecordedCards(num_cards)
-            if valid:
-                LogInfo(type=task_type.name, 
-                        cards=cards,
-                        names=[CardName(card, self.db) for card in cards])
-            else:
-                LogError(info=f"{task_type.name}: Some cards are not detected.", 
-                        cards=cards,
-                        names=[CardName(card, self.db) for card in cards])
+            if not valid:
+                LogError(info=f"{task_type.name}: Some cards are not detected.")
+            LogInfo(type=task_type.name, 
+                    cards=cards,
+                    names=[CardName(card, self.db) for card in cards])
         # cards, valid = self.GetRecordedCards(self.signaled_num_cards)
         # LogDebug(type=task_type.name, 
         #         cards=cards,

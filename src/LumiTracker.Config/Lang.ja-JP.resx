@@ -393,4 +393,7 @@
   <data name="EditDeckName_Placeholder" xml:space="preserve">
     <value>ここでデッキ名を入力</value>
   </data>
+  <data name="UnknownCard" xml:space="preserve">
+    <value>未知のカード</value>
+  </data>
 </root>
