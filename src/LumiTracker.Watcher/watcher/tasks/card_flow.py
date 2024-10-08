@@ -233,7 +233,14 @@ class CenterCropTask(TaskBase):
 
 class CardFlowTask(CenterCropTask):
     WAIT_TIME        = 1.2  # seconds
-    QUEUE_TIME_RANGE = 5.0  # seconds
+    QUEUE_TIME_RANGE = 8.0  # seconds
+
+    class SignalInfo:
+        def __init__(self, num_cards, t_begin, t_end, cards):
+            self.num_cards = num_cards
+            self.t_begin   = t_begin
+            self.t_end     = t_end
+            self.cards     = cards
 
     def __init__(self, frame_manager, need_deck=True, need_dump=True):
         super().__init__(frame_manager)
@@ -249,7 +256,8 @@ class CardFlowTask(CenterCropTask):
         self.card_recorder = {}
         
         self.signaled_num_cards = 0
-        self.signaled_timestamp = 0 
+        self.signaled_timestamp = 0
+        self.signal_queue  = deque()
         self.my_deck_queue = deque()
         self.op_deck_queue = deque()
 
@@ -280,7 +288,12 @@ class CardFlowTask(CenterCropTask):
             self._DetectDeck(is_op=True)
 
         if self.need_dump:
-            self._DumpDetected()
+            while len(self.signal_queue) > 0:
+                dumped = self._DumpDetected(self.signal_queue[0])
+                if dumped:
+                    self.signal_queue.popleft()
+                else:
+                    break
 
     def _DetectCards(self):
         # center
@@ -320,9 +333,24 @@ class CardFlowTask(CenterCropTask):
 
         # stream filtering
         num_cards = self.filter.Filter(num_cards, dist=0)
+        # LogDebug(num_cards=num_cards)
         if num_cards > 0:
             self.signaled_num_cards = num_cards
             self.signaled_timestamp = time.perf_counter()
+            # LogDebug(t_start=self.signaled_timestamp)
+
+        if (self.signaled_num_cards != 0) and self.filter.PrevSignalHasLeft():
+            # LogDebug(t_end=time.perf_counter())
+            num_cards = self.signaled_num_cards
+            info = CardFlowTask.SignalInfo(
+                num_cards=num_cards, 
+                t_begin=self.signaled_timestamp, 
+                t_end=time.perf_counter(),
+                cards=self.GetRecordedCards(num_cards)
+                )
+            self.signal_queue.append(info)
+            self.card_recorder = {}
+            self.signaled_num_cards = 0
 
     def _DetectDeck(self, is_op):
         deck_crop = self.op_deck_crop if is_op else self.my_deck_crop
@@ -381,54 +409,68 @@ class CardFlowTask(CenterCropTask):
                 dst_queue.popleft()
             dst_queue.append(timestamp)
 
-    def _DumpDetected(self):
-        # dump if signaled
-        if self.signaled_num_cards == 0:
-            return
-        if time.perf_counter() - self.signaled_timestamp < self.WAIT_TIME:
-            return
-        # LogDebug(signal_time=self.signaled_timestamp)
+    '''
+        Return (bool): whether this signal is dumped
+    '''
+    def _DumpDetected(self, info):
+        if info.num_cards == 0:
+            return True
+        # LogDebug(signal_time=t_end)
 
+        # Early return if my deck operation detected
         task_type = ETaskType.NONE
         idx = 0
         while idx < len(self.my_deck_queue):
             # Get my deck timestamps and remove outdated ones.
             timestamp = self.my_deck_queue[idx]
-            if timestamp < self.signaled_timestamp:
+            if timestamp < info.t_end:
                 self.my_deck_queue.popleft()
             else:
                 idx += 1
             # LogDebug(my=timestamp)
 
-            if timestamp > self.signaled_timestamp + self.WAIT_TIME:
+            if timestamp > info.t_end + self.WAIT_TIME:
                 break
             if task_type != ETaskType.NONE:
                 continue
-            if timestamp < self.signaled_timestamp - self.WAIT_TIME:
+            if timestamp >= info.t_begin and timestamp <= info.t_end:
                 continue
-            task_type = ETaskType.MY_DRAWN if timestamp < self.signaled_timestamp else ETaskType.MY_CREATE_DECK
+            if timestamp < info.t_begin - self.WAIT_TIME:
+                continue
+            task_type = ETaskType.MY_DRAWN if timestamp < info.t_begin else ETaskType.MY_CREATE_DECK
+
+        if task_type != ETaskType.NONE:
+            self._DumpTaskType(task_type, info)
+            return True
+
+        # op deck can be easily mis-detected, so we need to wait until time up
+        if (time.perf_counter() - info.t_end < self.WAIT_TIME):
+            return False
 
         idx = 0
         while idx < len(self.op_deck_queue):
             # Get op deck timestamps and remove outdated ones.
             timestamp = self.op_deck_queue[idx]
-            if timestamp < self.signaled_timestamp:
+            if timestamp < info.t_end:
                 self.op_deck_queue.popleft()
             else:
                 idx += 1
 
-            if timestamp > self.signaled_timestamp + self.WAIT_TIME:
+            if timestamp > info.t_end + self.WAIT_TIME:
                 break
             if task_type != ETaskType.NONE:
                 continue
-            if timestamp < self.signaled_timestamp:
+            if timestamp < info.t_end:
                 continue
             task_type = ETaskType.OP_CREATE_DECK
 
+        self._DumpTaskType(task_type, info)
+        return True
+
+    def _DumpTaskType(self, task_type, info):
         if task_type != ETaskType.NONE:
-            num_cards = self.signaled_num_cards
-            cards, valid = self.GetRecordedCards(num_cards)
-            if not valid:
+            cards = info.cards
+            if (info.num_cards == 0) or (-1 in cards):
                 LogError(info=f"{task_type.name}: Some cards are not detected.")
             LogInfo(type=task_type.name, 
                     cards=cards,
@@ -438,23 +480,13 @@ class CardFlowTask(CenterCropTask):
         #         cards=cards,
         #         names=[CardName(card, self.db) for card in cards])
 
-        # Reset
-        # Assume that within the time range of 1 operation, there will be only 1 count detected.
-        # Therefore, when the dump ends, all recorded cards should be reset.
-        self.card_recorder = {}
-        self.signaled_num_cards = 0
-        self.signaled_timestamp = 0 
-
     def GetRecordedCards(self, num_cards):
         recorder = self.card_recorder.get(num_cards, [])
         if not recorder:
-            return [], False
+            return []
 
-        valid = True
         cards = [-1] * num_cards
         for i, d in enumerate(recorder):
             card = max(d, key=d.get) if d else -1
-            if card == -1:
-                valid = False
             cards[i] = card
-        return cards, valid
+        return cards

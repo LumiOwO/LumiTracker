@@ -107,3 +107,6 @@ class StreamFilter:
             return self.value
         else:
             return self.NULL_VAL
+
+    def PrevSignalHasLeft(self):
+        return self.cooldown == 0
