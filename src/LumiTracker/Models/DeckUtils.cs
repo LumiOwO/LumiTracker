@@ -84,13 +84,11 @@ namespace LumiTracker.Models
                 int share_id = ids[i];
                 if (share_id < 0 || share_id >= share_to_internal.Count())
                 {
-                    ids[i] = -1;
                     continue;
                 }
                 JToken? jId = share_to_internal[ids[i]];
                 if (jId == null)
                 {
-                    ids[i] = -1;
                     continue;
                 }
 
