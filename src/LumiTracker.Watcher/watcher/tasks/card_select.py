@@ -29,25 +29,25 @@ class CardSelectTask(CenterCropTask):
     @override
     def Tick(self):
         bboxes, costs = self.DetectCenterCards()
-        num_bboxes = len(bboxes)
+        valid = (len(bboxes) == self.n_cards)
 
-        if num_bboxes != self.n_cards:
-            # Add a null value to filter if not detected
-            for i in range(self.n_cards):
-                self.filters[i].Filter(-1, dist=0)
-            return
+        for i in range(self.n_cards):
+            if valid:
+                bbox = bboxes[i]
+                card_handler = ActionCardHandler()
+                card_handler.OnResize(bbox)
+                card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db, threshold=40, check_next_dist=False)
+            else:
+                card_id = -1
+                dist = 0
 
-        for i, bbox in enumerate(bboxes):
-            card_handler = ActionCardHandler()
-            card_handler.OnResize(bbox)
-            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db, threshold=40, check_next_dist=False)
             card_id = self.filters[i].Filter(card_id, dist=dist)
 
             # record last detected card_id
             if card_id >= 0:
                 self.cards[i] = card_id
         
-        if cfg.DEBUG:
+        if cfg.DEBUG and valid:
             LogDebug(
                 cards=self.cards,
                 names=[CardName(card, self.db) for card in self.cards])

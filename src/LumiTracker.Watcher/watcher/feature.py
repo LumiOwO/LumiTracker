@@ -441,13 +441,6 @@ class ActionCardHandler:
         dist_a    = dists_a[0]
         dist_d    = dists_d[0]
 
-        # _debug = True
-        # if _debug:
-        #     LogDebug(
-        #         name_a=CardName(card_ids_a[0], db), dists_a=dists_a[:3],
-        #         name_d=CardName(card_ids_d[0], db), dists_d=dists_d[:3],
-        #         )
-
         # Debug: write card image buffer
         # if card_id_a == 119 or card_id_d == 119:
         #     import os
@@ -458,7 +451,8 @@ class ActionCardHandler:
         card_id = -1
         dist    = max(dist_a, dist_d)
         def PackedResult():
-            # if card_id >= 0:
+            # _debug = True
+            # if _debug:
             #     LogDebug(
             #         card_a=CardName(card_id_a, db),
             #         card_d=CardName(card_id_d, db),
