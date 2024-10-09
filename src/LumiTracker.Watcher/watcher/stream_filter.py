@@ -1,14 +1,23 @@
 from collections import deque, defaultdict
 from .config import cfg
+import time
 
 class SlidingWindow:
-    def __init__(self, null_val, window_size):
+    class Record:
+        def __init__(self):
+            self.count     = 0
+            self.is_strict = False
+            # Note: maybe use time range later
+            # self.t_first   = time.perf_counter()
+            # self.t_last    = self.t_first
+
+    def __init__(self, null_val, window_size, min_count):
         self.NULL_VAL    = null_val
         self.WINDOW_SIZE = window_size
+        self.MIN_COUNT   = min_count
 
         self.window      = deque(maxlen=window_size)
-        self.counts      = defaultdict(int)
-        self.is_strict   = defaultdict(bool)
+        self.records     = defaultdict(lambda: SlidingWindow.Record())
     
     def UpdateWindow(self, value, dist):
         if len(self.window) == self.WINDOW_SIZE:
@@ -16,43 +25,43 @@ class SlidingWindow:
         self.window.append(value)
 
         if value != self.NULL_VAL:
-            self.counts[value] += 1
-            self.is_strict[value] = (dist <= cfg.strict_threshold) or (self.is_strict[value])
+            record = self.records[value]
+            record.count += 1
+            record.is_strict = (dist <= cfg.strict_threshold) or (record.is_strict)
+            self.records[value] = record
 
     def _PopLeft(self):
         value = self.window.popleft()
         if value != self.NULL_VAL:
-            self.counts[value]   -= 1
-            if self.counts[value] == 0:
-                del self.counts[value]
-                del self.is_strict[value]
+            self.records[value].count -= 1
+            if self.records[value].count == 0:
+                del self.records[value]
 
     def GetMajority(self):
-        if not self.counts:
+        if not self.records:
             return self.NULL_VAL
 
-        majority = max(self.counts, key=self.counts.get)
-        count = self.counts[majority]
-        if count > 6:
+        majority = max(self.records, key=lambda k: self.records[k].count)
+        record = self.records[majority]
+        if record.count >= self.MIN_COUNT:
             return majority
-        if (self.is_strict[majority]) and (count > 0): # maybe tune this threshold
+        if (record.is_strict) and (record.count >= (self.MIN_COUNT // 2)): # maybe tune this threshold
             return majority
 
         return self.NULL_VAL
     
     def Reset(self):
         self.window    = deque(maxlen=self.WINDOW_SIZE)
-        self.counts    = defaultdict(int)
-        self.is_strict = defaultdict(bool)
+        self.records   = defaultdict(lambda: SlidingWindow.Record())
 
 
 class StreamFilter:
-    def __init__(self, null_val, window_size=40, valid_count=15, cooldown=10):
+    def __init__(self, null_val, window_size=40, valid_count=15, cooldown=10, window_min_count=10):
         self.NULL_VAL    = null_val
         self.VALID_COUNT = valid_count
         self.COOLDOWN    = cooldown
 
-        self.window      = SlidingWindow(null_val, window_size)
+        self.window      = SlidingWindow(null_val, window_size, window_min_count)
         self.value       = null_val
         self.count       = 0
         self.signaled    = False

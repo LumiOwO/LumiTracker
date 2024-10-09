@@ -37,7 +37,7 @@ class CardPlayedTask(TaskBase):
     def Tick(self):
         card_id, dist, dists = self.card_handler.Update(self.frame_buffer, self.db)
         if cfg.DEBUG:
-            # if (self.task_type.value == 1) and True: #(card_id != -1):
+            # if (self.task_type == ETaskType.MY_PLAYED) and True: #(card_id != -1):
             if (True) and (card_id != -1):
                 LogDebug(info=f'{dists=}, {self.task_type.name}: {CardName(card_id, self.db)}')
         card_id = self.filter.Filter(card_id, dist=dist)

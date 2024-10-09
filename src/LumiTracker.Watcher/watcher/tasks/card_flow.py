@@ -313,7 +313,7 @@ class CardFlowTask(CenterCropTask):
         for i, bbox in enumerate(bboxes):
             card_handler = ActionCardHandler()
             card_handler.OnResize(bbox)
-            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
+            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db, threshold=40, check_next_dist=False)
 
             if card_id >= 0:
                 recorder[i][card_id] += 1
@@ -337,10 +337,9 @@ class CardFlowTask(CenterCropTask):
         if num_cards > 0:
             self.signaled_num_cards = num_cards
             self.signaled_timestamp = time.perf_counter()
-            # LogDebug(t_start=self.signaled_timestamp)
+            LogDebug(info="[CardFlow]", t_start=self.signaled_timestamp)
 
         if (self.signaled_num_cards != 0) and self.filter.PrevSignalHasLeft():
-            # LogDebug(t_end=time.perf_counter())
             num_cards = self.signaled_num_cards
             info = CardFlowTask.SignalInfo(
                 num_cards=num_cards, 
@@ -351,6 +350,7 @@ class CardFlowTask(CenterCropTask):
             self.signal_queue.append(info)
             self.card_recorder = {}
             self.signaled_num_cards = 0
+            LogDebug(info="[CardFlow]", t_end=info.t_end)
 
     def _DetectDeck(self, is_op):
         deck_crop = self.op_deck_crop if is_op else self.my_deck_crop
@@ -475,7 +475,7 @@ class CardFlowTask(CenterCropTask):
             LogInfo(type=task_type.name, 
                     cards=cards,
                     names=[CardName(card, self.db) for card in cards])
-        # cards, valid = self.GetRecordedCards(self.signaled_num_cards)
+        # cards = self.GetRecordedCards(self.signaled_num_cards)
         # LogDebug(type=task_type.name, 
         #         cards=cards,
         #         names=[CardName(card, self.db) for card in cards])

@@ -2,68 +2,8 @@ from .card_flow import CenterCropTask
 
 from ..enums import ETaskType
 from ..config import cfg, override, LogDebug, LogInfo, LogError
-from ..feature import ActionCardHandler, CardName
+from ..feature import ActionCardHandler, CardName, Counter
 from ..stream_filter import StreamFilter
-
-import itertools
-
-class Counter:
-    def __init__(self, data=None):
-        self.data = {}
-        self.update(data)
-
-    def update(self, data):
-        """Update counts for elements in a list, dict, or increment a single key."""
-        if data is None:
-            return
-
-        if isinstance(data, dict):
-            for key, count in data.items():
-                self.data[key] = self.data.get(key, 0) + count
-        elif isinstance(data, list):
-            for key in data:
-                self.data[key] = self.data.get(key, 0) + 1
-        else:
-            # For other types (int, str, float), increment the count for the key
-            key = data
-            self.data[key] = self.data.get(key, 0) + 1
-
-    def keys(self):
-        """Return an iterable of keys."""
-        return self.data.keys()
-
-    def items(self):
-        """Return an iterable of key-value pairs."""
-        return self.data.items()
-
-    def __getitem__(self, key):
-        """Return the count for the given key, defaulting to 0 if not found."""
-        return self.data.get(key, 0)
-
-    def __setitem__(self, key, value):
-        """Set the count for the given key."""
-        self.data[key] = value
-    
-    def __delitem__(self, key):
-        """Remove the item with the specified key."""
-        if key in self.data:
-            del self.data[key]
-    
-    def __contains__(self, key):
-        """Check if the key is in the counter."""
-        return key in self.data
-
-    def __sub__(self, other):
-        """Subtract counts from another Counter, allowing negative values."""
-        result = Counter()
-        all_keys = dict.fromkeys(itertools.chain(self.data.keys(), other.data.keys())).keys()
-        for key in all_keys:
-            result[key] = self[key] - other[key]
-        return result
-
-    def __repr__(self):
-        """Return a string representation of the Counter."""
-        return f"Counter({self.data})"
 
 class CardSelectTask(CenterCropTask):
     def __init__(self, frame_manager, n_cards=1, prev_cards=None):
@@ -80,7 +20,7 @@ class CardSelectTask(CenterCropTask):
         self.n_cards     = n_cards
         self.prev_counts = Counter(prev_cards)
         self.cards   = [-1 for _ in range(self.n_cards)]
-        self.filters = [StreamFilter(null_val=-1) for _ in range(self.n_cards)]
+        self.filters = [StreamFilter(null_val=-1, window_size=10, valid_count=1, window_min_count=6) for _ in range(self.n_cards)]
 
     @override
     def Reset(self):
@@ -92,22 +32,25 @@ class CardSelectTask(CenterCropTask):
         num_bboxes = len(bboxes)
 
         if num_bboxes != self.n_cards:
+            # Add a null value to filter if not detected
+            for i in range(self.n_cards):
+                self.filters[i].Filter(-1, dist=0)
             return
 
         for i, bbox in enumerate(bboxes):
             card_handler = ActionCardHandler()
             card_handler.OnResize(bbox)
-            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db)
+            card_id, dist, dists = card_handler.Update(self.frame_buffer, self.db, threshold=40, check_next_dist=False)
             card_id = self.filters[i].Filter(card_id, dist=dist)
 
             # record last detected card_id
             if card_id >= 0:
                 self.cards[i] = card_id
         
-        # if cfg.DEBUG:
-        #     LogDebug(
-        #         cards=self.cards,
-        #         names=[CardName(card, self.db) for card in self.cards])
+        if cfg.DEBUG:
+            LogDebug(
+                cards=self.cards,
+                names=[CardName(card, self.db) for card in self.cards])
     
     def Flush(self):
         cur_counts = Counter(self.cards)

@@ -4,6 +4,66 @@ import cv2
 from .config import LogWarning, cfg, LogDebug
 from .enums import EAnnType, EActionCard
 
+import itertools
+
+class Counter:
+    def __init__(self, data=None):
+        self.data = {}
+        self.update(data)
+
+    def update(self, data):
+        """Update counts for elements in a list, dict, or increment a single key."""
+        if data is None:
+            return
+
+        if isinstance(data, dict):
+            for key, count in data.items():
+                self.data[key] = self.data.get(key, 0) + count
+        elif isinstance(data, list):
+            for key in data:
+                self.data[key] = self.data.get(key, 0) + 1
+        else:
+            # For other types (int, str, float), increment the count for the key
+            key = data
+            self.data[key] = self.data.get(key, 0) + 1
+
+    def keys(self):
+        """Return an iterable of keys."""
+        return self.data.keys()
+
+    def items(self):
+        """Return an iterable of key-value pairs."""
+        return self.data.items()
+
+    def __getitem__(self, key):
+        """Return the count for the given key, defaulting to 0 if not found."""
+        return self.data.get(key, 0)
+
+    def __setitem__(self, key, value):
+        """Set the count for the given key."""
+        self.data[key] = value
+    
+    def __delitem__(self, key):
+        """Remove the item with the specified key."""
+        if key in self.data:
+            del self.data[key]
+    
+    def __contains__(self, key):
+        """Check if the key is in the counter."""
+        return key in self.data
+
+    def __sub__(self, other):
+        """Subtract counts from another Counter, allowing negative values."""
+        result = Counter()
+        all_keys = dict.fromkeys(itertools.chain(self.data.keys(), other.data.keys())).keys()
+        for key in all_keys:
+            result[key] = self[key] - other[key]
+        return result
+
+    def __repr__(self):
+        """Return a string representation of the Counter."""
+        return f"Counter({self.data})"
+
 def GetHashSize(ann_type):
     return cfg.hash_size
     # if ann_type == EAnnType.ACTIONS_A:
@@ -368,7 +428,8 @@ class ActionCardHandler:
             card_id = db["extras"][card_id - EActionCard.NumActions.value]
         return card_id
 
-    def Update(self, frame_buffer, db, _debug=False):
+    def Update(self, frame_buffer, db, check_next_dist=True,
+                    threshold=cfg.threshold, strict_threshold=cfg.strict_threshold, _debug=False):
         self.frame_buffer = frame_buffer
 
         ahash, dhash = self.ExtractCardFeatures()
@@ -406,8 +467,6 @@ class ActionCardHandler:
 
         # Early return if the distance is below the strict threshold.
         # extra cards should be ignored here
-        threshold        = cfg.threshold
-        strict_threshold = cfg.strict_threshold
         if dist_d <= strict_threshold and card_id_d < EActionCard.NumActions.value:
             # dhash is more sensitive, so check it first
             card_id = card_id_d
@@ -417,23 +476,38 @@ class ActionCardHandler:
             card_id = card_id_a
             dist    = dist_a
             return PackedResult()
-
-        card_id_a = self.RemapCardId(card_id_a, db)
-        card_id_d = self.RemapCardId(card_id_d, db)
+        
+        # Check whether two hash gives the same result
+        # The smallest dist may contain multiple cards due to brightness change
+        dist_a_next = dists_a[3]
+        set_a = set()
+        for i in range(3):
+            if dists_a[i] != dist_a:
+                dist_a_next = dists_a[i]
+                break
+            set_a.add(self.RemapCardId(card_ids_a[i], db))
+        dist_d_next = dists_d[3]
+        set_d = set()
+        for i in range(3):
+            if dists_d[i] != dist_d:
+                dist_d_next = dists_d[i]
+                break
+            set_d.add(self.RemapCardId(card_ids_d[i], db))
+        intersection = set_a & set_d
 
         # Invalid if AHash detect different card from DHash
         # Note: Count Down To 3 may need extra logic
-        if card_id_a != card_id_d:
+        if len(intersection) != 1:
             return PackedResult()
         # A too large distance may likely be noise
         if dist_a > threshold or dist_d > threshold:
             return PackedResult()
-        # Invalid if 1st nearest AHash differs not much from 2nd nearest AHash
-        if dists_a[1] - dists_a[0] <= 5:
+        # Invalid if 1st nearest Hash differs not much from 2nd nearest Hash
+        if (check_next_dist) and (dist_a_next - dist_a <= 5 or dist_d_next - dist_d <= 5):
             return PackedResult()
 
-        card_id = card_id_a
-        dist    = min(dists_a[0], dists_d[0])
+        card_id = intersection.pop()
+        dist    = min(dist_a, dist_d)
         return PackedResult()
     
     def OnResize(self, crop_box):

@@ -33,7 +33,7 @@
   "db_filename": "db.json",
   "cards_dir": "cards",
   "hash_size": 10,
-  "threshold": 26,
+  "threshold": 29,
   "strict_threshold": 19,
   "ann_metric": "hamming",
   "ann_n_trees": 20,
