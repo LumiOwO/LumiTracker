@@ -236,11 +236,12 @@ class CardFlowTask(CenterCropTask):
     QUEUE_TIME_RANGE = 8.0  # seconds
 
     class SignalInfo:
-        def __init__(self, num_cards, t_begin, t_end, cards):
+        def __init__(self, num_cards, t_begin, t_end, cards, valid):
             self.num_cards = num_cards
             self.t_begin   = t_begin
             self.t_end     = t_end
             self.cards     = cards
+            self.valid     = valid
 
     def __init__(self, frame_manager, need_deck=True, need_dump=True):
         super().__init__(frame_manager)
@@ -341,11 +342,13 @@ class CardFlowTask(CenterCropTask):
 
         if (self.signaled_num_cards != 0) and self.filter.PrevSignalHasLeft():
             num_cards = self.signaled_num_cards
+            cards, valid = self.GetRecordedCards(num_cards)
             info = CardFlowTask.SignalInfo(
                 num_cards=num_cards, 
                 t_begin=self.signaled_timestamp, 
                 t_end=time.perf_counter(),
-                cards=self.GetRecordedCards(num_cards)
+                cards=cards,
+                valid=valid,
                 )
             self.signal_queue.append(info)
             self.card_recorder = {}
@@ -470,23 +473,22 @@ class CardFlowTask(CenterCropTask):
     def _DumpTaskType(self, task_type, info):
         if task_type != ETaskType.NONE:
             cards = info.cards
-            if (info.num_cards == 0) or (-1 in cards):
+            if not info.valid:
                 LogError(info=f"{task_type.name}: Some cards are not detected.")
             LogInfo(type=task_type.name, 
                     cards=cards,
                     names=[CardName(card, self.db) for card in cards])
-        # cards = self.GetRecordedCards(self.signaled_num_cards)
-        # LogDebug(type=task_type.name, 
-        #         cards=cards,
-        #         names=[CardName(card, self.db) for card in cards])
 
     def GetRecordedCards(self, num_cards):
         recorder = self.card_recorder.get(num_cards, [])
         if not recorder:
-            return []
+            return [], False
 
+        valid = True
         cards = [-1] * num_cards
         for i, d in enumerate(recorder):
             card = max(d, key=d.get) if d else -1
+            if card == -1:
+                valid = False
             cards[i] = card
-        return cards
+        return cards, valid

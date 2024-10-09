@@ -52,7 +52,7 @@ class CardSelectTask(CenterCropTask):
                 cards=self.cards,
                 names=[CardName(card, self.db) for card in self.cards])
     
-    def Flush(self):
+    def Flush(self, need_reset=True):
         cur_counts = Counter(self.cards)
         if -1 in cur_counts:
             del cur_counts[-1]
@@ -81,4 +81,5 @@ class CardSelectTask(CenterCropTask):
                 cards=create,
                 names=[CardName(card, self.db) for card in create])
 
-        self.Reset()
+        if need_reset:
+            self.Reset()

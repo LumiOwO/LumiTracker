@@ -75,26 +75,32 @@ class GameStateNatureAndWisdom(GameState):
             GTasks.NatureAndWisdom_Select.Flush()
 
     def Reset(self):
-        self.stage      = self.EStage.Draw
-        self.drawn_card = -1
-        self.drawn_time = None
-        self.num_select = 0
+        self.stage       = self.EStage.Draw
+        self.drawn_card  = -1
+        self.drawn_end_t = None
+        self.num_select  = 0
         GTasks.NatureAndWisdom_Draw.Reset()
 
     def HandleDrawStage(self):
+        task = GTasks.NatureAndWisdom_Draw
         if self.drawn_card == -1:
-            card_id = GTasks.NatureAndWisdom_Draw.cards[0]
+            card_id = task.cards[0]
             if card_id != -1:
-                GTasks.NatureAndWisdom_Draw.Flush()
+                task.Flush(need_reset=False)
                 self.drawn_card = card_id
-                self.drawn_time = time.perf_counter()
+                self.drawn_end_t = time.perf_counter()
             return
 
+        # wait until previous signal has left
+        if not task.filters[0].PrevSignalHasLeft():
+            self.drawn_end_t = time.perf_counter()
+            return
         # wait for the drawn card to leave the center region
-        WAIT_TIME = 2 # seconds
-        if time.perf_counter() - self.drawn_time < WAIT_TIME:
+        WAIT_TIME = 1.2 # seconds
+        if time.perf_counter() - self.drawn_end_t < WAIT_TIME:
             return
 
+        # To next stage
         self.stage = self.EStage.Count
         GTasks.NatureAndWisdom_Count.Reset()
         LogDebug(
@@ -115,6 +121,7 @@ class GameStateNatureAndWisdom(GameState):
         if self.drawn_card not in cards:
             return
 
+        # To next stage
         self.num_select = num_cards
         self.stage = self.EStage.Select
         GTasks.NatureAndWisdom_Select._Reset(num_cards, cards)
