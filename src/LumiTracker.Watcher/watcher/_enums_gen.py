@@ -324,6 +324,15 @@ class EActionCard(enum.Enum):
     Atea = enum.auto()
     SaurianDiningBuddies = enum.auto()
     EdictOfAbsolution = enum.auto()
+    InFiveColorsDyed = enum.auto()
+    ChainLightningCascade = enum.auto()
+    SpiritSerpentsSwirl = enum.auto()
+    PortablePowerSaw = enum.auto()
+    ConductorsTopHat = enum.auto()
+    Tepetlisaurus = enum.auto()
+    StageTepetl = enum.auto()
+    EremiteTeatime = enum.auto()
+    SaurusCrackers = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -340,9 +349,11 @@ class EActionCard(enum.Enum):
     MelusineSupport = enum.auto()
     Starwicker = enum.auto()
     MistBubbleSlime = enum.auto()
+    SpiritOfOmenPyroScorpion = enum.auto()
+    SpiritOfOmenDendroSpiritSerpent = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 321
+    NumSharables = 330
     NumTokens = NumActions - NumSharables
 
 class ECharacterCard(enum.Enum):
@@ -444,6 +455,9 @@ class ECharacterCard(enum.Enum):
     Freminet = enum.auto()
     Xianyun = enum.auto()
     HydroHilichurlRogue = enum.auto()
+    Chiori = enum.auto()
+    AbyssLectorVioletLightning = enum.auto()
+    EremiteFloralRingDancer = enum.auto()
     
     NumCharacters = enum.auto()
 

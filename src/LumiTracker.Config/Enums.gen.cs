@@ -325,6 +325,15 @@ namespace LumiTracker.Config
         Atea,
         SaurianDiningBuddies,
         EdictOfAbsolution,
+        InFiveColorsDyed,
+        ChainLightningCascade,
+        SpiritSerpentsSwirl,
+        PortablePowerSaw,
+        ConductorsTopHat,
+        Tepetlisaurus,
+        StageTepetl,
+        EremiteTeatime,
+        SaurusCrackers,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -341,9 +350,11 @@ namespace LumiTracker.Config
         MelusineSupport,
         Starwicker,
         MistBubbleSlime,
+        SpiritOfOmenPyroScorpion,
+        SpiritOfOmenDendroSpiritSerpent,
         
         NumActions,
-        NumSharables = 321,
+        NumSharables = 330,
         NumTokens = NumActions - NumSharables,
     }
     
@@ -447,6 +458,9 @@ namespace LumiTracker.Config
         Freminet,
         Xianyun,
         HydroHilichurlRogue,
+        Chiori,
+        AbyssLectorVioletLightning,
+        EremiteFloralRingDancer,
         
         NumCharacters,
     }

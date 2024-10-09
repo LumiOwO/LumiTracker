@@ -319,7 +319,7 @@
     <value>キャンセル</value>
   </data>
   <data name="MyDeck" xml:space="preserve">
-    <value>デッキ</value>
+    <value>山札</value>
   </data>
   <data name="DeckPageTitle" xml:space="preserve">
     <value>デッキ</value>
