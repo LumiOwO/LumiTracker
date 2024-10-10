@@ -1,3 +1,15 @@
+# \[[v1.2.9](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.9)\] - 2024.10.10
+### 新增功能
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了5.1版本的新卡牌
+- **[普通]** 安装程序中增加了日语选项
+
+### Bug修复
+- ${\color{#ed8e06}{\textbf{[传说]}}}$ 修复了起手选牌时，有极小概率随机出现部分牌无法识别的问题
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 提升了中间区域卡牌检测的准确度
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 修复了对局未开启加速时，过牌/塞牌无法被正常识别的问题
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 导入包含未知卡牌的分享码时，将不再报错
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了金色的「璃月港口」无法被识别的问题
+
 # \[[v1.2.8](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.8)\] - 2024.10.05
 ### 新增功能
 - ${\color{#db3fff}{\textbf{[史诗]}}}$ 现在，游戏内显示语言为英语或日语时，可以正常识别了
