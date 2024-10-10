@@ -5,6 +5,7 @@ from ..regions import GetRatioType
 from ..frame_manager import FrameManager
 from ..feature import CardName
 from ..states import GTasks
+from ..enums import EClientType
 
 import logging
 import os
@@ -16,8 +17,8 @@ logging.getLogger('matplotlib').setLevel(logging.WARNING)
 import matplotlib.pyplot as plt
 
 
-def image(image_path='temp/Snipaste_2024-07-21_16-22-27.png'):
-    frame_manager = FrameManager()
+def image(image_path='temp/Snipaste_2024-09-21_19-19-33.png'):
+    frame_manager = FrameManager(EClientType.YuanShen)
     task = GTasks.CardFlow
     frame_manager.round = 1
 
@@ -56,18 +57,20 @@ def image(image_path='temp/Snipaste_2024-07-21_16-22-27.png'):
         # box.bottom += task.center_crop.top
         cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 255, 0), 2)
         # print(box)
+    scale = task.my_deck_crop.height / task.DECK_DST_HEIGHT
+    print(f"{scale=}, {task.my_deck_crop=}")
     for box in task.my_deck_bboxes:
-        box.left   += task.my_deck_crop.left
-        box.top    += task.my_deck_crop.top
-        box.right  += task.my_deck_crop.left
-        box.bottom += task.my_deck_crop.top
+        box.left   = int(box.left   * scale) + task.my_deck_crop.left
+        box.top    = int(box.top    * scale) + task.my_deck_crop.top
+        box.right  = int(box.right  * scale) + task.my_deck_crop.left
+        box.bottom = int(box.bottom * scale) + task.my_deck_crop.top
         cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
         # print(box)
     # for box in task.op_deck_bboxes:
-    #     box.left   += task.op_deck_crop.left
-    #     box.top    += task.op_deck_crop.top
-    #     box.right  += task.op_deck_crop.left
-    #     box.bottom += task.op_deck_crop.top
+        # box.left   = int(box.left   * scale) + task.op_deck_crop.left
+        # box.top    = int(box.top    * scale) + task.op_deck_crop.top
+        # box.right  = int(box.right  * scale) + task.op_deck_crop.left
+        # box.bottom = int(box.bottom * scale) + task.op_deck_crop.top
     #     cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
         # print(box)
     

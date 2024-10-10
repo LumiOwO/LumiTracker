@@ -37,7 +37,6 @@ REGIONS = {
         ERegionType.CENTER     : ( 0.0700, 0.3380, 0.8600, 0.0500 ),
         ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3350, 0.1070, 0.3280 ), # (margin to digit center, margin to card top, card width, card height)
         ERegionType.MY_DECK    : ( 0.0000, 0.5550, 0.3250, 0.2750 ),
-        ERegionType.OP_DECK    : ( 0.0000, 0.1700, 0.3250, 0.2750 ),
     },
     # 1920 x 1200
     ERatioType.E16_10: {
@@ -49,8 +48,7 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5370, 0.1200, 0.0280 ),
         ERegionType.CENTER     : ( 0.0700, 0.3540, 0.8600, 0.0500 ),
         ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3550, 0.1035, 0.2850 ),
-        ERegionType.MY_DECK    : ( 0.0000, 0.5550, 0.3250, 0.2750 ),
-        ERegionType.OP_DECK    : ( 0.0000, 0.1700, 0.3250, 0.2750 ),
+        ERegionType.MY_DECK    : ( 0.0000, 0.5500, 0.3250, 0.2500 ),
     },
     # 2560 × 1080, 2048 x 864
     ERatioType.E64_27: {
@@ -62,8 +60,7 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5410, 0.1200, 0.0320 ),
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0800, 0.3280 ),
-        ERegionType.MY_DECK    : ( 0.1200, 0.5550, 0.2500, 0.2750 ),
-        ERegionType.OP_DECK    : ( 0.0000, 0.1700, 0.3250, 0.2750 ),
+        ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
     },
     # 3440 × 1440, 2150 x 900
     ERatioType.E43_18: {
@@ -75,8 +72,7 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5422, 0.1200, 0.0325 ),
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0780, 0.3280 ),
-        ERegionType.MY_DECK    : ( 0.1200, 0.5550, 0.2500, 0.2750 ),
-        ERegionType.OP_DECK    : ( 0.0000, 0.1700, 0.3250, 0.2750 ),
+        ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
     },
     # 3840 x 1600, 1920 x 800
     ERatioType.E12_5: {
@@ -88,7 +84,6 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5400, 0.1200, 0.0345 ),
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0055, 0.3350, 0.0790, 0.3280 ),
-        ERegionType.MY_DECK    : ( 0.1200, 0.5550, 0.2500, 0.2750 ),
-        ERegionType.OP_DECK    : ( 0.0000, 0.1700, 0.3250, 0.2750 ),
+        ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
     },
 }

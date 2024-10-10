@@ -61,7 +61,6 @@ class ERegionType(enum.Enum):
     CENTER     = enum.auto()
     FLOW_ANCHOR= enum.auto()
     MY_DECK    = enum.auto()
-    OP_DECK    = enum.auto()
 
 class ERatioType(enum.Enum):
     E16_9  = 0

@@ -247,6 +247,7 @@ class CardFlowTask(CenterCropTask):
         super().__init__(frame_manager)
         self.my_deck_crop  = None
         self.op_deck_crop  = None
+        self.deck_dst_size = None
         self.need_deck     = need_deck
         self.need_dump     = need_dump
         self.Reset()
@@ -267,18 +268,27 @@ class CardFlowTask(CenterCropTask):
         super().OnResize(client_width, client_height, ratio_type)
 
         box    = REGIONS[ratio_type][ERegionType.MY_DECK] 
-        left   = round(client_width  * box[0])
-        top    = round(client_height * box[1])
-        width  = round(client_width  * box[2])
-        height = round(client_height * box[3])
+        box_left, box_top, box_width, box_height = box
+        left   = round(client_width  * box_left)
+        width  = round(client_width  * box_width)
+        height = round(client_height * box_height)
+        # my deck
+        top    = round(client_height * box_top)
         self.my_deck_crop = CropBox(left, top, left + width, top + height)
-
-        box    = REGIONS[ratio_type][ERegionType.OP_DECK] 
-        left   = round(client_width  * box[0])
-        top    = round(client_height * box[1])
-        width  = round(client_width  * box[2])
-        height = round(client_height * box[3])
+        # op deck is at the mirror position
+        box_top = 1.0 - (box_top + box_height)
+        top    = round(client_height * box_top)
         self.op_deck_crop = CropBox(left, top, left + width, top + height)
+
+        # Dst deck size when resize deck buffer
+        dst_height = 200
+        self.DECK_DST_HEIGHT = dst_height
+        self.FILTER_H     = dst_height * 0.5
+        self.FILTER_W_MIN = dst_height * 0.8
+        self.FILTER_W_MAX = dst_height * 1.4
+        aspect_ratio = width / height
+        dst_width = int(dst_height * aspect_ratio)
+        self.deck_dst_size = (dst_width, dst_height)
 
     @override
     def Tick(self):
@@ -365,19 +375,19 @@ class CardFlowTask(CenterCropTask):
         # Convert to grayscale
         gray = cv2.cvtColor(deck_buffer, cv2.COLOR_BGR2GRAY)
 
+        # Resize to a relative small size, so the mouse cursor will not break the card contour
+        gray = cv2.resize(gray, self.deck_dst_size, interpolation=cv2.INTER_AREA)
+
         # Apply Canny edge detection
         edges = cv2.Canny(gray, 50, 150)
 
         # Find contours
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        FILTER_H     = deck_crop.height * 0.5
-        FILTER_W_MIN = deck_crop.width  * 0.4
-        FILTER_W_MAX = deck_crop.width  * 0.7
         bboxes = []
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if h < FILTER_H or w < FILTER_W_MIN or w > FILTER_W_MAX:
+            if h < self.FILTER_H or w < self.FILTER_W_MIN or w > self.FILTER_W_MAX:
                 continue
             ratio = w / h
             if ratio < 1.6 or ratio > 1.9:
@@ -406,7 +416,7 @@ class CardFlowTask(CenterCropTask):
 
         if bboxes:
             dst_queue = self.op_deck_queue if is_op else self.my_deck_queue
-            # LogDebug(drawn_detected=True, is_op=is_op)
+            LogDebug(drawn_detected=True, is_op=is_op)
             timestamp = time.perf_counter()
             while len(dst_queue) > 0 and (timestamp - dst_queue[0] > self.QUEUE_TIME_RANGE):
                 dst_queue.popleft()
