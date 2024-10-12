@@ -27,10 +27,10 @@ class CaptureBase(ABC):
         # set timer resolution to 1 ms
         winmm.timeBeginPeriod(1)
 
-    def Start(self, hwnd, port, client_type):
+    def Start(self, hwnd, port, client_type, log_dir, test_on_resize):
         self.hwnd = hwnd
-        self.frame_manager = FrameManager(client_type)
-        self.input_manager = InputManager(port)
+        self.frame_manager = FrameManager(client_type, log_dir, test_on_resize)
+        self.input_manager = InputManager(port, self.frame_manager)
 
         self.OnStart(hwnd)
         self.MainLoop()
@@ -59,9 +59,6 @@ class CaptureBase(ABC):
         self.input_manager.Tick()
 
     def OnFrameArrived(self, frame_buffer):
-        if self.input_manager.capture_save_dir:
-            self.frame_manager.CaptureTest(frame_buffer, self.input_manager.capture_save_dir)
-
         # frame_buffer: 4-channels, BGRX
         self.frame_manager.OnFrameArrived(frame_buffer)
 

@@ -78,12 +78,14 @@ namespace LumiTracker.Config
             return false;
         }
 
-        public static string JsonToConsoleStr(JToken token, bool forceIndent = false)
+        public static string JsonToConsoleStr(JToken token, bool forceIndent = false, bool forceCompact = false)
         {
             string res = "";
             using (var stringWriter = new StringWriter())
             {
-                bool indented = forceIndent ? true : ContainsDictOrArray(token);
+                bool indented = forceIndent  ? true  :
+                                forceCompact ? false :
+                                ContainsDictOrArray(token);
                 var customWriter = new CustomJsonTextWriter(stringWriter)
                 {
                     Formatting  = indented ? Formatting.Indented : Formatting.None,

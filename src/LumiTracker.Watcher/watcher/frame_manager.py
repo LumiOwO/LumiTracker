@@ -12,7 +12,7 @@ from .database import Database, SaveImage
 from .states import *
 
 class FrameManager:
-    def __init__(self, client_type):
+    def __init__(self, client_type, log_dir, test_on_resize):
         # database
         db = Database()
         db.Load()
@@ -40,28 +40,34 @@ class FrameManager:
         self.prev_frame_time = self.prev_log_time
         self.frame_count     = 0
         self.fps_interval    = cfg.LOG_INTERVAL / 10
+        self.test_on_resize  = test_on_resize
+        self.need_capture    = False
+        self.log_dir         = log_dir
 
         # For WeMeet, there are margins in the captured frame
         # This box is used to crop the margins
         self.client_type     = client_type
         self.content_box     = ()
+        self.content_not_found_warned = False
 
     def Resize(self, client_width, client_height):
         if client_width == 0 or client_height == 0:
             return
 
         self.content_box = ()
+        self.content_not_found_warned = False
         GTasks.OnResize(client_width, client_height)
 
-    def CaptureTest(self, frame_buffer, capture_save_dir):
-        filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
-        path = os.path.join(capture_save_dir, filename)
+        if self.test_on_resize:
+            self.need_capture = True
 
-        if len(self.content_box) == 4:
-            left, top, right, bottom = self.content_box
-            image = frame_buffer[top:bottom, left:right]
-        else:
-            image = frame_buffer
+    def CaptureTest(self, image):
+        if self.log_dir == "":
+            LogError(info="[CaptureTest] Capture save directory is not given!")
+            return
+
+        filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".png"
+        path = os.path.join(self.log_dir, filename)
 
         SaveImage(image, path, remove_alpha=True)
         LogInfo(
@@ -80,12 +86,23 @@ class FrameManager:
         if self.client_type == EClientType.WeMeet.name:
             if len(self.content_box) == 0:
                 self.FindContentBox(frame_buffer)
-
-            # In case of content box not found
-            if len(self.content_box) == 4:
+                # In case of content box not found
+                if len(self.content_box) == 0:
+                    return
+                # Remember to resize tasks!
                 left, top, right, bottom = self.content_box
-                frame_buffer = frame_buffer[top:bottom, left:right]
+                GTasks.OnResize(right - left, bottom - top)
 
+            left, top, right, bottom = self.content_box
+            frame_buffer = frame_buffer[top:bottom, left:right]
+
+        # capture test
+        if self.need_capture:
+            self.CaptureTest(frame_buffer)
+            self.need_capture = False
+
+        ####################
+        # Main tasks
         # Note: No PreTick & PostTick is needed right now. 
         for task in self.tasks:
             task.SetFrameBuffer(frame_buffer)
@@ -173,10 +190,23 @@ class FrameManager:
             boxes.append((x, y, w, h))
 
         if len(boxes) != 1:
-            LogError(info="[FindContentBox] Failed to find content box.", num_boxes=len(boxes))
+            if not self.content_not_found_warned:
+                LogWarning(info="[FindContentBox] Failed to find content box.", num_boxes=len(boxes))
+                self.content_not_found_warned = True
             return
 
         left, top, right, bottom = self._RemoveSmallMargins(frame_buffer, boxes[0])
+        # if center box too small, regard it as a failure case
+        if (right - left <= 200) or (bottom - top <= 200):
+            if not self.content_not_found_warned:
+                LogWarning(
+                    info="[FindContentBox] Found content box, but too small.", 
+                    box=(left, top, right, bottom),
+                    width=right - left,
+                    height=bottom - top,
+                    )
+                self.content_not_found_warned = True
+            return
         self.content_box = (left, top, right, bottom)
         LogInfo(
             info=f"[FindContentBox] Content box found.",
@@ -188,7 +218,7 @@ class FrameManager:
 
     def _RemoveSmallMargins(self, frame_buffer, box):
         x, y, w, h = box
-        LogDebug(info=f"{(x, y, w, h)}")
+        # LogDebug(info=f"{(x, y, w, h)}")
         img = frame_buffer[y:y+h, x:x+w]
         image_width, image_height = w, h
         # SaveImage(img, "temp/temp2.png", remove_alpha=True)

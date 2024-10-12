@@ -85,15 +85,11 @@ namespace LumiTracker.Config
             "config.json"
         );
 
-        private static string LogFilePath = Path.Combine(
+        // File paths that can be customized
+        public static string LogFilePath = Path.Combine(
             LogDir,
             "error.log"
         );
-
-        public static void SetCustomLogFilePath(string path)
-        {
-            LogFilePath = path;
-        }
 
         private Configuration()
         {

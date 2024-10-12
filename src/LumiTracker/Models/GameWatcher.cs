@@ -1,8 +1,7 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
-using System.Net.Sockets;
-using System.Text;
+using System.IO;
 
 namespace LumiTracker.Models
 {
@@ -54,20 +53,43 @@ namespace LumiTracker.Models
 
         public event OnLogFPSCallback?              LogFPS;
 
+        private readonly string ProcessWatcherInitFilePath;
+
+        private readonly bool TestCaptureOnResize;
+
         public GameWatcher()
         {
+            ProcessWatcherInitFilePath = Path.Combine(Configuration.DocumentsDir, "init.json");
+            TestCaptureOnResize = false;
+        }
 
+        public GameWatcher(string processWatcherInitFilePath, bool testCaptureOnResize)
+        {
+            ProcessWatcherInitFilePath = processWatcherInitFilePath;
+            TestCaptureOnResize = testCaptureOnResize;
         }
 
         public void Start(EClientType clientType, ECaptureType captureType)
         {
-            info.Value = new CaptureInfo { ClientType = clientType, CaptureType = captureType};
+            info.Value = new CaptureInfo 
+            { 
+                ClientType = clientType, 
+                CaptureType = captureType,
+                InitFilePath = ProcessWatcherInitFilePath,
+                TestCaptureOnResize = TestCaptureOnResize,
+            };
             MainLoopTask = MainLoop();
         }
 
         public void ChangeGameClient(EClientType clientType, ECaptureType captureType)
         {
-            info.Value = new CaptureInfo { ClientType = clientType, CaptureType = captureType };
+            info.Value = new CaptureInfo
+            {
+                ClientType = clientType,
+                CaptureType = captureType,
+                InitFilePath = ProcessWatcherInitFilePath,
+                TestCaptureOnResize = TestCaptureOnResize,
+            };
             StopCurrentProcessWatcher();
         }
 
@@ -76,20 +98,12 @@ namespace LumiTracker.Models
             get { return info.Value.ClientType; }
         }
 
-        public async Task DumpToBackend(string message)
+        public async Task DumpToBackend(object message_obj)
         {
             if (processWatcher.Value == null)
                 return;
 
-            var socket = processWatcher.Value.BackendSocket;
-            if (socket != null)
-            {
-                byte[] data = Encoding.UTF8.GetBytes(message + "\n");
-                await Task.Factory.FromAsync(
-                    (callback, state) => socket.BeginSend(data, 0, data.Length, SocketFlags.None, callback, state),
-                    socket.EndSend,
-                    null);
-            }
+            await processWatcher.Value.DumpToBackend(message_obj);
         }
 
         private async Task MainLoop()

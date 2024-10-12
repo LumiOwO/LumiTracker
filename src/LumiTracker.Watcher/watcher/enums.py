@@ -30,6 +30,10 @@ class EGamePhase(enum.Enum):
     Null   = 0
     Action = enum.auto()
 
+class EInputType(enum.Enum):
+    NONE              = 0
+    CAPTURE_TEST      = enum.auto()
+
 class ETaskType(enum.Enum):
     NONE              = 0
 

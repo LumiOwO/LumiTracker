@@ -1,6 +1,7 @@
 import sys
 import logging
 import ctypes
+import json
 
 from .config import cfg, LogDebug, LogError
 from .enums import ECaptureType
@@ -10,7 +11,7 @@ class WindowWatcher:
         self.hwnd    = 0
         self.capture = None
 
-    def Start(self, hwnd, capture, port, client_type):
+    def Start(self, hwnd, capture, port, client_type, log_dir, test_on_resize):
         PROCESS_PER_MONITOR_DPI_AWARE = 2
         try:
             ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
@@ -20,23 +21,24 @@ class WindowWatcher:
         self.hwnd = hwnd
         self.capture = capture
 
-        self.capture.Start(hwnd, port, client_type)
+        self.capture.Start(hwnd, port, client_type, log_dir, test_on_resize)
 
 if __name__ == '__main__':
-    assert len(sys.argv) == 6, "Wrong number of arguments"
-    hwnd            = int(sys.argv[1])
-    client_type     = sys.argv[2]
-    capture_type    = sys.argv[3]
-    can_hide_border = int(sys.argv[4])
-    port            = int(sys.argv[5])
+    assert len(sys.argv) == 2, "Wrong number of arguments"
+    init_file_path = sys.argv[1]
+    with open(init_file_path, 'r') as f:
+        params = json.load(f)
+    hwnd            = int(params["hwnd"])
+    client_type     = str(params["client_type"])
+    capture_type    = str(params["capture_type"])
+    can_hide_border = int(params["can_hide_border"])
+    port            = int(params["port"])
+    log_dir         = str(params["log_dir"])
+    test_on_resize  = int(params["test_on_resize"])
 
     LogDebug(
+        params,
         info="WindowWatcher start",
-        hwnd=hwnd, 
-        client_type=client_type,
-        capture_type=capture_type, 
-        can_hide_border=can_hide_border,
-        port=port
         )
 
     if capture_type == ECaptureType.BitBlt.name:
@@ -49,4 +51,4 @@ if __name__ == '__main__':
         raise NotImplementedError()
 
     window_watcher = WindowWatcher()
-    window_watcher.Start(hwnd, capture, port, client_type)
+    window_watcher.Start(hwnd, capture, port, client_type, log_dir, test_on_resize)

@@ -90,6 +90,13 @@ namespace LumiTracker.Config
         DendroAttack,
     }
 
+    public enum EInputType : int
+    {
+        NONE = 0,
+
+        CAPTURE_TEST,
+    }
+
     public enum ETaskType : int
     {
         NONE = 0,

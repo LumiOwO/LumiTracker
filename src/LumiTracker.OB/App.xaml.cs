@@ -45,7 +45,13 @@ namespace LumiTracker.OB
         /// </summary>
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            Configuration.SetCustomLogFilePath(OBConfig.OBLogFilePath);
+            // Configure custom file paths
+            if (!Directory.Exists(OBConfig.WorkingDir))
+            {
+                Directory.CreateDirectory(OBConfig.WorkingDir);
+            }
+            Configuration.LogFilePath = OBConfig.OBLogFilePath;
+
             SingleInstanceGuard.Init(this);
             if (!SingleInstanceGuard.IsAppRunning)
             {

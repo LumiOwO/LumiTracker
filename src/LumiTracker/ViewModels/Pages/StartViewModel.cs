@@ -268,7 +268,11 @@ namespace LumiTracker.ViewModels.Pages
         {
             if (IsGenshinWindowMinimized)
                 return;
-            await _gameWatcher.DumpToBackend(Configuration.LogDir);
+
+            await _gameWatcher.DumpToBackend(new
+            {
+                input_type = EInputType.CAPTURE_TEST.ToString(),
+            });
         }
 
         public void OnCaptureTestDone(string filename, int width, int height)

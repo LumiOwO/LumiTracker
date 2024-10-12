@@ -117,7 +117,7 @@ namespace LumiTracker.OB
             OBDataDir = Path.Combine(OBConfig.WorkingDir, scopeName);
             OBProxyConfig = OBConfig.Root[scopeName];
 
-            OBGameWatcher         = new GameWatcher();
+            OBGameWatcher         = new GameWatcher(Path.Combine(OBConfig.WorkingDir, $"{scopeName}_init.json"), true);
             OBDeckViewModel       = new DeckViewModel(null, null);
             OBDeckWindowViewModel = new DeckWindowViewModel(OBDeckViewModel, OBGameWatcher);
             OBDeckWindowViewModel.ShareCodeOverride = OBProxyConfig.Get<string>("deck");
@@ -245,14 +245,7 @@ namespace LumiTracker.OB
 
         private void OnGenshinWindowResized(int width, int height, bool isMinimized)
         {
-            if (isMinimized) return;
-
-            // Run a capture test whenever the window resized
-            Task.Run(async () =>
-            {
-                await Task.Delay(1000); // Delay for 1000 milliseconds (1 second)
-                await OBGameWatcher.DumpToBackend(Configuration.LogDir);
-            });
+            
         }
 
         private void OnCaptureTestDone(string filename, int width, int height)

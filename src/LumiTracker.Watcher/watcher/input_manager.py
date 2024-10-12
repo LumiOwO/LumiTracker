@@ -1,8 +1,10 @@
 import threading
 import queue
 import socket
+import json
 
-from .config import LogDebug, LogError
+from .config import LogDebug, LogInfo, LogError
+from .enums import EInputType
 
 class AsyncInput:
     def __init__(self, port):
@@ -38,8 +40,8 @@ class AsyncInput:
 
                 # Process lines from the buffer
                 while '\n' in buffer:
-                    user_input, buffer = buffer.split('\n', 1)
-                    self.queue.put(user_input)
+                    message, buffer = buffer.split('\n', 1)
+                    self.queue.put(message)
         
         except (socket.error, ConnectionResetError):
             # Exception will occur when socket is closed
@@ -49,26 +51,33 @@ class AsyncInput:
         
     def Read(self):
         try:
-            user_input = self.queue.get_nowait()
-            return user_input
+            message = self.queue.get_nowait()
+            return message
         except queue.Empty:
             return ""
 
 class InputManager:
-    def __init__(self, port):
+    def __init__(self, port, frame_manager):
         self.ainput = AsyncInput(port)
+        self.frame_manager = frame_manager
 
-        self.capture_save_dir = ""
-    
     def Close(self):
         self.ainput.Close()
-    
-    def ResetSignals(self):
-        self.capture_save_dir = ""
 
     def Tick(self):
-        self.ResetSignals()
+        message = self.ainput.Read()
+        if message == "":
+            return
 
-        user_input = self.ainput.Read()
-        if user_input:
-            self.capture_save_dir = user_input
+        try:
+            message_data = json.loads(message)
+        except Exception as e:
+            LogError(info=f"[InputManager.Tick] Failed to parse input message.", message=message)
+            return
+        LogInfo(message_data)
+
+        input_type = message_data["input_type"]
+        if input_type == EInputType.CAPTURE_TEST.name:
+            self.frame_manager.need_capture = True
+        else:
+            LogError(info="[InputManager.Tick] Unknown input type.")

@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Windows.Foundation.Metadata;
 using System.Net.Sockets;
 using System.Net;
+using System.IO;
 
 
 namespace LumiTracker.Watcher
@@ -23,6 +24,8 @@ namespace LumiTracker.Watcher
     {
         public EClientType ClientType { get; set; }
         public ECaptureType CaptureType { get; set; }
+        public string InitFilePath { get; set; }
+        public bool TestCaptureOnResize { get; set; }
     }
 
     public delegate void OnGenshinWindowFoundCallback();
@@ -271,6 +274,7 @@ namespace LumiTracker.Watcher
 
             //////////////////////////
             // Prepare start info
+            string clientType = captureInfo.ClientType.ToString();
             string captureType = EnumHelpers.BitBltUnavailable(captureInfo.ClientType) ?
                 ECaptureType.WindowsCapture.ToString() :
                 captureInfo.CaptureType.ToString();
@@ -284,10 +288,27 @@ namespace LumiTracker.Watcher
             int port = ((IPEndPoint)tempSocket!.LocalEndPoint!).Port;
             tempSocket.Close();
 
+            // Save init parameters to json file
+            bool saved = Configuration.SaveJObject(JObject.FromObject(new
+            {
+                hwnd            = info.hwnd.ToInt64(),
+                client_type     = clientType,
+                capture_type    = captureType,
+                can_hide_border = canHideBorder ? 1 : 0,
+                port            = port,
+                log_dir         = Configuration.LogDir,
+                test_on_resize  = captureInfo.TestCaptureOnResize ? 1 : 0,
+            }), captureInfo.InitFilePath);
+            if (!saved)
+            {
+                Configuration.Logger.LogError("Failed to save ProcessWatcher init file.");
+                return;
+            }
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = Path.Combine(Configuration.AppDir, "python", "python.exe"),
-                Arguments = $"-E -m watcher.window_watcher {info.hwnd.ToInt64()} {captureInfo.ClientType} {captureType} {(canHideBorder ? 1 : 0)} {port}",
+                Arguments = $"-E -m watcher.window_watcher {captureInfo.InitFilePath}",
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
@@ -328,6 +349,7 @@ namespace LumiTracker.Watcher
                 KillProcess();
                 return;
             }
+            Configuration.Logger.LogInformation($"Connected to backend socket on port {port}.");
 
             //////////////////////////
             // Main loop
@@ -343,6 +365,30 @@ namespace LumiTracker.Watcher
 
             Configuration.Logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
             WindowWatcherExit?.Invoke();
+        }
+
+        public async Task DumpToBackend(object message_obj)
+        {
+            string message_str = "";
+            try
+            {
+                message_str = LogHelper.JsonToConsoleStr(JObject.FromObject(message_obj), forceCompact: true);
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"[DumpToBackend] Failed to parse message object. \n{ex.ToString()}");
+                return;
+            }
+
+            var socket = BackendSocket;
+            if (socket != null)
+            {
+                byte[] data = Encoding.UTF8.GetBytes(message_str + "\n");
+                await Task.Factory.FromAsync(
+                    (callback, state) => socket.BeginSend(data, 0, data.Length, SocketFlags.None, callback, state),
+                    socket.EndSend,
+                    null);
+            }
         }
 
         private void WindowWatcherEventHandler(object sender, DataReceivedEventArgs e)
