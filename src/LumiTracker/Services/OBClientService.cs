@@ -1,4 +1,5 @@
 ﻿using LumiTracker.Config;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.IO;
 using System.Net.Sockets;
@@ -16,11 +17,10 @@ namespace LumiTracker.Services
 
     public class OBClientService
     {
-        private const int SERVER_PORT = 25251;
         private readonly string _serverIp;
-        private TcpClient _client;
-        private NetworkStream _stream;
         private readonly string _clientId;
+        private TcpClient? _client = null;
+        private NetworkStream? _stream = null;
 
         public OBClientService(string serverIp)
         {
@@ -31,8 +31,7 @@ namespace LumiTracker.Services
 
         private string GetOrCreateClientId()
         {
-            const string clientIdFilePath = "client_id.txt"; // Store the client ID locally
-
+            string clientIdFilePath = Path.Combine(Configuration.DocumentsDir, "GUID");
             if (File.Exists(clientIdFilePath))
             {
                 // Load existing client ID
@@ -53,19 +52,34 @@ namespace LumiTracker.Services
             try
             {
                 _client = new TcpClient();
-                Console.WriteLine($"Connecting to {_serverIp}:{SERVER_PORT}...");
+                int port = Configuration.Get<int>("ob_port");
+                Configuration.Logger.LogInformation($"Connecting to {_serverIp}:{port}...");
 
-                await _client.ConnectAsync(_serverIp, SERVER_PORT);
+                await _client.ConnectAsync(_serverIp, port);
                 _stream = _client.GetStream();
-
+                _stream.ReadTimeout = 5000; // Set to 5 seconds
                 // Enable TCP Keep-Alive
                 _client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
-                Console.WriteLine("Connected to server.");
+                // Send the client ID
+                byte[] idBytes = Encoding.UTF8.GetBytes(_clientId);
+                await _stream.WriteAsync(idBytes, 0, idBytes.Length);
+
+                // Wait for server response
+                byte[] responseBuffer = new byte[1];
+                await _stream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
+                if (responseBuffer[0] != 1) // Server accepted the ID
+                {
+                    Configuration.Logger.LogError("Connection rejected.");
+                    _client.Close();
+                }
+
+                Configuration.Logger.LogInformation("Connected to server.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Connection failed: {ex.Message}");
+                Configuration.Logger.LogError($"Connection failed: {ex.Message}");
+                _client?.Close();
             }
         }
 
@@ -74,7 +88,7 @@ namespace LumiTracker.Services
         {
             if (_client?.Connected != true)
             {
-                Console.WriteLine("Not connected to server.");
+                Configuration.Logger.LogError("Not connected to server.");
                 return;
             }
 
@@ -90,11 +104,11 @@ namespace LumiTracker.Services
                 byte[] data = Encoding.UTF8.GetBytes(json);
 
                 await _stream.WriteAsync(data, 0, data.Length);
-                Console.WriteLine("Message sent to server.");
+                Configuration.Logger.LogInformation("Message sent to server.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending message: {ex.Message}");
+                Configuration.Logger.LogError($"Error sending message: {ex.Message}");
             }
         }
 
@@ -105,11 +119,11 @@ namespace LumiTracker.Services
             {
                 _stream?.Close();
                 _client?.Close();
-                Console.WriteLine("Connection closed.");
+                Configuration.Logger.LogInformation("Connection closed.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error closing connection: {ex.Message}");
+                Configuration.Logger.LogError($"Error closing connection: {ex.Message}");
             }
         }
     }

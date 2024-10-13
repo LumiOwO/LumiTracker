@@ -1,4 +1,5 @@
 {
+  "port": 25251,
   "resource_dirs": {
     "tokens": "D:/_data/七圣/test"
   },

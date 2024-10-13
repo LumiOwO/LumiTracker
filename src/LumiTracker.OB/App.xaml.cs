@@ -1,4 +1,5 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -58,11 +59,14 @@ namespace LumiTracker.OB
                 return;
             }
 
-            GameWatcherOBProxy myProxy = new GameWatcherOBProxy("MY", LogHelper.AnsiOrange);
-            GameWatcherOBProxy opProxy = new GameWatcherOBProxy("OP", LogHelper.AnsiBlue);
+            //GameWatcherOBProxy myProxy = new GameWatcherOBProxy("MY", LogHelper.AnsiOrange);
+            //GameWatcherOBProxy opProxy = new GameWatcherOBProxy("OP", LogHelper.AnsiBlue);
 
-            myProxy.Start();
-            opProxy.Start();
+            //myProxy.Start();
+            //opProxy.Start();
+
+            OBServerService server = new OBServerService();
+            Task.Run(server.StartAsync);
 
             _host.Start();
         }
@@ -76,6 +80,8 @@ namespace LumiTracker.OB
             {
                 return;
             }
+
+            // TODO: close the OB server
 
             await _host.StopAsync();
             _host.Dispose();
