@@ -1,7 +1,8 @@
 import numpy as np
 import cv2
+from abc import ABC, abstractmethod
 
-from .config import LogWarning, cfg, LogDebug
+from .config import LogWarning, cfg, LogDebug, override
 from .enums import EAnnType, EActionCard
 
 import itertools
@@ -361,6 +362,9 @@ def ExtractFeature_ActionCard(image):
 
     return ahash, dhash
 
+def ExtractFeature_CharacterCard(image):
+    return ExtractFeature_ActionCard(image)
+
 def FeatureDistance(feature1, feature2):
     return ImageHash(feature1) - ImageHash(feature2)
 
@@ -386,24 +390,45 @@ def CardCost(card_id, db):
     return db["actions"][card_id]["cost"][0] if card_id >= 0 else -1
 
 
-class ActionCardHandler:
+class CardHandler(ABC):
     def __init__(self):
         self.feature_buffer = None
-        self.crop_cfgs      = (cfg.action_crop_box0, cfg.action_crop_box1, cfg.action_crop_box2)
+        self.crop_cfgs      = (cfg.feature_crop_box0, cfg.feature_crop_box1, cfg.feature_crop_box2)
+        self.feature_crops  = []
 
         self.frame_buffer   = None
         self.region_buffer  = None
         self.crop_box       = None  # init when resize
 
+        ann_type_a, ann_type_d = self.GetAnnTypes()
+        self.ann_type_a     = ann_type_a
+        self.ann_type_d     = ann_type_d
+
+    @abstractmethod
+    def GetAnnTypes(self):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def RemapCardId(self, card_id, db):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def ExtractFeatures(self, feature_buffer):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def AllowEarlyReturn(self, card_id):
+        raise NotImplementedError()
+
     def ExtractCardFeatures(self):
-        # Get action card region
+        # Get card region
         region_buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
         self.region_buffer = region_buffer
 
-        # Crop action card and get feature buffer
+        # Crop card and get feature buffer
         self.feature_buffer[:self.feature_crops[0].height, :self.feature_crops[0].width] = region_buffer[
             self.feature_crops[0].top  : self.feature_crops[0].bottom, 
             self.feature_crops[0].left : self.feature_crops[0].right
@@ -420,33 +445,21 @@ class ActionCardHandler:
         ]
 
         # Extract feature
-        features = ExtractFeature_ActionCard(self.feature_buffer)
+        features = self.ExtractFeatures(self.feature_buffer)
         return features
-    
-    def RemapCardId(self, card_id, db):
-        if card_id >= EActionCard.NumActions.value:
-            card_id = db["extras"][card_id - EActionCard.NumActions.value]
-        return card_id
 
     def Update(self, frame_buffer, db, check_next_dist=True,
                     threshold=cfg.threshold, strict_threshold=cfg.strict_threshold, _debug=False):
         self.frame_buffer = frame_buffer
 
         ahash, dhash = self.ExtractCardFeatures()
-        card_ids_a, dists_a = db.SearchByFeature(ahash, EAnnType.ACTIONS_A)
-        card_ids_d, dists_d = db.SearchByFeature(dhash, EAnnType.ACTIONS_D)
+        card_ids_a, dists_a = db.SearchByFeature(ahash, self.ann_type_a)
+        card_ids_d, dists_d = db.SearchByFeature(dhash, self.ann_type_d)
 
         card_id_a = card_ids_a[0]
         card_id_d = card_ids_d[0]
         dist_a    = dists_a[0]
         dist_d    = dists_d[0]
-
-        # Debug: write card image buffer
-        # if card_id_a == 119 or card_id_d == 119:
-        #     import os
-        #     image = self.region_buffer
-        #     cv2.imwrite(os.path.join(cfg.debug_dir, "save", f"{ActionCardHandler.debug_cnt}.png"), image)
-        #     ActionCardHandler.debug_cnt += 1
 
         card_id = -1
         dist    = max(dist_a, dist_d)
@@ -461,12 +474,12 @@ class ActionCardHandler:
 
         # Early return if the distance is below the strict threshold.
         # extra cards should be ignored here
-        if dist_d <= strict_threshold and card_id_d < EActionCard.NumActions.value:
+        if dist_d <= strict_threshold and self.AllowEarlyReturn(card_id_d):
             # dhash is more sensitive, so check it first
             card_id = card_id_d
             dist    = dist_d
             return PackedResult()
-        if dist_a <= strict_threshold and card_id_a < EActionCard.NumActions.value:
+        if dist_a <= strict_threshold and self.AllowEarlyReturn(card_id_a):
             card_id = card_id_a
             dist    = dist_a
             return PackedResult()
@@ -566,3 +579,47 @@ class ActionCardHandler:
             feature_crop_t2 + feature_crop_h2,
         )
         self.feature_crops = [feature_crop0, feature_crop1, feature_crop2]
+
+
+class ActionCardHandler(CardHandler):
+    def __init__(self):
+        super().__init__()
+
+    @override
+    def GetAnnTypes(self):
+        return EAnnType.ACTIONS_A, EAnnType.ACTIONS_D
+
+    @override
+    def RemapCardId(self, card_id, db):
+        if card_id >= EActionCard.NumActions.value:
+            card_id = db["extras"][card_id - EActionCard.NumActions.value]
+        return card_id
+
+    @override
+    def ExtractFeatures(self, feature_buffer):
+        return ExtractFeature_ActionCard(feature_buffer)
+
+    @override
+    def AllowEarlyReturn(self, card_id):
+        return card_id < EActionCard.NumActions.value
+
+
+class CharacterCardHandler(CardHandler):
+    def __init__(self):
+        super().__init__()
+
+    @override
+    def GetAnnTypes(self):
+        return EAnnType.CHARACTERS_A, EAnnType.CHARACTERS_D
+
+    @override
+    def RemapCardId(self, card_id, db):
+        return card_id
+
+    @override
+    def ExtractFeatures(self, feature_buffer):
+        return ExtractFeature_CharacterCard(feature_buffer)
+
+    @override
+    def AllowEarlyReturn(self, card_id):
+        return True

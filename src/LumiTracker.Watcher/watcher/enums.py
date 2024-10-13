@@ -136,12 +136,14 @@ class ECtrlType(enum.Enum):
 
 
 class EAnnType(enum.Enum):
-    ACTIONS_A = 0
-    ACTIONS_D = enum.auto()
-    CTRLS     = enum.auto()
-    DIGITS    = enum.auto()
+    ACTIONS_A    = 0
+    ACTIONS_D    = enum.auto()
+    CTRLS        = enum.auto()
+    DIGITS       = enum.auto()
+    CHARACTERS_A = enum.auto()
+    CHARACTERS_D = enum.auto()
 
-    ANN_COUNT = enum.auto()
+    ANN_COUNT    = enum.auto()
 
 class EActionCardType(enum.Enum):
     Talent       = 0

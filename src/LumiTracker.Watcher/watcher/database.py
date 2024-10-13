@@ -14,7 +14,7 @@ from collections import defaultdict
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
 from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType, ELanguage
-from .feature import CropBox, ActionCardHandler, FeatureDistance, GetHashSize
+from .feature import CropBox, ActionCardHandler, CharacterCardHandler, FeatureDistance, GetHashSize
 from .feature import ExtractFeature_Control, ExtractFeature_Digit
 
 def LoadImage(path):
@@ -28,7 +28,7 @@ def SaveImage(image, path, remove_alpha=False):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     cv2.imencode(Path(path).suffix, image)[1].tofile(path)
 
-def CheckHashDistances(hashs, name_func):
+def CheckHashDistances(test_name, hashs, name_func):
     n = len(hashs)
     min_dist = 100000
     close_dists = defaultdict(list)
@@ -42,6 +42,7 @@ def CheckHashDistances(hashs, name_func):
     close_dists = {key: close_dists[key] for key in sorted(close_dists)}
     LogWarning(
         indent=2,
+        test_name=test_name,
         min_dist=min_dist,
         close_dists=close_dists, 
         )
@@ -93,7 +94,7 @@ class Database:
         print(f"Loaded {n_controls} images from {controls_dir}")
 
         if cfg.DEBUG:
-            CheckHashDistances(features, name_func=lambda i: ECtrlType(i).name.lower())
+            CheckHashDistances("ctrls", features, name_func=lambda i: ECtrlType(i).name.lower())
 
             game_start_test_path = "temp/test/game_start_frame.png"
             image = LoadImage(game_start_test_path)
@@ -131,19 +132,19 @@ class Database:
         # top    = 320
         # height = 300
         # crop_box0 = CropBox(left, top, left + width, top + height)
-        # cfg.action_crop_box0 = ((crop_box0.left / 420, crop_box0.top / 720, crop_box0.width / 420, crop_box0.height / 720))
+        # cfg.feature_crop_box0 = ((crop_box0.left / 420, crop_box0.top / 720, crop_box0.width / 420, crop_box0.height / 720))
         # left   = 180
         # width  = 100
         # top    = 220
         # height = 200
         # crop_box1 = CropBox(left, top, left + width, top + height)
-        # cfg.action_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.width / 420, crop_box1.height / 720))
+        # cfg.feature_crop_box1 = ((crop_box1.left / 420, crop_box1.top / 720, crop_box1.width / 420, crop_box1.height / 720))
         # left   = 222
         # width  = 100
         # top    = 508
         # height = 100
         # crop_box2 = CropBox(left, top, left + width, top + height)
-        # cfg.action_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
+        # cfg.feature_crop_box2 = ((crop_box2.left / 420, crop_box2.top / 720, crop_box2.width / 420, crop_box2.height / 720))
 
         handler = ActionCardHandler()
         handler.OnResize(CropBox(0, 0, 420, 720))
@@ -249,10 +250,10 @@ class Database:
 
         if cfg.DEBUG:
             # ahash
-            CheckHashDistances(ahashs, 
+            CheckHashDistances("actions_a", ahashs, 
                 lambda i: actions[i if i < num_actions else extras[i - num_actions]]["zh-HANS"])
             # dhash
-            CheckHashDistances(dhashs, 
+            CheckHashDistances("actions_d", dhashs, 
                 lambda i: actions[i if i < num_actions else extras[i - num_actions]]["zh-HANS"])
 
         if cfg.DEBUG_SAVE:
@@ -309,9 +310,29 @@ class Database:
             data = [row for row in reader]
         num_characters = len(data)
 
+        handler = CharacterCardHandler()
+        handler.OnResize(CropBox(0, 0, 420, 720))
+        characters_dir = os.path.join(cfg.cards_dir, "characters")
+        ahashs  = [None] * num_characters
+        dhashs  = [None] * num_characters
+
         talent_to_character = {}
         characters = [None] * num_characters
-        for i, row in enumerate(data):
+        for idx, row in enumerate(data):
+            card_id = int(row["id"])
+
+            image_path = os.path.join(characters_dir, f"character_{card_id}_{row['zh-HANS']}.png")
+            image = LoadImage(image_path)
+            if image is None:
+                LogError(info=f"Failed to load image: {image_path}")
+                exit(1)
+
+            handler.frame_buffer = image
+            ahash, dhash = handler.ExtractCardFeatures()
+            ahashs[card_id] = ahash
+            dhashs[card_id] = dhash
+            # SaveImage(handler.feature_buffer, snapshot_path)
+
             name_langs = {}
             for lang in range(ELanguage.NumELanguages.value):
                 lang = ELanguage(lang)
@@ -326,7 +347,7 @@ class Database:
                 "element"    : EElementType[row["element"]].value,
                 "is_monster" : True if row["is_monster"] == "1" else False,
             }
-            characters[i] = character
+            characters[card_id] = character
             talent_id = int(row["talent_id"])
             talent_to_character[talent_id] = int(row["id"])
 
@@ -339,9 +360,22 @@ class Database:
                     )
                 shutil.copy(src_file, dst_file)
 
+        print(f"Loaded {num_characters} images from {characters_dir}")
         self.data["characters"] = characters
         self.data["talent_to_character"] = talent_to_character
-    
+
+        if cfg.DEBUG:
+            # ahash
+            CheckHashDistances("characters_a", ahashs, lambda i: characters[i]["zh-HANS"])
+            # dhash
+            CheckHashDistances("characters_d", dhashs, lambda i: characters[i]["zh-HANS"])
+
+        ann_ahash = self.CreateAndSaveAnn(ahashs, EAnnType.CHARACTERS_A)
+        self.anns[EAnnType.CHARACTERS_A.value] = ann_ahash
+
+        ann_dhash = self.CreateAndSaveAnn(dhashs, EAnnType.CHARACTERS_D)
+        self.anns[EAnnType.CHARACTERS_D.value] = ann_dhash
+
     def _UpdateGeneratedEnums(self, num_sharable_actions):
         eActions = [StringToVariableName(action["en-US"]) for action in self.data["actions"]]
         eCharacters = [StringToVariableName(character["en-US"]) for character in self.data["characters"]]
@@ -469,7 +503,7 @@ class Database:
         ann_digits = self.CreateAndSaveAnn(digit_hashs, EAnnType.DIGITS)
         self.anns[EAnnType.DIGITS.value] = ann_digits
         if cfg.DEBUG:
-            CheckHashDistances(digit_hashs, name_func=lambda i: "")
+            CheckHashDistances("digits", digit_hashs, name_func=lambda i: "")
 
         if save_image_assets:
             # cost images
