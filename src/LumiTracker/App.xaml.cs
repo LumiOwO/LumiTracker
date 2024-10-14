@@ -18,6 +18,7 @@ using LumiTracker.Models;
 using Wpf.Ui.Appearance;
 using Microsoft.Win32;
 using System.Diagnostics;
+using LumiTracker.Watcher;
 
 namespace LumiTracker
 {
@@ -56,6 +57,9 @@ namespace LumiTracker
                 // Localization
                 services.AddSingleton<ILocalizationService, LocalizationService>();
 
+                services.AddSingleton<GameWatcher>();
+                services.AddSingleton<GameEventHook>(provider => provider.GetRequiredService<GameWatcher>());
+
                 // Main window with navigation
                 services.AddSingleton<INavigationWindow, MainWindow>();
                 services.AddSingleton<MainWindowViewModel>();
@@ -74,8 +78,6 @@ namespace LumiTracker
                 services.AddSingleton<AboutViewModel>();
                 services.AddSingleton<SettingsPage>();
                 services.AddSingleton<SettingsViewModel>();
-
-                services.AddSingleton<GameWatcher>();
 
             }).Build();
 

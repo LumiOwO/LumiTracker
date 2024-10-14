@@ -115,6 +115,9 @@ namespace LumiTracker.Config
         MY_CREATE_HAND, // eg. Furina
         OP_CREATE_HAND,
 
+        GAME_EVENT_FIRST = GAME_START,
+        GAME_EVENT_LAST  = OP_CREATE_HAND,
+
         UNSUPPORTED_RATIO,
         CAPTURE_TEST,
         LOG_FPS,

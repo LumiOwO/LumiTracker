@@ -1,20 +1,13 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace LumiTracker.Services
 {
-    public class OBMessage
-    {
-        public string ClientId { get; set; }
-        public string TaskType { get; set; }
-        public object? Data { get; set; }
-    }
-
     public class OBClientService
     {
         private readonly string _serverIp;
@@ -84,7 +77,7 @@ namespace LumiTracker.Services
         }
 
         // Send a message to the server
-        public async Task SendMessageAsync(ETaskType taskType, object? message_data)
+        public async Task SendMessageAsync(GameEventMessage message)
         {
             if (_client?.Connected != true)
             {
@@ -94,12 +87,6 @@ namespace LumiTracker.Services
 
             try
             {
-                var message = new OBMessage 
-                { 
-                    ClientId = _clientId,
-                    TaskType = taskType.ToString(),
-                    Data = message_data,
-                };
                 string json = JsonConvert.SerializeObject(message);
                 byte[] data = Encoding.UTF8.GetBytes(json);
 

@@ -7,6 +7,7 @@ using LumiTracker.ViewModels.Pages;
 using LumiTracker.Services;
 using System.Windows.Data;
 using LumiTracker.Helpers;
+using LumiTracker.Watcher;
 
 #pragma warning disable CS8618
 
@@ -71,28 +72,27 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private DeckViewModel _deckViewModel;
 
-        private GameWatcher _gameWatcher;
+        private GameEventHook _hook;
 
-        public DeckWindowViewModel(DeckViewModel deckViewModel, GameWatcher gameWatcher)
+        public DeckWindowViewModel(DeckViewModel deckViewModel, GameEventHook hook)
         {
             var binding = LocalizationExtension.Create("DeckWindowTitle");
             binding.Converter = new OverlayWindowTitleNameConverter();
             BindingOperations.SetBinding(DeckWindowTitle, LocalizationTextItem.TextProperty, binding);
 
             _deckViewModel = deckViewModel;
-            _gameWatcher   = gameWatcher;
+            _hook = hook;
 
-            _gameWatcher.GameStarted        += OnGameStarted;
-            _gameWatcher.MyActionCardPlayed += OnMyActionCardPlayed;
-            _gameWatcher.OpActionCardPlayed += OnOpActionCardPlayed;
-            _gameWatcher.GameOver           += OnGameOver;
-            _gameWatcher.RoundDetected      += OnRoundDetected;
-            _gameWatcher.MyCardsDrawn       += OnMyCardsDrawn;
-            _gameWatcher.MyCardsCreateDeck  += OnMyCardsCreateDeck;
-            _gameWatcher.OpCardsCreateDeck  += OnOpCardsCreateDeck;
-            _gameWatcher.UnsupportedRatio   += OnUnsupportedRatio;
+            _hook.GameStarted        += OnGameStarted;
+            _hook.MyActionCardPlayed += OnMyActionCardPlayed;
+            _hook.OpActionCardPlayed += OnOpActionCardPlayed;
+            _hook.GameOver           += OnGameOver;
+            _hook.RoundDetected      += OnRoundDetected;
+            _hook.MyCardsDrawn       += OnMyCardsDrawn;
+            _hook.MyCardsCreateDeck  += OnMyCardsCreateDeck;
+            _hook.OpCardsCreateDeck  += OnOpCardsCreateDeck;
 
-            _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
+            _hook.WindowWatcherExit  += OnWindowWatcherExit;
 
             Reset(gameStart: false);
         }
@@ -182,19 +182,6 @@ namespace LumiTracker.ViewModels.Windows
         private void OnOpCardsCreateDeck(int[] card_ids)
         {
 
-        }
-
-        private void OnUnsupportedRatio()
-        {
-            EClientType clientType = _gameWatcher.ClientType;
-            // Ignore MessageBox popup when client is web browser
-            if (clientType != EClientType.CloudWeb && clientType != EClientType.WeMeet)
-            {
-                System.Windows.MessageBox.Show(
-                    $"{LocalizationSource.Instance["UnsupportedRatioWarning"]}\n{LocalizationSource.Instance["SupportedRatioInfo"]}", 
-                    $"{LocalizationSource.Instance["AppName"]}", 
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
-            }
         }
 
         private void OnWindowWatcherExit()

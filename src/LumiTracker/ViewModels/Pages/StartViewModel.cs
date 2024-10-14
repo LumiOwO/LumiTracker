@@ -203,6 +203,7 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.WindowWatcherExit  += OnWindowWatcherExit;
             _gameWatcher.CaptureTestDone    += OnCaptureTestDone;
             _gameWatcher.LogFPS             += OnLogFPS;
+            _gameWatcher.UnsupportedRatio   += OnUnsupportedRatio;
 
             _gameWatcher.Start(ClientType, CaptureType);
         }
@@ -286,6 +287,19 @@ namespace LumiTracker.ViewModels.Pages
         public void OnLogFPS(float fps)
         {
             FPS = fps;
+        }
+
+        private void OnUnsupportedRatio()
+        {
+            EClientType clientType = _gameWatcher.ClientType;
+            // Ignore MessageBox popup when client is web browser
+            if (clientType != EClientType.CloudWeb && clientType != EClientType.WeMeet)
+            {
+                System.Windows.MessageBox.Show(
+                    $"{LocalizationSource.Instance["UnsupportedRatioWarning"]}\n{LocalizationSource.Instance["SupportedRatioInfo"]}",
+                    $"{LocalizationSource.Instance["AppName"]}",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            }
         }
     }
 }

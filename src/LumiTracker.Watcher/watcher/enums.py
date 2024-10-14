@@ -51,6 +51,9 @@ class ETaskType(enum.Enum):
     MY_CREATE_HAND    = enum.auto() # eg. Furina
     OP_CREATE_HAND    = enum.auto()
 
+    GAME_EVENT_FIRST  = GAME_START
+    GAME_EVENT_LAST   = OP_CREATE_HAND
+
     UNSUPPORTED_RATIO = enum.auto()
     CAPTURE_TEST      = enum.auto()
     LOG_FPS           = enum.auto()

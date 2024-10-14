@@ -9,7 +9,6 @@ using Newtonsoft.Json;
 using Windows.Foundation.Metadata;
 using System.Net.Sockets;
 using System.Net;
-using System.IO;
 
 
 namespace LumiTracker.Watcher
@@ -28,55 +27,8 @@ namespace LumiTracker.Watcher
         public bool TestCaptureOnResize { get; set; }
     }
 
-    public delegate void OnGenshinWindowFoundCallback();
-
-    public delegate void OnWindowWatcherStartCallback(IntPtr hwnd);
-
-    public delegate void OnWindowWatcherExitCallback();
-
-    public delegate void OnGameStartedCallback();
-
-    public delegate void OnMyActionCardPlayedCallback(int card_id);
-
-    public delegate void OnOpActionCardPlayedCallback(int card_id);
-
-    public delegate void OnGameOverCallback();
-
-    public delegate void OnRoundDetectedCallback(int round);
-
-    public delegate void OnMyCardsDrawnCallback(int[] card_ids);
-
-    public delegate void OnMyCardsCreateDeckCallback(int[] card_ids);
-
-    public delegate void OnOpCardsCreateDeckCallback(int[] card_ids);
-
-    public delegate void OnUnsupportedRatioCallback();
-
-    public delegate void OnCaptureTestDoneCallback(string filename, int width, int height);
-
-    public delegate void OnLogFPSCallback(float fps);
-
-    public delegate void ExceptionHandlerCallback(Exception ex);
-
-    public class ProcessWatcher : IAsyncDisposable
+    public class ProcessWatcher : GameEventHook, IAsyncDisposable
     {
-        public event OnGenshinWindowFoundCallback? GenshinWindowFound;
-        public event OnWindowWatcherStartCallback? WindowWatcherStart;
-        public event OnWindowWatcherExitCallback?  WindowWatcherExit;
-        public event OnGameStartedCallback?        GameStarted;
-        public event OnMyActionCardPlayedCallback? MyActionCardPlayed;
-        public event OnOpActionCardPlayedCallback? OpActionCardPlayed;
-        public event OnGameOverCallback?           GameOver;
-        public event OnRoundDetectedCallback?      RoundDetected;
-        public event OnMyCardsDrawnCallback?       MyCardsDrawn;
-        public event OnMyCardsCreateDeckCallback?  MyCardsCreateDeck;
-        public event OnOpCardsCreateDeckCallback?  OpCardsCreateDeck;
-        public event OnUnsupportedRatioCallback?   UnsupportedRatio;
-        public event OnCaptureTestDoneCallback?    CaptureTestDone;
-        public event OnLogFPSCallback?             LogFPS;
-        public event ExceptionHandlerCallback?     ExceptionHandler;
-
-
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
         [DllImport("user32.dll")]
@@ -108,7 +60,7 @@ namespace LumiTracker.Watcher
 
         public ProcessWatcher()
         {
-
+            LogFPS += OnLogFPS;
         }
 
         public WindowInfo FindProcessWindow(string processName)
@@ -147,7 +99,8 @@ namespace LumiTracker.Watcher
             //////////////////////////
             // Get window info by hwnd
             var info = GetMainWindowInfo(hwnd);
-            GenshinWindowFound?.Invoke();
+            Configuration.Logger.LogDebug("[Processwatcher] OnGenshinWindowFound");
+            InvokeGenshinWindowFound();
 
             Configuration.Logger.LogInformation($"Window title for process '{processName}' (hwnd: {hwnd}): {info.title}");
             
@@ -264,7 +217,7 @@ namespace LumiTracker.Watcher
             catch (Exception ex)
             {
                 Configuration.Logger.LogError($"[ProcessWatcher] {ex.ToString()}");
-                ExceptionHandler?.Invoke(ex);
+                InvokeException(ex);
             }
         }
 
@@ -353,7 +306,8 @@ namespace LumiTracker.Watcher
 
             //////////////////////////
             // Main loop
-            WindowWatcherStart?.Invoke(info.hwnd);
+            Configuration.Logger.LogDebug("[Processwatcher] OnWindowWatcherStart");
+            InvokeWindowWatcherStart(info.hwnd);
             while (!process.HasExited)
             {
                 if (ShouldCancel.Value)
@@ -364,7 +318,8 @@ namespace LumiTracker.Watcher
             }
 
             Configuration.Logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
-            WindowWatcherExit?.Invoke();
+            Configuration.Logger.LogDebug("[Processwatcher] OnWindowWatcherExit");
+            InvokeWindowWatcherExit();
         }
 
         public async Task DumpToBackend(object message_obj)
@@ -407,7 +362,10 @@ namespace LumiTracker.Watcher
 
                 if (message_level == "INFO")
                 {
-                    ParseBackendMessage(message_data, message_str);
+                    if (!ParseBackendMessage(message_data, message_str))
+                    {
+                        Configuration.Logger.LogInformation(message_str);
+                    }
                 }
                 else if (message_level == "DEBUG")
                 {
@@ -425,106 +383,50 @@ namespace LumiTracker.Watcher
             catch (JsonReaderException ex)
             {
                 Configuration.Logger.LogError($"[python] {e.Data}");
-                ExceptionHandler?.Invoke(ex);
+                InvokeException(ex);
             }
             catch (Exception ex)
             {
                 Configuration.Logger.LogError($"[ProcessWatcher] {ex.ToString()}");
-                ExceptionHandler?.Invoke(ex);
+                InvokeException(ex);
             }
         }
 
-        private void ParseBackendMessage(JToken message_data, string message_str)
+        private bool ParseBackendMessage(JToken message_data, string message_str)
         {
-            JObject? message_obj = message_data as JObject;
-            if (message_obj == null || !message_obj.TryGetValue("type", out JToken? typeValue))
+            GameEventMessage? message = null;
+            try
             {
-                Configuration.Logger.LogInformation(message_str);
-                return;
-            }
-
-            string task_type_name = typeValue!.ToString();
-            bool valid_task_type = Enum.TryParse(task_type_name, out ETaskType task_type);
-
-            if (!valid_task_type || task_type != ETaskType.LOG_FPS)
-            {
-                Configuration.Logger.LogInformation(message_str);
-            }
-
-            if (!valid_task_type)
-            {
-                Configuration.Logger.LogWarning($"[ProcessWatcher] Unknown task type: {task_type_name}\n{message_data}");
-            }
-            else if (task_type == ETaskType.GAME_START)
-            {
-                GameStarted?.Invoke();
-            }
-            else if (task_type == ETaskType.MY_PLAYED)
-            {
-                int card_id = message_data["card_id"]!.ToObject<int>();
-                MyActionCardPlayed?.Invoke(card_id);
-            }
-            else if (task_type == ETaskType.OP_PLAYED)
-            {
-                int card_id = message_data["card_id"]!.ToObject<int>();
-                OpActionCardPlayed?.Invoke(card_id);
-            }
-            else if (task_type == ETaskType.GAME_OVER)
-            {
-                GameOver?.Invoke();
-            }
-            else if (task_type == ETaskType.ROUND)
-            {
-                int round = message_data["round"]!.ToObject<int>();
-                RoundDetected?.Invoke(round);
-            }
-            else if (task_type == ETaskType.MY_DRAWN)
-            {
-                int[] cards = message_data["cards"]!.ToObject<int[]>()!;
-                MyCardsDrawn?.Invoke(cards);
-            }
-            else if (task_type == ETaskType.MY_CREATE_DECK)
-            {
-                int[] cards = message_data["cards"]!.ToObject<int[]>()!;
-                MyCardsCreateDeck?.Invoke(cards);
-            }
-            else if (task_type == ETaskType.OP_CREATE_DECK)
-            {
-                int[] cards = message_data["cards"]!.ToObject<int[]>()!;
-                OpCardsCreateDeck?.Invoke(cards);
-            }
-            else if (task_type == ETaskType.UNSUPPORTED_RATIO)
-            {
-                int client_width  = message_data["client_width"]!.ToObject<int>();
-                int client_height = message_data["client_height"]!.ToObject<int>();
-                float ratio = 1.0f * client_width / client_height;
-                Configuration.Logger.LogWarning(
-                    $"[ProcessWatcher] Current resolution is {client_width} x {client_height} with ratio = {ratio}, which is not supported now.");
-                UnsupportedRatio?.Invoke();
-            }
-            else if (task_type == ETaskType.CAPTURE_TEST)
-            {
-                string filename = message_data["filename"]!.ToObject<string>()!;
-                int width  = message_data["width"]!.ToObject<int>();
-                int height = message_data["height"]!.ToObject<int>();
-                CaptureTestDone?.Invoke(filename, width, height);
-            }
-            else if (task_type == ETaskType.LOG_FPS)
-            {
-                long cur_fps_time = Stopwatch.GetTimestamp();
-                float elapsedSeconds = (cur_fps_time - _last_fps_time.Value) / (float)Stopwatch.Frequency;
-                if (elapsedSeconds >= LOG_INTERVAL)
+                message = message_data.ToObject<GameEventMessage>();
+                if (message == null)
                 {
-                    Configuration.Logger.LogInformation(message_str);
-                    _last_fps_time.Value = cur_fps_time;
+                    throw new Exception("ToObject<GameEventMessage> failed.");
                 }
-
-                float fps = message_data["fps"]!.ToObject<float>()!;
-                LogFPS?.Invoke(fps);
             }
-            else
+            catch (Exception ex)
             {
-                Configuration.Logger.LogWarning($"[ProcessWatcher] Enum {task_type_name} defined but not handled: {task_type_name}\n{message_data}");
+                Configuration.Logger.LogError($"JSON Serialization Error: {ex.Message}");
+                return false;
+            }
+
+            if (message.TaskType != ETaskType.LOG_FPS)
+            {
+                Configuration.Logger.LogInformation(message_str);
+            }
+
+            ParseGameEventMessage(message);
+            return true;
+        }
+
+        private void OnLogFPS(float fps)
+        {
+            long cur_fps_time = Stopwatch.GetTimestamp();
+            float elapsedSeconds = (cur_fps_time - _last_fps_time.Value) / (float)Stopwatch.Frequency;
+            if (elapsedSeconds >= LOG_INTERVAL)
+            {
+                string message_str = $"{LogHelper.AnsiMagenta}@{LogHelper.AnsiEnd} FPS = {fps}";
+                Configuration.Logger.LogInformation(message_str);
+                _last_fps_time.Value = cur_fps_time;
             }
         }
     }
