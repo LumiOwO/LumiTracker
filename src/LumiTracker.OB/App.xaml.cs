@@ -2,7 +2,6 @@
 using LumiTracker.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -47,11 +46,13 @@ namespace LumiTracker.OB
         private void OnStartup(object sender, StartupEventArgs e)
         {
             // Configure custom file paths
-            if (!Directory.Exists(OBConfig.WorkingDir))
+            if (!Directory.Exists(Configuration.OBWorkingDir))
             {
-                Directory.CreateDirectory(OBConfig.WorkingDir);
+                Directory.CreateDirectory(Configuration.OBWorkingDir);
             }
-            Configuration.LogFilePath = OBConfig.OBLogFilePath;
+            Configuration.DefaultConfigPath = Path.Combine(Configuration.AssetsDir, "obconfig.json");
+            Configuration.UserConfigPath    = Path.Combine(Configuration.OBWorkingDir, "obconfig.json");
+            Configuration.LogFilePath       = Path.Combine(Configuration.OBWorkingDir, "error.log");
 
             SingleInstanceGuard.Init(this);
             if (!SingleInstanceGuard.IsAppRunning)
@@ -59,17 +60,13 @@ namespace LumiTracker.OB
                 return;
             }
 
-            //GameWatcherOBProxy myProxy = new GameWatcherOBProxy("MY", LogHelper.AnsiOrange);
-            //GameWatcherOBProxy opProxy = new GameWatcherOBProxy("OP", LogHelper.AnsiBlue);
-
-            //myProxy.Start();
-            //opProxy.Start();
-
-            OBServerService server = new OBServerService();
+            server = new OBServerService();
             Task.Run(server.StartAsync);
 
             _host.Start();
         }
+        // TODO: move to OBStartViewPage
+        private OBServerService? server = null;
 
         /// <summary>
         /// Occurs when the application is closing.
@@ -81,7 +78,8 @@ namespace LumiTracker.OB
                 return;
             }
 
-            // TODO: close the OB server
+            // TODO: fix server close
+            server?.Close();
 
             await _host.StopAsync();
             _host.Dispose();

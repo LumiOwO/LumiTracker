@@ -111,13 +111,6 @@ namespace LumiTracker
                 return;
             }
 
-            OBClientService client = new OBClientService("192.168.0.101");
-            Task.Run(client.ConnectAsync);
-            OBClientService client2 = new OBClientService("192.168.0.101");
-            Task.Run(client2.ConnectAsync);
-            OBClientService client3 = new OBClientService("192.168.0.101");
-            Task.Run(client3.ConnectAsync);
-
             if (e.Args.Length == 1 && e.Args[0] == "just_updated")
             {
                 Configuration.SetTemporal("just_updated", true);
@@ -142,8 +135,6 @@ namespace LumiTracker
             {
                 return;
             }
-
-            // TODO: close OB clients
 
             await _host.StopAsync();
             _host.Dispose();

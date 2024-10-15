@@ -52,6 +52,12 @@ namespace LumiTracker.Config
             _                    => AnsiWhite,
         };
 
+        public static string GetAnsiColorFromGuid(Guid guid)
+        {
+            int colorCode = Math.Abs(guid.GetHashCode() % 256);
+            return $"\x1b[38;5;{colorCode}m";
+        }
+
         public static string GetShortLevelStr(LogLevel logLevel) => logLevel switch
         {
             LogLevel.Trace       => "[TRACE]",
@@ -102,7 +108,8 @@ namespace LumiTracker.Config
 
     public class ScopeState
     {
-        public string Name { get; set; }  = "";
+        public Guid   Guid  { get; set; } = Guid.Empty;
+        public string Name  { get; set; } = "";
         public string Color { get; set; } = LogHelper.AnsiWhite;
     }
 

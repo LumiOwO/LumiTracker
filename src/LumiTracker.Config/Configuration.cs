@@ -63,6 +63,11 @@ namespace LumiTracker.Config
             "log"
         );
 
+        public static readonly string OBWorkingDir = Path.Combine(
+            DocumentsDir,
+            "ob"
+        );
+
         // Files
         public static readonly string IniFilePath = Path.Combine(
             RootDir,
@@ -75,17 +80,17 @@ namespace LumiTracker.Config
             "db.json"
         );
 
-        private static readonly string DefaultConfigPath = Path.Combine(
+        // File paths that can be customized
+        public static string DefaultConfigPath = Path.Combine(
             AssetsDir,
             "config.json"
         );
 
-        private static readonly string UserConfigPath = Path.Combine(
+        public static string UserConfigPath = Path.Combine(
             ConfigDir,
             "config.json"
         );
 
-        // File paths that can be customized
         public static string LogFilePath = Path.Combine(
             LogDir,
             "error.log"
