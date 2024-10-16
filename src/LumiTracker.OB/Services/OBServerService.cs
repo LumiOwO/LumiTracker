@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Net;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
@@ -22,21 +23,17 @@ namespace LumiTracker.Services
         {
             try
             {
-                if (Stream != null)
-                {
-                    byte[] shutdownMessage = Encoding.UTF8.GetBytes("SHUTDOWN");
-                    Stream.Write(shutdownMessage, 0, shutdownMessage.Length);
-                    Stream.Flush(); // Ensure the message is sent immediately
-                }
+                Stream?.Close();
+                Stream = null;
+                Tcp?.Close();
+                Tcp = null;
+                ScopeGuard?.Dispose();
+                ScopeGuard = null;
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"Error sending shutdown signal: {ex.Message}");
+                Configuration.Logger.LogError($"Error closing client.\n{ex.ToString()}");
             }
-
-            Stream?.Close();
-            Tcp?.Close();
-            ScopeGuard?.Dispose();
         }
     }
 
@@ -52,11 +49,10 @@ namespace LumiTracker.Services
             {
                 int port = Configuration.Get<int>("port");
                 string localIp = GetLocalIpAddress();
-                Configuration.Logger.LogInformation($"Server started at IP: {localIp}, Port: {port}");
 
                 _listener = new TcpListener(IPAddress.Any, port);
                 _listener.Start();
-                Configuration.Logger.LogInformation($"Listening for connections on port {port}...");
+                Configuration.Logger.LogInformation($"Server started at IP: {localIp}, Port: {port}");
 
                 while (true)
                 {
@@ -64,13 +60,13 @@ namespace LumiTracker.Services
                     _ = Task.Run(() => HandleClientAsync(client));
                 }
             }
-            catch (ObjectDisposedException)
+            catch (SocketException)
             {
-                Configuration.Logger.LogInformation("Listener stopped. Exiting connection loop.");
+                Configuration.Logger.LogInformation("Server closed, exit connection loop.");
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"Server error: {ex.ToString()}");
+                Configuration.Logger.LogError($"Server error.\n{ex.ToString()}");
             }
             finally
             {
@@ -87,11 +83,13 @@ namespace LumiTracker.Services
         {
             try
             {
-                foreach (var client in _connectedClients.Values)
-                {
-                    client.Close();
+                lock (_clientLock)
+                { 
+                    foreach (var client in _connectedClients.Values)
+                    {
+                        client.Close();
+                    }
                 }
-                Configuration.Logger.LogInformation("Server closed.");
             }
             catch (Exception ex)
             {
@@ -118,20 +116,12 @@ namespace LumiTracker.Services
                 if (!Guid.TryParse(guidStr, out clientId))
                 {
                     clientId = Guid.Empty;
-                    throw new ArgumentException("Invalid GUID format.");
+                    throw new ArgumentException("Client's Guid is invalid.");
                 }
-                Configuration.Logger.LogInformation($"Received ID: {clientId}");
+                Configuration.Logger.LogInformation($"Client is trying to connect, Guid: {clientId}");
 
                 // Check if the client ID is valid
-                lock (_clientLock)
-                {
-                    if (!_connectedClients.ContainsKey(clientId))
-                    {
-                        client = new OBClient();
-                        _connectedClients[clientId] = client;
-                    }
-                }
-
+                client = GetOrCreateClient(clientId, guidStr, tcp, stream);
                 if (client != null)
                 {
                     // Connection accepted
@@ -144,16 +134,6 @@ namespace LumiTracker.Services
                     throw new Exception("Connection rejected: client id conflict or OBClient not created.");
                 }
 
-                // Begin log scope here
-                client.Scope.Guid  = clientId;
-                client.Scope.Name  = guidStr.Substring(0, 4);
-                client.Scope.Color = LogHelper.GetAnsiColorFromGuid(clientId);
-                client.ScopeGuard  = Configuration.Logger.BeginScope(client.Scope);
-                client.Tcp         = tcp;
-                client.Stream      = stream;
-                client.Proxy       = new OBGameWatcherProxy(client.Scope);
-                Configuration.Logger.LogInformation($"Client connected.");
-
                 while (tcp.Connected)
                 {
                     bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
@@ -165,24 +145,77 @@ namespace LumiTracker.Services
                         var message = JsonConvert.DeserializeObject<GameEventMessage>(json);
                         if (message == null)
                         {
-                            throw new Exception($"Failed to deserialize GameEventMessage: {json}");
+                            throw new Exception($"Failed to deserialize GameEventMessage");
                         }
                         Configuration.Logger.LogInformation($"{LogHelper.AnsiMagenta}@{LogHelper.AnsiEnd} {json}");
-                        client.Proxy.ParseGameEventTask(message);
+                        client.Proxy!.ParseGameEventTask(message);
                     }
                     catch (Exception ex)
                     {
-                        Configuration.Logger.LogError($"Client error: {ex.Message}");
+                        Configuration.Logger.LogError($"Error when receiving message: {ex.Message}\n{json}");
                     }
                 }
             }
+            catch (IOException)
+            {
+                Configuration.Logger.LogInformation($"Client disconnected.");
+            }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"Client error: {ex.Message}");
+                Configuration.Logger.LogError($"Unexpected error.\n{ex.ToString()}");
             }
             finally
             {
-                Configuration.Logger.LogInformation($"Client disconnected.");
+                CloseClient(client, clientId);
+            }
+        }
+
+        private OBClient? GetOrCreateClient(Guid clientId, string guidStr, TcpClient tcp, NetworkStream stream)
+        {
+            lock (_clientLock)
+            {
+                if (!_connectedClients.TryGetValue(clientId, out OBClient? client))
+                {
+                    client = new OBClient();
+                    _connectedClients[clientId] = client;
+                }
+
+                if (client.Tcp != null)
+                {
+                    // Already connected
+                    return null;
+                }
+
+                // Begin log scope here
+                if (client.Scope.Guid == Guid.Empty)
+                {
+                    client.Scope.Guid  = clientId;
+                    client.Scope.Name  = guidStr.Substring(0, 4);
+                    client.Scope.Color = LogHelper.GetAnsiColorFromGuid(clientId);
+                }
+                client.ScopeGuard = Configuration.Logger.BeginScope(client.Scope);
+                client.Tcp        = tcp;
+                client.Stream     = stream;
+
+                if (client.Proxy == null)
+                {
+                    Configuration.Logger.LogInformation($"Client connected.");
+                    client.Proxy = new OBGameWatcherProxy(client.Scope);
+                }
+                else
+                {
+                    Configuration.Logger.LogInformation($"Client reconnected.");
+                }
+                return client;
+            }
+        }
+
+        private void CloseClient(OBClient? client, Guid clientId)
+        {
+            if (client == null || clientId == Guid.Empty) return;
+            lock (_clientLock)
+            {
+                if (!_connectedClients.TryGetValue(clientId, out client)) return;
                 client?.Close();
             }
         }

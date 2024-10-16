@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 
 namespace LumiTracker.Services
 {
@@ -50,7 +49,7 @@ namespace LumiTracker.Services
             {
                 _client = new TcpClient();
                 int port = Configuration.Get<int>("ob_port");
-                Configuration.Logger.LogInformation($"Connecting to {_serverIp}:{port}...");
+                Configuration.Logger.LogInformation($"[OBClientService] Connecting to {_serverIp}:{port}...");
 
                 await _client.ConnectAsync(_serverIp, port);
                 _stream = _client.GetStream();
@@ -63,21 +62,21 @@ namespace LumiTracker.Services
                 await _stream.WriteAsync(idBytes, 0, idBytes.Length);
 
                 // Wait for server response
-                byte[] responseBuffer = new byte[1];
-                await _stream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
-                if (responseBuffer[0] != 1) // Server accepted the ID
+                byte[] responseBuffer = [0];
+                int bytesRead = await _stream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
+                if (bytesRead == 0 || responseBuffer[0] != 1)
                 {
-                    Configuration.Logger.LogError("Connection rejected.");
+                    Configuration.Logger.LogError("[OBClientService] Connection rejected.");
                     _client.Close();
                 }
 
                 _checkTask = CheckConnectionStatusAsync();
 
-                Configuration.Logger.LogInformation("Connected to server.");
+                Configuration.Logger.LogInformation("[OBClientService] Connected to server.");
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"Connection failed: {ex.Message}");
+                Configuration.Logger.LogError($"[OBClientService] Connection failed.\n{ex.ToString()}");
                 _client?.Close();
             }
         }
@@ -99,17 +98,7 @@ namespace LumiTracker.Services
                     if (bytesRead == 0)
                     {
                         // Server closed the connection gracefully
-                        Configuration.Logger.LogInformation("Server closed the connection.");
-                        break;
-                    }
-
-                    // Convert the received data to a string
-                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-
-                    if (message == "SHUTDOWN")
-                    {
-                        // Handle server shutdown request
-                        Configuration.Logger.LogInformation("Received shutdown signal from server.");
+                        Configuration.Logger.LogInformation("[OBClientService] Server closed the connection.");
                         Close();  // Gracefully close the connection
                         break;
                     }
@@ -120,15 +109,18 @@ namespace LumiTracker.Services
             }
             catch (OperationCanceledException)
             {
-                Configuration.Logger.LogInformation("Connection monitoring canceled.");
+                Configuration.Logger.LogInformation("[OBClientService] Connection canceled.");
+            }
+            catch (IOException)
+            {
+                Configuration.Logger.LogInformation("[OBClientService] Disconnected from server.");
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"Error monitoring connection: {ex.Message}");
+                Configuration.Logger.LogError($"[OBClientService] Unexpected error.\n{ex.ToString()}");
             }
             finally
             {
-                Configuration.Logger.LogInformation("Disconnected from server.");
                 _checkTask = null;
                 _checkCts  = null;
             }
@@ -139,7 +131,7 @@ namespace LumiTracker.Services
         {
             if (_client?.Connected != true)
             {
-                Configuration.Logger.LogError("Not connected to server.");
+                Configuration.Logger.LogError("[OBClientService] Not connected to server.");
                 return;
             }
 
@@ -149,11 +141,11 @@ namespace LumiTracker.Services
                 byte[] data = Encoding.UTF8.GetBytes(json);
 
                 await _stream!.WriteAsync(data, 0, data.Length);
-                Configuration.Logger.LogInformation("Message sent to server.");
+                Configuration.Logger.LogDebug("[OBClientService] Message sent to server.");
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"Error sending message: {ex.Message}");
+                Configuration.Logger.LogError($"[OBClientService] Error sending message: {ex.Message}");
             }
         }
 
@@ -165,11 +157,10 @@ namespace LumiTracker.Services
                 _checkCts?.Cancel();
                 _stream?.Close();
                 _client?.Close();
-                Configuration.Logger.LogInformation("Connection closed.");
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"Error closing connection: {ex.Message}");
+                Configuration.Logger.LogError($"[OBClientService] Error closing connection.\n{ex.ToString()}");
             }
         }
     }

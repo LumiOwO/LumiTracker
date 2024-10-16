@@ -207,6 +207,7 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.UnsupportedRatio   += OnUnsupportedRatio;
 
             // TODO: close the clients
+            // TODO: auto reconnect
             OBClientService client = new OBClientService("192.168.0.101");
             Task.Run(client.ConnectAsync);
             //OBClientService client2 = new OBClientService("192.168.0.101");
