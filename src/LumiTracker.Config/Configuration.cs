@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using System.Diagnostics;
 
 #pragma warning disable CS8618
 
@@ -380,6 +381,26 @@ namespace LumiTracker.Config
             }
 
             return SaveJObject(UserConfig, UserConfigPath);
+        }
+
+        public static async Task RevealInExplorerAsync(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                // If it's a directory, open it
+                var dirInfo = new DirectoryInfo(path);
+                await Task.Run(() => Process.Start("explorer.exe", dirInfo.FullName));
+            }
+            else if (File.Exists(path))
+            {
+                // If it's a file, open the directory containing the file and select the file
+                var fileInfo = new FileInfo(path);
+                await Task.Run(() => Process.Start("explorer.exe", $"/select,\"{fileInfo.FullName}\""));
+            }
+            else
+            {
+                Logger.LogError("[RevealInExplorer] Path not found.");
+            }
         }
     }
 

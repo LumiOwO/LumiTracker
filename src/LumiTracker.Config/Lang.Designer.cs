@@ -88,6 +88,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to App Path.
+        /// </summary>
+        public static string AppPath {
+            get {
+                return ResourceManager.GetString("AppPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Genshin TCG Deck Tracker.
         /// </summary>
         public static string AppSubTitle {
@@ -507,6 +516,15 @@ namespace LumiTracker.Config {
         public static string Loading {
             get {
                 return ResourceManager.GetString("Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Log File.
+        /// </summary>
+        public static string LogFile {
+            get {
+                return ResourceManager.GetString("LogFile", resourceCulture);
             }
         }
         

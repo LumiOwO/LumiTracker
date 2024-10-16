@@ -486,4 +486,10 @@
   <data name="UnknownCard" xml:space="preserve">
     <value>Unknown Card</value>
   </data>
+  <data name="LogFile" xml:space="preserve">
+    <value>Log File</value>
+  </data>
+  <data name="AppPath" xml:space="preserve">
+    <value>App Path</value>
+  </data>
 </root>

@@ -25,5 +25,17 @@ namespace LumiTracker.ViewModels.Pages
             AppVersion = $"{LocalizationSource.Instance["AppName"]} v{Configuration.GetAssemblyVersion()}";
             _isInitialized = true;
         }
+
+        [RelayCommand]
+        public async Task OnLocateLogFile()
+        {
+            await Configuration.RevealInExplorerAsync(Configuration.LogFilePath);
+        }
+
+        [RelayCommand]
+        public async Task OnLocateAppDir()
+        {
+            await Configuration.RevealInExplorerAsync(Configuration.RootDir);
+        }
     }
 }

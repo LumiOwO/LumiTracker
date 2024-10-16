@@ -40,8 +40,37 @@
             TextWrapping="Wrap"
             />
 
+        <StackPanel 
+            Margin="5, 55, 0, 0"
+            Orientation="Horizontal">
+            <ui:Button 
+                Height="Auto"
+                Padding="9,5,9,6"
+                Command="{Binding ViewModel.LocateLogFileCommand, Mode=OneWay}">
+                <TextBlock 
+                    FontSize="14"
+                    Text="{svs:Localization LogFile}" />
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Margin="0,0,-3,0" Symbol="DocumentText24"/>
+                </ui:Button.Icon>
+            </ui:Button>
+
+            <ui:Button 
+                Height="Auto"
+                Margin="10, 0, 0, 0"
+                Padding="9,5,9,6"
+                Command="{Binding ViewModel.LocateAppDirCommand, Mode=OneWay}">
+                <TextBlock 
+                    FontSize="14"
+                    Text="{svs:Localization AppPath}" />
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Margin="0,0,-3,0" Symbol="FolderOpen24"/>
+                </ui:Button.Icon>
+            </ui:Button>
+        </StackPanel>
+
         <ui:HyperlinkButton
-            Margin="-1, 80, 0, 0"
+            Margin="-1, 10, 0, 0"
             Padding="5"
             Content="{svs:Localization DocumentationLink}"
             NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe"

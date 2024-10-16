@@ -486,4 +486,10 @@
   <data name="UnknownCard" xml:space="preserve">
     <value>未知卡牌</value>
   </data>
+  <data name="LogFile" xml:space="preserve">
+    <value>日志文件</value>
+  </data>
+  <data name="AppPath" xml:space="preserve">
+    <value>安装位置</value>
+  </data>
 </root>

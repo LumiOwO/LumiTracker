@@ -396,4 +396,10 @@
   <data name="UnknownCard" xml:space="preserve">
     <value>未知のカード</value>
   </data>
+  <data name="LogFile" xml:space="preserve">
+    <value>ログファイル</value>
+  </data>
+  <data name="AppPath" xml:space="preserve">
+    <value>インストールパス</value>
+  </data>
 </root>
