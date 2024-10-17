@@ -136,6 +136,9 @@ namespace LumiTracker
                 return;
             }
 
+            var gameWatcher = GetService<GameWatcher>();
+            gameWatcher?.Close();
+
             await _host.StopAsync();
             _host.Dispose();
 

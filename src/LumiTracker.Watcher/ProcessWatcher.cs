@@ -409,7 +409,7 @@ namespace LumiTracker.Watcher
                 return false;
             }
 
-            if (message.TaskType != ETaskType.LOG_FPS)
+            if (message.Event != EGameEvent.LOG_FPS)
             {
                 Configuration.Logger.LogInformation(message_str);
             }

@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
-from .enums import ETaskType, EClientType
+from .enums import EGameEvent, EClientType
 from .database import Database, SaveImage
 
 from .states import *
@@ -71,7 +71,7 @@ class FrameManager:
 
         SaveImage(image, path, remove_alpha=True)
         LogInfo(
-            type=f"{ETaskType.CAPTURE_TEST.name}",
+            type=f"{EGameEvent.CAPTURE_TEST.name}",
             filename=filename,
             width=image.shape[1],
             height=image.shape[0],
@@ -132,7 +132,7 @@ class FrameManager:
         if cur_time - self.prev_log_time >= self.fps_interval:
             fps = self.frame_count / (cur_time - self.prev_log_time)
             LogInfo(
-                type=f"{ETaskType.LOG_FPS.name}",
+                type=f"{EGameEvent.LOG_FPS.name}",
                 fps=f"{fps}"
                 )
 

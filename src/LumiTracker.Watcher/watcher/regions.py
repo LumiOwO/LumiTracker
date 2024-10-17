@@ -1,4 +1,4 @@
-from .enums import ERegionType, ERatioType, ETaskType
+from .enums import ERegionType, ERatioType, EGameEvent
 from .config import LogInfo
 
 def GetRatioType(client_width, client_height):
@@ -16,7 +16,7 @@ def GetRatioType(client_width, client_height):
         ratio_type = ERatioType.E12_5
     else:
         LogInfo(
-            type=ETaskType.UNSUPPORTED_RATIO.name, 
+            type=EGameEvent.UNSUPPORTED_RATIO.name, 
             client_width=client_width, 
             client_height=client_height,
             )

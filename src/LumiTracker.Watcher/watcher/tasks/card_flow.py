@@ -1,6 +1,6 @@
 from .base import TaskBase
 
-from ..enums import ETaskType, ERegionType, EAnnType
+from ..enums import EGameEvent, ERegionType, EAnnType
 from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..regions import REGIONS
 from ..feature import CropBox, ActionCardHandler, CardName
@@ -431,7 +431,7 @@ class CardFlowTask(CenterCropTask):
         # LogDebug(signal_time=t_end)
 
         # Early return if my deck operation detected
-        task_type = ETaskType.NONE
+        event_type = EGameEvent.NONE
         idx = 0
         while idx < len(self.my_deck_queue):
             # Get my deck timestamps and remove outdated ones.
@@ -444,16 +444,16 @@ class CardFlowTask(CenterCropTask):
 
             if timestamp > info.t_end + self.WAIT_TIME:
                 break
-            if task_type != ETaskType.NONE:
+            if event_type != EGameEvent.NONE:
                 continue
             if timestamp >= info.t_begin and timestamp <= info.t_end:
                 continue
             if timestamp < info.t_begin - self.WAIT_TIME:
                 continue
-            task_type = ETaskType.MY_DRAWN if timestamp < info.t_begin else ETaskType.MY_CREATE_DECK
+            event_type = EGameEvent.MY_DRAWN if timestamp < info.t_begin else EGameEvent.MY_CREATE_DECK
 
-        if task_type != ETaskType.NONE:
-            self._DumpTaskType(task_type, info)
+        if event_type != EGameEvent.NONE:
+            self._DumpEventType(event_type, info)
             return True
 
         # op deck can be easily mis-detected, so we need to wait until time up
@@ -471,21 +471,21 @@ class CardFlowTask(CenterCropTask):
 
             if timestamp > info.t_end + self.WAIT_TIME:
                 break
-            if task_type != ETaskType.NONE:
+            if event_type != EGameEvent.NONE:
                 continue
             if timestamp < info.t_end:
                 continue
-            task_type = ETaskType.OP_CREATE_DECK
+            event_type = EGameEvent.OP_CREATE_DECK
 
-        self._DumpTaskType(task_type, info)
+        self._DumpEventType(event_type, info)
         return True
 
-    def _DumpTaskType(self, task_type, info):
-        if task_type != ETaskType.NONE:
+    def _DumpEventType(self, event_type, info):
+        if event_type != EGameEvent.NONE:
             cards = info.cards
             if not info.valid:
-                LogError(info=f"{task_type.name}: Some cards are not detected.")
-            LogInfo(type=task_type.name, 
+                LogError(info=f"{event_type.name}: Some cards are not detected.")
+            LogInfo(type=event_type.name, 
                     cards=cards,
                     names=[CardName(card, self.db) for card in cards])
 

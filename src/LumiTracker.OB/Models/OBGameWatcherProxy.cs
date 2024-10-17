@@ -37,7 +37,15 @@ namespace LumiTracker.OB
 
         public void ParseGameEventTask(GameEventMessage message)
         {
-            Hook.ParseGameEventMessage(message);
+            if (message.Event == EGameEvent.INITIAL_DECK)
+            {
+                string sharecode = message.Data["sharecode"].ToString();
+                DeckWindowViewModel.InitDeckOnGameStart(sharecode);
+            }
+            else
+            {
+                Hook.ParseGameEventMessage(message);
+            }
         }
 
         private void ResetOBData()

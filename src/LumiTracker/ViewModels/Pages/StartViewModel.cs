@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using System.Windows.Media;
 using System.Windows.Data;
 using LumiTracker.Services;
-using LumiTracker.Watcher;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -205,17 +204,6 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.CaptureTestDone    += OnCaptureTestDone;
             _gameWatcher.LogFPS             += OnLogFPS;
             _gameWatcher.UnsupportedRatio   += OnUnsupportedRatio;
-
-            // TODO: close the clients
-            // TODO: auto reconnect
-            OBClientService client = new OBClientService("192.168.0.101");
-            Task.Run(client.ConnectAsync);
-            //OBClientService client2 = new OBClientService("192.168.0.101");
-            //Task.Run(client2.ConnectAsync);
-            //OBClientService client3 = new OBClientService("192.168.0.101");
-            //Task.Run(client3.ConnectAsync);
-
-            _gameWatcher.GameEventMessage += async (GameEventMessage message) => { await client.SendMessageAsync(message); };
 
             _gameWatcher.Start(ClientType, CaptureType);
         }

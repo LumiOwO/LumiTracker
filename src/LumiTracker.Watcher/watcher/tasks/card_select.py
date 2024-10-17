@@ -1,6 +1,6 @@
 from .card_flow import CenterCropTask
 
-from ..enums import ETaskType
+from ..enums import EGameEvent
 from ..config import cfg, override, LogDebug, LogInfo, LogError
 from ..feature import ActionCardHandler, CardName, Counter
 from ..stream_filter import StreamFilter
@@ -72,12 +72,12 @@ class CardSelectTask(CenterCropTask):
 
         if drawn:
             LogInfo(
-                type=ETaskType.MY_DRAWN.name,
+                type=EGameEvent.MY_DRAWN.name,
                 cards=drawn,
                 names=[CardName(card, self.db) for card in drawn])
         if create:
             LogInfo(
-                type=ETaskType.MY_CREATE_DECK.name,
+                type=EGameEvent.MY_CREATE_DECK.name,
                 cards=create,
                 names=[CardName(card, self.db) for card in create])
 

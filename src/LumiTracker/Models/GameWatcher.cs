@@ -1,4 +1,5 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Services;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
 using System.IO;
@@ -29,6 +30,8 @@ namespace LumiTracker.Models
 
         private readonly bool TestCaptureOnResize;
 
+        private OBClientService? client = null;
+
         public GameWatcher()
         {
             ProcessWatcherInitFilePath = Path.Combine(Configuration.DocumentsDir, "init.json");
@@ -43,6 +46,13 @@ namespace LumiTracker.Models
 
         public void Start(EClientType clientType, ECaptureType captureType)
         {
+            // TODO: auto reconnect
+            // TODO: use settings to start connect
+            client = new OBClientService("192.168.0.101");
+            Task.Run(client.ConnectAsync);
+
+            GameEventMessage += async (GameEventMessage message) => { await SendMessageToServer(message); };
+
             info.Value = new CaptureInfo 
             { 
                 ClientType = clientType, 
@@ -51,6 +61,13 @@ namespace LumiTracker.Models
                 TestCaptureOnResize = TestCaptureOnResize,
             };
             MainLoopTask = MainLoop();
+        }
+
+        public void Close()
+        {
+            Task? task = client?.CheckTask;
+            client?.Close();
+            task?.Wait();
         }
 
         public void ChangeGameClient(EClientType clientType, ECaptureType captureType)
@@ -76,6 +93,14 @@ namespace LumiTracker.Models
                 return;
 
             await processWatcher.Value.DumpToBackend(message_obj);
+        }
+
+        public async Task SendMessageToServer(GameEventMessage message)
+        {
+            if (client == null || !client.Connected())
+                return;
+
+            await client.SendMessageAsync(message);
         }
 
         private async Task MainLoop()

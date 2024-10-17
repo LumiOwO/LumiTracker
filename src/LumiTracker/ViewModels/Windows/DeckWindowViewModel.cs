@@ -8,6 +8,8 @@ using LumiTracker.Services;
 using System.Windows.Data;
 using LumiTracker.Helpers;
 using LumiTracker.Watcher;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 #pragma warning disable CS8618
 
@@ -106,25 +108,56 @@ namespace LumiTracker.ViewModels.Windows
             GameStarted = gameStart;
             if (gameStart)
             {
+                MyDeck = new CardList(Enumerable.Repeat(-1, 30).ToArray(), inGame: true);
+
+                // TODO: auto detect active deck
                 string sharecode = ShareCodeOverride;
-                int activeIndex  = DeckViewModel.UserDeckList.ActiveIndex;
+                int activeIndex = DeckViewModel.UserDeckList.ActiveIndex;
                 if (sharecode == "" && activeIndex >= 0)
                 {
                     sharecode = DeckViewModel.UserDeckList.DeckInfos[activeIndex].ShareCode;
                 }
-
                 if (sharecode == "")
                 {
-                    MyDeck = new CardList(inGame: true);
+                    Configuration.Logger.LogWarning($"Deck list in empty.");
                 }
                 else
                 {
-                    MyDeck = new CardList(sharecode, inGame: true);
+                    InitDeckOnGameStart(sharecode);
                 }
             }
             else
             {
                 MyDeck = new CardList(inGame: true);
+            }
+        }
+
+        public void InitDeckOnGameStart(string sharecode)
+        {
+            if (!MyDeck.InGame || MyDeck.OperationCount != 1)
+            {
+                return;
+            }
+
+            int[]? cards = DeckUtils.DecodeShareCode(sharecode);
+            if (cards == null)
+            {
+                Configuration.Logger.LogWarning($"Invalid share code: {sharecode}");
+                return;
+            }
+
+            // Update the initial deck
+            MyDeck.Remove(Enumerable.Repeat(-1, 30).ToArray(), keep_zero: false);
+            MyDeck.Add(cards);
+
+            // Try to message to server
+            if (_hook is GameWatcher gameWatcher)
+            {
+                Task.Run(() => gameWatcher.SendMessageToServer(new GameEventMessage 
+                { 
+                    Event = EGameEvent.INITIAL_DECK,
+                    Data  = new () { ["sharecode"] = JToken.FromObject(sharecode) },
+                }));
             }
         }
 

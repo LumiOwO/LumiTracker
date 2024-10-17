@@ -34,9 +34,10 @@ class EInputType(enum.Enum):
     NONE              = 0
     CAPTURE_TEST      = enum.auto()
 
-class ETaskType(enum.Enum):
+class EGameEvent(enum.Enum):
     NONE              = 0
 
+    # Events for duel
     GAME_START        = enum.auto()
     MY_PLAYED         = enum.auto()
     OP_PLAYED         = enum.auto()
@@ -54,9 +55,13 @@ class ETaskType(enum.Enum):
     GAME_EVENT_FIRST  = GAME_START
     GAME_EVENT_LAST   = OP_CREATE_HAND
 
+    # Events for client
     UNSUPPORTED_RATIO = enum.auto()
     CAPTURE_TEST      = enum.auto()
     LOG_FPS           = enum.auto()
+
+    # Events for server
+    INITIAL_DECK      = enum.auto()
 
 class ERegionType(enum.Enum):
     GAME_START = 0

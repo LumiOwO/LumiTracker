@@ -1,6 +1,6 @@
 from .base import TaskBase
 
-from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
+from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType
 from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import CropBox, ExtractFeature_Control
@@ -21,8 +21,8 @@ class EGameResult(enum.Enum):
 class GameOverTask(TaskBase):
     def __init__(self, frame_manager):
         super().__init__(frame_manager)
-        self.task_type = ETaskType.GAME_OVER
-        self.crop_box  = None  # init when resize
+        self.event_type = EGameEvent.GAME_OVER
+        self.crop_box   = None  # init when resize
         self.Reset()
 
     @override
@@ -49,7 +49,7 @@ class GameOverTask(TaskBase):
 
             LogInfo(
                 info=f"Game Over, last dist in window = {dist}",
-                type=f"{self.task_type.name}",
+                type=f"{self.event_type.name}",
                 is_win=(res == EGameResult.Win),
                 )
 
@@ -79,7 +79,7 @@ class GameOverTask(TaskBase):
         # LogDebug(res=f"{res}", dists=dists[:3])
 
         if cfg.DEBUG_SAVE:
-            SaveImage(main_content, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
+            SaveImage(main_content, os.path.join(cfg.debug_dir, "save", f"{self.event_type.name}.png"))
         return res, dist
 
     @staticmethod

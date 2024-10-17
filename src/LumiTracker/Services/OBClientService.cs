@@ -15,8 +15,7 @@ namespace LumiTracker.Services
         private TcpClient? _client = null;
         private NetworkStream? _stream = null;
 
-        private Task? _checkTask = null;
-        private CancellationTokenSource? _checkCts = null;
+        public Task? CheckTask { get; set; } = null;
 
         public OBClientService(string serverIp)
         {
@@ -67,49 +66,41 @@ namespace LumiTracker.Services
                 if (bytesRead == 0 || responseBuffer[0] != 1)
                 {
                     Configuration.Logger.LogError("[OBClientService] Connection rejected.");
-                    _client.Close();
+                    Close();
                 }
 
-                _checkTask = CheckConnectionStatusAsync();
+                CheckTask = CheckConnectionStatusAsync();
 
                 Configuration.Logger.LogInformation("[OBClientService] Connected to server.");
             }
             catch (Exception ex)
             {
                 Configuration.Logger.LogError($"[OBClientService] Connection failed.\n{ex.ToString()}");
-                _client?.Close();
+                Close();
             }
         }
 
         public async Task CheckConnectionStatusAsync()
         {
-            _checkCts = new CancellationTokenSource();
-            CancellationToken token = _checkCts.Token;
-
             try
             {
                 byte[] buffer = new byte[256]; // Adjust buffer size based on expected messages
 
-                while (_client?.Connected == true && !token.IsCancellationRequested)
+                while (_client?.Connected == true)
                 {
                     // Read from the stream to detect shutdown signal or disconnection
-                    int bytesRead = await _stream!.ReadAsync(buffer, 0, buffer.Length, token);
+                    int bytesRead = await _stream!.ReadAsync(buffer, 0, buffer.Length);
 
                     if (bytesRead == 0)
                     {
                         // Server closed the connection gracefully
                         Configuration.Logger.LogInformation("[OBClientService] Server closed the connection.");
-                        Close();  // Gracefully close the connection
                         break;
                     }
 
                     // Add a small delay between checks to avoid tight looping
-                    await Task.Delay(500, token);
+                    await Task.Delay(500);
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                Configuration.Logger.LogInformation("[OBClientService] Connection canceled.");
             }
             catch (IOException)
             {
@@ -121,8 +112,10 @@ namespace LumiTracker.Services
             }
             finally
             {
-                _checkTask = null;
-                _checkCts  = null;
+                // In case of exception, need to call Close() here
+                // So, for a normal close in OnExit(), Close() will be called twice
+                Close();
+                CheckTask = null;
             }
         }
 
@@ -149,14 +142,27 @@ namespace LumiTracker.Services
             }
         }
 
+        public bool Connected()
+        {
+            return _stream != null && _client != null && _client.Connected;
+        }
+
         // Close the connection
         public void Close()
         {
             try
             {
-                _checkCts?.Cancel();
-                _stream?.Close();
-                _client?.Close();
+                if (_stream != null)
+                {
+                    _stream.Flush();
+                    _stream.Close();
+                    _stream = null;
+                }
+                if (_client != null)
+                {
+                    _client.Close();
+                    _client = null;
+                }
             }
             catch (Exception ex)
             {

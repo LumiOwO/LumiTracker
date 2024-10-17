@@ -97,10 +97,11 @@ namespace LumiTracker.Config
         CAPTURE_TEST,
     }
 
-    public enum ETaskType : int
+    public enum EGameEvent : int
     {
         NONE = 0,
 
+        // Events for duel
         GAME_START,
         MY_PLAYED,
         OP_PLAYED,
@@ -118,9 +119,13 @@ namespace LumiTracker.Config
         GAME_EVENT_FIRST = GAME_START,
         GAME_EVENT_LAST  = OP_CREATE_HAND,
 
+        // Events for client
         UNSUPPORTED_RATIO,
         CAPTURE_TEST,
         LOG_FPS,
+
+        // Events for server
+        INITIAL_DECK,
     }
 
     public static class EnumHelpers

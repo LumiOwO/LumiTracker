@@ -1,6 +1,6 @@
 from .base import TaskBase
 
-from ..enums import EAnnType, ECtrlType, ETaskType, ERegionType
+from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType
 from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import CropBox, ExtractFeature_Control, ExtractFeature_Digit_Binalized
@@ -15,8 +15,8 @@ import cv2
 class RoundTask(TaskBase):
     def __init__(self, frame_manager):
         super().__init__(frame_manager)
-        self.task_type = ETaskType.ROUND
-        self.crop_box  = None  # init when resize
+        self.event_type = EGameEvent.ROUND
+        self.crop_box   = None  # init when resize
         self.Reset()
 
     @override
@@ -48,7 +48,7 @@ class RoundTask(TaskBase):
             self.fm.round = cur_round
             LogInfo(
                 info=f"Found Round Text",
-                type=self.task_type.name, 
+                type=self.event_type.name, 
                 round=self.fm.round,
                 )
 
@@ -109,7 +109,7 @@ class RoundTask(TaskBase):
         # LogDebug(found=found, dists=dists[:3], cur_round=cur_round)
 
         if cfg.DEBUG_SAVE:
-            SaveImage(content, os.path.join(cfg.debug_dir, "save", f"{self.task_type.name}.png"))
+            SaveImage(content, os.path.join(cfg.debug_dir, "save", f"{self.event_type.name}.png"))
 
         return cur_round if found else -1
 

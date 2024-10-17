@@ -10,8 +10,8 @@ namespace LumiTracker.Watcher
     public class GameEventMessage
     {
         [JsonProperty("type")]
-        [JsonConverter(typeof(StringEnumConverter))]  // Optional: if you want TaskType as string
-        public ETaskType TaskType { get; set; } = ETaskType.NONE;
+        [JsonConverter(typeof(StringEnumConverter))]
+        public EGameEvent Event { get; set; } = EGameEvent.NONE;
 
         [JsonExtensionData] // Captures additional properties into this dictionary
         public Dictionary<string, JToken> Data { get; set; } = [];
@@ -170,86 +170,86 @@ namespace LumiTracker.Watcher
 
         public void ParseGameEventMessage(GameEventMessage message)
         {
-            ETaskType type = message.TaskType;
-            if (type >= ETaskType.GAME_EVENT_FIRST && type <= ETaskType.GAME_EVENT_LAST)
+            EGameEvent type = message.Event;
+            if (type >= EGameEvent.GAME_EVENT_FIRST && type <= EGameEvent.GAME_EVENT_LAST)
             {
                 InvokeGameEventMessage(message);
             }
 
-            if (type == ETaskType.GAME_START)
+            if (type == EGameEvent.GAME_START)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnGameStarted");
                 InvokeGameStarted();
             }
-            else if (type == ETaskType.MY_PLAYED)
+            else if (type == EGameEvent.MY_PLAYED)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnMyActionCard");
-                int card_id = message.Data["card_id"]!.ToObject<int>();
+                int card_id = message.Data["card_id"].ToObject<int>();
                 InvokeMyActionCardPlayed(card_id);
             }
-            else if (type == ETaskType.OP_PLAYED)
+            else if (type == EGameEvent.OP_PLAYED)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnOpActionCard");
-                int card_id = message.Data["card_id"]!.ToObject<int>();
+                int card_id = message.Data["card_id"].ToObject<int>();
                 InvokeOpActionCardPlayed(card_id);
             }
-            else if (type == ETaskType.GAME_OVER)
+            else if (type == EGameEvent.GAME_OVER)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnGameOver");
                 InvokeGameOver();
             }
-            else if (type == ETaskType.ROUND)
+            else if (type == EGameEvent.ROUND)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnRoundDetected");
-                int round = message.Data["round"]!.ToObject<int>();
+                int round = message.Data["round"].ToObject<int>();
                 InvokeRoundDetected(round);
             }
-            else if (type == ETaskType.MY_DRAWN)
+            else if (type == EGameEvent.MY_DRAWN)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnMyCardsDrawn");
-                int[] cards = message.Data["cards"]!.ToObject<int[]>()!;
+                int[] cards = message.Data["cards"].ToObject<int[]>()!;
                 InvokeMyCardsDrawn(cards);
             }
-            else if (type == ETaskType.MY_CREATE_DECK)
+            else if (type == EGameEvent.MY_CREATE_DECK)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnMyCardsCreateDeck");
-                int[] cards = message.Data["cards"]!.ToObject<int[]>()!;
+                int[] cards = message.Data["cards"].ToObject<int[]>()!;
                 InvokeMyCardsCreateDeck(cards);
             }
-            else if (type == ETaskType.OP_CREATE_DECK)
+            else if (type == EGameEvent.OP_CREATE_DECK)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnOpCardsCreateDeck");
-                int[] cards = message.Data["cards"]!.ToObject<int[]>()!;
+                int[] cards = message.Data["cards"].ToObject<int[]>()!;
                 InvokeOpCardsCreateDeck(cards);
             }
-            else if (type == ETaskType.UNSUPPORTED_RATIO)
+            else if (type == EGameEvent.UNSUPPORTED_RATIO)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnUnsupportedRatio");
-                int client_width = message.Data["client_width"]!.ToObject<int>();
-                int client_height = message.Data["client_height"]!.ToObject<int>();
+                int client_width = message.Data["client_width"].ToObject<int>();
+                int client_height = message.Data["client_height"].ToObject<int>();
                 float ratio = 1.0f * client_width / client_height;
                 Configuration.Logger.LogWarning(
                     $"[ProcessWatcher] Current resolution is {client_width} x {client_height} with ratio = {ratio}, which is not supported now.");
                 InvokeUnsupportedRatio();
             }
-            else if (type == ETaskType.CAPTURE_TEST)
+            else if (type == EGameEvent.CAPTURE_TEST)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnCaptureTestDone");
-                string filename = message.Data["filename"]!.ToObject<string>()!;
-                int width = message.Data["width"]!.ToObject<int>();
-                int height = message.Data["height"]!.ToObject<int>();
+                string filename = message.Data["filename"].ToObject<string>()!;
+                int width = message.Data["width"].ToObject<int>();
+                int height = message.Data["height"].ToObject<int>();
                 InvokeCaptureTestDone(filename, width, height);
             }
-            else if (type == ETaskType.LOG_FPS)
+            else if (type == EGameEvent.LOG_FPS)
             {
                 //Configuration.Logger.LogDebug("[GameEventHook] OnLogFPS");
-                float fps = message.Data["fps"]!.ToObject<float>()!;
+                float fps = message.Data["fps"].ToObject<float>()!;
                 InvokeLogFPS(fps);
             }
             else
             {
-                string task_type_name = type.ToString();
-                Configuration.Logger.LogWarning($"[GameEventHook] Enum {task_type_name} defined but not handled: {task_type_name}\n{message.Data}");
+                string game_event_name = type.ToString();
+                Configuration.Logger.LogWarning($"[GameEventHook] Enum {game_event_name} defined but not handled: {game_event_name}\n{message.Data}");
             }
         }
     }

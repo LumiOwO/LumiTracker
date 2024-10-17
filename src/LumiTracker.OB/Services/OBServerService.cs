@@ -23,12 +23,22 @@ namespace LumiTracker.Services
         {
             try
             {
-                Stream?.Close();
-                Stream = null;
-                Tcp?.Close();
-                Tcp = null;
-                ScopeGuard?.Dispose();
-                ScopeGuard = null;
+                if (Stream != null)
+                {
+                    Stream.Flush();
+                    Stream.Close();
+                    Stream = null;
+                }
+                if (Tcp != null)
+                {
+                    Tcp.Close();
+                    Tcp = null;
+                }
+                if (ScopeGuard != null)
+                {
+                    ScopeGuard.Dispose();
+                    ScopeGuard = null;
+                }
             }
             catch (Exception ex)
             {
@@ -137,7 +147,11 @@ namespace LumiTracker.Services
                 while (tcp.Connected)
                 {
                     bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (bytesRead == 0) break; // Client disconnected
+                    if (bytesRead == 0)
+                    {
+                        Configuration.Logger.LogInformation("Client closed the connection.");
+                        break;
+                    }
 
                     string json = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     try
@@ -158,7 +172,7 @@ namespace LumiTracker.Services
             }
             catch (IOException)
             {
-                Configuration.Logger.LogInformation($"Client disconnected.");
+                Configuration.Logger.LogInformation($"Disconnected from client.");
             }
             catch (Exception ex)
             {
