@@ -34,7 +34,8 @@ namespace LumiTracker.Helpers
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return $"{LocalizationSource.Instance["AppName"]} {Configuration.GetAssemblyVersion()} - {LocalizationSource.Instance["AppSubTitle"]}";
+            string title = (value as string)!;
+            return $"{LocalizationSource.Instance["AppName"]} {Configuration.GetAssemblyVersion()} - {title}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

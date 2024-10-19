@@ -44,6 +44,24 @@ namespace LumiTracker.Helpers
         }
     }
 
+    public class BooleanNotToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(value is bool notVisible && parameter is string invisibleType))
+            {
+                throw new NotImplementedException();
+            }
+
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => !notVisible);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class StringToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

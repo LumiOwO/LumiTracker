@@ -37,7 +37,7 @@ namespace LumiTracker
             .ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!); })
             .ConfigureServices((context, services) =>
             {
-                services.AddHostedService<ApplicationHostService>();
+                services.AddHostedService<ApplicationHostService<MainWindow>>();
 
                 // Page resolver service
                 services.AddSingleton<IPageService, PageService>();
@@ -147,7 +147,7 @@ namespace LumiTracker
             await _host.StopAsync();
             _host.Dispose();
 
-            if (Configuration.Get<bool>("restart"))
+            if (Configuration.Get<string>("updated_to") is string version && !string.IsNullOrEmpty(version))
             {
                 string launcherPath = Path.Combine(Configuration.RootDir, "LumiTracker.exe");
                 ProcessStartInfo startInfo = new ProcessStartInfo

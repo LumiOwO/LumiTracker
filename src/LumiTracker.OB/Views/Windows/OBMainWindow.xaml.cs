@@ -1,17 +1,18 @@
-﻿using LumiTracker.ViewModels.Windows;
-using Wpf.Ui;
+﻿using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 using LumiTracker.Config;
+using LumiTracker.Services;
+using LumiTracker.OB.Views.Pages;
+using LumiTracker.OB.ViewModels.Pages;
+using LumiTracker.OB.ViewModels.Windows;
 using Microsoft.Extensions.Logging;
-using LumiTracker.Views.Pages;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
-using LumiTracker.Services;
-using LumiTracker.ViewModels.Pages;
 using System.Windows.Input;
+using System.Windows.Controls;
 
-namespace LumiTracker.Views.Windows
+namespace LumiTracker.OB.Views.Windows
 {
     public partial class MainWindow : INavigationWindow
     {
@@ -119,6 +120,18 @@ namespace LumiTracker.Views.Windows
             ShowInTaskbar = true;
         }
 
+        private void MainWindow_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // Try to clear selection from the focused control if applicable
+            if (FocusManager.GetFocusedElement(this) is DependencyObject focusedElement)
+            {
+                // Kill logical focus
+                FocusManager.SetFocusedElement(FocusManager.GetFocusScope(focusedElement), null);
+            }
+            // Kill keyboard focus
+            Keyboard.ClearFocus();
+        }
+
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
@@ -147,18 +160,6 @@ namespace LumiTracker.Views.Windows
 
             // Make sure that closing this window will begin the process of closing the application.
             Application.Current.Shutdown();
-        }
-
-        private void MainWindow_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            // Try to clear selection from the focused control if applicable
-            if (FocusManager.GetFocusedElement(this) is DependencyObject focusedElement)
-            {
-                // Kill logical focus
-                FocusManager.SetFocusedElement(FocusManager.GetFocusScope(focusedElement), null);
-            }
-            // Kill keyboard focus
-            Keyboard.ClearFocus();
         }
 
         private async Task OnShowClosingDialog()

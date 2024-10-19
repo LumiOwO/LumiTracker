@@ -259,6 +259,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 复制.
+        /// </summary>
+        public static string Copy {
+            get {
+                return ResourceManager.GetString("Copy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sharing Code copied to the clipboard.
         /// </summary>
         public static string CopyToClipboard {
@@ -574,6 +583,24 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 观战服务器.
+        /// </summary>
+        public static string OB_AppSubTitle {
+            get {
+                return ResourceManager.GetString("OB_AppSubTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 更改....
+        /// </summary>
+        public static string OB_ChangeDir {
+            get {
+                return ResourceManager.GetString("OB_ChangeDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connect to Server.
         /// </summary>
         public static string OB_ConnectBtnText {
@@ -592,11 +619,47 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 图标所在目录.
+        /// </summary>
+        public static string OB_IconDirectory {
+            get {
+                return ResourceManager.GetString("OB_IconDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 内网穿透ID.
+        /// </summary>
+        public static string OB_NatId {
+            get {
+                return ResourceManager.GetString("OB_NatId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Port.
         /// </summary>
         public static string OB_Port {
             get {
                 return ResourceManager.GetString("OB_Port", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 服务器已启动.
+        /// </summary>
+        public static string OB_ServerStarted {
+            get {
+                return ResourceManager.GetString("OB_ServerStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 服务器启动中....
+        /// </summary>
+        public static string OB_ServerStarting {
+            get {
+                return ResourceManager.GetString("OB_ServerStarting", resourceCulture);
             }
         }
         
@@ -705,6 +768,15 @@ namespace LumiTracker.Config {
         public static string SafeDeclaration {
             get {
                 return ResourceManager.GetString("SafeDeclaration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 服务器.
+        /// </summary>
+        public static string Server {
+            get {
+                return ResourceManager.GetString("Server", resourceCulture);
             }
         }
         

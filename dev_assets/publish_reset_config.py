@@ -23,6 +23,7 @@ def main(publish_dir):
         "show_closing_dialog" : True,
         "check_updates_on_startup" : True,
         "subscribe_to_beta_updates": False,
+        "update_retries": 3,
     }
     cfg.update(reset_configs)
 
@@ -42,6 +43,13 @@ def main(publish_dir):
     # Step 2: Modify the dictionary
     reset_configs = {
         "DEBUG" : False,
+        "closing_behavior": "Minimize",
+        "show_closing_dialog": True,
+        "check_updates_on_startup": True,
+        "subscribe_to_beta_updates": False,
+        "update_retries": 3,
+        "lang": "FollowSystem",
+        "theme": "Dark",
         "resource_dirs": {
             "tokens": ""
         }

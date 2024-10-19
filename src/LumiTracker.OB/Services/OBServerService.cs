@@ -1,5 +1,4 @@
 ﻿using LumiTracker.Config;
-using LumiTracker.OB;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -9,7 +8,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
-namespace LumiTracker.Services
+namespace LumiTracker.OB.Services
 {
     public class OBClient
     {

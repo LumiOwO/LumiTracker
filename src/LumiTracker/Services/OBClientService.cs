@@ -6,7 +6,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
-namespace LumiTracker.Services
+namespace LumiTracker.OB.Services
 {
     public delegate void OnServerDisconnectedCallback();
 

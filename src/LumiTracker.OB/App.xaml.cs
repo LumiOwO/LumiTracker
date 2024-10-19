@@ -1,11 +1,22 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.OB.ViewModels.Pages;
+using LumiTracker.OB.ViewModels.Windows;
+using LumiTracker.OB.Views.Pages;
+using LumiTracker.OB.Views.Windows;
+using LumiTracker.OB.Services;
 using LumiTracker.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 using System.Reflection;
-using System.Windows;
+using System.Diagnostics;
+using System.Windows.Media;
 using System.Windows.Threading;
+using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
+using Wpf.Ui;
+using Wpf.Ui.Appearance;
 
 namespace LumiTracker.OB
 {
@@ -24,8 +35,44 @@ namespace LumiTracker.OB
             .ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!); })
             .ConfigureServices((context, services) =>
             {
-                // TODO: Add OB app UI
+                services.AddHostedService<ApplicationHostService<MainWindow>>();
+
+                // Page resolver service
+                services.AddSingleton<IPageService, PageService>();
+
+                // Theme manipulation
+                services.AddSingleton<IThemeService, ThemeService>();
+
+                // TaskBar manipulation
+                services.AddSingleton<ITaskBarService, TaskBarService>();
+
+                // Service containing navigation, same as INavigationWindow... but without window
+                services.AddSingleton<INavigationService, NavigationService>();
+                services.AddSingleton<ISnackbarService, SnackbarService>();
+                services.AddSingleton<StyledContentDialogService>();
+                services.AddSingleton<UpdateService>();
+                services.AddSingleton<OBServerService>();
+
+                // Localization
+                services.AddSingleton<ILocalizationService, LocalizationService>();
+
+                // Main window with navigation
+                services.AddSingleton<INavigationWindow, MainWindow>();
+                services.AddSingleton<MainWindowViewModel>();
+
+                services.AddSingleton<StartPage>();
+                services.AddSingleton<StartViewModel>();
+                services.AddSingleton<DuelPage>();
+                services.AddSingleton<DuelViewModel>();
+                services.AddSingleton<SettingsPage>();
+                services.AddSingleton<SettingsViewModel>();
+
             }).Build();
+
+        public App()
+        {
+            SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
+        }
 
         /// <summary>
         /// Gets registered service.
@@ -60,13 +107,20 @@ namespace LumiTracker.OB
                 return;
             }
 
-            server = new OBServerService();
-            Task.Run(server.StartAsync);
+            if (e.Args.Length == 1 && e.Args[0] == "just_updated")
+            {
+                Configuration.SetTemporal("just_updated", true);
+            }
+            // refresh theme
+            ApplicationThemeManager.Apply(Configuration.Get<ApplicationTheme>("theme"));
+            // Overwrite accent color
+            ApplicationAccentColorManager.Apply(
+                Color.FromArgb(0xff, 0x1c, 0xdd, 0xe9),
+                ApplicationTheme.Dark
+            );
 
             _host.Start();
         }
-        // TODO: move to OBStartViewPage
-        private OBServerService? server = null;
 
         /// <summary>
         /// Occurs when the application is closing.
@@ -78,11 +132,25 @@ namespace LumiTracker.OB
                 return;
             }
 
-            // TODO: fix server close
-            server?.Close();
-
             await _host.StopAsync();
             _host.Dispose();
+
+            if (Configuration.Get<string>("updated_to") is string version && !string.IsNullOrEmpty(version))
+            {
+                // Start server app
+                string launcherPath = Path.Combine(Configuration.RootDir, $"LumiTrackerApp-{version}", "LumiTrackerOB.exe");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = launcherPath,
+                };
+
+                var process = new Process();
+                process.StartInfo = startInfo;
+                if (!process.Start())
+                {
+                    Configuration.Logger.LogError("[Update] Failed to Restart app.");
+                }
+            }
         }
 
         /// <summary>
@@ -91,6 +159,37 @@ namespace LumiTracker.OB
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
+            Configuration.Logger.LogError($"[App] {e.Exception.ToString()}");
+            MessageBox.Show($"App error occurred: {e.Exception.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+        {
+            Configuration.Logger.LogDebug($"SystemEvents_SessionSwitch Reason={e.Reason}");
+            switch (e.Reason)
+            {
+                case SessionSwitchReason.SessionLock:
+                    // Screen locked, application might be suspended
+                    break;
+                case SessionSwitchReason.SessionUnlock:
+                    // Screen unlocked, application might be resumed
+                    break;
+                case SessionSwitchReason.SessionLogoff:
+                    // User logged off
+                    break;
+                case SessionSwitchReason.SessionLogon:
+                    // User logged on
+                    break;
+                case SessionSwitchReason.RemoteDisconnect:
+                    // Remote session disconnected
+                    break;
+                case SessionSwitchReason.RemoteConnect:
+                    // Remote session connected
+                    break;
+                default:
+                    // Other session switch reasons
+                    break;
+            }
         }
     }
 }

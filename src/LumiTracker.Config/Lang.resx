@@ -516,4 +516,28 @@
   <data name="OBConnectState_Reconnecting" xml:space="preserve">
     <value>Reconnecting...</value>
   </data>
+  <data name="OB_AppSubTitle" xml:space="preserve">
+    <value>观战服务器</value>
+  </data>
+  <data name="Server" xml:space="preserve">
+    <value>服务器</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="OB_NatId" xml:space="preserve">
+    <value>内网穿透ID</value>
+  </data>
+  <data name="OB_ServerStarting" xml:space="preserve">
+    <value>服务器启动中...</value>
+  </data>
+  <data name="OB_ServerStarted" xml:space="preserve">
+    <value>服务器已启动</value>
+  </data>
+  <data name="OB_IconDirectory" xml:space="preserve">
+    <value>图标所在目录</value>
+  </data>
+  <data name="OB_ChangeDir" xml:space="preserve">
+    <value>更改...</value>
+  </data>
 </root>

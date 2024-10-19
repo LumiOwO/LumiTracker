@@ -1,5 +1,13 @@
 {
   "DEBUG": true,
+  "closing_behavior": "Quit",
+  "update_retries": 3,
+  "show_closing_dialog": true,
+  "check_updates_on_startup": true,
+  "subscribe_to_beta_updates": false,
+  "lang": "FollowSystem",
+  "theme": "Dark",
+
   "port": 25251,
   "max_tracked_tokens": 3,
   "resource_dirs": {

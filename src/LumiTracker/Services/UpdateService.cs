@@ -241,7 +241,8 @@ namespace LumiTracker.Services
             else if (ctx.State == EUpdateState.ReadyToRestart)
             {
                 // Restart
-                Configuration.SetTemporal("restart", true);
+                string latestVersion = ctx.ReleaseMeta!.tag_name.TrimStart('v');
+                Configuration.SetTemporal("updated_to", latestVersion);
                 Application.Current.Shutdown();
                 return;
             }

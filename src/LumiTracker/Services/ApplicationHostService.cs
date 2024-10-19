@@ -1,7 +1,4 @@
-﻿using LumiTracker.Views.Pages;
-using LumiTracker.Views.Windows;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Wpf.Ui;
 
 namespace LumiTracker.Services
@@ -9,7 +6,7 @@ namespace LumiTracker.Services
     /// <summary>
     /// Managed host of the application.
     /// </summary>
-    public class ApplicationHostService : IHostedService
+    public class ApplicationHostService<MainWindow> : IHostedService
     {
         private readonly IServiceProvider _serviceProvider;
 

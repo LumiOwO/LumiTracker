@@ -5,7 +5,6 @@
   "LOG_INTERVAL": 10,
   "proc_watch_interval": 1,
   "frame_limit": 50,
-  "update_retries": 3,
   "feature_crop_box0": [
     0.16666666666666666,
     0.4444444444444444,
@@ -43,9 +42,10 @@
   "client_type": "YuanShen",
   "capture_type": "BitBlt",
   "show_ui_outside": true,
-  "show_closing_dialog": false,
+  "show_closing_dialog": true,
   "check_updates_on_startup": true,
   "subscribe_to_beta_updates": false,
+  "update_retries": 3,
 
   "ob_host": "",
   "ob_port": 25251

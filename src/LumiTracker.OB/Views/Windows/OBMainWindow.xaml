@@ -1,0 +1,96 @@
+﻿<ui:FluentWindow
+    x:Class="LumiTracker.OB.Views.Windows.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:LumiTracker.OB.Views.Windows"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
+    xmlns:svs="clr-namespace:LumiTracker.Services;assembly=LumiTrackerApp"
+    
+    Title="{Binding ViewModel.AppTitle.Text}"
+    Width="1100"
+    Height="650"
+    d:DataContext="{d:DesignInstance local:MainWindow,
+                                     IsDesignTimeCreatable=True}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ExtendsContentIntoTitleBar="True"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    WindowBackdropType="Mica"
+    WindowCornerPreference="Round"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d"
+    >
+    <!--<ui:FluentWindow.InputBindings>
+        <KeyBinding
+            Key="F"
+            Command="{Binding ElementName=AutoSuggestBox, Path=FocusCommand}"
+            Modifiers="Control" />
+    </ui:FluentWindow.InputBindings>-->
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar
+            x:Name="TitleBar"
+            Title="{Binding ViewModel.AppTitle.Text}"
+            Grid.Row="0"
+            Margin="0"
+            CloseWindowByDoubleClickOnIcon="False"
+            >
+            <ui:TitleBar.Icon>
+                <ui:SymbolIcon 
+                    Symbol="PlayingCards20"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                              />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+
+        <ui:NavigationView
+            x:Name="RootNavigation"
+            Grid.Row="1"
+            Padding="30,30,30,0"
+            FooterMenuItemsSource="{Binding ViewModel.FooterMenuItems, Mode=OneWay}"
+            FrameMargin="10, 0, 15, 15"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleVisible="False"
+            MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
+            OpenPaneLength="180"
+            PaneDisplayMode="Left"
+            d:BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
+            d:TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
+            >
+            <ui:NavigationView.ContentOverlay>
+                <Grid>
+                    <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
+                </Grid>
+            </ui:NavigationView.ContentOverlay>
+        </ui:NavigationView>
+
+        <ContentPresenter x:Name="MainContentDialog"    Grid.Row="1" />
+        <ContentPresenter x:Name="ClosingContentDialog" Grid.Row="1" />
+
+        <tray:NotifyIcon
+            x:Name="TrayIcon"
+            Grid.Row="0"
+            Icon="pack://application:,,,/LumiTrackerApp;component/Assets/LumiTracker.png"
+            FocusOnLeftClick="True"
+            MenuOnRightClick="True"
+            TooltipText="{Binding ViewModel.AppTitle.Text}">
+            <tray:NotifyIcon.Menu>
+                <ContextMenu ItemsSource = "{Binding ViewModel.TrayMenuItems, Mode=OneWay}" />
+            </tray:NotifyIcon.Menu>
+        </tray:NotifyIcon>
+    </Grid>
+
+
+    
+    
+</ui:FluentWindow>
