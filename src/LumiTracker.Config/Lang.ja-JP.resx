@@ -402,4 +402,28 @@
   <data name="AppPath" xml:space="preserve">
     <value>インストールパス</value>
   </data>
+  <data name="OB_SettingsText" xml:space="preserve">
+    <value>観戦</value>
+  </data>
+  <data name="OB_Host" xml:space="preserve">
+    <value>ホスト</value>
+  </data>
+  <data name="OB_Port" xml:space="preserve">
+    <value>ポート</value>
+  </data>
+  <data name="OB_ConnectBtnText" xml:space="preserve">
+    <value>サーバーに接続する</value>
+  </data>
+  <data name="OBConnectState_Connecting" xml:space="preserve">
+    <value>接続中...</value>
+  </data>
+  <data name="OBConnectState_Connected" xml:space="preserve">
+    <value>接続済み</value>
+  </data>
+  <data name="OBConnectState_Failed" xml:space="preserve">
+    <value>接続失敗</value>
+  </data>
+  <data name="OBConnectState_Reconnecting" xml:space="preserve">
+    <value>再接続中...</value>
+  </data>
 </root>

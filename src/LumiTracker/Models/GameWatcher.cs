@@ -46,13 +46,6 @@ namespace LumiTracker.Models
 
         public void Start(EClientType clientType, ECaptureType captureType)
         {
-            // TODO: auto reconnect
-            // TODO: use settings to start connect
-            client = new OBClientService("192.168.0.101");
-            Task.Run(client.ConnectAsync);
-
-            GameEventMessage += async (GameEventMessage message) => { await SendMessageToServer(message); };
-
             info.Value = new CaptureInfo 
             { 
                 ClientType = clientType, 
@@ -65,9 +58,11 @@ namespace LumiTracker.Models
 
         public void Close()
         {
-            Task? task = client?.CheckTask;
-            client?.Close();
-            task?.Wait();
+            if (client != null)
+            {
+                client.Close();
+                client = null;
+            }
         }
 
         public void ChangeGameClient(EClientType clientType, ECaptureType captureType)
@@ -93,6 +88,25 @@ namespace LumiTracker.Models
                 return;
 
             await processWatcher.Value.DumpToBackend(message_obj);
+        }
+
+        public async Task<bool> ConnectToServer(string host, int port)
+        {
+            client = new OBClientService(host, port);
+            bool success = await client.ConnectAsync();
+            if (success)
+            {
+                GameEventMessage += async (GameEventMessage message) => { await SendMessageToServer(message); };
+            }
+            return success;
+        }
+
+        public void AddServerDisconnectedCallback(OnServerDisconnectedCallback callback)
+        {
+            if (client != null)
+            {
+                client.ServerDisconnected += callback;
+            }
         }
 
         public async Task SendMessageToServer(GameEventMessage message)

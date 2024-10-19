@@ -574,6 +574,78 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect to Server.
+        /// </summary>
+        public static string OB_ConnectBtnText {
+            get {
+                return ResourceManager.GetString("OB_ConnectBtnText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host.
+        /// </summary>
+        public static string OB_Host {
+            get {
+                return ResourceManager.GetString("OB_Host", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string OB_Port {
+            get {
+                return ResourceManager.GetString("OB_Port", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Spectate.
+        /// </summary>
+        public static string OB_SettingsText {
+            get {
+                return ResourceManager.GetString("OB_SettingsText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connected.
+        /// </summary>
+        public static string OBConnectState_Connected {
+            get {
+                return ResourceManager.GetString("OBConnectState_Connected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connecting....
+        /// </summary>
+        public static string OBConnectState_Connecting {
+            get {
+                return ResourceManager.GetString("OBConnectState_Connecting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection Failed.
+        /// </summary>
+        public static string OBConnectState_Failed {
+            get {
+                return ResourceManager.GetString("OBConnectState_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reconnecting....
+        /// </summary>
+        public static string OBConnectState_Reconnecting {
+            get {
+                return ResourceManager.GetString("OBConnectState_Reconnecting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to OK.
         /// </summary>
         public static string OK {

@@ -47,7 +47,6 @@
   "check_updates_on_startup": true,
   "subscribe_to_beta_updates": false,
 
-  "ob_enabled": false,
   "ob_host": "",
   "ob_port": 25251
 }

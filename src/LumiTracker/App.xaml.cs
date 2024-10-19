@@ -136,6 +136,11 @@ namespace LumiTracker
                 return;
             }
 
+            var settingsViewModel = GetService<SettingsViewModel>();
+            if (settingsViewModel != null)
+            {
+                settingsViewModel.ConnectState = EOBConnectState.None;
+            }
             var gameWatcher = GetService<GameWatcher>();
             gameWatcher?.Close();
 

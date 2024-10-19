@@ -492,4 +492,28 @@
   <data name="AppPath" xml:space="preserve">
     <value>App Path</value>
   </data>
+  <data name="OB_SettingsText" xml:space="preserve">
+    <value>Spectate</value>
+  </data>
+  <data name="OB_Host" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="OB_Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="OB_ConnectBtnText" xml:space="preserve">
+    <value>Connect to Server</value>
+  </data>
+  <data name="OBConnectState_Connecting" xml:space="preserve">
+    <value>Connecting...</value>
+  </data>
+  <data name="OBConnectState_Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="OBConnectState_Failed" xml:space="preserve">
+    <value>Connection Failed</value>
+  </data>
+  <data name="OBConnectState_Reconnecting" xml:space="preserve">
+    <value>Reconnecting...</value>
+  </data>
 </root>

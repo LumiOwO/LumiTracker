@@ -1,11 +1,24 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Models;
 using LumiTracker.Services;
 using System.Globalization;
+using System.Windows.Data;
+using System.Windows.Media;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
+using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.ViewModels.Pages
 {
+    public enum EOBConnectState : int
+    {
+        None,
+        Connecting,
+        Connected,
+        Failed,
+        Reconnecting,
+    }
+
     public partial class SettingsViewModel : ObservableObject, INavigationAware
     {
         private bool _isInitialized = false;
@@ -26,10 +39,92 @@ namespace LumiTracker.ViewModels.Pages
 
         private readonly UpdateService _updateService;
 
-        public SettingsViewModel(ILocalizationService localizationService, UpdateService updateService)
+        private GameWatcher _gameWatcher;
+
+        // OB setting prompts
+        [ObservableProperty]
+        private string _OBHost = "";
+
+        [ObservableProperty]
+        private int _OBPort = 0;
+
+        [ObservableProperty]
+        private LocalizationTextItem _OBConnectStateText = new ();
+
+        [ObservableProperty]
+        private Brush _OBConnectColor = Brushes.White;
+
+        [ObservableProperty]
+        private SymbolRegular _OBConnectIcon = SymbolRegular.Question24;
+
+        [ObservableProperty]
+        private Visibility _OBConnectShowLoading = Visibility.Collapsed;
+
+        [ObservableProperty]
+        private Visibility _OBConnectShowIcon = Visibility.Collapsed;
+
+        [ObservableProperty]
+        private bool _OBConnectButtonEnabled = true;
+
+        [ObservableProperty]
+        private EOBConnectState _connectState = EOBConnectState.None;
+
+        partial void OnConnectStateChanged(EOBConnectState oldValue, EOBConnectState newValue)
+        {
+            if (newValue != EOBConnectState.None)
+            {
+                var binding = LocalizationExtension.Create(newValue);
+                BindingOperations.SetBinding(OBConnectStateText, LocalizationTextItem.TextProperty, binding);
+            }
+            else
+            {
+                BindingOperations.ClearBinding(OBConnectStateText, LocalizationTextItem.TextProperty);
+                OBConnectStateText.Text = "";
+            }
+
+            if (newValue == EOBConnectState.Connecting)
+            {
+                OBConnectColor = Brushes.Gray;
+                OBConnectShowLoading = Visibility.Visible;
+                OBConnectShowIcon = Visibility.Collapsed;
+            }
+            else if (newValue == EOBConnectState.Connected)
+            {
+                OBConnectColor = Brushes.Green;
+                OBConnectIcon = SymbolRegular.Checkmark24;
+                OBConnectShowLoading = Visibility.Collapsed;
+                OBConnectShowIcon = Visibility.Visible;
+            }
+            else if (newValue == EOBConnectState.Failed)
+            {
+                OBConnectColor = Brushes.Red;
+                OBConnectIcon = SymbolRegular.Dismiss24;
+                OBConnectShowLoading = Visibility.Collapsed;
+                OBConnectShowIcon = Visibility.Visible;
+            }
+            else if (newValue == EOBConnectState.Reconnecting)
+            {
+                OBConnectColor = Brushes.Gray;
+                OBConnectShowLoading = Visibility.Visible;
+                OBConnectShowIcon = Visibility.Collapsed;
+            }
+            else if (newValue == EOBConnectState.None)
+            {
+                OBConnectShowLoading = Visibility.Collapsed;
+                OBConnectShowIcon = Visibility.Collapsed;
+            }
+        }
+
+        partial void OnOBConnectShowLoadingChanged(Visibility oldValue, Visibility newValue)
+        {
+            OBConnectButtonEnabled = (newValue != Visibility.Visible);
+        }
+
+        public SettingsViewModel(ILocalizationService localizationService, UpdateService updateService, GameWatcher gameWatcher)
         {
             _localizationService = localizationService;
             _updateService = updateService;
+            _gameWatcher = gameWatcher;
         }
 
         public void OnNavigatedTo()
@@ -68,6 +163,8 @@ namespace LumiTracker.ViewModels.Pages
 
             CurrentClosingBehavior = Configuration.Get<EClosingBehavior>("closing_behavior");
             CurrentTheme           = Configuration.Get<ApplicationTheme>("theme");
+            OBHost                 = Configuration.Get<string>("ob_host");
+            OBPort                 = Configuration.Get<int>("ob_port");
 
             _isInitialized = true;
         }
@@ -146,6 +243,54 @@ namespace LumiTracker.ViewModels.Pages
         {
             Configuration.Set("subscribe_to_beta_updates", newValue);
             Configuration.RemoveTemporal("releaseMeta");
+        }
+
+        partial void OnOBHostChanged(string? oldValue, string newValue)
+        {
+            Configuration.Set("ob_host", newValue);
+        }
+
+        partial void OnOBPortChanged(int oldValue, int newValue)
+        {
+            Configuration.Set("ob_port", newValue);
+        }
+
+        [RelayCommand]
+        public async Task OnConnectToOBServer(EOBConnectState state)
+        {
+            if (ConnectState == EOBConnectState.Connected)
+            {
+                return;
+            }
+            ConnectState = state;
+
+            bool success = await _gameWatcher.ConnectToServer(OBHost, OBPort);
+            if (success)
+            {
+                ConnectState = EOBConnectState.Connected;
+                _gameWatcher.AddServerDisconnectedCallback(OnDisconnected);
+            }
+            else if (state != EOBConnectState.Reconnecting)
+            {
+                ConnectState = EOBConnectState.Failed;
+            }
+        }
+
+        public void OnDisconnected()
+        {
+            if (ConnectState == EOBConnectState.None) return;
+
+            Application.Current.Dispatcher.Invoke(async () =>
+            {
+                ConnectState = EOBConnectState.Failed;
+                // Try to reconnect
+                do
+                {
+                    await Task.Delay(500);
+                    Configuration.Logger.LogError("Server disconnected, try to reconnect...");
+                    await OnConnectToOBServer(EOBConnectState.Reconnecting);
+                } while (ConnectState != EOBConnectState.Connected && ConnectState != EOBConnectState.None);
+            });
         }
     }
 }

@@ -8,18 +8,24 @@ using System.Text;
 
 namespace LumiTracker.Services
 {
+    public delegate void OnServerDisconnectedCallback();
+
     public class OBClientService
     {
-        private readonly string _serverIp;
+        private readonly string _host;
+        private readonly int _port;
         private readonly string _clientId;
         private TcpClient? _client = null;
         private NetworkStream? _stream = null;
 
-        public Task? CheckTask { get; set; } = null;
+        public event OnServerDisconnectedCallback? ServerDisconnected;
 
-        public OBClientService(string serverIp)
+        private Task? CheckTask = null;
+
+        public OBClientService(string host, int port)
         {
-            _serverIp = serverIp;
+            _host = host;
+            _port = port;
             // Use a persistent GUID strategy to identify the client
             _clientId = GetOrCreateClientId();
         }
@@ -42,15 +48,14 @@ namespace LumiTracker.Services
         }
 
         // Connect to the server
-        public async Task ConnectAsync()
+        public async Task<bool> ConnectAsync()
         {
             try
             {
                 _client = new TcpClient();
-                int port = Configuration.Get<int>("ob_port");
-                Configuration.Logger.LogInformation($"[OBClientService] Connecting to {_serverIp}:{port}...");
+                Configuration.Logger.LogInformation($"[OBClientService] Connecting to {_host}:{_port}...");
 
-                await _client.ConnectAsync(_serverIp, port);
+                await _client.ConnectAsync(_host, _port);
                 _stream = _client.GetStream();
                 _stream.ReadTimeout = 5000; // Set to 5 seconds
                 // Enable TCP Keep-Alive
@@ -67,16 +72,19 @@ namespace LumiTracker.Services
                 {
                     Configuration.Logger.LogError("[OBClientService] Connection rejected.");
                     Close();
+                    return false;
                 }
 
                 CheckTask = CheckConnectionStatusAsync();
 
                 Configuration.Logger.LogInformation("[OBClientService] Connected to server.");
+                return true;
             }
             catch (Exception ex)
             {
                 Configuration.Logger.LogError($"[OBClientService] Connection failed.\n{ex.ToString()}");
                 Close();
+                return false;
             }
         }
 
@@ -89,8 +97,7 @@ namespace LumiTracker.Services
                 while (_client?.Connected == true)
                 {
                     // Read from the stream to detect shutdown signal or disconnection
-                    int bytesRead = await _stream!.ReadAsync(buffer, 0, buffer.Length);
-
+                    int bytesRead = await _stream!.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
                     if (bytesRead == 0)
                     {
                         // Server closed the connection gracefully
@@ -114,8 +121,7 @@ namespace LumiTracker.Services
             {
                 // In case of exception, need to call Close() here
                 // So, for a normal close in OnExit(), Close() will be called twice
-                Close();
-                CheckTask = null;
+                Close(fromCheckTask: true);
             }
         }
 
@@ -148,7 +154,7 @@ namespace LumiTracker.Services
         }
 
         // Close the connection
-        public void Close()
+        public void Close(bool fromCheckTask = false)
         {
             try
             {
@@ -162,7 +168,14 @@ namespace LumiTracker.Services
                 {
                     _client.Close();
                     _client = null;
+                    ServerDisconnected?.Invoke();
+                    ServerDisconnected = null;
                 }
+                if (!fromCheckTask)
+                {
+                    CheckTask?.Wait();
+                }
+                CheckTask = null;
             }
             catch (Exception ex)
             {

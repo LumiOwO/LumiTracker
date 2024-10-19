@@ -492,4 +492,28 @@
   <data name="AppPath" xml:space="preserve">
     <value>安装位置</value>
   </data>
+  <data name="OB_SettingsText" xml:space="preserve">
+    <value>观战</value>
+  </data>
+  <data name="OB_Host" xml:space="preserve">
+    <value>地址</value>
+  </data>
+  <data name="OB_Port" xml:space="preserve">
+    <value>端口</value>
+  </data>
+  <data name="OB_ConnectBtnText" xml:space="preserve">
+    <value>连接至服务器</value>
+  </data>
+  <data name="OBConnectState_Connecting" xml:space="preserve">
+    <value>连接中...</value>
+  </data>
+  <data name="OBConnectState_Connected" xml:space="preserve">
+    <value>已连接</value>
+  </data>
+  <data name="OBConnectState_Failed" xml:space="preserve">
+    <value>连接失败</value>
+  </data>
+  <data name="OBConnectState_Reconnecting" xml:space="preserve">
+    <value>重新连接中...</value>
+  </data>
 </root>
