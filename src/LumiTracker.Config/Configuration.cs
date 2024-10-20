@@ -99,24 +99,14 @@ namespace LumiTracker.Config
 
         private Configuration()
         {
-            _ini            = LoadIniSettings(IniFilePath);
-            _db             = LoadJObject(DbFilePath);
-            _defaultConfig  = LoadJObject(DefaultConfigPath);
-            if (File.Exists(UserConfigPath))
-            {
-                _userConfig = LoadJObject(UserConfigPath);
-            }
-            else
-            {
-                _userConfig = new JObject();
-            }
-
             if (!Directory.Exists(LogDir))
             {
                 Directory.CreateDirectory(LogDir);
             }
             _errorWriter = new StreamWriter(LogFilePath, false) { AutoFlush = true };
 
+            // Assume default config file will always be valid
+            _defaultConfig = LoadJObjectInternal(DefaultConfigPath);
             bool DEBUG = _defaultConfig["DEBUG"]!.ToObject<bool>();
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
@@ -131,8 +121,18 @@ namespace LumiTracker.Config
                     ;
             });
             _logger = loggerFactory.CreateLogger<Configuration>();
-
             _logger.LogInformation($"App Version: {AppName}-{GetAssemblyVersion()}");
+
+            _ini = LoadIniSettings(IniFilePath);
+            _db = LoadJObjectInternal(DbFilePath);
+            if (File.Exists(UserConfigPath))
+            {
+                _userConfig = LoadJObjectInternal(UserConfigPath);
+            }
+            else
+            {
+                _userConfig = new JObject();
+            }
         }
 
         private static IniSettings LoadIniSettings(string path)
@@ -198,12 +198,25 @@ namespace LumiTracker.Config
 
         public static JObject LoadJObject(string path)
         {
-            string jsonString = File.ReadAllText(path);
-            return JObject.Parse(jsonString, new JsonLoadSettings
+            return Instance.LoadJObjectInternal(path);
+        }
+
+        private JObject LoadJObjectInternal(string path)
+        {
+            try
             {
-                CommentHandling = CommentHandling.Ignore,
-                LineInfoHandling = LineInfoHandling.Load
-            });
+                string jsonString = File.ReadAllText(path);
+                return JObject.Parse(jsonString, new JsonLoadSettings
+                {
+                    CommentHandling = CommentHandling.Ignore,
+                    LineInfoHandling = LineInfoHandling.Load
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError($"Error when loading json from {path}: {ex.Message}");
+                return new JObject();
+            }
         }
 
         public static bool SaveJObject(JObject jObject, string path)
