@@ -17,11 +17,20 @@
         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         Title="{svs:Localization DeckPageTitle}">
 
+    <Page.Resources>
+        <helpers:HideNullValueConverter x:Key="HideNullValueConverter" />
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <helpers:BooleanNotToVisibilityConverter x:Key="BooleanNotToVisibilityConverter" />
+        <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+    </Page.Resources>
+
     <Grid
+        Margin="-5,-5,270,0"
         >
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -30,15 +39,17 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!--my-->
         <StackPanel
             Grid.Row="0"
             Grid.Column="0"
+            Margin="0,0,0,0"
             Orientation="Horizontal"
             >
 
             <TextBlock 
                 Margin="0,0,20,2" 
-                Text="{svs:Localization CaptureType}" 
+                Text="{svs:Localization OB_MyView}" 
                 FontSize="15"
                 FontWeight="Bold"
                 HorizontalAlignment="Left"
@@ -46,30 +57,116 @@
                 />
 
             <ComboBox
-                x:Name="CaptureTypeComboBox"
                 HorizontalAlignment="Stretch"
-                SelectedIndex="{Binding ViewModel.SelectedCaptureIndex, Mode=TwoWay}"
-                ItemsSource="{Binding ViewModel.CaptureTypes, Mode=OneWay}"
-                IsEnabled="{Binding ViewModel.CaptureSelectionEnabled, Mode=OneWay}"
+                SelectedIndex="{Binding ViewModel.My_SelectedPlayerIndex, Mode=TwoWay}"
+                ItemsSource="{Binding ViewModel.StartViewModel.ClientInfos.CollectionView, Mode=OneWay}"
                 >
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="SelectionChanged">
-                        <b:InvokeCommandAction 
-                Command="{Binding ViewModel.SelectedClientChangedCommand}"
-                />
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock 
+                            Margin="0,0,0,0"
+                            Text="{Binding Value.Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
         </StackPanel>
 
-        <ctrls:DeckWindowCardListTab
+        <Border
             Grid.Row="1"
             Grid.Column="0"
-            ViewModel="{Binding Path=ViewModel}"
-            CardList="{Binding Path=ViewModel.MyActionCardsPlayed}"
-            WindowHeight="{Binding Height}"
-            WindowWidth="{Binding Width}"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            Margin="0,10,30,10"
+            >
+            
+        <ctrls:DeckWindowCardListTab
+            Visibility="{Binding ViewModel.My_DeckWindowViewModel,
+                Converter={StaticResource HideNullValueConverter},
+                ConverterParameter=Collapsed,
+                Mode=OneWay
+                }"
+            ViewModel="{Binding Path=ViewModel.My_DeckWindowViewModel}"
+            CardList="{Binding Path=ViewModel.My_DeckWindowViewModel.MyDeck}"
+            WindowHeight="{Binding ActualHeight,
+                RelativeSource={RelativeSource AncestorType={x:Type Border}},
+                Converter={StaticResource SizeWithRatioConverter}, 
+                ConverterParameter=1.25
+                }"
+            WindowWidth="{Binding ActualWidth,
+                RelativeSource={RelativeSource AncestorType={x:Type Border}}
+                }"
             />
+        </Border>
+
+        <!-- Separator -->
+        <Rectangle 
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Grid.Column="1"
+            Width="2" 
+            Fill="DimGray"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Center"
+            Margin="0,2,0,10" />
+
+        <!--op-->
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="2"
+            Margin="30,0,0,0"
+            Orientation="Horizontal"
+            >
+
+            <TextBlock 
+                Margin="0,0,20,2" 
+                Text="{svs:Localization OB_OpView}" 
+                FontSize="15"
+                FontWeight="Bold"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                />
+
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                SelectedIndex="{Binding ViewModel.Op_SelectedPlayerIndex, Mode=TwoWay}"
+                ItemsSource="{Binding ViewModel.StartViewModel.ClientInfos.CollectionView, Mode=OneWay}"
+                >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock 
+                            Margin="0,0,0,0"
+                            Text="{Binding Value.Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <Border
+            Grid.Row="1"
+            Grid.Column="2"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            Margin="30,10,0,10"
+            >
+
+            <ctrls:DeckWindowCardListTab
+                Visibility="{Binding ViewModel.Op_DeckWindowViewModel,
+                    Converter={StaticResource HideNullValueConverter},
+                    ConverterParameter=Collapsed,
+                    Mode=OneWay
+                    }"
+                ViewModel="{Binding Path=ViewModel.Op_DeckWindowViewModel}"
+                CardList="{Binding Path=ViewModel.Op_DeckWindowViewModel.MyDeck}"
+                WindowHeight="{Binding ActualHeight,
+                    RelativeSource={RelativeSource AncestorType={x:Type Border}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=1.25
+                    }"
+                WindowWidth="{Binding ActualWidth,
+                    RelativeSource={RelativeSource AncestorType={x:Type Border}}
+                    }"
+                />
+        </Border>
 
     </Grid>
 </Page>

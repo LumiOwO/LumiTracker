@@ -519,8 +519,8 @@
   <data name="OB_AppSubTitle" xml:space="preserve">
     <value>观战服务器</value>
   </data>
-  <data name="Server" xml:space="preserve">
-    <value>服务器</value>
+  <data name="Duel" xml:space="preserve">
+    <value>对局</value>
   </data>
   <data name="Copy" xml:space="preserve">
     <value>复制</value>
@@ -539,5 +539,38 @@
   </data>
   <data name="OB_ChangeDir" xml:space="preserve">
     <value>更改...</value>
+  </data>
+  <data name="OB_MaxTokens" xml:space="preserve">
+    <value>图标显示数量</value>
+  </data>
+  <data name="OB_MyView" xml:space="preserve">
+    <value>我方视角</value>
+  </data>
+  <data name="OB_Header_Connected" xml:space="preserve">
+    <value>连接状态</value>
+  </data>
+  <data name="OB_Header_Name" xml:space="preserve">
+    <value>用户名</value>
+  </data>
+  <data name="OB_Header_GameStarted" xml:space="preserve">
+    <value>对局情况</value>
+  </data>
+  <data name="OBConnectState_None" xml:space="preserve">
+    <value>未连接</value>
+  </data>
+  <data name="OB_GameNotStarted" xml:space="preserve">
+    <value>未开始</value>
+  </data>
+  <data name="OB_GameStarted" xml:space="preserve">
+    <value>对局中</value>
+  </data>
+  <data name="OB_HostCopiedToClipboard" xml:space="preserve">
+    <value>服务器地址已复制到剪贴板</value>
+  </data>
+  <data name="Player" xml:space="preserve">
+    <value>牌手</value>
+  </data>
+  <data name="OB_OpView" xml:space="preserve">
+    <value>对方视角</value>
   </data>
 </root>

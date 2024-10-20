@@ -76,7 +76,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private GameEventHook _hook;
 
-        public DeckWindowViewModel(DeckViewModel deckViewModel, GameEventHook hook)
+        public DeckWindowViewModel(DeckViewModel deckViewModel, GameEventHook hook, bool from_server = false)
         {
             var binding = LocalizationExtension.Create("DeckWindowTitle");
             binding.Converter = new OverlayWindowTitleNameConverter();
@@ -97,8 +97,10 @@ namespace LumiTracker.ViewModels.Windows
             _hook.WindowWatcherExit  += OnWindowWatcherExit;
 
             Reset(gameStart: false);
+            _from_server = from_server;
         }
 
+        private readonly bool _from_server;
         private void Reset(bool gameStart)
         {
             MyActionCardsPlayed = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
@@ -111,19 +113,23 @@ namespace LumiTracker.ViewModels.Windows
                 MyDeck = new CardList(Enumerable.Repeat(-1, 30).ToArray(), inGame: true);
 
                 // TODO: auto detect active deck
-                string sharecode = ShareCodeOverride;
-                int activeIndex = DeckViewModel.UserDeckList.ActiveIndex;
-                if (sharecode == "" && activeIndex >= 0)
+                // TODO: remove from_server
+                if (!_from_server)
                 {
-                    sharecode = DeckViewModel.UserDeckList.DeckInfos[activeIndex].ShareCode;
-                }
-                if (sharecode == "")
-                {
-                    Configuration.Logger.LogWarning($"Deck list in empty.");
-                }
-                else
-                {
-                    InitDeckOnGameStart(sharecode);
+                    string sharecode = ShareCodeOverride;
+                    int activeIndex = DeckViewModel.UserDeckList.ActiveIndex;
+                    if (sharecode == "" && activeIndex >= 0)
+                    {
+                        sharecode = DeckViewModel.UserDeckList.DeckInfos[activeIndex].ShareCode;
+                    }
+                    if (sharecode == "")
+                    {
+                        Configuration.Logger.LogWarning($"Deck list is empty.");
+                    }
+                    else
+                    {
+                        InitDeckOnGameStart(sharecode);
+                    }
                 }
             }
             else

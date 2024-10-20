@@ -36,12 +36,22 @@ namespace LumiTracker.Models
         {
             ProcessWatcherInitFilePath = Path.Combine(Configuration.DocumentsDir, "init.json");
             TestCaptureOnResize = false;
+
+            GameEventMessage += async message =>
+            {
+                await SendMessageToServer(message);
+            };
         }
 
         public GameWatcher(string processWatcherInitFilePath, bool testCaptureOnResize)
         {
             ProcessWatcherInitFilePath = processWatcherInitFilePath;
             TestCaptureOnResize = testCaptureOnResize;
+
+            GameEventMessage += async message =>
+            {
+                await SendMessageToServer(message);
+            };
         }
 
         public void Start(EClientType clientType, ECaptureType captureType)
@@ -94,10 +104,6 @@ namespace LumiTracker.Models
         {
             client = new OBClientService(host, port);
             bool success = await client.ConnectAsync();
-            if (success)
-            {
-                GameEventMessage += async (GameEventMessage message) => { await SendMessageToServer(message); };
-            }
             return success;
         }
 

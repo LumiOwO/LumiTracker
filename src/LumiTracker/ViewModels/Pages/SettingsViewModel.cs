@@ -46,7 +46,7 @@ namespace LumiTracker.ViewModels.Pages
         private string _OBHost = "";
 
         [ObservableProperty]
-        private int _OBPort = 0;
+        private int _OBPort = 25251;
 
         [ObservableProperty]
         private LocalizationTextItem _OBConnectStateText = new ();

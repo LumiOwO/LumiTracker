@@ -35,7 +35,7 @@ namespace LumiTracker.ViewModels.Pages
         [RelayCommand]
         public async Task OnLocateAppDir()
         {
-            await Configuration.RevealInExplorerAsync(Configuration.RootDir);
+            await Configuration.RevealInExplorerAsync(Configuration.AppDir);
         }
     }
 }

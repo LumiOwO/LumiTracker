@@ -85,7 +85,9 @@
     </Page.Resources>
 
 
-    <StackPanel>
+    <StackPanel
+        Margin="-5,0,0,0" 
+        >
         <StackPanel
             Orientation="Horizontal">
 
@@ -105,7 +107,7 @@
                 TextWrapping="WrapWithOverflow"
                 VerticalAlignment="Center"
                 d:Text="25251"
-                Text="{Binding ViewModel.NatId, Mode=TwoWay}"
+                Text="{Binding ViewModel.NatId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 />
 
             <TextBlock 
@@ -127,12 +129,12 @@
                 ClearButtonEnabled="False"
                 d:Value="25251"
                 VerticalAlignment="Center"
-                Value="{Binding ViewModel.Port, Mode=TwoWay}"
+                Value="{Binding ViewModel.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 />
         </StackPanel>
 
         <Grid
-            Margin="0, 0, 0, 0"
+            Margin="0, 2, 0, 0"
             >
             <StackPanel 
                 Visibility="{Binding ViewModel.ServerStarted,
@@ -187,10 +189,10 @@
                     <Run/>
                 </TextBlock>
                 <ui:Button 
-                    Margin="10,2,0,0"
-                    Height="30"
-                    Padding="9,5,9,6"
-                    Command="{Binding ViewModel.UpdateButtonClickedCommand, Mode=OneWay}"
+                    Margin="2,3,0,0"
+                    Height="25"
+                    Padding="8,0,8,0"
+                    Command="{Binding ViewModel.ServerHostAddressCopiedCommand, Mode=OneWay}"
                     >
                     <TextBlock 
                         FontSize="14"
@@ -201,7 +203,7 @@
 
         <Grid Margin="5,30,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="110" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
@@ -225,21 +227,20 @@
                 />
             <ui:TextBox
                 Grid.Column="1"
-                Margin="5,0,0,0" 
                 FontSize="15"
                 MinWidth="400"
                 MaxWidth="400"
                 TextWrapping="WrapWithOverflow"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Left"
-                Text="{Binding ViewModel.NatId, Mode=TwoWay}"
+                Text="{Binding ViewModel.TokensIconDir, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 />
             <ui:Button 
                 Grid.Column="2"
                 Margin="10,2,0,0"
                 Height="30"
                 Padding="9,5,9,6"
-                Command="{Binding ViewModel.UpdateButtonClickedCommand, Mode=OneWay}"
+                Command="{Binding ViewModel.SelectTokensIconDirCommand, Mode=OneWay}"
                 >
                 <TextBlock 
                     FontSize="14" 
@@ -247,6 +248,36 @@
 
             </ui:Button>
         </Grid>
+
+        <Grid Margin="5,15,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="110" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock 
+                Grid.Column="0"
+                Margin="0,0,0,0" 
+                FontWeight="Bold"
+                Text="{svs:Localization OB_MaxTokens}" 
+                FontSize="15"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                />
+
+            <ui:NumberBox
+                Grid.Column="1"
+                FontSize="15"
+                Width="100"
+                TextWrapping="WrapWithOverflow"
+                Minimum="1"
+                Maximum="5"
+                ClearButtonEnabled="False"
+                Value="{Binding ViewModel.MaxTrackedTokens, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                />
+        </Grid>
+
 
         <StackPanel 
             Margin="5, 15, 0, 0"
@@ -278,15 +309,16 @@
         </StackPanel>
 
         <ui:DataGrid
-            Margin="5, 20, -10, 0"
+            Margin="5, 40, -10, 0"
             ItemsSource="{Binding ViewModel.ClientInfos.CollectionView}"
             AutoGenerateColumns="False"
             HeadersVisibility="Column"
-            MaxHeight="320"
+            MaxHeight="275"
             >
             <ui:DataGrid.Columns>
                 <DataGridTemplateColumn 
                     Header=""
+                    MinWidth="5"
                     Width="Auto">
                     <DataGridTemplateColumn.HeaderStyle>
                         <StaticResource ResourceKey="HeaderStyle" />
@@ -299,10 +331,10 @@
                             <ui:Button 
                                 Height="Auto"
                                 Margin="5, 2"
-                                Padding="8,3,8,3"
+                                Padding="6,3,8,3"
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
-                                Command="{Binding ViewModel.ButtonClickCommand, RelativeSource={RelativeSource AncestorType={x:Type Page}}}"
+                                Command="{Binding ViewModel.OpenClientDataDirCommand, RelativeSource={RelativeSource AncestorType={x:Type Page}}}"
                                 CommandParameter="{Binding Value.Guid}"
                                 >
                                 <ui:Button.Icon>
@@ -313,7 +345,8 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn 
-                    Header="Connected" 
+                    Header="{svs:Localization OB_Header_Connected}" 
+                    MinWidth="50"
                     Width="Auto">
                     <DataGridTemplateColumn.HeaderStyle>
                         <StaticResource ResourceKey="HeaderStyle" />
@@ -339,7 +372,7 @@
                                     VerticalAlignment="Center"
                                     FontWeight="Bold"
                                     Foreground="Red"
-                                    Text="未连接" />
+                                    Text="{svs:Localization OBConnectState_None}" />
                             </StackPanel>
                             <StackPanel 
                                 Visibility="{Binding Value.Connected,
@@ -353,14 +386,14 @@
                                     VerticalAlignment="Center"
                                     FontWeight="Bold"
                                     Foreground="Green"
-                                    Text="已连接" />
+                                    Text="{svs:Localization OBConnectState_Connected}" />
                             </StackPanel>
                             </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn 
-                    Header="Name" 
+                    Header="{svs:Localization OB_Header_Name}" 
                     Width="*">
                     <DataGridTemplateColumn.HeaderStyle>
                         <StaticResource ResourceKey="HeaderStyle" />
@@ -373,18 +406,19 @@
                             <ui:TextBox
                                 FontSize="15"
                                 Margin="10,5"
-                                TextWrapping="WrapWithOverflow"
+                                TextWrapping="NoWrap"
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Stretch"
                                 TextAlignment="Center"
                                 ClearButtonEnabled="False"
-                                Text="{Binding Value.Name, Mode=TwoWay}"
+                                Text="{Binding Value.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn 
-                    Header="GameStarted" 
+                    Header="{svs:Localization OB_Header_GameStarted}" 
+                    MinWidth="50"
                     Width="Auto">
                     <DataGridTemplateColumn.HeaderStyle>
                         <StaticResource ResourceKey="HeaderStyle" />
@@ -395,6 +429,11 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid
+                                Visibility="{Binding Value.Connected,
+                                    Converter={StaticResource BooleanToVisibilityConverter},
+                                    ConverterParameter=Hidden,
+                                    Mode=OneWay
+                                    }"
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
                                 >
@@ -410,7 +449,7 @@
                                     VerticalAlignment="Center"
                                     FontWeight="Bold"
                                     Foreground="Gray"
-                                    Text="未开始" />
+                                    Text="{svs:Localization OB_GameNotStarted}" />
                             </StackPanel>
                             <StackPanel 
                                 Visibility="{Binding Value.GameStarted,
@@ -424,14 +463,15 @@
                                     VerticalAlignment="Center"
                                     FontWeight="Bold"
                                     Foreground="#f9ca24"
-                                    Text="对局中" />
+                                    Text="{svs:Localization OB_GameStarted}" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn 
-                    Header="Guid" 
+                    Header="GUID" 
+                    MinWidth="200"
                     Width="Auto">
                     <DataGridTemplateColumn.HeaderStyle>
                         <StaticResource ResourceKey="HeaderStyle" />

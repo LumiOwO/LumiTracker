@@ -7,6 +7,8 @@ using System.Net;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using LumiTracker.OB.ViewModels.Pages;
+using Newtonsoft.Json.Linq;
 
 namespace LumiTracker.OB.Services
 {
@@ -17,6 +19,7 @@ namespace LumiTracker.OB.Services
         public NetworkStream?      Stream     { get; set; } = null;
         public IDisposable?        ScopeGuard { get; set; } = null;
         public ScopeState          Scope      { get; set; } = new ();
+        public ClientInfo?         Info       { get; set; } = null;
 
         public void Close()
         {
@@ -51,9 +54,18 @@ namespace LumiTracker.OB.Services
         private readonly object _clientLock = new object();
         private readonly ConcurrentDictionary<Guid, OBClient> _connectedClients = new ();
         private TcpListener? _listener = null;
+        private StartViewModel? ViewModel = null;
 
-        public async Task StartAsync()
+        public OBGameWatcherProxy? GetGameWatcherProxy(Guid guid)
         {
+            OBClient? client = null;
+            _connectedClients.TryGetValue(guid, out client);
+            return client?.Proxy;
+        }
+
+        public async Task StartAsync(StartViewModel viewModel)
+        {
+            ViewModel = viewModel;
             try
             {
                 int port = Configuration.Get<int>("port");
@@ -143,6 +155,7 @@ namespace LumiTracker.OB.Services
                     throw new Exception("Connection rejected: client id conflict or OBClient not created.");
                 }
 
+                string messageBuffer = "";
                 while (tcp.Connected)
                 {
                     bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
@@ -152,20 +165,30 @@ namespace LumiTracker.OB.Services
                         break;
                     }
 
-                    string json = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    try
+                    messageBuffer += Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    int endIdx;
+                    while ((endIdx = messageBuffer.IndexOf('\n')) != -1)
                     {
-                        var message = JsonConvert.DeserializeObject<GameEventMessage>(json);
-                        if (message == null)
+                        try
                         {
-                            throw new Exception($"Failed to deserialize GameEventMessage");
+                            // Extract the message from the buffer
+                            string json = messageBuffer.Substring(0, endIdx);
+                            messageBuffer = messageBuffer.Substring(endIdx + 1); // Remove processed message
+
+                            var message = JsonConvert.DeserializeObject<GameEventMessage>(json);
+                            if (message == null)
+                            {
+                                throw new Exception($"Failed to deserialize GameEventMessage");
+                            }
+                            Configuration.Logger.LogInformation($"{LogHelper.AnsiMagenta}@{LogHelper.AnsiEnd} {json}");
+                            client.Proxy!.ParseGameEventTask(message);
                         }
-                        Configuration.Logger.LogInformation($"{LogHelper.AnsiMagenta}@{LogHelper.AnsiEnd} {json}");
-                        client.Proxy!.ParseGameEventTask(message);
-                    }
-                    catch (Exception ex)
-                    {
-                        Configuration.Logger.LogError($"Error when receiving message: {ex.Message}\n{json}");
+                        catch (Exception ex)
+                        {
+                            Configuration.Logger.LogError($"Error when receiving message: {ex.Message}\nCurrent buffer: {messageBuffer}");
+                            // Clear the messageBuffer if failed, so it may process later messages
+                            messageBuffer = "";
+                        }
                     }
                 }
             }
@@ -199,7 +222,7 @@ namespace LumiTracker.OB.Services
                     return null;
                 }
 
-                // Begin log scope here
+                // Begin log scope
                 if (client.Scope.Guid == Guid.Empty)
                 {
                     client.Scope.Guid  = clientId;
@@ -210,15 +233,40 @@ namespace LumiTracker.OB.Services
                 client.Tcp        = tcp;
                 client.Stream     = stream;
 
+                // Process client info
+                string dataPath = Path.Combine(Configuration.OBWorkingDir, guidStr);
+                if (!Directory.Exists(dataPath))
+                {
+                    Directory.CreateDirectory(dataPath);
+                }
+                if (!ViewModel!.ClientInfos.TryGetValue(clientId, out ClientInfo? clientInfo))
+                {
+                    string clientName = LocalizationSource.Instance["Player"] + guidStr.Substring(0, 4);
+                    string metaPath = Path.Combine(dataPath, "meta.json");
+                    if (File.Exists(metaPath))
+                    {
+                        var meta = Configuration.LoadJObject(metaPath);
+                        if (meta.TryGetValue("name", out JToken? nameToken) && nameToken.Type == JTokenType.String)
+                        {
+                            clientName = nameToken.ToString();
+                        }
+                    }
+                    clientInfo = new ClientInfo(ViewModel!, clientName, guidStr);
+                    ViewModel!.ClientInfos[clientId] = clientInfo;
+                }
+                client.Info = clientInfo;
+
+                // Start GameWatcher proxy
                 if (client.Proxy == null)
                 {
                     Configuration.Logger.LogInformation($"Client connected.");
-                    client.Proxy = new OBGameWatcherProxy(client.Scope);
+                    client.Proxy = new OBGameWatcherProxy(client.Scope, client.Info);
                 }
                 else
                 {
                     Configuration.Logger.LogInformation($"Client reconnected.");
                 }
+                client.Info.Connected = true;
                 return client;
             }
         }
@@ -229,7 +277,8 @@ namespace LumiTracker.OB.Services
             lock (_clientLock)
             {
                 if (!_connectedClients.TryGetValue(clientId, out client)) return;
-                client?.Close();
+                client.Close();
+                client.Info!.Connected = false;
             }
         }
 

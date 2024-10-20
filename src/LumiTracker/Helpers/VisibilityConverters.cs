@@ -131,4 +131,22 @@ namespace LumiTracker.Helpers
             throw new NotImplementedException();
         }
     }
+
+    public class HideNullValueConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (parameter is not string invisibleType)
+            {
+                throw new NotImplementedException();
+            }
+
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => value != null);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

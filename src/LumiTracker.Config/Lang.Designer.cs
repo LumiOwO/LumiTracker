@@ -340,6 +340,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 对局.
+        /// </summary>
+        public static string Duel {
+            get {
+                return ResourceManager.GetString("Duel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Edit Name.
         /// </summary>
         public static string EditDeckName {
@@ -610,11 +619,65 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 未开始.
+        /// </summary>
+        public static string OB_GameNotStarted {
+            get {
+                return ResourceManager.GetString("OB_GameNotStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 对局中.
+        /// </summary>
+        public static string OB_GameStarted {
+            get {
+                return ResourceManager.GetString("OB_GameStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 连接状态.
+        /// </summary>
+        public static string OB_Header_Connected {
+            get {
+                return ResourceManager.GetString("OB_Header_Connected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 对局情况.
+        /// </summary>
+        public static string OB_Header_GameStarted {
+            get {
+                return ResourceManager.GetString("OB_Header_GameStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 用户名.
+        /// </summary>
+        public static string OB_Header_Name {
+            get {
+                return ResourceManager.GetString("OB_Header_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Host.
         /// </summary>
         public static string OB_Host {
             get {
                 return ResourceManager.GetString("OB_Host", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 服务器地址已复制到剪贴板.
+        /// </summary>
+        public static string OB_HostCopiedToClipboard {
+            get {
+                return ResourceManager.GetString("OB_HostCopiedToClipboard", resourceCulture);
             }
         }
         
@@ -628,11 +691,38 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 图标显示数量.
+        /// </summary>
+        public static string OB_MaxTokens {
+            get {
+                return ResourceManager.GetString("OB_MaxTokens", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 我方视角.
+        /// </summary>
+        public static string OB_MyView {
+            get {
+                return ResourceManager.GetString("OB_MyView", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 内网穿透ID.
         /// </summary>
         public static string OB_NatId {
             get {
                 return ResourceManager.GetString("OB_NatId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 对方视角.
+        /// </summary>
+        public static string OB_OpView {
+            get {
+                return ResourceManager.GetString("OB_OpView", resourceCulture);
             }
         }
         
@@ -700,6 +790,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 未连接.
+        /// </summary>
+        public static string OBConnectState_None {
+            get {
+                return ResourceManager.GetString("OBConnectState_None", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reconnecting....
         /// </summary>
         public static string OBConnectState_Reconnecting {
@@ -736,6 +835,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 牌手.
+        /// </summary>
+        public static string Player {
+            get {
+                return ResourceManager.GetString("Player", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rank.
         /// </summary>
         public static string Rank {
@@ -768,15 +876,6 @@ namespace LumiTracker.Config {
         public static string SafeDeclaration {
             get {
                 return ResourceManager.GetString("SafeDeclaration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 服务器.
-        /// </summary>
-        public static string Server {
-            get {
-                return ResourceManager.GetString("Server", resourceCulture);
             }
         }
         

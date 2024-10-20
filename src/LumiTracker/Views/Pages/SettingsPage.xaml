@@ -320,7 +320,7 @@
                 Width="300"
                 TextWrapping="WrapWithOverflow"
                 d:Text="127.0.0.1"
-                Text="{Binding ViewModel.OBHost, Mode=TwoWay}"
+                Text="{Binding ViewModel.OBHost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 />
         
 
@@ -343,7 +343,7 @@
                 TextWrapping="WrapWithOverflow"
                 SpinButtonPlacementMode="Hidden"
                 d:Text="25251"
-                Value="{Binding ViewModel.OBPort, Mode=TwoWay}"
+                Value="{Binding ViewModel.OBPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 />
         </Grid>
 

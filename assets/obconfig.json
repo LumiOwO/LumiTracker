@@ -8,9 +8,8 @@
   "lang": "FollowSystem",
   "theme": "Dark",
 
+  "nat_id": "",
   "port": 25251,
   "max_tracked_tokens": 3,
-  "resource_dirs": {
-    "tokens": "D:/_data/七圣/test"
-  }
+  "tokens_dir": ""
 }

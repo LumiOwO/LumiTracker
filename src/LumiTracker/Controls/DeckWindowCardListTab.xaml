@@ -27,26 +27,26 @@
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <ctrls:ActionCardViewListItem
                 Value="{Binding Value, Mode=OneWay}"
-                ItemWidth="{Binding Width, 
-                        RelativeSource={RelativeSource AncestorType={x:Type Window}}
+                ItemWidth="{Binding WindowWidth, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}}
                         }"
-                ItemHeight="{Binding Height, 
-                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                ItemHeight="{Binding WindowHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}},
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.034
                         }"
-                CostFontSize="{Binding Height, 
-                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                CostFontSize="{Binding WindowHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}},
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.016
                         }"
-                NameFontSize="{Binding Height, 
-                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                NameFontSize="{Binding WindowHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}},
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.016
                         }"
-                CountFontSize="{Binding Height, 
-                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                CountFontSize="{Binding WindowHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}},
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.018
                         }"

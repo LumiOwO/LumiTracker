@@ -64,10 +64,10 @@ namespace LumiTracker.OB.ViewModels.Windows
 
             DuelViewItem = new NavigationViewItem()
             {
-                Icon = new SymbolIcon { Symbol = SymbolRegular.Info24 },
+                Icon = new SymbolIcon { Symbol = SymbolRegular.People24 },
                 TargetPageType = typeof(DuelPage)
             };
-            itemNameBinding = LocalizationExtension.Create("Start");
+            itemNameBinding = LocalizationExtension.Create("Duel");
             DuelViewItem.SetBinding(NavigationViewItem.ContentProperty, itemNameBinding);
 
             MenuItems = new () { StartViewItem, DuelViewItem };

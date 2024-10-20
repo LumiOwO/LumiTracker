@@ -32,7 +32,7 @@ namespace LumiTracker.OB.Services
 
         private string GetOrCreateClientId()
         {
-            string clientIdFilePath = Path.Combine(Configuration.OBWorkingDir, "GUID");
+            string clientIdFilePath = Path.Combine(Configuration.OBWorkingDir, "GUID.txt");
             if (File.Exists(clientIdFilePath))
             {
                 // Load existing client ID
@@ -126,6 +126,7 @@ namespace LumiTracker.OB.Services
         }
 
         // Send a message to the server
+        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);  // Initialize with 1 available slot
         public async Task SendMessageAsync(GameEventMessage message)
         {
             if (_client?.Connected != true)
@@ -134,17 +135,22 @@ namespace LumiTracker.OB.Services
                 return;
             }
 
+            await _lock.WaitAsync();  // Asynchronous lock acquisition
             try
             {
-                string json = JsonConvert.SerializeObject(message);
+                string json = JsonConvert.SerializeObject(message) + "\n";
                 byte[] data = Encoding.UTF8.GetBytes(json);
 
                 await _stream!.WriteAsync(data, 0, data.Length);
-                Configuration.Logger.LogDebug("[OBClientService] Message sent to server.");
+                // Configuration.Logger.LogDebug($"[OBClientService] Message sent to server: {json}");
             }
             catch (Exception ex)
             {
                 Configuration.Logger.LogError($"[OBClientService] Error sending message: {ex.Message}");
+            }
+            finally
+            {
+                _lock.Release();  // Release the lock
             }
         }
 

@@ -50,9 +50,6 @@ def main(publish_dir):
         "update_retries": 3,
         "lang": "FollowSystem",
         "theme": "Dark",
-        "resource_dirs": {
-            "tokens": ""
-        }
     }
     cfg.update(reset_configs)
 

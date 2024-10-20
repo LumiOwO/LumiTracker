@@ -1,9 +1,9 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.OB.ViewModels.Pages;
 using LumiTracker.ViewModels.Pages;
 using LumiTracker.ViewModels.Windows;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using System.IO;
 
 namespace LumiTracker.OB
@@ -13,17 +13,20 @@ namespace LumiTracker.OB
         private ScopeState          Scope;
         private GameEventHook       Hook;
         private DeckViewModel       DeckViewModel;
-        private DeckWindowViewModel DeckWindowViewModel;
+        public  DeckWindowViewModel DeckWindowViewModel { get; }
         private string              WorkingDir;
 
-        public OBGameWatcherProxy(ScopeState scope)
+        private ClientInfo ClientInfo;
+
+        public OBGameWatcherProxy(ScopeState scope, ClientInfo clientInfo)
         {
+            ClientInfo = clientInfo;
             Scope = scope;
             WorkingDir = Path.Combine(Configuration.OBWorkingDir, scope.Guid.ToString());
 
             Hook                = new GameEventHook();
             DeckViewModel       = new DeckViewModel(null, null);
-            DeckWindowViewModel = new DeckWindowViewModel(DeckViewModel, Hook);
+            DeckWindowViewModel = new DeckWindowViewModel(DeckViewModel, Hook, from_server: true);
 
             ResetOBData();
 
@@ -50,13 +53,14 @@ namespace LumiTracker.OB
 
         private void ResetOBData()
         {
+            // When this called, the tracked card list is already empty
+            // so this will set all tracked images to empty.png
             try
             {
-                if (Directory.Exists(WorkingDir))
+                if (!Directory.Exists(WorkingDir))
                 {
-                    Directory.Delete(WorkingDir, true);  // Recursively delete everything
+                    Directory.CreateDirectory(WorkingDir);
                 }
-                Directory.CreateDirectory(WorkingDir);
                 UpdateOBData();
                 Configuration.Logger.LogInformation($"OB data reset done at {WorkingDir}");
             }
@@ -70,9 +74,9 @@ namespace LumiTracker.OB
         {
             var tracked = DeckWindowViewModel.TrackedCards.Data;
             var it = tracked.GetEnumerator();
-            int max_cnt = Configuration.Get<int>("max_tracked_tokens");
-            JObject resource_dirs = Configuration.Get<JObject>("resource_dirs");
-            string tokens_dir = resource_dirs["tokens"]!.ToString();
+            int max_cnt = ClientInfo.ViewModel.MaxTrackedTokens;
+            string tokens_dir = ClientInfo.ViewModel.TokensIconDir;
+            bool has_tokens_dir = Directory.Exists(tokens_dir);
 
             for (int i = 1; i <= max_cnt; i++)
             {
@@ -84,14 +88,14 @@ namespace LumiTracker.OB
 
                 string imageFileForOBS = Path.Combine(WorkingDir, $"token{i}.png");
                 string countFileForOBS = Path.Combine(WorkingDir, $"token{i}.txt");
-                string imageSrcPath;
-                if (token_id >= 0)
+                string imageSrcPath = Path.Combine(Configuration.AssetsDir, "images", "empty.png");
+                if (token_id >= 0 && has_tokens_dir)
                 {
-                    imageSrcPath = Path.Combine(tokens_dir, $"{token_id}.png");
-                }
-                else
-                {
-                    imageSrcPath = Path.Combine(Configuration.AssetsDir, "images", "empty.png");
+                    string path = Path.Combine(tokens_dir, $"{token_id}.png");
+                    if (File.Exists(path))
+                    {
+                        imageSrcPath = path;
+                    }
                 }
 
                 try
@@ -117,11 +121,13 @@ namespace LumiTracker.OB
         private void OnGameStarted()
         {
             ResetOBData();
+            ClientInfo.GameStarted = true;
         }
 
         private void OnGameOver()
         {
             ResetOBData();
+            ClientInfo.GameStarted = false;
         }
 
         private void OnWindowWatcherStart(IntPtr hwnd)
