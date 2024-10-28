@@ -21,10 +21,10 @@ Steps to reproduce the behavior:
 **Environment**
 请描述你的电脑系统、游戏窗口分辨率
 例：Win10，1920x1080
-并将 `C:\Users\<你的用户名>\Documents\LumiTracker\log\error.log` 的内容粘贴到这里
+并将日志文件 `C:\Users\<你的用户名>\Documents\LumiTracker\log\error.log` 以附件形式上传
 Please describe your computer system and game window resolution.
 Example: Win10, 1920x1080
-And paste the contents of `C:\Users\<Your Username>\Documents\LumiTracker\log\error.log` here.
+And please upload the log file `C:\Users\<Your Username>\Documents\LumiTracker\log\error.log` as an attachment.
 
 **预期的正确表现**
 **Expected behavior**
