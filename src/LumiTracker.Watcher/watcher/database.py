@@ -149,6 +149,8 @@ class Database:
         handler = ActionCardHandler()
         handler.OnResize(CropBox(0, 0, 420, 720))
 
+        arcane_legends = []
+
         action_cards_dir = os.path.join(cfg.cards_dir, "actions")
         num_actions = len(csv_data)
         actions  = [None] * num_actions
@@ -207,6 +209,8 @@ class Database:
                 "type" : EActionCardType[row["type"]].value,
                 "cost" : (cost, cost_type),
             }
+            if action["type"] == EActionCardType.ArcaneLegend.value:
+                arcane_legends.append((card_id, image))
 
             ahashs[card_id]   = ahash
             dhashs[card_id]   = dhash
@@ -215,13 +219,15 @@ class Database:
         print(f"Loaded {len(ahashs)} images from {action_cards_dir}")
         self.data["actions"] = actions
 
+
         # extras
         extra_cards_dir = os.path.join(action_cards_dir, "extras")
         extra_image_names = os.listdir(extra_cards_dir)
-        num_extras = len(extra_image_names)
+        num_extras = len(extra_image_names) + len(arcane_legends) * 2
         extras = [None] * num_extras
         ahash_extras = [None] * num_extras
         dhash_extras = [None] * num_extras
+
         for extra_image_name in extra_image_names:
             info = extra_image_name[:-4] # remove ".png"
             parts = info.split('_')
@@ -243,7 +249,36 @@ class Database:
             ahash_extras[extra_id] = ahash
             dhash_extras[extra_id] = dhash
 
-        print(f"Loaded {len(ahash_extras)} images from {extra_cards_dir}")
+        boxes = [
+            (-22, 0, 315, 540), # my
+            (128, 50, 315, 540), # op
+        ]
+        for i, (mapped_id, image) in enumerate(arcane_legends):
+            for j, (left, top, width, height) in enumerate(boxes):
+                r = min(left + width, 420)
+                b = min(top + height, 720)
+                l = max(left, 0)
+                t = max(top, 0)
+                region = image[t:b, l:r]
+
+                buffer = np.zeros((height, width, 4), dtype=image.dtype)
+                if left < 0:
+                    buffer[-top:, -left:] = region
+                else:
+                    buffer[:720-top, :420-left] = region
+                buffer = cv2.resize(buffer, (420, 720), interpolation=cv2.INTER_LANCZOS4)
+                # cv2.imshow("name", buffer)
+                # cv2.waitKey(0)
+                handler.frame_buffer = buffer
+                ahash, dhash = handler.ExtractCardFeatures()
+
+                extra_id = i * 2 + j + len(extra_image_names)
+                extras[extra_id] = mapped_id
+                ahash_extras[extra_id] = ahash
+                dhash_extras[extra_id] = dhash
+
+        print(f"Added {len(ahash_extras)} extra images")
+
         ahashs += ahash_extras
         dhashs += dhash_extras
         self.data["extras"] = extras
