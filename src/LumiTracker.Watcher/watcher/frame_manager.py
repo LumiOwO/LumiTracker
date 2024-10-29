@@ -12,7 +12,7 @@ from .database import Database, SaveImage
 from .states import *
 
 class FrameManager:
-    def __init__(self, client_type, log_dir, test_on_resize):
+    def __init__(self, client_type=EClientType.YuanShen, log_dir="", test_on_resize=False):
         # database
         db = Database()
         db.Load()

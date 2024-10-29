@@ -51,6 +51,7 @@ class EGameEvent(enum.Enum):
     OP_CREATE_DECK    = enum.auto()
     MY_CREATE_HAND    = enum.auto() # eg. Furina
     OP_CREATE_HAND    = enum.auto()
+    VS_CHARACTERS     = enum.auto()
 
     GAME_EVENT_FIRST  = GAME_START
     GAME_EVENT_LAST   = OP_CREATE_HAND
@@ -73,6 +74,7 @@ class ERegionType(enum.Enum):
     CENTER     = enum.auto()
     FLOW_ANCHOR= enum.auto()
     MY_DECK    = enum.auto()
+    VS_ANCHOR  = enum.auto()
 
 class ERatioType(enum.Enum):
     E16_9  = 0

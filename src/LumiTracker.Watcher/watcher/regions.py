@@ -37,8 +37,9 @@ REGIONS = {
         ERegionType.CENTER     : ( 0.0700, 0.3380, 0.8600, 0.0500 ),
         ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3350, 0.1070, 0.3280 ), # (margin to digit center, margin to card top, card width, card height)
         ERegionType.MY_DECK    : ( 0.0000, 0.5550, 0.3250, 0.2750 ),
+        ERegionType.VS_ANCHOR  : ( 0.1355, 0.3595, 0.0870, 0.2585, 0.0090 ), # left, top, width, height, margin
     },
-    # 1920 x 1200
+    # 1920 x 1200, 1680 x 1050
     ERatioType.E16_10: {
         ERegionType.GAME_START : ( 0.4470, 0.4470, 0.1045, 0.0995 ),
         ERegionType.MY_PLAYED  : ( 0.1490, 0.2285, 0.1305, 0.3565 ),
@@ -49,6 +50,7 @@ REGIONS = {
         ERegionType.CENTER     : ( 0.0700, 0.3540, 0.8600, 0.0500 ),
         ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3550, 0.1035, 0.2850 ),
         ERegionType.MY_DECK    : ( 0.0000, 0.5500, 0.3250, 0.2500 ),
+        ERegionType.VS_ANCHOR  : ( 0.1350, 0.3725, 0.0870, 0.2335, 0.0094 ),
     },
     # 2560 × 1080, 2048 x 864
     ERatioType.E64_27: {
@@ -61,6 +63,7 @@ REGIONS = {
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0800, 0.3280 ),
         ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
+        ERegionType.VS_ANCHOR  : ( 0.2265, 0.3590, 0.0650, 0.2590, 0.0075 ),
     },
     # 3440 × 1440, 2150 x 900
     ERatioType.E43_18: {
@@ -73,6 +76,7 @@ REGIONS = {
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0780, 0.3280 ),
         ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
+        ERegionType.VS_ANCHOR  : ( 0.2285, 0.3590, 0.0645, 0.2590, 0.0070 ),
     },
     # 3840 x 1600, 1920 x 800
     ERatioType.E12_5: {
@@ -85,5 +89,6 @@ REGIONS = {
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0055, 0.3350, 0.0790, 0.3280 ),
         ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
+        ERegionType.VS_ANCHOR  : ( 0.2295, 0.3590, 0.0645, 0.2590, 0.0070 ),
     },
 }

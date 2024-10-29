@@ -3,7 +3,7 @@ import cv2
 from abc import ABC, abstractmethod
 
 from .config import LogWarning, cfg, LogDebug, override
-from .enums import EAnnType, EActionCard
+from .enums import EAnnType, EActionCard, ECharacterCard
 
 import itertools
 
@@ -389,6 +389,11 @@ def CardName(card_id, db, lang="zh-HANS"):
 def CardCost(card_id, db):
     return db["actions"][card_id]["cost"][0] if card_id >= 0 else -1
 
+def ChracterName(card_id, db, lang="zh-HANS", is_short=False):
+    if card_id < 0 or card_id >= ECharacterCard.NumCharacters.value:
+        return "None"
+    key = (lang + "_short") if is_short else lang
+    return db["characters"][card_id][key]
 
 class CardHandler(ABC):
     def __init__(self):
@@ -466,9 +471,10 @@ class CardHandler(ABC):
         def PackedResult():
             # _debug = True
             # if _debug:
+            #     NameFunc = CardName if self.ann_type_a == EAnnType.ACTIONS_A else ChracterName
             #     LogDebug(
-            #         card_a=CardName(card_id_a, db),
-            #         card_d=CardName(card_id_d, db),
+            #         card_a=NameFunc(card_id_a, db),
+            #         card_d=NameFunc(card_id_d, db),
             #         dists=(dists_a[:3], dists_d[:3]))
             return card_id, dist, (dists_a[:3], dists_d[:3])
 
