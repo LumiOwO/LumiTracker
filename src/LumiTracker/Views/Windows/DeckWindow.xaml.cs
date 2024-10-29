@@ -111,14 +111,14 @@ namespace LumiTracker.Views.Windows
             _snapper?.SetbOutside(bOutside);
             if (bOutside)
             {
-                toggle.IsChecked = true;
-                toggle.Visibility = toggleIcon.Visibility = Visibility.Collapsed;
+                ViewModel.IsChecked = true;
+                toggle.Visibility = Visibility.Collapsed;
                 ViewModel.MainContentHeightRatio = 1.0;
                 Topmost = false;
             }
             else
             {
-                toggle.Visibility = toggleIcon.Visibility = Visibility.Visible;
+                toggle.Visibility = Visibility.Visible;
                 ViewModel.MainContentHeightRatio = 0.45;
                 Topmost = true;
             }
@@ -147,12 +147,12 @@ namespace LumiTracker.Views.Windows
 
         private void OnChecked(object sender, RoutedEventArgs e)
         {
-            ViewModel.ToggleButtonIcon = SymbolRegular.ChevronDown48;
+            ViewModel.IsChecked = true;
         }
 
         private void OnUnchecked(object sender, RoutedEventArgs e)
         {
-            ViewModel.ToggleButtonIcon = SymbolRegular.ChevronUp48;
+            ViewModel.IsChecked = false;
         }
     }
 }

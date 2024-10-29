@@ -30,12 +30,11 @@
     </Window.Template>
 
     <Window.Resources>
-        <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
         <helpers:SizeWithRatioVariableConverter x:Key="SizeWithRatioVariableConverter" />
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <helpers:BooleanNotToVisibilityConverter x:Key="BooleanNotToVisibilityConverter" />
         <helpers:MultiBooleanAndToVisibilityConverter x:Key="MultiBooleanAndToVisibilityConverter" />
-        <helpers:BooleanNotConverter x:Key="BooleanNotConverter" />
 
         <SolidColorBrush x:Key="TabHeaderBackground"
             Color="#6aaaaaaa" />
@@ -72,7 +71,7 @@
                 <MultiBinding Converter="{StaticResource MultiBooleanAndToVisibilityConverter}"
                               ConverterParameter="Collapsed"
                               >
-                    <Binding ElementName="toggle" Path="IsChecked" />
+                    <Binding Path="ViewModel.IsChecked" />
                     <Binding Path="ViewModel.IsShowing" />
                 </MultiBinding>
             </Grid.Visibility>
@@ -167,26 +166,92 @@
         </Grid>
 
         <!-- Toggle -->
-        <ToggleButton 
-            Grid.Row="1"
+        <Grid
             x:Name="toggle" 
-            Content="{svs:Localization AppName}" 
-            HorizontalAlignment="Stretch"
-            Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.04}"
-            FontWeight="Bold" 
-            Checked="OnChecked"
-            Unchecked="OnUnchecked"
-            />
-        <ui:SymbolIcon 
             Grid.Row="1"
-            x:Name="toggleIcon" 
+            Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.04}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            >
+            
+        <ToggleButton 
+            Grid.Row="0"
+            Visibility="{Binding ViewModel.IsChecked,
+                Converter={StaticResource BooleanToVisibilityConverter},
+                ConverterParameter=Hidden,
+                Mode=OneWay
+                }"
+            IsChecked="{Binding ViewModel.IsChecked, Mode=TwoWay}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            FontWeight="Bold" 
+            Unchecked="OnUnchecked"
+            Margin="0,0,0,0"
+            >
+            <TextBlock 
+                Foreground="Black"
+                Text="{svs:Localization AppName}" 
+                FontSize="{Binding Height, 
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.016
+                    }"
+                />
+        </ToggleButton>
+        <ui:SymbolIcon 
+            Grid.Row="0"
+            Visibility="{Binding ViewModel.IsChecked,
+                Converter={StaticResource BooleanToVisibilityConverter},
+                ConverterParameter=Hidden,
+                Mode=OneWay
+                }"
             Foreground="#333333"
-            HorizontalAlignment="Right"
+            HorizontalAlignment="Left"
             VerticalAlignment="Center"
             FontWeight="Bold"
-            Margin="0,0,6,0" 
+            FontSize="{Binding Height, 
+                Converter={StaticResource SizeWithRatioConverter}, 
+                ConverterParameter=0.015
+                }"
+            Margin="4,0,0,0" 
             IsHitTestVisible="False"
-            Symbol="{Binding ViewModel.ToggleButtonIcon}" />
+            Symbol="ChevronLeft48" />
+
+        <ui:Button 
+            Grid.Row="0"
+            Visibility="{Binding ViewModel.IsChecked,
+                Converter={StaticResource BooleanNotToVisibilityConverter},
+                ConverterParameter=Hidden,
+                Mode=OneWay
+                }"
+            Click="OnChecked"
+            >
+
+            <ui:Button.Icon>
+                <ui:SymbolIcon 
+                    Foreground="White"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    FontSize="{Binding Height, 
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.015
+                        }"
+                    Margin="-8,0,0,0" 
+                    Symbol="ChevronRight48" />
+            </ui:Button.Icon>
+
+            <ui:SymbolIcon 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="{Binding Height, 
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.025
+                    }"
+                Margin="-7,3,-6,0" 
+                Symbol="PlayingCards20" />
+        </ui:Button>
+
+        </Grid>
 
     </Grid>
 </Window>

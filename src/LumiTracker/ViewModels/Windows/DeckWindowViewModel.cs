@@ -25,10 +25,10 @@ namespace LumiTracker.ViewModels.Windows
         private ScrollBarVisibility _VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
 
         [ObservableProperty]
-        private SymbolRegular _toggleButtonIcon = SymbolRegular.ChevronUp48;
+        private bool _isShowing = false;
 
         [ObservableProperty]
-        private bool _isShowing = false;
+        private bool _isChecked = true;
 
         [ObservableProperty]
         private LocalizationTextItem _deckWindowTitle = new ();
