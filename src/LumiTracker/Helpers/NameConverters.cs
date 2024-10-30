@@ -10,7 +10,7 @@ namespace LumiTracker.Helpers
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            string none = LocalizationSource.Instance["None"];
+            string none = $"<{LocalizationSource.Instance["UnknownDeck"]}>";
             if (values == null || values.Length != 3)
                 return none;
             if (!(values[0] is ObservableCollection<DeckInfo> deckInfos))

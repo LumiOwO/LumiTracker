@@ -199,6 +199,7 @@ namespace LumiTracker.Models
 
             var pairsToUpdate = new Dictionary<int, ActionCardView>();
             var keysToRemove  = new HashSet<int>();
+            int invalidCount  = 0;
             foreach (var card_id in card_ids)
             {
                 ActionCardView cardView;
@@ -207,6 +208,7 @@ namespace LumiTracker.Models
                     if (cardView.Count == 0)
                     {
                         Configuration.Logger.LogWarning($"[CardList.Remove] Count of card id {card_id} is 0.");
+                        invalidCount++;
                     }
                     else
                     {
@@ -217,11 +219,12 @@ namespace LumiTracker.Models
                         }
                     }
                 }
-                else if (Data.TryGetValue(card_id, out cardView!))
+                else if (Data.TryGetValue(card_id, out cardView))
                 {
                     if (cardView.Count == 0)
                     {
                         Configuration.Logger.LogWarning($"[CardList.Remove] Count of card id {card_id} is 0.");
+                        invalidCount++;
                     }
                     else
                     {
@@ -240,10 +243,29 @@ namespace LumiTracker.Models
                 else
                 {
                     Configuration.Logger.LogWarning($"[CardList.Remove] Card id {card_id} is not in the deck.");
+                    invalidCount++;
                 }
             }
-            OperationCount++;
+            if (invalidCount > 0 && Data.TryGetValue(-1, out ActionCardView unknownCardView))
+            {
+                int unknownCardCount = unknownCardView.Count;
+                if (invalidCount > unknownCardCount)
+                {
+                    Configuration.Logger.LogWarning($"[CardList.Remove] Number of invalid cards ({invalidCount}) > number of unknown cards ({unknownCardCount})");
+                    invalidCount = unknownCardCount;
+                }
+                unknownCardCount -= invalidCount;
+                unknownCardView.Count = unknownCardCount;
 
+                keysToRemove.Add(-1);
+                // Does not keep unknown cards if count == 0
+                if (unknownCardCount > 0)
+                {
+                    pairsToUpdate.Add(-1, unknownCardView);
+                }
+            }
+
+            OperationCount++;
             var Update = () =>
             {
                 Data.RemoveRange(keysToRemove);

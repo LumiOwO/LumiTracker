@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace LumiTracker.Config
 {
@@ -245,5 +246,41 @@ namespace LumiTracker.Config
     public class CustomConsoleFormatterOptions : ConsoleFormatterOptions
     {
         // Define any custom options here if needed
+    }
+
+    public class CustomDateTimeConverter : JsonConverter<DateTime>
+    {
+        private readonly string _dateFormat;
+
+        public static readonly DateTime MinTime = new DateTime(2024, 10, 31, 0, 0, 0); // 2024/10/31 00:00:00
+
+        public CustomDateTimeConverter(string dateFormat)
+        {
+            _dateFormat = dateFormat;
+        }
+
+        public override void WriteJson(JsonWriter writer, DateTime value, JsonSerializer serializer)
+        {
+            writer.WriteValue(value.ToString(_dateFormat, CultureInfo.InvariantCulture));
+        }
+
+        public override DateTime ReadJson(JsonReader reader, Type objectType, DateTime existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            DateTime fallbackValue = hasExistingValue ? existingValue : MinTime;
+            try
+            {
+                if (reader.TokenType == JsonToken.Null || reader.Value == null)
+                {
+                    return fallbackValue;
+                }
+                var dateString = reader.Value.ToString()!;
+                return DateTime.ParseExact(dateString, _dateFormat, CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError(ex.ToString());
+                return fallbackValue;
+            }
+        }
     }
 }

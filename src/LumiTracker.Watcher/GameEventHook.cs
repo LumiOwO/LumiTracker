@@ -45,6 +45,10 @@ namespace LumiTracker.Watcher
 
     public delegate void OnLogFPSCallback(float fps);
 
+    public delegate void OnMyCharactersCallback(int[] character_ids);
+
+    public delegate void OnOpCharactersCallback(int[] character_ids);
+
     public delegate void ExceptionHandlerCallback(Exception ex);
 
     public delegate void OnGameEventMessageCallback(GameEventMessage message);
@@ -65,6 +69,8 @@ namespace LumiTracker.Watcher
         public event OnUnsupportedRatioCallback?   UnsupportedRatio;
         public event OnCaptureTestDoneCallback?    CaptureTestDone;
         public event OnLogFPSCallback?             LogFPS;
+        public event OnMyCharactersCallback?       MyCharacters;
+        public event OnOpCharactersCallback?       OpCharacters;
         public event ExceptionHandlerCallback?     ExceptionHandler;
         public event OnGameEventMessageCallback?   GameEventMessage;
 
@@ -138,6 +144,16 @@ namespace LumiTracker.Watcher
             LogFPS?.Invoke(fps);
         }
 
+        protected void InvokeMyCharacters(int[] character_ids)
+        {
+            MyCharacters?.Invoke(character_ids);
+        }
+
+        protected void InvokeOpCharacters(int[] character_ids)
+        {
+            OpCharacters?.Invoke(character_ids);
+        }
+
         protected void InvokeException(Exception e)
         {
             ExceptionHandler?.Invoke(e);
@@ -164,6 +180,8 @@ namespace LumiTracker.Watcher
             other.UnsupportedRatio   += InvokeUnsupportedRatio;
             other.CaptureTestDone    += InvokeCaptureTestDone;
             other.LogFPS             += InvokeLogFPS;
+            other.MyCharacters       += InvokeMyCharacters;
+            other.OpCharacters       += InvokeOpCharacters;
             other.ExceptionHandler   += InvokeException;
             other.GameEventMessage   += InvokeGameEventMessage;
         }
@@ -245,6 +263,18 @@ namespace LumiTracker.Watcher
                 //Configuration.Logger.LogDebug("[GameEventHook] OnLogFPS");
                 float fps = message.Data["fps"].ToObject<float>()!;
                 InvokeLogFPS(fps);
+            }
+            else if (type == EGameEvent.MY_CHARACTERS)
+            {
+                Configuration.Logger.LogDebug("[GameEventHook] OnMyCharacters");
+                int[] character_ids = message.Data["cards"].ToObject<int[]>()!;
+                InvokeMyCharacters(character_ids);
+            }
+            else if (type == EGameEvent.OP_CHARACTERS)
+            {
+                Configuration.Logger.LogDebug("[GameEventHook] OnOpCharacters");
+                int[] character_ids = message.Data["cards"].ToObject<int[]>()!;
+                InvokeOpCharacters(character_ids);
             }
             else
             {

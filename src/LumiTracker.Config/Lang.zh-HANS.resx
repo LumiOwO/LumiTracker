@@ -516,4 +516,15 @@
   <data name="OBConnectState_Reconnecting" xml:space="preserve">
     <value>重新连接中...</value>
   </data>
+  <data name="AutoSelectActiveDeck" xml:space="preserve">
+    <value>自动选择出战牌组</value>
+  </data>
+  <data name="AutoSelectActiveDeck_ToolTip" xml:space="preserve">
+    <value>1. 对局开始时，记牌器会识别我方的三名出战角色，并根据角色在上方的列表中搜索。
+2. 若存在角色相同的牌组，则选取最后修改的那一套；不同的角色顺序被视为不同的牌组。
+3. 出战牌组将会被高亮显示。</value>
+  </data>
+  <data name="UnknownDeck" xml:space="preserve">
+    <value>未知牌组</value>
+  </data>
 </root>

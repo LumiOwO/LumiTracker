@@ -51,7 +51,6 @@ class EGameEvent(enum.Enum):
     OP_CREATE_DECK    = enum.auto()
     MY_CREATE_HAND    = enum.auto() # eg. Furina
     OP_CREATE_HAND    = enum.auto()
-    VS_CHARACTERS     = enum.auto()
 
     GAME_EVENT_FIRST  = GAME_START
     GAME_EVENT_LAST   = OP_CREATE_HAND
@@ -60,6 +59,8 @@ class EGameEvent(enum.Enum):
     UNSUPPORTED_RATIO = enum.auto()
     CAPTURE_TEST      = enum.auto()
     LOG_FPS           = enum.auto()
+    MY_CHARACTERS     = enum.auto()
+    OP_CHARACTERS     = enum.auto()
 
     # Events for server
     INITIAL_DECK      = enum.auto()

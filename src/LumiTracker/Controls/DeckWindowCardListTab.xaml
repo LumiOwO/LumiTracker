@@ -19,6 +19,9 @@
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <helpers:MultiBooleanAndToVisibilityConverter x:Key="MultiBooleanAndToVisibilityConverter" />
         <helpers:GetActiveDeckNameConverter x:Key="GetActiveDeckNameConverter" />
+        <helpers:HideNonPositiveIntValueConverter x:Key="HideNonPositiveIntValueConverter" />
+        <helpers:HidePositiveIntValueConverter x:Key="HidePositiveIntValueConverter" />
+
 
         <SolidColorBrush 
             x:Key="MainContentBackground"
@@ -83,14 +86,42 @@
             MouseLeave="OnMouseLeave"
         />
 
-        <!-- Round Text -->
+        <!-- Game Not Started -->
         <TextBlock
             Grid.Row="1"
             Margin="0, 5, 0, 5"
             HorizontalAlignment="Center"
             VerticalAlignment="Stretch"
-            Visibility="{Binding ViewModel.GameStarted,
+            Visibility="{Binding ViewModel.GameNotStarted,
                     Converter={StaticResource BooleanToVisibilityConverter},
+                    ConverterParameter=Hidden
+                    }"
+            FontSize="{Binding WindowHeight, 
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.015
+                    }"
+            >
+            <Run 
+                Foreground="DarkGray"
+                Text="{svs:Localization GameNotStarted}"
+            />
+        </TextBlock>
+
+        <Grid 
+            Grid.Row="1"
+            Visibility="{Binding ViewModel.GameStarted,
+                Converter={StaticResource BooleanToVisibilityConverter},
+                ConverterParameter=Hidden
+                }"
+            >
+
+        <!-- Round Text -->
+        <TextBlock
+            Margin="0, 5, 0, 5"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Stretch"
+            Visibility="{Binding ViewModel.Round,
+                    Converter={StaticResource HideNonPositiveIntValueConverter},
                     ConverterParameter=Hidden
                     }"
             FontSize="{Binding WindowHeight, 
@@ -108,16 +139,16 @@
                 Text="{Binding ViewModel.Round}"
                 />
         </TextBlock>
-
+        
+        <!-- Deck Name -->
         <TextBlock
-            Grid.Row="1"
             Margin="0, 5, 0, 5"
             HorizontalAlignment="Center"
             VerticalAlignment="Stretch"
             TextWrapping="NoWrap"
             TextTrimming="CharacterEllipsis"
-            Visibility="{Binding ViewModel.GameNotStarted,
-                    Converter={StaticResource BooleanToVisibilityConverter},
+            Visibility="{Binding ViewModel.Round,
+                    Converter={StaticResource HidePositiveIntValueConverter},
                     ConverterParameter=Hidden
                     }"
             FontSize="{Binding WindowHeight, 
@@ -147,5 +178,8 @@
                 </Run.Text>
             </Run>
         </TextBlock>
+
+        </Grid>
+
     </Grid>
 </UserControl>

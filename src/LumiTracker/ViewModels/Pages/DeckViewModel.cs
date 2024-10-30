@@ -52,6 +52,10 @@ namespace LumiTracker.ViewModels.Pages
         [JsonProperty("characters")]
         public int[] Characters = [];
 
+        [JsonProperty("last_modified")]
+        [JsonConverter(typeof(CustomDateTimeConverter), "yyyy/MM/dd HH:mm:ss")]
+        public DateTime LastModified = CustomDateTimeConverter.MinTime;
+
         [ObservableProperty]
         [property: JsonIgnore]
         private FontWeight _textWeight = FontWeights.Light;
@@ -82,7 +86,7 @@ namespace LumiTracker.ViewModels.Pages
                 DeckInfos[oldValue].TextWeight = FontWeights.Light;
                 DeckInfos[oldValue].TextColor  = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
             }
-            if (newValue >= 0)
+            if (newValue >= 0 && newValue < DeckInfos.Count)
             {
                 DeckInfos[newValue].TextWeight = FontWeights.Bold;
                 DeckInfos[newValue].TextColor  = HighlightColor;
@@ -92,7 +96,7 @@ namespace LumiTracker.ViewModels.Pages
 
     enum EControlButtonType : int
     {
-        SetAsActiveDeck,
+        //SetAsActiveDeck,
         EditDeckName,
         ReimportDeck,
         ShareDeck,
@@ -176,13 +180,13 @@ namespace LumiTracker.ViewModels.Pages
 
             /////////////////////////
             // Init buttons
-            Buttons[(int)EControlButtonType.SetAsActiveDeck] = new ControlButton(
-                textKey    : "SetAsActiveDeck",
-                icon       : SymbolRegular.Checkmark24,
-                command    : SetAsActiveDeckClickedCommand,
-                appearance : ControlAppearance.Caution,
-                isEnabled  : false
-            );
+            //Buttons[(int)EControlButtonType.SetAsActiveDeck] = new ControlButton(
+            //    textKey    : "SetAsActiveDeck",
+            //    icon       : SymbolRegular.Checkmark24,
+            //    command    : SetAsActiveDeckClickedCommand,
+            //    appearance : ControlAppearance.Caution,
+            //    isEnabled  : false
+            //);
             Buttons[(int)EControlButtonType.EditDeckName] = new ControlButton(
                 textKey    : "EditDeckName",
                 icon       : SymbolRegular.Pen24,
@@ -233,8 +237,8 @@ namespace LumiTracker.ViewModels.Pages
                 return;
             }
             UserDeckList.DeckInfos   = userDecks.DeckInfos;
-            UserDeckList.ActiveIndex = userDecks.ActiveIndex;
-            SelectedDeckIndex        = userDecks.ActiveIndex;
+            UserDeckList.ActiveIndex = Math.Clamp(userDecks.ActiveIndex, -1, UserDeckList.DeckInfos.Count - 1);
+            SelectedDeckIndex        = UserDeckList.ActiveIndex;
         }
 
         private void Select(int index)
@@ -309,7 +313,7 @@ namespace LumiTracker.ViewModels.Pages
             return true;
         }
 
-        private void SaveDeckList()
+        public void SaveDeckList()
         {
             Configuration.SaveJObject(JObject.FromObject(UserDeckList), UserDecksDescPath);
         }
@@ -383,6 +387,7 @@ namespace LumiTracker.ViewModels.Pages
                 bool success = DecodeShareCode(info, sharecode);
                 if (success)
                 {
+                    info.LastModified = DateTime.Now;
                     SaveDeckList();
                 }
                 else
@@ -450,6 +455,7 @@ namespace LumiTracker.ViewModels.Pages
                     info.Name = deckName;
                     UserDeckList.DeckInfos.Add(info);
                     SelectedDeckIndex = UserDeckList.DeckInfos.Count - 1;
+                    info.LastModified = DateTime.Now;
                     SaveDeckList();
                 }
                 else
@@ -508,7 +514,15 @@ namespace LumiTracker.ViewModels.Pages
 
         public void OnNavigatedTo()
         {
-
+            int ActiveIndex = UserDeckList.ActiveIndex;
+            if (ActiveIndex >= 0 && ActiveIndex < UserDeckList.DeckInfos.Count)
+            {
+                SelectedDeckIndex = ActiveIndex;
+            }
+            else if (SelectedDeckIndex < 0 && UserDeckList.DeckInfos.Count > 0)
+            {
+                SelectedDeckIndex = 0;
+            }
         }
 
         public void OnNavigatedFrom() 

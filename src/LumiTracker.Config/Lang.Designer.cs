@@ -106,6 +106,26 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto Active Deck.
+        /// </summary>
+        public static string AutoSelectActiveDeck {
+            get {
+                return ResourceManager.GetString("AutoSelectActiveDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1. When the duel starts, LumiTracker will detect our three characters and search for the matching deck in the list above.
+        ///2. If there are decks with the same characters, the one that was most recently modified will be chosen; decks with different character orders will be regarded as separate.
+        ///3. The active deck will be highlighted..
+        /// </summary>
+        public static string AutoSelectActiveDeck_ToolTip {
+            get {
+                return ResourceManager.GetString("AutoSelectActiveDeck_ToolTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bilibili.
         /// </summary>
         public static string BiliBiliLink {
@@ -1014,6 +1034,15 @@ namespace LumiTracker.Config {
         public static string UnknownCard {
             get {
                 return ResourceManager.GetString("UnknownCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown Deck.
+        /// </summary>
+        public static string UnknownDeck {
+            get {
+                return ResourceManager.GetString("UnknownDeck", resourceCulture);
             }
         }
         

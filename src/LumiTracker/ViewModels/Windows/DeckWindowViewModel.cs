@@ -1,6 +1,4 @@
-﻿using Wpf.Ui.Controls;
-
-using LumiTracker.Config;
+﻿using LumiTracker.Config;
 using LumiTracker.Models;
 using System.Windows.Controls;
 using LumiTracker.ViewModels.Pages;
@@ -55,8 +53,6 @@ namespace LumiTracker.ViewModels.Windows
             EActionCard.TaroumarusSavings,
         ];
 
-        public string ShareCodeOverride { get; set; } = "";
-
         // controls
         [ObservableProperty]
         private bool _gameStarted = false;
@@ -76,7 +72,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private GameEventHook _hook;
 
-        public DeckWindowViewModel(DeckViewModel deckViewModel, GameEventHook hook, bool from_server = false)
+        public DeckWindowViewModel(DeckViewModel deckViewModel, GameEventHook hook)
         {
             var binding = LocalizationExtension.Create("DeckWindowTitle");
             binding.Converter = new OverlayWindowTitleNameConverter();
@@ -94,13 +90,13 @@ namespace LumiTracker.ViewModels.Windows
             _hook.MyCardsCreateDeck  += OnMyCardsCreateDeck;
             _hook.OpCardsCreateDeck  += OnOpCardsCreateDeck;
 
+            _hook.MyCharacters       += OnMyCharacters;
+            _hook.OpCharacters       += OnOpCharacters;
             _hook.WindowWatcherExit  += OnWindowWatcherExit;
 
             Reset(gameStart: false);
-            _from_server = from_server;
         }
 
-        private readonly bool _from_server;
         private void Reset(bool gameStart)
         {
             MyActionCardsPlayed = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
@@ -111,26 +107,7 @@ namespace LumiTracker.ViewModels.Windows
             if (gameStart)
             {
                 MyDeck = new CardList(Enumerable.Repeat(-1, 30).ToArray(), inGame: true);
-
-                // TODO: auto detect active deck
-                // TODO: remove from_server
-                if (!_from_server)
-                {
-                    string sharecode = ShareCodeOverride;
-                    int activeIndex = DeckViewModel.UserDeckList.ActiveIndex;
-                    if (sharecode == "" && activeIndex >= 0)
-                    {
-                        sharecode = DeckViewModel.UserDeckList.DeckInfos[activeIndex].ShareCode;
-                    }
-                    if (sharecode == "")
-                    {
-                        Configuration.Logger.LogWarning($"Deck list is empty.");
-                    }
-                    else
-                    {
-                        InitDeckOnGameStart(sharecode);
-                    }
-                }
+                DeckViewModel.UserDeckList.ActiveIndex = -1;
             }
             else
             {
@@ -221,6 +198,51 @@ namespace LumiTracker.ViewModels.Windows
         private void OnOpCardsCreateDeck(int[] card_ids)
         {
 
+        }
+
+        private void OnMyCharacters(int[] card_ids)
+        {
+            if (card_ids.Length != 3)
+            {
+                Configuration.Logger.LogError($"Number of my characters is not 3!");
+                return;
+            }
+
+            var sortedDeckInfos = DeckViewModel.UserDeckList.DeckInfos
+                .Select((info, index) => new { Info = info, Index = index })
+                .OrderByDescending(x => x.Info.LastModified);
+
+            bool found = false;
+            foreach (var item in sortedDeckInfos)
+            {
+                var info = item.Info;
+                if (info.Characters.Length == 3
+                    && card_ids[0] == info.Characters[0]
+                    && card_ids[1] == info.Characters[1]
+                    && card_ids[2] == info.Characters[2] )
+                {
+                    InitDeckOnGameStart(info.ShareCode);
+                    DeckViewModel.UserDeckList.ActiveIndex = item.Index;
+                    DeckViewModel.SaveDeckList();
+                    Configuration.Logger.LogInformation($"Set deck[{item.Index}] as active deck.");
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                Configuration.Logger.LogInformation($"Characters tuple ({card_ids[0]}, {card_ids[1]}, {card_ids[2]}) is not found in the deck list.");
+            }
+        }
+
+        private void OnOpCharacters(int[] card_ids)
+        {
+            if (card_ids.Length != 6)
+            {
+                Configuration.Logger.LogError($"Number of (my + op) characters is not 6!");
+                return;
+            }
         }
 
         private void OnWindowWatcherExit()

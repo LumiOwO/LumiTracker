@@ -132,6 +132,42 @@ namespace LumiTracker.Helpers
         }
     }
 
+    public class HideNonPositiveIntValueConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(value is int intValue && parameter is string invisibleType))
+            {
+                throw new NotImplementedException();
+            }
+
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => intValue > 0);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class HidePositiveIntValueConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(value is int intValue && parameter is string invisibleType))
+            {
+                throw new NotImplementedException();
+            }
+
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => intValue <= 0);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class HideNullValueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

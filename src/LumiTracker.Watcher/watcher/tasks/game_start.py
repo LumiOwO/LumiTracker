@@ -3,7 +3,7 @@ from .base import TaskBase
 from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType
 from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS
-from ..feature import CropBox, ExtractFeature_Control, CharacterCardHandler
+from ..feature import CropBox, ExtractFeature_Control, CharacterCardHandler, ChracterName
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
@@ -93,8 +93,15 @@ class GameStartTask(TaskBase):
                 self.Reset()
 
     def DetectCharacters(self):
-        detected = True
+        my_ctx = [0, 0] # prev, cur
+        op_ctx = [0, 0]
+
         for i in range(6):
+            ctx = my_ctx if i < 3 else op_ctx
+            if self.cards[i] >= 0:
+                ctx[0] += 1
+                continue
+
             offset = self.vs_left_offsets[i]
             buffer = self.frame_buffer[
                 self.vs_anchor_box.top  : self.vs_anchor_box.bottom, 
@@ -107,15 +114,20 @@ class GameStartTask(TaskBase):
             # record last detected card_id
             if card_id >= 0:
                 self.cards[i] = card_id
+                ctx[1] += 1
 
-            if self.cards[i] < 0:
-                detected = False
-
-        # TODO: separate my & op, because PVE does not have op characters
-        if detected:
+        my_sum = sum(my_ctx)
+        if my_ctx[1] > 0 and my_sum == 3:
             LogInfo(
-                type=EGameEvent.VS_CHARACTERS.name,
-                my=self.cards[:3],
-                op=self.cards[3:],
+                type=EGameEvent.MY_CHARACTERS.name,
+                cards=self.cards[:3],
+                names=[ChracterName(card_id, self.db) for card_id in self.cards[:3]],
                 )
-            self.Reset()
+
+        op_sum = sum(op_ctx)
+        if my_sum == 3 and op_ctx[1] > 0 and op_sum == 3:
+            LogInfo(
+                type=EGameEvent.OP_CHARACTERS.name,
+                cards=self.cards,
+                names=[ChracterName(card_id, self.db) for card_id in self.cards[3:]],
+                )

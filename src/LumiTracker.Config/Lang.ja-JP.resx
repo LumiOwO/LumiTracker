@@ -426,4 +426,15 @@
   <data name="OBConnectState_Reconnecting" xml:space="preserve">
     <value>再接続中...</value>
   </data>
+  <data name="AutoSelectActiveDeck" xml:space="preserve">
+    <value>自動でデッキを選択</value>
+  </data>
+  <data name="AutoSelectActiveDeck_ToolTip" xml:space="preserve">
+    <value>1．対局が始まると、記牌器は我々の3名の出撃キャラクターを識別し、上のリストでキャラクターに基づいて検索を行います。
+2．同じキャラクターを持つデッキが存在する場合、最も最近修正されたものが選ばれます；異なるキャラクターの順序は別のデッキと見なされます。
+3．出撃デッキはハイライト表示されます。</value>
+  </data>
+  <data name="UnknownDeck" xml:space="preserve">
+    <value>未知のデッキ</value>
+  </data>
 </root>

@@ -123,6 +123,8 @@ namespace LumiTracker.Config
         UNSUPPORTED_RATIO,
         CAPTURE_TEST,
         LOG_FPS,
+        MY_CHARACTERS,
+        OP_CHARACTERS,
 
         // Events for server
         INITIAL_DECK,

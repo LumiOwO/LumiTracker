@@ -573,4 +573,15 @@
   <data name="OB_OpView" xml:space="preserve">
     <value>对方视角</value>
   </data>
+  <data name="UnknownDeck" xml:space="preserve">
+    <value>Unknown Deck</value>
+  </data>
+  <data name="AutoSelectActiveDeck" xml:space="preserve">
+    <value>Auto Active Deck</value>
+  </data>
+  <data name="AutoSelectActiveDeck_ToolTip" xml:space="preserve">
+    <value>1. When the duel starts, LumiTracker will detect our three characters and search for the matching deck in the list above.
+2. If there are decks with the same characters, the one that was most recently modified will be chosen; decks with different character orders will be regarded as separate.
+3. The active deck will be highlighted.</value>
+  </data>
 </root>

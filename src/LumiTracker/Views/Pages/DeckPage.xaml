@@ -112,7 +112,7 @@
                         FontSize="{Binding ActualHeight,
                             RelativeSource={RelativeSource AncestorType={x:Type ListView}},
                             Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.036
+                            ConverterParameter=0.0425
                             }"
                         />
                 </TextBlock>
@@ -214,31 +214,88 @@
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
+
+
+            <Grid
+                Grid.Column="0"
+                Margin="0,4,0,0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                Height="{Binding ActualHeight,
+                    RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.98
+                    }"
+                >
             
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
             <!-- Deck List -->
             <Border 
+                Grid.Row="0"
                 BorderBrush="#5aaaaaaa" 
                 BorderThickness="0.7"
                 Background="{StaticResource MainContentBackground}"
                 >
                 <ui:ListView
-                    Grid.Column="0"
                     x:Name="UserDeckListView"
                     Margin="0, 0, 0, 2"
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                     ItemsSource="{Binding ViewModel.UserDeckList.DeckInfos}"
                     ItemTemplate="{StaticResource DeckInfoTemplate}"
-                    Height="{Binding ActualHeight,
-                        RelativeSource={RelativeSource AncestorType={x:Type Grid}},
-                        Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.98
-                        }"
                     SelectedIndex="{Binding ViewModel.SelectedDeckIndex, Mode=TwoWay}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Top">
 
                 </ui:ListView>
             </Border>
+
+            <StackPanel 
+                Grid.Row="1"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Margin="0,2,0,0"
+                Orientation="Horizontal"
+                ToolTipService.InitialShowDelay="200"
+                ToolTipService.BetweenShowDelay="500"
+                >
+                <ToolTipService.ToolTip>
+                    <ToolTip MaxWidth="415"
+                        Placement="MousePoint">
+                        <TextBlock
+                            FontSize="12"
+                            TextWrapping="Wrap"
+                            Text="{svs:Localization AutoSelectActiveDeck_ToolTip}" />
+                    </ToolTip>
+                </ToolTipService.ToolTip>
+                <ui:SymbolIcon 
+                    Symbol="Info24"
+                    FontSize="{Binding ActualHeight,
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.022
+                        }"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="DarkGray"
+                    />
+                
+                <TextBlock
+                    Text="{svs:Localization AutoSelectActiveDeck}"
+                    Margin="2,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="DarkGray"
+                    FontSize="{Binding ActualHeight,
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.022
+                        }"
+                    />
+            </StackPanel>
+
+            </Grid>
 
             <!-- Buttons -->
             <ItemsControl
@@ -256,7 +313,7 @@
                     ConverterParameter=0.98
                     }"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Top">
+                VerticalAlignment="Stretch">
                 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
