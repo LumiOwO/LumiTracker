@@ -76,7 +76,7 @@
 
         <ui:ListView
             Grid.Row="0"
-            ScrollViewer.VerticalScrollBarVisibility="{Binding ViewModel.VerticalScrollBarVisibility}"
+            ScrollViewer.VerticalScrollBarVisibility="{Binding VerticalScrollBarVisibility}"
             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
             MaxWidth="{Binding WindowWidth}"
             ItemsSource="{Binding CardList.Data.CollectionView}"

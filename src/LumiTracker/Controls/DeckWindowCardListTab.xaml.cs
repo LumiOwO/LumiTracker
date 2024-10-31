@@ -47,6 +47,15 @@ namespace LumiTracker.Controls
             set { SetValue(WindowWidthProperty, value); }
         }
 
+        public static readonly DependencyProperty VerticalScrollBarVisibilityProperty = DependencyProperty.Register(
+            "VerticalScrollBarVisibility", typeof(ScrollBarVisibility), typeof(DeckWindowCardListTab), new PropertyMetadata(ScrollBarVisibility.Hidden));
+
+        public ScrollBarVisibility VerticalScrollBarVisibility
+        {
+            get { return (ScrollBarVisibility)GetValue(VerticalScrollBarVisibilityProperty); }
+            set { SetValue(VerticalScrollBarVisibilityProperty, value); }
+        }
+
         public DeckWindowCardListTab()
         {
             InitializeComponent();
@@ -59,12 +68,12 @@ namespace LumiTracker.Controls
 
         private void OnMouseEnter(object sender, MouseEventArgs e)
         {
-            ViewModel.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
         }
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
-            ViewModel.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
         }
     }
 }

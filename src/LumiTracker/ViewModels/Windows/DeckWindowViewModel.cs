@@ -20,9 +20,6 @@ namespace LumiTracker.ViewModels.Windows
         private double _mainContentHeightRatio = 0.0;
 
         [ObservableProperty]
-        private ScrollBarVisibility _VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
-
-        [ObservableProperty]
         private bool _isShowing = false;
 
         [ObservableProperty]

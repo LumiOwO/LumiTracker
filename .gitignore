@@ -448,7 +448,5 @@ FodyWeavers.xsd
 /watcher
 /watcher/
 /innosetup
-*.zip
-*.7z
 .vscode
 /assets/images

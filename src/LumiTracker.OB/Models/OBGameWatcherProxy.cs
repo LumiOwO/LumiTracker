@@ -26,7 +26,7 @@ namespace LumiTracker.OB
 
             Hook                = new GameEventHook();
             DeckViewModel       = new DeckViewModel(null, null);
-            DeckWindowViewModel = new DeckWindowViewModel(DeckViewModel, Hook, from_server: true);
+            DeckWindowViewModel = new DeckWindowViewModel(DeckViewModel, Hook);
 
             ResetOBData();
 

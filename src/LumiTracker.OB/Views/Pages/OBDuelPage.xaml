@@ -36,7 +36,11 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="{Binding ActualHeight,
+                RelativeSource={RelativeSource AncestorType={x:Type Page}},
+                Converter={StaticResource SizeWithRatioConverter}, 
+                ConverterParameter=0.940
+                }" />
         </Grid.RowDefinitions>
 
         <!--my-->
@@ -90,7 +94,7 @@
             WindowHeight="{Binding ActualHeight,
                 RelativeSource={RelativeSource AncestorType={x:Type Border}},
                 Converter={StaticResource SizeWithRatioConverter}, 
-                ConverterParameter=1.25
+                ConverterParameter=1.45
                 }"
             WindowWidth="{Binding ActualWidth,
                 RelativeSource={RelativeSource AncestorType={x:Type Border}}
@@ -160,7 +164,7 @@
                 WindowHeight="{Binding ActualHeight,
                     RelativeSource={RelativeSource AncestorType={x:Type Border}},
                     Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=1.25
+                    ConverterParameter=1.45
                     }"
                 WindowWidth="{Binding ActualWidth,
                     RelativeSource={RelativeSource AncestorType={x:Type Border}}
