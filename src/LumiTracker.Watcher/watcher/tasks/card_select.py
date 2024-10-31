@@ -47,7 +47,7 @@ class CardSelectTask(CenterCropTask):
             if card_id >= 0:
                 self.cards[i] = card_id
         
-        if cfg.DEBUG and valid:
+        if cfg.DEBUG and valid and False:
             LogDebug(
                 cards=self.cards,
                 names=[CardName(card, self.db) for card in self.cards])

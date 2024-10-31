@@ -36,7 +36,7 @@ class CardPlayedTask(TaskBase):
     @override
     def Tick(self):
         card_id, dist, dists = self.card_handler.Update(self.frame_buffer, self.db)
-        if cfg.DEBUG:
+        if cfg.DEBUG and False:
             # if (self.event_type == EGameEvent.MY_PLAYED) and True: #(card_id != -1):
                 # SaveImage(self.card_handler.region_buffer, os.path.join(cfg.debug_dir, "save", f"{self.event_type.name}{self.fm.frame_count}.png"))
             if (True) and (card_id != -1):

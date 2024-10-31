@@ -128,7 +128,7 @@ namespace LumiTracker.ViewModels.Windows
 
             // Update the initial deck
             MyDeck.Remove(Enumerable.Repeat(-1, 30).ToArray(), keep_zero: false);
-            MyDeck.Add(cards);
+            MyDeck.Add(cards[3..]);
 
             // Try to message to server
             if (_hook is GameWatcher gameWatcher)
