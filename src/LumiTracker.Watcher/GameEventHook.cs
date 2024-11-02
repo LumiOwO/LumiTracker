@@ -276,7 +276,7 @@ namespace LumiTracker.Watcher
                 int[] character_ids = message.Data["cards"].ToObject<int[]>()!;
                 InvokeOpCharacters(character_ids);
             }
-            else
+            else if (type != EGameEvent.NONE)
             {
                 string game_event_name = type.ToString();
                 Configuration.Logger.LogWarning($"[GameEventHook] Enum {game_event_name} defined but not handled: {game_event_name}\n{message.Data}");
