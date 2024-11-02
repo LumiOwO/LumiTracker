@@ -66,6 +66,7 @@
     <Exec Command="copy /Y $(TargetDir)..\Utils.bat $(PublishDir)..\Utils.bat" />
     <Exec Command="copy /Y $(SolutionDir)dev_assets\README.txt $(PublishDir)..\使用说明.txt" />
     <Exec Command="copy /Y $(SolutionDir)dev_assets\README.txt $(PublishDir)..\README.txt" />
+    <Exec Command="copy /Y $(SolutionDir)dev_assets\info.bat $(PublishDir)info.bat" />
 
   </Target>
 
