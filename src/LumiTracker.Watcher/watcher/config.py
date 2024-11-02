@@ -16,7 +16,7 @@ def dict_to_simplenamespace(d):
         return d
 
 _data = None
-with open("assets/config.json", 'r') as f:
+with open("assets/config.json", 'r', encoding='utf-8') as f:
     _data = json.load(f)
 cfg = dict_to_simplenamespace(_data)
 

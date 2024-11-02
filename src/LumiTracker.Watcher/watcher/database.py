@@ -588,7 +588,7 @@ class Database:
             ann.load(os.path.join(cfg.database_dir, ann_filename))
             self.anns[i] = ann
 
-        with open(os.path.join(cfg.database_dir, cfg.db_filename), encoding='utf-8') as f:
+        with open(os.path.join(cfg.database_dir, cfg.db_filename), 'r', encoding='utf-8') as f:
             self.data = json.load(f)
     
     def CreateAndSaveAnn(self, features, ann_type):

@@ -26,7 +26,7 @@ class WindowWatcher:
 if __name__ == '__main__':
     assert len(sys.argv) == 2, "Wrong number of arguments"
     init_file_path = sys.argv[1]
-    with open(init_file_path, 'r') as f:
+    with open(init_file_path, 'r', encoding='utf-8') as f:
         params = json.load(f)
     hwnd            = int(params["hwnd"])
     client_type     = str(params["client_type"])

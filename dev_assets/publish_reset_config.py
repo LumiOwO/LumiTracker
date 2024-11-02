@@ -6,7 +6,7 @@ def main(publish_dir):
     file_path = f"{publish_dir}assets/config.json"
 
     # Step 1: Read the JSON file
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding='utf-8') as file:
         cfg = json.load(file)
 
     # Step 2: Modify the dictionary
@@ -37,7 +37,7 @@ def main(publish_dir):
     file_path = f"{publish_dir}assets/obconfig.json"
 
     # Step 1: Read the JSON file
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding='utf-8') as file:
         cfg = json.load(file)
 
     # Step 2: Modify the dictionary
