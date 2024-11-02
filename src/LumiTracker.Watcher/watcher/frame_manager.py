@@ -6,8 +6,9 @@ from datetime import datetime
 import os
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
-from .enums import EGameEvent, EClientType
+from .enums import EGameEvent, EClientType, ERegionType
 from .database import Database, SaveImage
+from .regions import REGIONS, GetRatioType
 
 from .states import *
 
@@ -34,6 +35,8 @@ class FrameManager:
         # control signals
         self.game_started    = False
         self.round           = 0
+        self.my_card_back    = np.zeros((0,))
+        self.op_card_back    = np.zeros((0,))
 
         # logs
         self.prev_log_time   = time.perf_counter()
@@ -53,10 +56,20 @@ class FrameManager:
     def Resize(self, client_width, client_height):
         if client_width == 0 or client_height == 0:
             return
+        # Update ratio
+        ratio_type = GetRatioType(client_width, client_height)
 
         self.content_box = ()
         self.content_not_found_warned = False
-        GTasks.OnResize(client_width, client_height)
+        GTasks.OnResize(client_width, client_height, ratio_type)
+
+        # Resize card backs
+        if self.my_card_back.size > 0 and self.op_card_back.size > 0:
+            box    = REGIONS[ratio_type][ERegionType.CARD_BACK]
+            width  = round(client_width  * box[2])
+            height = round(client_height * box[3])
+            self.my_card_back = cv2.resize(self.my_card_back, (width, height), interpolation=cv2.INTER_LANCZOS4)
+            self.op_card_back = cv2.resize(self.op_card_back, (width, height), interpolation=cv2.INTER_LANCZOS4)
 
         if self.test_on_resize:
             self.need_capture = True

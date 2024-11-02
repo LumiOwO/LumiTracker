@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <VersionNumber>1.2.10</VersionNumber>
+    <VersionNumber>1.2.11</VersionNumber>
     <BetaNumber></BetaNumber>
 
     <AssemblyVersion>$(VersionNumber)</AssemblyVersion>

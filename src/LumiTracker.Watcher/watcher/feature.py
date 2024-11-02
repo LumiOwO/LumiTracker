@@ -3,7 +3,7 @@ import cv2
 from abc import ABC, abstractmethod
 
 from .config import LogWarning, cfg, LogDebug, override
-from .enums import EAnnType, EActionCard, ECharacterCard
+from .enums import EAnnType, EActionCard, ECharacterCard, ECtrlType
 
 import itertools
 
@@ -320,6 +320,12 @@ def ExtractFeature_Control(image):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
 
     return ExtractFeature_Control_Grayed(gray_image)
+
+def ExtractFeature_Control_Single(image, ctrl_type):
+    if ctrl_type == ECtrlType.SETTINGS:
+        image = cv2.resize(image, (160, 160), interpolation=cv2.INTER_LANCZOS4)
+
+    return ExtractFeature_Control(image)
 
 def ExtractFeature_Digit_Binalized(binary):
     # resize

@@ -76,7 +76,6 @@ class GameStartTask(TaskBase):
 
         if start:
             self.fm.game_started = True
-            self.fm.round        = 0
             self.detect_characters = True
 
             LogInfo(

@@ -6,9 +6,10 @@ from .game_phase import GamePhaseTask
 from .round import RoundTask
 from .card_flow import CardFlowTask
 from .card_select import CardSelectTask
+from .card_back import CardBackTask
 
 __all__ = [
     "TaskBase",
     "CardPlayedTask", "GameStartTask", "GameOverTask", "GamePhaseTask",
-    "RoundTask", "CardFlowTask", "CardSelectTask",
+    "RoundTask", "CardFlowTask", "CardSelectTask", "CardBackTask"
 ]

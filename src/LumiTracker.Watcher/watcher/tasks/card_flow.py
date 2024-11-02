@@ -263,11 +263,15 @@ class CardFlowTask(CenterCropTask):
         self.my_deck_queue = deque()
         self.op_deck_queue = deque()
 
+        self.my_card_back_scaled = np.zeros((0,))
+        self.op_card_back_scaled = np.zeros((0,))
+        self.invalid_card_back_notified = False
+
     @override
     def OnResize(self, client_width, client_height, ratio_type):
         super().OnResize(client_width, client_height, ratio_type)
 
-        box    = REGIONS[ratio_type][ERegionType.MY_DECK] 
+        box    = REGIONS[ratio_type][ERegionType.DECK] 
         box_left, box_top, box_width, box_height = box
         left   = round(client_width  * box_left)
         width  = round(client_width  * box_width)
@@ -281,14 +285,16 @@ class CardFlowTask(CenterCropTask):
         self.op_deck_crop = CropBox(left, top, left + width, top + height)
 
         # Dst deck size when resize deck buffer
-        dst_height = 200
-        self.DECK_DST_HEIGHT = dst_height
-        self.FILTER_H     = dst_height * 0.5
-        self.FILTER_W_MIN = dst_height * 0.8
-        self.FILTER_W_MAX = dst_height * 1.4
+        dst_height = 100
         aspect_ratio = width / height
         dst_width = int(dst_height * aspect_ratio)
         self.deck_dst_size = (dst_width, dst_height)
+
+        self.scale = dst_height / height
+        LogDebug(DeckScale=self.scale)
+        self.my_card_back_scaled = np.zeros((0,))
+        self.op_card_back_scaled = np.zeros((0,))
+        self.invalid_card_back_notified = False
 
     @override
     def Tick(self):
@@ -365,7 +371,30 @@ class CardFlowTask(CenterCropTask):
             self.signaled_num_cards = 0
             LogDebug(info="[CardFlow]", t_end=info.t_end)
 
+    def _IsCardBackValid(self, is_op):
+        card_back_scaled = self.op_card_back_scaled if is_op else self.my_card_back_scaled
+        if card_back_scaled.size > 0:
+            return True
+
+        card_back = self.fm.op_card_back if is_op else self.fm.my_card_back
+        if card_back.size == 0:
+            if (not self.invalid_card_back_notified):
+                LogError(info="[CardFlow] _DetectDeck() called, but card_back is empty!", is_op=is_op)
+                self.invalid_card_back_notified = True
+            return False
+
+        card_back_scaled = cv2.resize(card_back, None, fx=self.scale, fy=self.scale, interpolation=cv2.INTER_AREA)
+        if is_op:
+            self.op_card_back_scaled = card_back_scaled
+        else:
+            self.my_card_back_scaled = card_back_scaled
+        return True
+
     def _DetectDeck(self, is_op):
+        if not self._IsCardBackValid(is_op):
+            return
+
+        card_back = self.op_card_back_scaled if is_op else self.my_card_back_scaled
         deck_crop = self.op_deck_crop if is_op else self.my_deck_crop
         deck_buffer = self.frame_buffer[
             deck_crop.top  : deck_crop.bottom, 
@@ -374,47 +403,25 @@ class CardFlowTask(CenterCropTask):
 
         # Convert to grayscale
         gray = cv2.cvtColor(deck_buffer, cv2.COLOR_BGR2GRAY)
-
-        # Resize to a relative small size, so the mouse cursor will not break the card contour
+        # Resize to a relative small size for performance
         gray = cv2.resize(gray, self.deck_dst_size, interpolation=cv2.INTER_AREA)
+        # Template matching
+        result = cv2.matchTemplate(gray, card_back, cv2.TM_CCOEFF_NORMED)
 
-        # Apply Canny edge detection
-        edges = cv2.Canny(gray, 50, 150)
-
-        # Find contours
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        bboxes = []
-        for contour in contours:
-            x, y, w, h = cv2.boundingRect(contour)
-            if h < self.FILTER_H or w < self.FILTER_W_MIN or w > self.FILTER_W_MAX:
-                continue
-            ratio = w / h
-            if ratio < 1.6 or ratio > 1.9:
-                continue
-            # LogDebug(is_op=is_op, info="ratio passed")
-
-            # Approximate the contour
-            epsilon = 0.1 * cv2.arcLength(contour, True) # roughly to a rectangle
-            approx = cv2.approxPolyDP(contour, epsilon, True)
-            # LogDebug(is_op=is_op, edges=len(approx))
-            if len(approx) > 4: # not rectangle
-                continue
-
-            # LogDebug(is_op=is_op, ratio=ratio)
-            bboxes.append(CropBox(x, y, x + w, y + h))
+        # Set threshold
+        threshold = 0.8
+        found = np.any(result >= threshold)
 
         if cfg.DEBUG:
+            bboxes = []
             if not is_op:
                 self.my_deck_buffer = deck_buffer
-                self.my_deck_edges  = edges
                 self.my_deck_bboxes = bboxes
             else:
                 self.op_deck_buffer = deck_buffer
-                self.op_deck_edges  = edges
                 self.op_deck_bboxes = bboxes
 
-        if bboxes:
+        if found:
             dst_queue = self.op_deck_queue if is_op else self.my_deck_queue
             LogDebug(drawn_detected=True, is_op=is_op)
             timestamp = time.perf_counter()

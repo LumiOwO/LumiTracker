@@ -74,8 +74,10 @@ class ERegionType(enum.Enum):
     ROUND      = enum.auto()
     CENTER     = enum.auto()
     FLOW_ANCHOR= enum.auto()
-    MY_DECK    = enum.auto()
+    DECK       = enum.auto()
     VS_ANCHOR  = enum.auto()
+    SETTINGS   = enum.auto()
+    CARD_BACK  = enum.auto()  
 
 class ERatioType(enum.Enum):
     E16_9  = 0
@@ -119,7 +121,14 @@ class ECtrlType(enum.Enum):
     PHASE_ACTION_FIRST = PHASE_ACTION_ZH
     PHASE_ACTION_LAST  = PHASE_ACTION_JA
 
-    CTRL_FEATURES_COUNT = enum.auto()
+    NUM_CTRLS_ANN = enum.auto()
+
+    # Single ctrls that are not included in the ann file
+    SETTINGS = enum.auto()
+
+    CTRL_SINGLE_FIRST = SETTINGS
+    CTRL_SINGLE_LAST  = SETTINGS
+    NUM_CTRLS_SINGLE  = CTRL_SINGLE_LAST - CTRL_SINGLE_FIRST + 1
 
     @staticmethod
     def IsGameStart(ctrl_id):

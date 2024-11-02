@@ -36,8 +36,10 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5420, 0.1200, 0.0310 ),
         ERegionType.CENTER     : ( 0.0700, 0.3380, 0.8600, 0.0500 ),
         ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3350, 0.1070, 0.3280 ), # (margin to digit center, margin to card top, card width, card height)
-        ERegionType.MY_DECK    : ( 0.0000, 0.5550, 0.3250, 0.2750 ),
+        ERegionType.DECK       : ( 0.0300, 0.5550, 0.2950, 0.2750 ),
         ERegionType.VS_ANCHOR  : ( 0.1355, 0.3595, 0.0870, 0.2585, 0.0090 ), # left, top, width, height, margin
+        ERegionType.SETTINGS   : ( 0.9610, 0.0240, 0.0225, 0.0400 ),
+        ERegionType.CARD_BACK  : ( 0.0000, 0.6700, 0.0865, 0.1375 ),
     },
     # 1920 x 1200, 1680 x 1050
     ERatioType.E16_10: {
@@ -49,8 +51,10 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5370, 0.1200, 0.0280 ),
         ERegionType.CENTER     : ( 0.0700, 0.3540, 0.8600, 0.0500 ),
         ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3550, 0.1035, 0.2850 ),
-        ERegionType.MY_DECK    : ( 0.0000, 0.5500, 0.3250, 0.2500 ),
+        ERegionType.DECK       : ( 0.0330, 0.5500, 0.2920, 0.2500 ),
         ERegionType.VS_ANCHOR  : ( 0.1350, 0.3725, 0.0870, 0.2335, 0.0094 ),
+        ERegionType.SETTINGS   : ( 0.9610, 0.0215, 0.0225, 0.0365 ),
+        ERegionType.CARD_BACK  : ( 0.0000, 0.6500, 0.0900, 0.1255 ),
     },
     # 2560 × 1080, 2048 x 864
     ERatioType.E64_27: {
@@ -62,8 +66,10 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5410, 0.1200, 0.0320 ),
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0800, 0.3280 ),
-        ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
+        ERegionType.DECK       : ( 0.1470, 0.5550, 0.2230, 0.2750 ),
         ERegionType.VS_ANCHOR  : ( 0.2265, 0.3590, 0.0650, 0.2590, 0.0075 ),
+        ERegionType.SETTINGS   : ( 0.8455, 0.0230, 0.0170, 0.0410 ),
+        ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
     },
     # 3440 × 1440, 2150 x 900
     ERatioType.E43_18: {
@@ -75,8 +81,10 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5422, 0.1200, 0.0325 ),
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0780, 0.3280 ),
-        ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
+        ERegionType.DECK       : ( 0.1495, 0.5550, 0.2205, 0.2750 ),
         ERegionType.VS_ANCHOR  : ( 0.2285, 0.3590, 0.0645, 0.2590, 0.0070 ),
+        ERegionType.SETTINGS   : ( 0.8430, 0.0230, 0.0170, 0.0400 ),
+        ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
     },
     # 3840 x 1600, 1920 x 800
     ERatioType.E12_5: {
@@ -88,7 +96,9 @@ REGIONS = {
         ERegionType.ROUND      : ( 0.4400, 0.5400, 0.1200, 0.0345 ),
         ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
         ERegionType.FLOW_ANCHOR: ( 0.0055, 0.3350, 0.0790, 0.3280 ),
-        ERegionType.MY_DECK    : ( 0.1260, 0.5550, 0.2440, 0.2750 ),
+        ERegionType.DECK       : ( 0.1510, 0.5550, 0.2190, 0.2750 ),
         ERegionType.VS_ANCHOR  : ( 0.2295, 0.3590, 0.0645, 0.2590, 0.0070 ),
+        ERegionType.SETTINGS   : ( 0.8410, 0.0230, 0.0170, 0.0400 ),
+        ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
     },
 }

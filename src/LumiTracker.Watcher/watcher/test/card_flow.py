@@ -17,7 +17,7 @@ logging.getLogger('matplotlib').setLevel(logging.WARNING)
 import matplotlib.pyplot as plt
 
 
-def image(image_path='temp/Snipaste_2024-09-21_19-19-33.png'):
+def image(image_path='temp/Snipaste_2024-08-03_16-02-12.png'):
     frame_manager = FrameManager(EClientType.YuanShen)
     task = GTasks.CardFlow
     frame_manager.round = 1
@@ -59,12 +59,12 @@ def image(image_path='temp/Snipaste_2024-09-21_19-19-33.png'):
         # print(box)
     scale = task.my_deck_crop.height / task.DECK_DST_HEIGHT
     print(f"{scale=}, {task.my_deck_crop=}")
-    for box in task.my_deck_bboxes:
-        box.left   = int(box.left   * scale) + task.my_deck_crop.left
-        box.top    = int(box.top    * scale) + task.my_deck_crop.top
-        box.right  = int(box.right  * scale) + task.my_deck_crop.left
-        box.bottom = int(box.bottom * scale) + task.my_deck_crop.top
-        cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
+    # for box in task.my_deck_bboxes:
+    #     box.left   = int(box.left   * scale) + task.my_deck_crop.left
+    #     box.top    = int(box.top    * scale) + task.my_deck_crop.top
+    #     box.right  = int(box.right  * scale) + task.my_deck_crop.left
+    #     box.bottom = int(box.bottom * scale) + task.my_deck_crop.top
+    #     cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
         # print(box)
     # for box in task.op_deck_bboxes:
         # box.left   = int(box.left   * scale) + task.op_deck_crop.left
@@ -74,7 +74,11 @@ def image(image_path='temp/Snipaste_2024-09-21_19-19-33.png'):
     #     cv2.rectangle(dst, (box.left, box.top), (box.right, box.bottom), (0, 0, 255), 2)
         # print(box)
     
-    plt.imshow(cv2.cvtColor(dst, cv2.COLOR_BGR2RGB))
+    my_deck_buffer = task.frame_buffer[
+        task.my_deck_crop.top  : task.my_deck_crop.bottom, 
+        task.my_deck_crop.left : task.my_deck_crop.right
+    ]
+    plt.imshow(cv2.cvtColor(my_deck_buffer, cv2.COLOR_BGR2RGB))
     plt.show()
 
 

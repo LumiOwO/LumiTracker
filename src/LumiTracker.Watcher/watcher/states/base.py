@@ -43,6 +43,7 @@ class GTasks():
         cls.OpPlayed     = CardPlayedTask(frame_manager, is_op=True)
         cls.CardFlow     = CardFlowTask(frame_manager)
         cls.GamePhase    = GamePhaseTask(frame_manager)
+        cls.CardBack     = CardBackTask(frame_manager)
 
         cls.NatureAndWisdom_Draw   = CardSelectTask(frame_manager, 1)
         cls.NatureAndWisdom_Count  = CardFlowTask(frame_manager, need_deck=False, need_dump=False)
@@ -56,9 +57,7 @@ class GTasks():
                 func(task)
 
     @classmethod
-    def OnResize(cls, client_width, client_height):
-        # Update ratio
-        ratio_type = GetRatioType(client_width, client_height)
+    def OnResize(cls, client_width, client_height, ratio_type):
         GTasks.ForEach(lambda task: task.OnResize(client_width, client_height, ratio_type))
     
     @classmethod

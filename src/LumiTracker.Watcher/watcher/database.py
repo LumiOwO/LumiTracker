@@ -14,8 +14,8 @@ from collections import defaultdict
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
 from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType, ELanguage
-from .feature import CropBox, ActionCardHandler, CharacterCardHandler, FeatureDistance, GetHashSize
-from .feature import ExtractFeature_Control, ExtractFeature_Digit
+from .feature import CropBox, ActionCardHandler, CharacterCardHandler, FeatureDistance, GetHashSize, ImageHash
+from .feature import ExtractFeature_Control, ExtractFeature_Digit, ExtractFeature_Control_Single
 
 def LoadImage(path):
     return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -78,7 +78,7 @@ class Database:
     def _UpdateControls(self):
         LogDebug(ctrl_types=[(e.name, e.value) for e in ECtrlType], indent=2)
 
-        n_controls = ECtrlType.CTRL_FEATURES_COUNT.value
+        n_controls = ECtrlType.NUM_CTRLS_ANN.value
         features = [None] * n_controls
 
         controls_dir = os.path.join(cfg.cards_dir, "controls")
@@ -92,6 +92,16 @@ class Database:
         self.anns[EAnnType.CTRLS.value] = ann
 
         print(f"Loaded {n_controls} images from {controls_dir}")
+
+        single_ctrls = []    
+        for i in range(ECtrlType.CTRL_SINGLE_FIRST.value, ECtrlType.CTRL_SINGLE_LAST.value + 1):
+            ctrl_type = ECtrlType(i)
+            name = ctrl_type.name.lower()
+            image = LoadImage(os.path.join(controls_dir, f"control_{name}.png"))
+            feature = ExtractFeature_Control_Single(image, ctrl_type)
+            single_ctrls.append(f"{ImageHash(feature)}")
+        print(f"Added {ECtrlType.NUM_CTRLS_SINGLE.value} ctrl hashs to database")
+        self.data["ctrls"] = single_ctrls
 
         if cfg.DEBUG:
             CheckHashDistances("ctrls", features, name_func=lambda i: ECtrlType(i).name.lower())
@@ -277,7 +287,7 @@ class Database:
                 ahash_extras[extra_id] = ahash
                 dhash_extras[extra_id] = dhash
 
-        print(f"Added {len(ahash_extras)} extra images")
+        print(f"Added {len(ahash_extras)} extra images = {len(extra_image_names)} goldens + {len(arcane_legends) * 2} arcane legends")
 
         ahashs += ahash_extras
         dhashs += dhash_extras
