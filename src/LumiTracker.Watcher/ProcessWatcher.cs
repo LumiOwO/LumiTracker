@@ -261,7 +261,7 @@ namespace LumiTracker.Watcher
             var startInfo = new ProcessStartInfo
             {
                 FileName = Path.Combine(Configuration.AppDir, "python", "python.exe"),
-                Arguments = $"-E -m watcher.window_watcher {captureInfo.InitFilePath}",
+                Arguments = $"-E -m watcher.window_watcher \"{captureInfo.InitFilePath}\"",
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
