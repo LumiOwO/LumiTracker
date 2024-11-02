@@ -1,3 +1,10 @@
+# \[[v1.2.11](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.11)\] - 2024.11.03
+### Bug修复
+- ${\color{#ed8e06}{\textbf{[传说]}}}$ 极大提升了牌库检测的稳定性；之前的方案只检测轮廓，比较容易误判，例如把对方洗的牌当成自己的。
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 现在，如果断线重连进入对局，记牌器会尽快开始记录，而不是等到下个回合开始。
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了在某些情况下一直显示「记牌器启动中」的问题。
+
+
 # \[[v1.2.10](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.10)\] - 2024.11.01
 ### 新增功能
 - ${\color{#ed8e06}{\textbf{[传说]}}}$ 现在，在对局开始时，会根据我方出战角色，自动在「牌组」页面的列表中选择出战卡组
