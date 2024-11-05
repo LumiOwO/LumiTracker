@@ -56,7 +56,7 @@ namespace LumiTracker.Services
         ProcessMetadata,
         Download,
         UnzipAndCopy,
-        UpdateIniFile,
+        UpdateLauncher,
         ReadyToRestart,
 
         NumStages
@@ -534,10 +534,24 @@ namespace LumiTracker.Services
                 await UpdateUtils.CopyDirectoryAsync(copySrc, copyDst);
             }
 
-            // Update ini file
+            // Update launcher
             Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
-            ctx.State = EUpdateState.UpdateIniFile;
-
+            ctx.State = EUpdateState.UpdateLauncher;
+            // Overwrite launcher executable
+            string launcherSrc = Path.Combine(dstDir, "VersionSelector.exe");
+            if (File.Exists(launcherSrc))
+            {
+                string launcherDst = Path.Combine(Configuration.RootDir, "LumiTracker.exe");
+                await UpdateUtils.CopyFileAsync(launcherSrc, launcherDst);
+            }
+            // Overwrite Utils.bat
+            string utilsBatSrc = Path.Combine(dstDir, "Utils.bat");
+            if (File.Exists(utilsBatSrc))
+            {
+                string utilsBatDst = Path.Combine(Configuration.RootDir, "Utils.bat");
+                await UpdateUtils.CopyFileAsync(utilsBatSrc, utilsBatDst);
+            }
+            // Write ini file
             using (StreamWriter writer = new StreamWriter(Configuration.IniFilePath))
             {
                 writer.WriteLine("[Application]");
@@ -548,7 +562,7 @@ namespace LumiTracker.Services
                     writer.WriteLine($"{type.ToString()} = {md5Hashs[(int)type]}");
                 }
             }
-            Configuration.Logger.LogDebug("[Update] .ini file updated");
+            Configuration.Logger.LogDebug("[Update] Launcher & .ini file updated");
 
             // Wait for user confirm, then restart
             Configuration.Logger.LogDebug("[Update] Ready to restart, waiting for confirm...");
@@ -595,6 +609,7 @@ namespace LumiTracker.Services
             "https://github.abskoop.workers.dev/",
             "https://gh-proxy.com/",
             "https://mirror.ghproxy.com/",
+            "https://ghp.ci/",
         ];
 
         private async Task<string> GetBestDownloadUrl(bool isBeta)

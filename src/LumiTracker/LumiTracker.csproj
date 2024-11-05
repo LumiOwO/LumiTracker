@@ -61,9 +61,11 @@
     <Exec Command="$(SolutionDir)python\python.exe -E $(SolutionDir)dev_assets\publish_reset_config.py $(PublishDir)" />
     <Message Text="Reset published config.json successfully." Importance="high" />
 
-    <Exec Command="copy /Y $(TargetDir)..\LumiTracker.exe $(PublishDir)..\LumiTracker.exe" />
+    <Exec Command="copy /Y $(TargetDir)VersionSelector.exe $(PublishDir)VersionSelector.exe" />
+    <Exec Command="copy /Y $(TargetDir)VersionSelector.exe $(PublishDir)..\LumiTracker.exe" />
+    <Exec Command="copy /Y $(TargetDir)Utils.bat $(PublishDir)Utils.bat" />
+    <Exec Command="copy /Y $(TargetDir)Utils.bat $(PublishDir)..\Utils.bat" />
     <Exec Command="copy /Y $(TargetDir)..\LumiTracker.ini $(PublishDir)..\LumiTracker.ini" />
-    <Exec Command="copy /Y $(TargetDir)..\Utils.bat $(PublishDir)..\Utils.bat" />
     <Exec Command="copy /Y $(SolutionDir)dev_assets\README.txt $(PublishDir)..\使用说明.txt" />
     <Exec Command="copy /Y $(SolutionDir)dev_assets\README.txt $(PublishDir)..\README.txt" />
     <Exec Command="copy /Y $(SolutionDir)dev_assets\info.bat $(PublishDir)info.bat" />

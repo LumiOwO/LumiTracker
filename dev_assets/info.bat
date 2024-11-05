@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-"C:\Program Files\dotnet\dotnet.exe" --info
+dotnet.exe --info
 LumiTrackerApp.exe
 
 pause

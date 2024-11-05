@@ -32,7 +32,7 @@ if "%~2"=="" (
 set "VERSION_NUMBER=%~1"
 set "TARGET_DIR=%~2"
 
-set "INI_FILE=%TARGET_DIR%\LumiTracker.ini"
+set "INI_FILE=%TARGET_DIR%..\LumiTracker.ini"
 (
     echo [Application]
     echo Version = %VERSION_NUMBER%
@@ -44,8 +44,10 @@ set "INI_FILE=%TARGET_DIR%\LumiTracker.ini"
 
 echo Created %INI_FILE%
 
-if not exist "%TARGET_DIR%\Utils.bat" (
-    mklink %TARGET_DIR%\Utils.bat "%~dp0"\Utils.bat
-)
+copy /Y "%~dp0"\Utils.bat %TARGET_DIR%\Utils.bat
+
+copy /Y "%~dp0"\Utils.bat %TARGET_DIR%..\Utils.bat
+
+copy /Y %TARGET_DIR%\VersionSelector.exe %TARGET_DIR%..\LumiTracker.exe 
 
 endlocal

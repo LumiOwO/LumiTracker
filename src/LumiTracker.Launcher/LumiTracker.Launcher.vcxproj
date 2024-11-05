@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>LumiTracker</TargetName>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\LumiTrackerApp-$(InformationalVersion)\</OutDir>
+    <TargetName>VersionSelector</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>LumiTracker</TargetName>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\LumiTrackerApp-$(InformationalVersion)\</OutDir>
+    <TargetName>VersionSelector</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -118,9 +118,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PreBuildEvent>
+    <PostBuildEvent>
       <Command>$(ProjectDir)Utils.bat $(InformationalVersion) $(TargetDir)</Command>
-    </PreBuildEvent>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -138,9 +138,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PreBuildEvent>
+    <PostBuildEvent>
       <Command>$(ProjectDir)Utils.bat $(InformationalVersion) $(TargetDir)</Command>
-    </PreBuildEvent>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Launcher.cpp" />

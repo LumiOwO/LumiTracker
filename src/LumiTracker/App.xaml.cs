@@ -153,7 +153,7 @@ namespace LumiTracker
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = launcherPath,
-                    Arguments = Configuration.RootDir + "\\",
+                    Arguments = "just_updated",
                     UseShellExecute = false,  // Required to set CreateNoWindow to true
                     CreateNoWindow = true,   // Hides the console window
                 };
