@@ -341,10 +341,10 @@ void Launch(const std::wstring& rootDir, bool just_updated)
         AlertW(L"Error: Specified executable not found: " + app, NO_OPEN_LINK, SHOULD_EXIT);
     }
 
-    std::wstring parameters = L"";
+    std::wstring command = app;
     if (just_updated)
     {
-        parameters = L"just_updated";
+        command += L" just_updated";
     }
 
     auto consoleIt = applicationSection.find(L"Console");
@@ -365,8 +365,8 @@ void Launch(const std::wstring& rootDir, bool just_updated)
 
     // Create the process
     BOOL success = CreateProcessW(
-        app.data(),             // Application name
-        parameters.data(),      // Command line arguments
+        NULL,                   // Application name (NULL to rely on lpCommandLine)
+        command.data(),         // Full command line (app path + arguments)
         NULL,                   // Process security attributes
         NULL,                   // Thread security attributes
         FALSE,                  // Inherit handles
