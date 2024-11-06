@@ -23,6 +23,7 @@
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Page.Resources>
 
     <StackPanel>
@@ -89,6 +90,7 @@
                 <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <CheckBox
                 Grid.Column="1"
@@ -104,19 +106,45 @@
                 Content="{svs:Localization UpdatePrompt_Manual}"
                 NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#KSvDdP00EoNnmox0Lkccs9fenMf"
                 ToolTip="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#KSvDdP00EoNnmox0Lkccs9fenMf" />
+            <ui:HyperlinkButton
+                Grid.Column="3"
+                Margin="0, 0, 0, 0"
+                FontWeight="Bold"
+                Padding="10, 5, 10, 6"
+                Content="{svs:Localization UpdatePrompt_ChangeLog}"
+                NavigateUri="https://github.com/LumiOwO/LumiTracker/releases"
+                ToolTip="https://github.com/LumiOwO/LumiTracker/releases" />
+
         </Grid>
         
         <Grid Margin="10,10,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <CheckBox
                 Grid.Column="1"
+                x:Name="SubscribeToBetaUpdatesCheckBox"
                 HorizontalAlignment="Stretch"
                 IsChecked="{Binding ViewModel.CheckSubscribeToBetaUpdates, Mode=TwoWay}"
                 Content="{svs:Localization SubscribeToBetaUpdates}"
                 />
+            <ui:HyperlinkButton
+                Grid.Column="2"
+                Visibility="{Binding
+                    ElementName=SubscribeToBetaUpdatesCheckBox,
+                    Path=IsChecked,
+                    Mode=OneWay,
+                    Converter={StaticResource BooleanToVisibilityConverter},
+                    ConverterParameter=Hidden
+                    }"
+                Margin="10, 0, 0, 0"
+                FontWeight="Bold"
+                Padding="10, 5, 10, 6"
+                Content="{svs:Localization UpdatePrompt_ChangeLogBeta}"
+                NavigateUri="https://gitee.com/LumiOwO/LumiTracker-Beta/releases"
+                ToolTip="https://gitee.com/LumiOwO/LumiTracker-Beta/releases" />
         </Grid>
 
 

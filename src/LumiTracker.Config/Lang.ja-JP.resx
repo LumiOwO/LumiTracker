@@ -437,4 +437,10 @@
   <data name="UnknownDeck" xml:space="preserve">
     <value>未知のデッキ</value>
   </data>
+  <data name="UpdatePrompt_ChangeLog" xml:space="preserve">
+    <value>リリース履歴</value>
+  </data>
+  <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
+    <value>リリース履歴（プレビュー）</value>
+  </data>
 </root>

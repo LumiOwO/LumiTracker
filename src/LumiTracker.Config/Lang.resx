@@ -584,4 +584,10 @@
 2. If there are decks with the same characters, the one that was most recently modified will be chosen; decks with different character orders will be regarded as separate.
 3. The active deck will be highlighted.</value>
   </data>
+  <data name="UpdatePrompt_ChangeLog" xml:space="preserve">
+    <value>Release History</value>
+  </data>
+  <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
+    <value>Release History (Preview)</value>
+  </data>
 </root>

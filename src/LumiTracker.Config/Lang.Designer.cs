@@ -1074,6 +1074,24 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Release History.
+        /// </summary>
+        public static string UpdatePrompt_ChangeLog {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_ChangeLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Release History (Preview).
+        /// </summary>
+        public static string UpdatePrompt_ChangeLogBeta {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_ChangeLogBeta", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Check For Update.
         /// </summary>
         public static string UpdatePrompt_CheckForUpdate {

@@ -527,4 +527,10 @@
   <data name="UnknownDeck" xml:space="preserve">
     <value>未知牌组</value>
   </data>
+  <data name="UpdatePrompt_ChangeLog" xml:space="preserve">
+    <value>更新记录</value>
+  </data>
+  <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
+    <value>更新记录（预览版）</value>
+  </data>
 </root>
