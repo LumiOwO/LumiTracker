@@ -15,10 +15,12 @@ namespace LumiTracker.Views.Pages
             ViewModel = viewModel;
             DataContext = this;
 
-            // Hide selected color of list view
-            //Resources["ListViewItemBackgroundPointerOver"] = new SolidColorBrush(Color.FromArgb(0x00, 0x00, 0x00, 0x00));
-
             InitializeComponent();
+
+            Resources["TabViewItemHeaderBackground"] = new SolidColorBrush((Color)Application.Current.Resources["SubtleFillColorTertiary"]);
+            Resources["TabViewItemHeaderBackgroundSelected"] = (SolidColorBrush)Resources["MainContentBackground"];
+            Resources["TabViewSelectedItemBorderBrush"] = (SolidColorBrush)Resources["DeckPageBorderBrush"];
+            Resources["TabViewForeground"] = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
         }
 
         private void OnCardsListClicked(object sender, MouseButtonEventArgs e)

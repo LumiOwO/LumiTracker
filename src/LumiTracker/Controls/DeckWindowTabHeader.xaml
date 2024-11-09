@@ -15,22 +15,17 @@
     <StackPanel 
         DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:DeckWindowTabHeader}}"
         Orientation="Horizontal"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
         >
         <ui:SymbolIcon 
-            FontSize="{Binding Height, 
-                RelativeSource={RelativeSource AncestorType={x:Type Window}},
-                Converter={StaticResource SizeWithRatioConverter}, 
-                ConverterParameter=0.016
-                }"
-            Margin="2,0,4,0" 
+            FontSize="{Binding FontSize}"
+            Margin="{Binding IconMargin}" 
             Symbol="{Binding Icon}" />
         <TextBlock 
-            FontSize="{Binding Height, 
-                RelativeSource={RelativeSource AncestorType={x:Type Window}},
-                Converter={StaticResource SizeWithRatioConverter}, 
-                ConverterParameter=0.016
-                }"
+            FontSize="{Binding FontSize}"
             FontWeight="Bold"
+            Margin="{Binding TextMargin}" 
             Text="{Binding Text}" />
     </StackPanel>
 </UserControl>

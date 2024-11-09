@@ -26,6 +26,10 @@
             x:Key="MainContentBackground"
             Color="#ff282c34" />
 
+        <SolidColorBrush 
+            x:Key="DeckPageBorderBrush"
+            Color="#5aaaaaaa" />
+
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <ctrls:ActionCardViewListItem
                 Value="{Binding Path=., Mode=OneWay}"
@@ -237,7 +241,7 @@
             <!-- Deck List -->
             <Border 
                 Grid.Row="0"
-                BorderBrush="#5aaaaaaa" 
+                BorderBrush="{StaticResource DeckPageBorderBrush}" 
                 BorderThickness="0.7"
                 Background="{StaticResource MainContentBackground}"
                 >
@@ -328,30 +332,101 @@
             </ItemsControl>
         </Grid>
 
-        <!-- Cards -->
-        <ListView
+        <TabControl 
             Grid.Column="1"
             Grid.Row="0"
             Grid.RowSpan="3"
-            x:Name="CardListView"
-            BorderBrush="#5aaaaaaa"
-            BorderThickness="0.7"
-            Padding="0, 2, 0, 2"
-            ScrollViewer.VerticalScrollBarVisibility="Hidden"
-            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-            PreviewMouseDown="OnCardsListClicked"
-            ItemsSource="{Binding ViewModel.CurrentDeck}"
-            ItemTemplate="{StaticResource ActionCardViewTemplate}"
-            Background="{StaticResource MainContentBackground}"
+            x:Name="DeckTabControl"
+            Margin="0,-5,0,0"
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
+            Background="{StaticResource MainContentBackground}"
+            >
 
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Columns="2" />
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
+            <!-- Cards -->
+            <TabItem 
+                Width="{Binding Path=ActualWidth, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.5,
+                    RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
+                    }"
+                Height="{Binding Path=ActualHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.08,
+                    RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
+                    }"
+                HorizontalAlignment="Stretch"
+                >
+                <!--Header-->
+                <TabItem.Header>
+                    <ctrls:DeckWindowTabHeader
+                        Icon="PlayingCards20"
+                        IconMargin="5,0,8,0"
+                        TextMargin="0,0,0,1"
+                        Text="{svs:Localization MyDeck}"
+                        FontSize="{Binding ActualWidth, 
+                            RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.045
+                            }"
+                        />
+                </TabItem.Header>
+                <ListView
+                    x:Name="CardListView"
+                    BorderBrush="{StaticResource DeckPageBorderBrush}"
+                    BorderThickness="0.7, 0, 0.7, 0.7"
+                    Padding="0, 0, 0, 2"
+                    Margin="0,-1,0,0"
+                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                    PreviewMouseDown="OnCardsListClicked"
+                    ItemsSource="{Binding ViewModel.CurrentDeck}"
+                    ItemTemplate="{StaticResource ActionCardViewTemplate}"
+                    Background="{StaticResource MainContentBackground}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
 
-        </ListView>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="2" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                </ListView>
+            </TabItem>
+
+            <TabItem
+                HorizontalAlignment="Stretch"
+                Width="{Binding Path=ActualWidth, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.5,
+                    RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
+                    }"
+                Height="{Binding Path=ActualHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.08,
+                    RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
+                    }"
+                >
+                <TabItem.Header>
+                    <ctrls:DeckWindowTabHeader
+                        Icon="History24"
+                        IconMargin="5,0,8,0"
+                        TextMargin="0,0,0,1"
+                        Text="{svs:Localization MyDeck}"
+                        FontSize="{Binding ActualWidth, 
+                            RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.045
+                            }"
+                        />
+                </TabItem.Header>
+                <TextBlock
+                    Margin="0,-1,0,0"
+                    Background="{StaticResource MainContentBackground}"
+                    Text="1212123"
+                    />
+            </TabItem>
+
+        </TabControl>
+        
     </Grid>
 </Page>

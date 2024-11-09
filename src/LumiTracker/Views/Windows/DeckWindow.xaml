@@ -98,11 +98,18 @@
                     <TabItem.Header>
                         <ctrls:DeckWindowTabHeader
                             Icon="PlayingCards20"
+                            IconMargin="2,0,4,0"
                             Text="{svs:Localization MyDeck}"
+                            FontSize="{Binding Height, 
+                                RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                                Converter={StaticResource SizeWithRatioConverter}, 
+                                ConverterParameter=0.016
+                                }"
                             />
                     </TabItem.Header>
                     <!--Content-->
                     <ctrls:DeckWindowCardListTab
+                        Margin="0,-1,0,0"
                         ViewModel="{Binding Path=ViewModel}"
                         CardList="{Binding Path=ViewModel.MyDeck}"
                         WindowHeight="{Binding Height}"
@@ -124,11 +131,18 @@
                     <TabItem.Header>
                         <ctrls:DeckWindowTabHeader
                             Icon="Person24"
+                            IconMargin="2,0,4,0"
                             Text="{svs:Localization MyPlayedCards}"
+                            FontSize="{Binding Height, 
+                                RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                                Converter={StaticResource SizeWithRatioConverter}, 
+                                ConverterParameter=0.016
+                                }"
                             />
                     </TabItem.Header>
                     <!--Content-->
                     <ctrls:DeckWindowCardListTab
+                        Margin="0,-1,0,0"
                         ViewModel="{Binding Path=ViewModel}"
                         CardList="{Binding Path=ViewModel.MyActionCardsPlayed}"
                         WindowHeight="{Binding Height}"
@@ -150,11 +164,18 @@
                     <TabItem.Header>
                         <ctrls:DeckWindowTabHeader
                             Icon="TargetArrow24"
+                            IconMargin="2,0,4,0"
                             Text="{svs:Localization OpPlayedCards}"
+                            FontSize="{Binding Height, 
+                                RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                                Converter={StaticResource SizeWithRatioConverter}, 
+                                ConverterParameter=0.016
+                                }"
                             />
                     </TabItem.Header>
                     <!--Content-->
                     <ctrls:DeckWindowCardListTab
+                        Margin="0,-1,0,0"
                         ViewModel="{Binding Path=ViewModel}"
                         CardList="{Binding Path=ViewModel.OpActionCardsPlayed}"
                         WindowHeight="{Binding Height}"
