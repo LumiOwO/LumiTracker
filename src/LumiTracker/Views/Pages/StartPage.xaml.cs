@@ -1,4 +1,5 @@
-﻿using LumiTracker.ViewModels.Pages;
+﻿using LumiTracker.Services;
+using LumiTracker.ViewModels.Pages;
 using Wpf.Ui.Controls;
 
 namespace LumiTracker.Views.Pages
@@ -18,6 +19,16 @@ namespace LumiTracker.Views.Pages
         public void Init()
         {
             ViewModel.Init();
+        }
+
+        [RelayCommand]
+        public async Task OnShowDonateDialog()
+        {
+            var service = App.GetService<StyledContentDialogService>();
+            if (service != null) 
+            { 
+                await service.ShowDonateDialogAsync();
+            }
         }
     }
 }

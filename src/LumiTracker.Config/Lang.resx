@@ -119,369 +119,279 @@
   </resheader>
   <data name="AppName" xml:space="preserve">
     <value>LumiTracker</value>
-    <comment />
   </data>
   <data name="AppSubTitle" xml:space="preserve">
     <value>Genshin TCG Deck Tracker</value>
-    <comment />
   </data>
   <data name="DeckWindowTitle" xml:space="preserve">
     <value>Deck Window</value>
-    <comment />
   </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>
-    <comment />
   </data>
   <data name="Rank" xml:space="preserve">
     <value>Rank</value>
-    <comment />
   </data>
   <data name="Loading" xml:space="preserve">
     <value>Loading...</value>
-    <comment />
   </data>
   <data name="About" xml:space="preserve">
     <value>About</value>
-    <comment />
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
-    <comment />
   </data>
   <data name="Update" xml:space="preserve">
     <value>Update</value>
-    <comment />
   </data>
   <data name="CheckUpdatesOnStartup" xml:space="preserve">
     <value>Check Updates on Startup</value>
-    <comment />
   </data>
   <data name="SubscribeToBetaUpdates" xml:space="preserve">
     <value>Join Preview Release Channel</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_CheckForUpdate" xml:space="preserve">
     <value>Check For Update</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Fetching" xml:space="preserve">
     <value>Fetching latest version...</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_AlreadyLatest" xml:space="preserve">
     <value>Already latest</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_UpdateAvailable" xml:space="preserve">
     <value>An update is available</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
     <value>Update failed, please retry; If it still fails, try running as admin</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Manual" xml:space="preserve">
     <value>Manual Update</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_UpdateNow" xml:space="preserve">
     <value>Update Now</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Later" xml:space="preserve">
     <value>Remind Me Later</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Connecting" xml:space="preserve">
     <value>Connecting...</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Retrying" xml:space="preserve">
     <value>Network Error, Retrying...</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Downloading" xml:space="preserve">
     <value>Downloading...</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Unpacking" xml:space="preserve">
     <value>Unpacking...</value>
-    <comment />
   </data>
   <data name="UpdatePrompt_Complete" xml:space="preserve">
     <value>Update Complete!</value>
-    <comment />
   </data>
   <data name="Language" xml:space="preserve">
     <value>Language</value>
-    <comment />
-  </data>
-  <data name="ClosingBehavior" xml:space="preserve">
-    <value>Close Behavior</value>
-    <comment />
-  </data>
-  <data name="ClosingBehavior_Quit" xml:space="preserve">
-    <value>Quit</value>
-    <comment />
-  </data>
-  <data name="ClosingBehavior_Minimize" xml:space="preserve">
-    <value>Minimize to System Tray</value>
-    <comment />
-  </data>
-  <data name="Theme" xml:space="preserve">
-    <value>Theme</value>
-    <comment />
-  </data>
-  <data name="Theme_Light" xml:space="preserve">
-    <value>Light</value>
-    <comment />
-  </data>
-  <data name="Theme_Dark" xml:space="preserve">
-    <value>Dark</value>
-    <comment />
-  </data>
-  <data name="Tray_Quit" xml:space="preserve">
-    <value>Quit</value>
-    <comment />
-  </data>
-  <data name="Tray_Home" xml:space="preserve">
-    <value>Home</value>
-    <comment />
-  </data>
-  <data name="ClientType" xml:space="preserve">
-    <value>Genshin Client</value>
-    <comment />
-  </data>
-  <data name="ClientType_YuanShen" xml:space="preserve">
-    <value>[CN] YuanShen</value>
-    <comment />
-  </data>
-  <data name="ClientType_Global" xml:space="preserve">
-    <value>[Global] Genshin</value>
-    <comment />
-  </data>
-  <data name="ClientType_CloudPC" xml:space="preserve">
-    <value>[CN] Cloud PC</value>
-    <comment />
-  </data>
-  <data name="ClientType_CloudWeb" xml:space="preserve">
-    <value>[CN] Cloud Web</value>
-    <comment />
-  </data>
-  <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
-    <value>Detecting game window...</value>
-    <comment />
-  </data>
-  <data name="GameWatcherState_StartingWindowWatcher" xml:space="preserve">
-    <value>Launching LumiTracker...</value>
-    <comment />
-  </data>
-  <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
-    <value>LumiTracker started</value>
-    <comment />
-  </data>
-  <data name="MinimizedNotification" xml:space="preserve">
-    <value>Screen capture is not possible when the game window is minimized!</value>
-    <comment />
-  </data>
-  <data name="CaptureType" xml:space="preserve">
-    <value>Capture Type</value>
-    <comment />
-  </data>
-  <data name="CaptureType_Test" xml:space="preserve">
-    <value>Test</value>
-    <comment />
-  </data>
-  <data name="CaptureType_CloudGameHint" xml:space="preserve">
-    <value>* This is the only available method for cloud game</value>
-    <comment />
-  </data>
-  <data name="CaptureType_CloudGameHint_Web" xml:space="preserve">
-    <value>* Only supports Chrome, Firefox, or Edge browsers with fullscreen mode</value>
-    <comment />
-  </data>
-  <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
-    <value>Client Resolution : </value>
-    <comment />
-  </data>
-  <data name="MyPlayedCards" xml:space="preserve">
-    <value>My Played</value>
-    <comment />
-  </data>
-  <data name="OpPlayedCards" xml:space="preserve">
-    <value>Op Played</value>
-    <comment />
-  </data>
-  <data name="Instruction" xml:space="preserve">
-    <value>Instruction</value>
-    <comment />
-  </data>
-  <data name="Instruction1" xml:space="preserve">
-    <value>If duel not detected, consider trying a different capture method;</value>
-    <comment />
-  </data>
-  <data name="Instruction2" xml:space="preserve">
-    <value>Do not minimize the game window! Capture is not available when minimized;</value>
-    <comment />
-  </data>
-  <data name="Instruction3" xml:space="preserve">
-    <value>If fullscreen, change "Fullscreen" to "Borderless" in Genshin's Settings -&gt; Graphics -&gt; Display Mode.</value>
-    <comment />
-  </data>
-  <data name="SupportedRatioInfo" xml:space="preserve">
-<value>Supported aspect ratios:
-- 16:9
-- 16:10
-- 21:9 series (including 64:27, 43:18, 12:5)</value>
-    <comment />
-  </data>
-  <data name="FreeDeclaration" xml:space="preserve">
-    <value>This software is open-source and completely free. If you paid for it, you have been scammed!</value>
-    <comment />
-  </data>
-  <data name="SafeDeclaration" xml:space="preserve">
-    <value>LumiTracker uses computer vision without reading or modifying the game's memory.</value>
-    <comment />
-  </data>
-  <data name="UnsupportedRatioWarning" xml:space="preserve">
-    <value>Current resolution of game window is not supported.</value>
-    <comment />
-  </data>
-  <data name="Round" xml:space="preserve">
-    <value>Round</value>
-    <comment />
-  </data>
-  <data name="GameNotStarted" xml:space="preserve">
-    <value>Duel Not Started</value>
-    <comment />
-  </data>
-  <data name="ShowUIOutside" xml:space="preserve">
-    <value>Display UI outside the window</value>
-    <comment />
-  </data>
-  <data name="NotShowAgain" xml:space="preserve">
-    <value>Don't show this again</value>
-    <comment />
-  </data>
-  <data name="ClosingDialogTitle" xml:space="preserve">
-    <value>Exit Application</value>
-    <comment />
-  </data>
-  <data name="OK" xml:space="preserve">
-    <value>OK</value>
-    <comment />
-  </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>Cancel</value>
-    <comment />
-  </data>
-  <data name="MyDeck" xml:space="preserve">
-    <value>My Deck</value>
-    <comment />
-  </data>
-  <data name="DeckPageTitle" xml:space="preserve">
-    <value>Deck</value>
-    <comment />
-  </data>
-  <data name="DefaultDeckName" xml:space="preserve">
-    <value>&lt;Untitled&gt;</value>
-    <comment />
-  </data>
-  <data name="SetAsActiveDeck" xml:space="preserve">
-    <value>Set Active</value>
-    <comment />
-  </data>
-  <data name="EditDeckName" xml:space="preserve">
-    <value>Edit Name</value>
-    <comment />
-  </data>
-  <data name="ReimportDeck" xml:space="preserve">
-    <value>Reimport</value>
-    <comment />
-  </data>
-  <data name="ShareDeck" xml:space="preserve">
-    <value>Share</value>
-    <comment />
-  </data>
-  <data name="AddNewDeck" xml:space="preserve">
-    <value>Import</value>
-    <comment />
-  </data>
-  <data name="DeleteDeck" xml:space="preserve">
-    <value>Delete</value>
-    <comment />
-  </data>
-  <data name="DocumentationLink" xml:space="preserve">
-    <value>Documentation</value>
-    <comment />
-  </data>
-  <data name="FeedbackLink" xml:space="preserve">
-    <value>Feedback</value>
-    <comment />
-  </data>
-  <data name="BiliBiliLink" xml:space="preserve">
-    <value>Bilibili</value>
-    <comment />
-  </data>
-  <data name="GithubLink" xml:space="preserve">
-    <value>Github</value>
-    <comment />
-  </data>
-  <data name="CopyToClipboard" xml:space="preserve">
-    <value>Sharing Code copied to the clipboard</value>
-    <comment />
-  </data>
-  <data name="Paste" xml:space="preserve">
-    <value>Paste</value>
-    <comment />
-  </data>
-  <data name="ImportDeck_Title" xml:space="preserve">
-    <value>Use Sharing Code to import deck</value>
-    <comment />
-  </data>
-  <data name="ImportDeck_Placeholder" xml:space="preserve">
-    <value>Please enter Sharing Code</value>
-    <comment />
-  </data>
-  <data name="EditDeckName_Title" xml:space="preserve">
-    <value>Edit Deck Name</value>
-    <comment />
-  </data>
-  <data name="EditDeckName_Placeholder" xml:space="preserve">
-    <value>Enter Your Deck Name Here</value>
-    <comment />
-  </data>
-  <data name="InvalidSharingCode_Title" xml:space="preserve">
-    <value>Failed to import the Sharing Code</value>
-    <comment />
-  </data>
-  <data name="InvalidSharingCode_Message" xml:space="preserve">
-    <value>Invalid Sharing Code:</value>
-    <comment />
-  </data>
-  <data name="SetAsActiveSuccess_Title" xml:space="preserve">
-    <value>Success</value>
-    <comment />
-  </data>
-  <data name="SetAsActiveSuccess_Message" xml:space="preserve">
-    <value>Current Active Deck:</value>
-    <comment />
-  </data>
-  <data name="DeleteConfirm_Title" xml:space="preserve">
-    <value>Delete this Deck?</value>
-    <comment />
-  </data>
-  <data name="DeleteConfirm_Message" xml:space="preserve">
-    <value>Deck Name:</value>
-    <comment />
-  </data>
-  <data name="None" xml:space="preserve">
-    <value>None</value>
-    <comment />
   </data>
   <data name="FollowSystem" xml:space="preserve">
     <value>Follow System</value>
+  </data>
+  <data name="ClosingBehavior" xml:space="preserve">
+    <value>Close Behavior</value>
+  </data>
+  <data name="ClosingBehavior_Quit" xml:space="preserve">
+    <value>Quit</value>
+  </data>
+  <data name="ClosingBehavior_Minimize" xml:space="preserve">
+    <value>Minimize to System Tray</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Theme_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Theme_Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Tray_Quit" xml:space="preserve">
+    <value>Quit</value>
+  </data>
+  <data name="Tray_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ClientType" xml:space="preserve">
+    <value>Genshin Client</value>
+  </data>
+  <data name="ClientType_YuanShen" xml:space="preserve">
+    <value>[CN] YuanShen</value>
+  </data>
+  <data name="ClientType_Global" xml:space="preserve">
+    <value>[Global] Genshin</value>
+  </data>
+  <data name="ClientType_CloudPC" xml:space="preserve">
+    <value>[CN] Cloud PC</value>
+  </data>
+  <data name="ClientType_CloudWeb" xml:space="preserve">
+    <value>[CN] Cloud Web</value>
+  </data>
+  <data name="GameWatcherState_NoWindowFound" xml:space="preserve">
+    <value>Detecting game window...</value>
+  </data>
+  <data name="GameWatcherState_StartingWindowWatcher" xml:space="preserve">
+    <value>Launching LumiTracker...</value>
+  </data>
+  <data name="GameWatcherState_WindowWatcherStarted" xml:space="preserve">
+    <value>LumiTracker started</value>
+  </data>
+  <data name="MinimizedNotification" xml:space="preserve">
+    <value>Screen capture is not possible when the game window is minimized!</value>
+  </data>
+  <data name="CaptureType" xml:space="preserve">
+    <value>Capture Type</value>
+  </data>
+  <data name="CaptureType_Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="CaptureType_CloudGameHint" xml:space="preserve">
+    <value>* This is the only available method for cloud game</value>
+  </data>
+  <data name="CaptureType_CloudGameHint_Web" xml:space="preserve">
+    <value>* Only supports Chrome, Firefox, or Edge browsers with fullscreen mode</value>
+  </data>
+  <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
+    <value>Client Resolution : </value>
+  </data>
+  <data name="MyPlayedCards" xml:space="preserve">
+    <value>My Played</value>
+  </data>
+  <data name="OpPlayedCards" xml:space="preserve">
+    <value>Op Played</value>
+  </data>
+  <data name="Instruction" xml:space="preserve">
+    <value>Instruction</value>
+  </data>
+  <data name="Instruction1" xml:space="preserve">
+    <value>If duel not detected, consider trying a different capture method;</value>
+  </data>
+  <data name="Instruction2" xml:space="preserve">
+    <value>Do not minimize the game window! Capture is not available when minimized;</value>
+  </data>
+  <data name="Instruction3" xml:space="preserve">
+    <value>If fullscreen, change "Fullscreen" to "Borderless" in Genshin's Settings -&gt; Graphics -&gt; Display Mode.</value>
+  </data>
+  <data name="SupportedRatioInfo" xml:space="preserve">
+    <value>Supported aspect ratios:
+- 16:9
+- 16:10
+- 21:9 series (including 64:27, 43:18, 12:5)</value>
+  </data>
+  <data name="FreeDeclaration" xml:space="preserve">
+    <value>This software is open-source and completely free. If you paid for it, you have been scammed!</value>
+  </data>
+  <data name="SafeDeclaration" xml:space="preserve">
+    <value>LumiTracker uses computer vision without reading or modifying the game's memory.</value>
+  </data>
+  <data name="UnsupportedRatioWarning" xml:space="preserve">
+    <value>Current resolution of game window is not supported.</value>
+  </data>
+  <data name="Round" xml:space="preserve">
+    <value>Round</value>
+  </data>
+  <data name="GameNotStarted" xml:space="preserve">
+    <value>Duel Not Started</value>
+  </data>
+  <data name="ShowUIOutside" xml:space="preserve">
+    <value>Display UI outside the window</value>
+  </data>
+  <data name="NotShowAgain" xml:space="preserve">
+    <value>Don't show this again</value>
+  </data>
+  <data name="ClosingDialogTitle" xml:space="preserve">
+    <value>Exit Application</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="MyDeck" xml:space="preserve">
+    <value>My Deck</value>
+  </data>
+  <data name="DeckPageTitle" xml:space="preserve">
+    <value>Deck</value>
+  </data>
+  <data name="DefaultDeckName" xml:space="preserve">
+    <value>&lt;Untitled&gt;</value>
+  </data>
+  <data name="SetAsActiveDeck" xml:space="preserve">
+    <value>Set Active</value>
+  </data>
+  <data name="EditDeckName" xml:space="preserve">
+    <value>Edit Name</value>
+  </data>
+  <data name="ReimportDeck" xml:space="preserve">
+    <value>Reimport</value>
+  </data>
+  <data name="ShareDeck" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="AddNewDeck" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="DeleteDeck" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DocumentationLink" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="FeedbackLink" xml:space="preserve">
+    <value>Feedback</value>
+  </data>
+  <data name="BiliBiliLink" xml:space="preserve">
+    <value>Bilibili</value>
+  </data>
+  <data name="GithubLink" xml:space="preserve">
+    <value>Github</value>
+  </data>
+  <data name="CopyToClipboard" xml:space="preserve">
+    <value>Sharing Code copied to the clipboard</value>
+  </data>
+  <data name="Paste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="ImportDeck_Title" xml:space="preserve">
+    <value>Use Sharing Code to import deck</value>
+  </data>
+  <data name="ImportDeck_Placeholder" xml:space="preserve">
+    <value>Please enter Sharing Code</value>
+  </data>
+  <data name="EditDeckName_Title" xml:space="preserve">
+    <value>Edit Deck Name</value>
+  </data>
+  <data name="InvalidSharingCode_Title" xml:space="preserve">
+    <value>Failed to import the Sharing Code</value>
+  </data>
+  <data name="InvalidSharingCode_Message" xml:space="preserve">
+    <value>Invalid Sharing Code:</value>
+  </data>
+  <data name="SetAsActiveSuccess_Title" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="SetAsActiveSuccess_Message" xml:space="preserve">
+    <value>Current Active Deck:</value>
+  </data>
+  <data name="DeleteConfirm_Title" xml:space="preserve">
+    <value>Delete this Deck?</value>
+  </data>
+  <data name="DeleteConfirm_Message" xml:space="preserve">
+    <value>Deck Name:</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="EditDeckName_Placeholder" xml:space="preserve">
+    <value>Enter Your Deck Name Here</value>
   </data>
   <data name="UnknownCard" xml:space="preserve">
     <value>Unknown Card</value>
@@ -491,6 +401,44 @@
   </data>
   <data name="AppPath" xml:space="preserve">
     <value>App Path</value>
+  </data>
+  <data name="AutoSelectActiveDeck" xml:space="preserve">
+    <value>Auto Active Deck</value>
+  </data>
+  <data name="AutoSelectActiveDeck_ToolTip" xml:space="preserve">
+    <value>1. When the duel starts, LumiTracker will detect our three characters and search for the matching deck in the list above.
+2. If there are decks with the same characters, the one that was most recently modified will be chosen; decks with different character orders will be regarded as separate.
+3. The active deck will be highlighted.</value>
+  </data>
+  <data name="UnknownDeck" xml:space="preserve">
+    <value>Unknown Deck</value>
+  </data>
+  <data name="UpdatePrompt_ChangeLog" xml:space="preserve">
+    <value>Release History</value>
+  </data>
+  <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
+    <value>Release History (Preview)</value>
+  </data>
+  <data name="Donate" xml:space="preserve">
+    <value>Donate</value>
+  </data>
+  <data name="Donate_Thanks" xml:space="preserve">
+    <value>Thank You for Supporting! Your Generosity Brightens My Day!</value>
+  </data>
+  <data name="Donate_ButtonText" xml:space="preserve">
+    <value>Join the Giving ! </value>
+  </data>
+  <data name="Donate_Prompt" xml:space="preserve">
+    <value>If you found this useful, a donation would be appreciated~</value>
+  </data>
+  <data name="CurrentVersion_Title" xml:space="preserve">
+    <value>Current Version</value>
+  </data>
+  <data name="LatestRelease_Title" xml:space="preserve">
+    <value>Update Available</value>
+  </data>
+  <data name="Welcome_Title" xml:space="preserve">
+    <value>Welcome to LumiTracker !</value>
   </data>
   <data name="OB_SettingsText" xml:space="preserve">
     <value>Spectate</value>
@@ -517,77 +465,60 @@
     <value>Reconnecting...</value>
   </data>
   <data name="OB_AppSubTitle" xml:space="preserve">
-    <value>观战服务器</value>
+    <value>Spectator Server</value>
   </data>
   <data name="Duel" xml:space="preserve">
-    <value>对局</value>
+    <value>Duel</value>
   </data>
   <data name="Copy" xml:space="preserve">
-    <value>复制</value>
+    <value>Copy</value>
   </data>
   <data name="OB_NatId" xml:space="preserve">
-    <value>内网穿透ID</value>
+    <value>NAT ID</value>
   </data>
   <data name="OB_ServerStarting" xml:space="preserve">
-    <value>服务器启动中...</value>
+    <value>Server Starting...</value>
   </data>
   <data name="OB_ServerStarted" xml:space="preserve">
-    <value>服务器已启动</value>
+    <value>Server Started</value>
   </data>
   <data name="OB_IconDirectory" xml:space="preserve">
-    <value>图标所在目录</value>
+    <value>Icon Directory</value>
   </data>
   <data name="OB_ChangeDir" xml:space="preserve">
-    <value>更改...</value>
+    <value>Change...</value>
   </data>
   <data name="OB_MaxTokens" xml:space="preserve">
-    <value>图标显示数量</value>
+    <value>Max Icon Count</value>
   </data>
   <data name="OB_MyView" xml:space="preserve">
-    <value>我方视角</value>
+    <value>My View</value>
   </data>
   <data name="OB_Header_Connected" xml:space="preserve">
-    <value>连接状态</value>
+    <value>Connection Status</value>
   </data>
   <data name="OB_Header_Name" xml:space="preserve">
-    <value>用户名</value>
+    <value>Username</value>
   </data>
   <data name="OB_Header_GameStarted" xml:space="preserve">
-    <value>对局情况</value>
+    <value>Game Status</value>
   </data>
   <data name="OBConnectState_None" xml:space="preserve">
-    <value>未连接</value>
+    <value>Not Connected</value>
   </data>
   <data name="OB_GameNotStarted" xml:space="preserve">
-    <value>未开始</value>
+    <value>Not Started</value>
   </data>
   <data name="OB_GameStarted" xml:space="preserve">
-    <value>对局中</value>
+    <value>In Game</value>
   </data>
   <data name="OB_HostCopiedToClipboard" xml:space="preserve">
-    <value>服务器地址已复制到剪贴板</value>
+    <value>Server Address Copied to Clipboard</value>
   </data>
   <data name="Player" xml:space="preserve">
-    <value>牌手</value>
+    <value>Player</value>
   </data>
   <data name="OB_OpView" xml:space="preserve">
-    <value>对方视角</value>
-  </data>
-  <data name="UnknownDeck" xml:space="preserve">
-    <value>Unknown Deck</value>
-  </data>
-  <data name="AutoSelectActiveDeck" xml:space="preserve">
-    <value>Auto Active Deck</value>
-  </data>
-  <data name="AutoSelectActiveDeck_ToolTip" xml:space="preserve">
-    <value>1. When the duel starts, LumiTracker will detect our three characters and search for the matching deck in the list above.
-2. If there are decks with the same characters, the one that was most recently modified will be chosen; decks with different character orders will be regarded as separate.
-3. The active deck will be highlighted.</value>
-  </data>
-  <data name="UpdatePrompt_ChangeLog" xml:space="preserve">
-    <value>Release History</value>
-  </data>
-  <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
-    <value>Release History (Preview)</value>
+    <value>Opponent's View</value>
   </data>
 </root>

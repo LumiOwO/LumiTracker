@@ -241,7 +241,7 @@ namespace LumiTracker.OB.Services
                 }
                 if (!ViewModel!.ClientInfos.TryGetValue(clientId, out ClientInfo? clientInfo))
                 {
-                    string clientName = LocalizationSource.Instance["Player"] + guidStr.Substring(0, 4);
+                    string clientName = Lang.Player + guidStr.Substring(0, 4);
                     string metaPath = Path.Combine(dataPath, "meta.json");
                     if (File.Exists(metaPath))
                     {

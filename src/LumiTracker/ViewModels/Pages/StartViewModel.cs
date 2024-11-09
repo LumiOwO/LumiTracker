@@ -296,8 +296,8 @@ namespace LumiTracker.ViewModels.Pages
             if (clientType != EClientType.CloudWeb && clientType != EClientType.WeMeet)
             {
                 System.Windows.MessageBox.Show(
-                    $"{LocalizationSource.Instance["UnsupportedRatioWarning"]}\n{LocalizationSource.Instance["SupportedRatioInfo"]}",
-                    $"{LocalizationSource.Instance["AppName"]}",
+                    $"{Lang.UnsupportedRatioWarning}\n{Lang.SupportedRatioInfo}",
+                    $"{Lang.AppName}",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             }
         }

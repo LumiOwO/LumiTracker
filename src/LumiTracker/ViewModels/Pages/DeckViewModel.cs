@@ -47,7 +47,7 @@ namespace LumiTracker.ViewModels.Pages
         [JsonProperty("name")]
         [ObservableProperty]
         [property: JsonIgnore]
-        private string _name = LocalizationSource.Instance["DefaultDeckName"];
+        private string _name = Lang.DefaultDeckName;
 
         [JsonProperty("characters")]
         public int[] Characters = [];
@@ -331,8 +331,8 @@ namespace LumiTracker.ViewModels.Pages
             UserDeckList.ActiveIndex = SelectedDeckIndex;
             SaveDeckList();
             SnackbarService?.Show(
-                LocalizationSource.Instance["SetAsActiveSuccess_Title"],
-                LocalizationSource.Instance["SetAsActiveSuccess_Message"] + SelectedDeckName,
+                Lang.SetAsActiveSuccess_Title,
+                Lang.SetAsActiveSuccess_Message + SelectedDeckName,
                 ControlAppearance.Success,
                 new SymbolIcon(SymbolRegular.CheckmarkCircle24),
                 TimeSpan.FromSeconds(2)
@@ -349,16 +349,16 @@ namespace LumiTracker.ViewModels.Pages
             }
 
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
-                LocalizationSource.Instance["EditDeckName_Title"],
+                Lang.EditDeckName_Title,
                 SelectedDeckName,
-                LocalizationSource.Instance["EditDeckName_Placeholder"]
+                Lang.EditDeckName_Placeholder
             );
 
             if (result == ContentDialogResult.Primary)
             {
                 if (name == "")
                 {
-                    name = LocalizationSource.Instance["DefaultDeckName"];
+                    name = Lang.DefaultDeckName;
                 }
                 UserDeckList.DeckInfos[SelectedDeckIndex].Name = name;
                 SelectedDeckName = name;
@@ -376,9 +376,9 @@ namespace LumiTracker.ViewModels.Pages
             }
 
             var (result, sharecode) = await ContentDialogService.ShowTextInputDialogAsync(
-                LocalizationSource.Instance["ImportDeck_Title"],
+                Lang.ImportDeck_Title,
                 "",
-                LocalizationSource.Instance["ImportDeck_Placeholder"]
+                Lang.ImportDeck_Placeholder
             );
 
             if (result == ContentDialogResult.Primary)
@@ -393,8 +393,8 @@ namespace LumiTracker.ViewModels.Pages
                 else
                 {
                     SnackbarService?.Show(
-                        LocalizationSource.Instance["InvalidSharingCode_Title"],
-                        LocalizationSource.Instance["InvalidSharingCode_Message"] + sharecode,
+                        Lang.InvalidSharingCode_Title,
+                        Lang.InvalidSharingCode_Message + sharecode,
                         ControlAppearance.Danger,
                         new SymbolIcon(SymbolRegular.DismissCircle24),
                         TimeSpan.FromSeconds(3)
@@ -417,7 +417,7 @@ namespace LumiTracker.ViewModels.Pages
 
             Clipboard.SetText(sharecode);
             SnackbarService?.Show(
-                LocalizationSource.Instance["CopyToClipboard"],
+                Lang.CopyToClipboard,
                 $"{sharecode}",
                 ControlAppearance.Success,
                 new SymbolIcon(SymbolRegular.CheckmarkCircle24),
@@ -435,9 +435,9 @@ namespace LumiTracker.ViewModels.Pages
             }
 
             var (result, sharecode) = await ContentDialogService.ShowTextInputDialogAsync(
-                LocalizationSource.Instance["ImportDeck_Title"], 
+                Lang.ImportDeck_Title, 
                 "",
-                LocalizationSource.Instance["ImportDeck_Placeholder"]
+                Lang.ImportDeck_Placeholder
             );
 
             if (result == ContentDialogResult.Primary)
@@ -461,8 +461,8 @@ namespace LumiTracker.ViewModels.Pages
                 else
                 {
                     SnackbarService?.Show(
-                        LocalizationSource.Instance["InvalidSharingCode_Title"],
-                        LocalizationSource.Instance["InvalidSharingCode_Message"] + sharecode,
+                        Lang.InvalidSharingCode_Title,
+                        Lang.InvalidSharingCode_Message + sharecode,
                         ControlAppearance.Danger,
                         new SymbolIcon(SymbolRegular.DismissCircle24),
                         TimeSpan.FromSeconds(3)

@@ -106,7 +106,7 @@ namespace LumiTracker.OB.ViewModels.Pages
             string host = "127.0.0.1";
             Clipboard.SetText(host);
             _snackbarService?.Show(
-                LocalizationSource.Instance["OB_HostCopiedToClipboard"],
+                Lang.OB_HostCopiedToClipboard,
                 $"{host}",
                 ControlAppearance.Success,
                 new SymbolIcon(SymbolRegular.CheckmarkCircle24),

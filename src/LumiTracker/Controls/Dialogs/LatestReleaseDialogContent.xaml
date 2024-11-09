@@ -15,18 +15,40 @@
         <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#909090"/>
     </UserControl.Resources>
 
-    <RichTextBox
+    <Grid
         DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:LatestReleaseDialogContent}}"
-        x:Name="RichTextBox" 
-        Margin="-20, -50, -20, -50"
-        Padding="5, 55, 5, 55"
-        Width="500"
-        IsReadOnly="True"
-        VerticalContentAlignment="Top"
-        VerticalAlignment="Top"
-        VerticalScrollBarVisibility="Auto"
-        HorizontalScrollBarVisibility="Disabled"
-        IsHitTestVisible="False"
-        />
+        Margin="-15,-15,-15,-15"
+        Width="650"
+        Height="350"
+        VerticalAlignment="Center"
+        HorizontalAlignment="Center"
+        >
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            Grid.Row="0"
+            Margin="10,0,0,0"
+            FontWeight="Bold"
+            FontSize="20"
+            >
+            <Run Text="{svs:Localization Donate_Prompt}"/>
+            <Run Foreground="Red" Text="♥"/>
+        </TextBlock>
+        
+        <RichTextBox
+            Grid.Row="1"
+            x:Name="RichTextBox" 
+            Margin="10, 15, 10, 0"
+            IsReadOnly="True"
+            VerticalContentAlignment="Top"
+            VerticalAlignment="Top"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled"
+            />
+    </Grid>
 
 </UserControl>

@@ -1,6 +1,7 @@
 ﻿using System.Windows.Documents;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
+using Swordfish.NET.Collections.Auxiliary;
 
 public class MarkdownParser
 {
@@ -16,6 +17,9 @@ public class MarkdownParser
     public static void ParseMarkdown(FlowDocument document, string markdown)
     {
         document.Blocks.Clear();
+        document.PagePadding = new Thickness(0);
+        document.TextAlignment = TextAlignment.Justify;
+        document.FontSize = 16;
 
         // Remove all '\r' characters
         markdown  = markdown.Replace("\r", string.Empty);
@@ -23,12 +27,17 @@ public class MarkdownParser
 
         foreach (var line in lines)
         {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
             Paragraph paragraph = new Paragraph();
+            paragraph.Margin = new Thickness(0);
+            paragraph.Padding = new Thickness(0);
 
             // Handle headers (one or more #)
             var headerMatch = HeaderRegex.Match(line);
             if (headerMatch.Success)
             {
+                // Add header
                 int headerLevel = headerMatch.Groups[1].Value.Length;
                 string headerText = headerMatch.Groups[2].Value;
                 paragraph.Inlines.Add(new Run(headerText) 
@@ -36,6 +45,10 @@ public class MarkdownParser
                     FontWeight = FontWeights.Bold,
                     FontSize   = 18,
                 });
+
+                // Add some space before header if not at the beginning of the document
+                double top = document.Blocks.IsEmpty() ? 0 : 15;
+                paragraph.Margin = new Thickness(0, top, 0, 5);
                 document.Blocks.Add(paragraph);
                 continue;
             }
@@ -48,12 +61,13 @@ public class MarkdownParser
                 var listItemText  = line.TrimStart('-', ' ').Trim();
 
                 // Create list item and apply padding based on indentation level
-                var listItem = new ListItem(new Paragraph(ProcessMarkdownText(listItemText)));
+                paragraph.Inlines.Add(ProcessMarkdownText(listItemText));
+                var listItem = new ListItem(paragraph);
                 var list = new List { ListItems = { listItem } };
 
                 // Apply padding
-                var margin = new Thickness(leadingSpaces * 5, 0, 0, 0); // Adjust the multiplier as needed
-                listItem.Margin = margin;
+                var margin = new Thickness(leadingSpaces * 20, 2, 0, 2); // Adjust the multiplier as needed
+                list.Margin = margin;
 
                 document.Blocks.Add(list);
                 continue;
@@ -63,6 +77,9 @@ public class MarkdownParser
             paragraph.Inlines.Add(ProcessMarkdownText(line));
             document.Blocks.Add(paragraph);
         }
+
+        // Add some space at the end of the document
+        document.Blocks.Add(new Paragraph());
     }
 
     private static Inline ProcessMarkdownText(string text)

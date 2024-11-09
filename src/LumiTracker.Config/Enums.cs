@@ -176,7 +176,7 @@ namespace LumiTracker.Config
                 ELanguage.zh_HANS => "简体中文",
                 ELanguage.en_US   => "English",
                 ELanguage.ja_JP   => "日本語",
-                _ => LocalizationSource.Instance["FollowSystem"],
+                _ => Lang.FollowSystem,
             };
         }
 

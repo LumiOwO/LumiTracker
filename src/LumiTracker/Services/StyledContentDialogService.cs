@@ -1,9 +1,9 @@
-﻿using LumiTracker.Config;
+using LumiTracker.Config;
 using LumiTracker.Controls;
+using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
@@ -30,18 +30,17 @@ namespace LumiTracker.Services
             content.NotShowAgainButton.IsChecked = false;
 
             // Show Closing dialog
-            var dialog = new ContentDialog()
-            {
-                Content = content,
-                Title   = LocalizationSource.Instance["ClosingDialogTitle"],
-                PrimaryButtonText = LocalizationSource.Instance["OK"],
-                CloseButtonText   = LocalizationSource.Instance["Cancel"],
-                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
-                CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24),
-                PrimaryButtonAppearance = ControlAppearance.Info,
-            };
-            ContentDialogResult result = await ClosingService.ShowAsync(dialog, default);
+            var styledDialog = new StyledContentDialog();
+            styledDialog.Title = Lang.ClosingDialogTitle;
+            var dialog = styledDialog.Dialog;
+            dialog.Content = content;
+            dialog.PrimaryButtonText = Lang.OK;
+            dialog.CloseButtonText   = Lang.Cancel;
+            dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24);
+            dialog.CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24);
+            dialog.PrimaryButtonAppearance = ControlAppearance.Info;
 
+            ContentDialogResult result = await ClosingService.ShowAsync(dialog, default);
             bool MinimizeChecked = (content.MinimizeButton.IsChecked ?? false);
             bool NotShowAgainChecked = (content.NotShowAgainButton.IsChecked ?? false);
 
@@ -56,18 +55,17 @@ namespace LumiTracker.Services
             content.TextBox.PlaceholderText = placeholder;
 
             // Show TextBox dialog
-            var dialog = new ContentDialog()
-            {
-                Content = content,
-                Title   = title,
-                PrimaryButtonText   = LocalizationSource.Instance["OK"],
-                SecondaryButtonText = LocalizationSource.Instance["Paste"],
-                CloseButtonText     = LocalizationSource.Instance["Cancel"],
-                PrimaryButtonIcon   = new SymbolIcon(SymbolRegular.Checkmark24),
-                SecondaryButtonIcon = new SymbolIcon(SymbolRegular.ClipboardPaste24),
-                CloseButtonIcon     = new SymbolIcon(SymbolRegular.Dismiss24),
-                PrimaryButtonAppearance = ControlAppearance.Info,
-            };
+            var styledDialog = new StyledContentDialog();
+            styledDialog.Title = title;
+            var dialog = styledDialog.Dialog;
+            dialog.Content = content;
+            dialog.PrimaryButtonText   = Lang.OK;
+            dialog.SecondaryButtonText = Lang.Paste;
+            dialog.CloseButtonText     = Lang.Cancel;
+            dialog.PrimaryButtonIcon   = new SymbolIcon(SymbolRegular.Checkmark24);
+            dialog.SecondaryButtonIcon = new SymbolIcon(SymbolRegular.ClipboardPaste24);
+            dialog.CloseButtonIcon     = new SymbolIcon(SymbolRegular.Dismiss24);
+            dialog.PrimaryButtonAppearance = ControlAppearance.Info;
             dialog.ButtonClicked += (ContentDialog sender, ContentDialogButtonClickEventArgs args) =>
             {
                 if (args.Button == ContentDialogButton.Secondary)
@@ -91,54 +89,68 @@ namespace LumiTracker.Services
         {
             // Init
             var content = new DeleteConfirmDialogContent();
-            content.TextPrefix.Text = LocalizationSource.Instance["DeleteConfirm_Message"];
+            content.TextPrefix.Text = Lang.DeleteConfirm_Message;
             content.TextMain.Text   = deckName;
 
             // Show dialog
-            var dialog = new ContentDialog()
-            {
-                Title   = LocalizationSource.Instance["DeleteConfirm_Title"],
-                Content = content,
-                PrimaryButtonText = LocalizationSource.Instance["OK"],
-                CloseButtonText   = LocalizationSource.Instance["Cancel"],
-                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Delete24),
-                CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24),
-                PrimaryButtonAppearance = ControlAppearance.Danger,
-            };
-            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
+            var styledDialog = new StyledContentDialog();
+            styledDialog.Title = Lang.DeleteConfirm_Title;
+            var dialog = styledDialog.Dialog;
+            dialog.Content = content;
+            dialog.PrimaryButtonText = Lang.OK;
+            dialog.CloseButtonText   = Lang.Cancel;
+            dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Delete24);
+            dialog.CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24);
+            dialog.PrimaryButtonAppearance = ControlAppearance.Danger;
 
+            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
             return result;
         }
 
-        private ContentDialog? UpdateDialog;
+        private StyledContentDialog? UpdateDialog = null;
+
+        private StyledContentDialog GetReleaseLogDialog(string title, string body, bool isStartup)
+        {
+            // Init
+            var content = new LatestReleaseDialogContent();
+            // Get update info of current language
+            string[] textMultiLangs = body.Split("----------");
+            if (textMultiLangs.Length == (int)ELanguage.NumELanguages - 1)
+            {
+                body = textMultiLangs[(int)Configuration.GetELanguage() - 1];
+                body = body.TrimStart();
+            }
+            MarkdownParser.ParseMarkdown(content.RichTextBox.Document, body);
+
+            // Show latest release info dialog
+            var styledDialog = new StyledContentDialog();
+            styledDialog.Title = title;
+            var dialog = styledDialog.Dialog;
+            dialog.Content = content;
+            dialog.CloseButtonText   = Lang.UpdatePrompt_Later;
+            dialog.CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24);
+            if (isStartup)
+            {
+                dialog.PrimaryButtonText = Lang.Donate_ButtonText;
+                dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Heart24);
+                dialog.PrimaryButtonAppearance = ControlAppearance.Danger;
+            }
+            else
+            {
+                dialog.PrimaryButtonText = Lang.UpdatePrompt_UpdateNow;
+                dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24);
+                dialog.PrimaryButtonAppearance = ControlAppearance.Success;
+            }
+
+            return styledDialog;
+        }
 
         public async Task<Task<ContentDialogResult>?> ShowUpdateDialogAsync(UpdateContext ctx)
         {
             // Init latest release info dialog content
-            var releaseContent = new LatestReleaseDialogContent();
-            string title = ctx.ReleaseMeta!.tag_name;
-            string text  = ctx.ReleaseMeta!.body;
-            // Get update info of current language
-            string[] textMultiLangs = text.Split("----------");
-            if (textMultiLangs.Length == (int)ELanguage.NumELanguages - 1)
-            {
-                text = textMultiLangs[(int)Configuration.GetELanguage() - 1];
-                text = text.TrimStart();
-            }
-            MarkdownParser.ParseMarkdown(releaseContent.RichTextBox.Document, text);
-
-            // Show latest release info dialog
-            UpdateDialog = new ContentDialog()
-            {
-                Title   = title,
-                Content = releaseContent,
-                PrimaryButtonText = LocalizationSource.Instance["UpdatePrompt_UpdateNow"],
-                CloseButtonText   = LocalizationSource.Instance["UpdatePrompt_Later"],
-                PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
-                CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24),
-                PrimaryButtonAppearance = ControlAppearance.Success,
-            };
-            ContentDialogResult result = await MainService.ShowAsync(UpdateDialog, default);
+            UpdateDialog = GetReleaseLogDialog(
+                $"{Lang.LatestRelease_Title} : {ctx.ReleaseMeta!.tag_name}", ctx.ReleaseMeta!.body, false);
+            ContentDialogResult result = await MainService.ShowAsync(UpdateDialog.Dialog, default);
             if (result == ContentDialogResult.None)
             {
                 return null;
@@ -154,37 +166,37 @@ namespace LumiTracker.Services
             progressContent.SetBinding(UpdateProgressDialogContent.ContextProperty, binding);
 
             // Show progress dialog
-            UpdateDialog = new ContentDialog()
-            {
-                Content = progressContent,
-                CloseButtonText = LocalizationSource.Instance["OK"],
-                CloseButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
-                CloseButtonAppearance = ControlAppearance.Success,
-                IsPrimaryButtonEnabled   = false,
-                IsSecondaryButtonEnabled = false,
-                IsEnabled = false,
-            };
+            UpdateDialog = new StyledContentDialog();
+            UpdateDialog.TitleCloseButtonVisibility = Visibility.Hidden;
+            var dialog = UpdateDialog.Dialog;
+            dialog.Content = progressContent;
+            dialog.CloseButtonText = Lang.OK;
+            dialog.CloseButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24);
+            dialog.CloseButtonAppearance = ControlAppearance.Success;
+            dialog.IsPrimaryButtonEnabled   = false;
+            dialog.IsSecondaryButtonEnabled = false;
+            dialog.IsEnabled = false;
             binding = new Binding("ProgressText")
             {
                 Source = ctx,
                 Mode = BindingMode.OneWay,
             };
-            UpdateDialog.SetBinding(ContentDialog.TitleProperty, binding);
+            UpdateDialog.SetBinding(StyledContentDialog.TitleProperty, binding);
             binding = new Binding("ReadyToRestart")
             {
                 Source = ctx,
                 Mode = BindingMode.OneWay,
             };
-            UpdateDialog.SetBinding(ContentDialog.IsEnabledProperty, binding);
+            dialog.SetBinding(ContentDialog.IsEnabledProperty, binding);
 
-            return MainService.ShowAsync(UpdateDialog, default);
+            return MainService.ShowAsync(dialog, default);
         }
 
         public void ClearUpdateDialog()
         {
             if (UpdateDialog != null)
             {
-                UpdateDialog.Hide();
+                UpdateDialog.Dialog.Hide();
                 UpdateDialog = null;
             }
         }
@@ -196,20 +208,114 @@ namespace LumiTracker.Services
             content.CapturedImage.Source = new BitmapImage(new Uri(Path.Combine(Configuration.LogDir, filename), UriKind.Absolute));
 
             // Show dialog
-            var dialog = new ContentDialog()
-            {
-                Title   = $"{LocalizationSource.Instance["CaptureType_FrameSizePrompt"]} {width} x {height}",
-                Content = content,
-                CloseButtonText = LocalizationSource.Instance["OK"],
-                CloseButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24),
-                CloseButtonAppearance    = ControlAppearance.Success,
-                IsPrimaryButtonEnabled   = false,
-                IsSecondaryButtonEnabled = false,
-            };
+            var styledDialog = new StyledContentDialog();
+            styledDialog.Title = $"{Lang.CaptureType_FrameSizePrompt} {width} x {height}";
+            var dialog = styledDialog.Dialog;
+            dialog.Content = content;
+            dialog.CloseButtonText = Lang.OK;
+            dialog.CloseButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24);
+            dialog.CloseButtonAppearance    = ControlAppearance.Success;
+            dialog.IsPrimaryButtonEnabled   = false;
+            dialog.IsSecondaryButtonEnabled = false;
             dialog.DialogMargin = new Thickness(0, -20, 0, -5);
-            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
 
+            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
             return result;
+        }
+
+        public async Task ShowDonateDialogAsync()
+        {
+            // Init
+            var content = new DonateDialogContent();
+
+            // Show dialog
+            var styledDialog = new StyledContentDialog();
+            styledDialog.Title = Lang.Donate;
+            var dialog = styledDialog.Dialog;
+            dialog.Content = content;
+            dialog.CloseButtonText = Lang.UpdatePrompt_Later;
+            dialog.CloseButtonIcon = new SymbolIcon(SymbolRegular.Dismiss24);
+            dialog.IsPrimaryButtonEnabled = false;
+            dialog.IsSecondaryButtonEnabled = false;
+            dialog.DialogMargin = new Thickness(0, -20, 0, -5);
+
+            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
+        }
+
+        public async Task<ContentDialogResult> ShowWelcomeDialogAsync()
+        {
+            // Init
+            var content = new WelcomeDialogContent();
+
+            // Show dialog
+            var styledDialog = new StyledContentDialog();
+            styledDialog.Title = Lang.Welcome_Title;
+            var dialog = styledDialog.Dialog;
+            dialog.Content = content;
+            dialog.PrimaryButtonText = Lang.Donate_ButtonText;
+            dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Heart24);
+            dialog.PrimaryButtonAppearance = ControlAppearance.Danger;
+            dialog.CloseButtonText = Lang.UpdatePrompt_Later;
+            dialog.CloseButtonIcon = new SymbolIcon(SymbolRegular.Dismiss24);
+            dialog.IsSecondaryButtonEnabled = false;
+            dialog.DialogMargin = new Thickness(0, -20, 0, -5);
+
+            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
+            return result;
+        }
+
+        private async Task _ShowStartupDialogIfNeededAsync()
+        {
+            string guid = Configuration.GetOrCreateClientId(out bool guidNewlyCreated);
+            bool just_updated = Configuration.Get<bool>("just_updated");
+
+            if (!guidNewlyCreated && just_updated)
+            {
+                StyledContentDialog? styledDialog = null;
+                try
+                {
+                    string version = Configuration.GetAssemblyVersion();
+                    string changeLogPath = Path.Combine(Configuration.ChangeLogDir, $"{version}.md");
+                    if (File.Exists(changeLogPath))
+                    {
+                        string body = File.ReadAllText(changeLogPath);
+                        styledDialog = GetReleaseLogDialog($"{Lang.CurrentVersion_Title} : v{version}", body, true);
+                    }
+                    else
+                    {
+                        Configuration.Logger.LogWarning($"[ShowStartupDialog] Just updated, but release log file not found.");
+                    }
+                }
+                catch (Exception ex)
+                { 
+                    Configuration.Logger.LogError($"[ShowStartupDialog] Failed to read release log: {ex.Message}");
+                }
+
+                if (styledDialog != null)
+                {
+                    ContentDialogResult result = await MainService.ShowAsync(styledDialog.Dialog, default);
+                    if (result == ContentDialogResult.Primary)
+                    {
+                        await ShowDonateDialogAsync();
+                    }
+                    return;
+                }
+            }
+
+            if (just_updated || guidNewlyCreated)
+            {
+                ContentDialogResult result = await ShowWelcomeDialogAsync();
+                if (result == ContentDialogResult.Primary)
+                {
+                    await ShowDonateDialogAsync();
+                }
+            }
+        }
+
+        public async Task ShowStartupDialogIfNeededAsync(Func<Task> OnDialogClosed)
+        {
+            await _ShowStartupDialogIfNeededAsync();
+            await OnDialogClosed();
         }
     }
 }

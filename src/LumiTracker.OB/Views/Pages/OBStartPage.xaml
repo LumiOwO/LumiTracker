@@ -203,7 +203,7 @@
 
         <Grid Margin="5,30,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="110" />
+                <ColumnDefinition Width="Auto" MinWidth="110" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
@@ -218,7 +218,7 @@
             <TextBlock 
                 Grid.Row="0"
                 Grid.Column="0"
-                Margin="0,0,0,2" 
+                Margin="0,0,10,2" 
                 Text="{svs:Localization OB_IconDirectory}" 
                 FontSize="15"
                 FontWeight="Bold"
@@ -251,14 +251,14 @@
 
         <Grid Margin="5,15,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="110" />
+                <ColumnDefinition Width="Auto" MinWidth="110" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
             <TextBlock 
                 Grid.Column="0"
-                Margin="0,0,0,0" 
+                Margin="0,0,10,0" 
                 FontWeight="Bold"
                 Text="{svs:Localization OB_MaxTokens}" 
                 FontSize="15"

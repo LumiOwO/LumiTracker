@@ -15,8 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\alipay.png" />
     <None Remove="Assets\LumiTracker.ico" />
     <None Remove="Assets\LumiTracker.png" />
+    <None Remove="Assets\wechat.png" />
+    <None Remove="Assets\welcome%40LEMP!KA.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,12 +40,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\alipay.png" />
     <Resource Include="Assets\LumiTracker.ico" />
     <Resource Include="Assets\LumiTracker.png" />
+    <Resource Include="Assets\wechat.png" />
+    <Resource Include="Assets\welcome%40LEMP!KA.jpg" />
   </ItemGroup>
 
   <Target Name="PublishOB" AfterTargets="Publish">
-    <MSBuild Projects="$(SolutionDir)src\LumiTracker.OB\LumiTracker.OB.csproj" Targets="Publish"/>
+    <MSBuild Projects="$(SolutionDir)src\LumiTracker.OB\LumiTracker.OB.csproj" Targets="Publish" />
   </Target>
 
   <Target Name="CopyFiles" AfterTargets="PublishOB">

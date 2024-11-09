@@ -40,8 +40,38 @@
             TextWrapping="Wrap"
             />
 
+        <TextBlock
+            Grid.Row="0"
+            Margin="5,40,0,0"
+            FontWeight="Bold"
+            FontSize="22"
+            HorizontalAlignment="Left"
+            >
+            <Run Text="{svs:Localization Donate_Prompt}"/>
+            <Run Foreground="Red" Text="♥"/>
+        </TextBlock>
+
+        <ui:Button 
+            Height="Auto"
+            Margin="5,10,0,0"
+            Padding="9,4,4,6"
+            Appearance="Danger"
+            Command="{Binding ShowDonateDialogCommand, Mode=OneWay}">
+            <TextBlock 
+                FontSize="17"
+                FontWeight="Bold"
+                Text="{svs:Localization Donate_ButtonText}" />
+            <ui:Button.Icon>
+                <ui:SymbolIcon 
+                    Margin="0,0,-3,0" 
+                    FontWeight="Bold"
+                    FontSize="16"
+                    Symbol="Heart24"/>
+            </ui:Button.Icon>
+        </ui:Button>
+
         <StackPanel 
-            Margin="5, 55, 0, 0"
+            Margin="5, 70, 0, 0"
             Orientation="Horizontal">
             <ui:Button 
                 Height="Auto"

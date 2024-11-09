@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 using System.Resources;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LumiTracker.Config
 {
@@ -20,22 +15,21 @@ namespace LumiTracker.Config
         }
 
         private readonly ResourceManager resManager = Lang.ResourceManager;
-        private CultureInfo? currentCulture;
 
         public string this[string key]
         {
-            get { return this.resManager.GetString(key, this.currentCulture)!; }
+            get { return resManager.GetString(key, Lang.Culture)!; }
         }
 
         public CultureInfo CurrentCulture
         {
-            get { return this.currentCulture!; }
+            get { return Lang.Culture; }
             set
             {
-                if (this.currentCulture != value)
+                if (Lang.Culture != value)
                 {
-                    this.currentCulture = value;
-                    var @event = this.PropertyChanged;
+                    Lang.Culture = value;
+                    var @event = PropertyChanged;
                     if (@event != null)
                     {
                         @event.Invoke(this, new PropertyChangedEventArgs(string.Empty));

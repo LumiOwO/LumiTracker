@@ -337,6 +337,20 @@ namespace LumiTracker.Services
                 ctx.State = EUpdateState.AlreadyLatest;
                 return true;
             }
+            // Save release log
+            try
+            {
+                if (!Directory.Exists(Configuration.ChangeLogDir))
+                {
+                    Directory.CreateDirectory(Configuration.ChangeLogDir);
+                }
+                await File.WriteAllTextAsync(Path.Combine(Configuration.ChangeLogDir, $"{latestVersion}.md"), releaseMeta.body);
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"[Update] Failed to save release log: {ex.Message}");
+            }
+
             // Show update available dialog
             var task = await ContentDialogService.ShowUpdateDialogAsync(ctx);
             ctx.ProgressDialogTask = task;
@@ -352,7 +366,7 @@ namespace LumiTracker.Services
             {
                 await progressUpdater;
             }
-            ctx.ProgressText   = retry ? LocalizationSource.Instance["UpdatePrompt_Retrying"] : LocalizationSource.Instance["UpdatePrompt_Connecting"];
+            ctx.ProgressText   = retry ? Lang.UpdatePrompt_Retrying : Lang.UpdatePrompt_Connecting;
             ctx.Indeterminate  = true;
             ctx.ElapsedTime    = "";
             ctx.RemainTime     = "";
@@ -426,7 +440,7 @@ namespace LumiTracker.Services
             }
 
             ctx.Indeterminate   = false;
-            ctx.ProgressText    = LocalizationSource.Instance["UpdatePrompt_Downloading"];
+            ctx.ProgressText    = Lang.UpdatePrompt_Downloading;
             ctx.globalStopwatch = new Stopwatch();
             ctx.downloadedBytes = 0;
             ctx.totalBytes      = totalBytes;
@@ -484,7 +498,7 @@ namespace LumiTracker.Services
             ctx.Progress       = 1.0;
             ctx.DownloadedSize = ctx.TotalSize;
             ctx.Indeterminate  = true;
-            ctx.ProgressText   = LocalizationSource.Instance["UpdatePrompt_Unpacking"];
+            ctx.ProgressText   = Lang.UpdatePrompt_Unpacking;
 
             string dstDir = Path.Combine(Configuration.RootDir, "LumiTrackerApp-" + latestVersion);
             foreach (var meta in downloadMetas)
@@ -568,7 +582,7 @@ namespace LumiTracker.Services
             Configuration.Logger.LogDebug("[Update] Ready to restart, waiting for confirm...");
             ctx.State = EUpdateState.ReadyToRestart;
             ctx.Indeterminate  = false;
-            ctx.ProgressText   = LocalizationSource.Instance["UpdatePrompt_Complete"];
+            ctx.ProgressText   = Lang.UpdatePrompt_Complete;
             ctx.ReadyToRestart = true;
             await ctx.ProgressDialogTask!;
             return true;

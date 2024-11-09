@@ -12,7 +12,7 @@
     Title="StartPage"
     d:DataContext="{d:DesignInstance local:StartPage,
                                      IsDesignTimeCreatable=False}"
-    d:DesignHeight="450"
+    d:DesignHeight="550"
     d:DesignWidth="800"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -306,7 +306,15 @@
             Grid.Column="0" />
 
         <ui:HyperlinkButton
-            Margin="-1, 20, 0, 0"
+            Margin="-1, 40, 0, 0"
+            Padding="5"
+            Content="{svs:Localization Donate}"
+            FontWeight="Bold"
+            Command="{Binding ShowDonateDialogCommand, Mode=OneWay}"
+            />
+
+        <ui:HyperlinkButton
+            Margin="-1, 5, 0, 0"
             Padding="5"
             Content="{svs:Localization DocumentationLink}"
             FontWeight="Bold"

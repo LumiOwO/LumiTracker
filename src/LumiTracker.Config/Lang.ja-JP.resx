@@ -120,9 +120,6 @@
   <data name="AppName" xml:space="preserve">
     <value>LumiTracker</value>
   </data>
-  <data name="None" xml:space="preserve">
-    <value>無</value>
-  </data>
   <data name="AppSubTitle" xml:space="preserve">
     <value>七聖召喚カードレコーダー</value>
   </data>
@@ -175,7 +172,7 @@
     <value>今すぐ更新</value>
   </data>
   <data name="UpdatePrompt_Later" xml:space="preserve">
-    <value>今回更新しない</value>
+    <value>後で通知</value>
   </data>
   <data name="UpdatePrompt_Connecting" xml:space="preserve">
     <value>接続中...</value>
@@ -390,6 +387,9 @@
   <data name="DeleteConfirm_Message" xml:space="preserve">
     <value>デッキ名：</value>
   </data>
+  <data name="None" xml:space="preserve">
+    <value>無</value>
+  </data>
   <data name="EditDeckName_Placeholder" xml:space="preserve">
     <value>ここでデッキ名を入力</value>
   </data>
@@ -401,6 +401,44 @@
   </data>
   <data name="AppPath" xml:space="preserve">
     <value>インストールパス</value>
+  </data>
+  <data name="AutoSelectActiveDeck" xml:space="preserve">
+    <value>自動でデッキを選択</value>
+  </data>
+  <data name="AutoSelectActiveDeck_ToolTip" xml:space="preserve">
+    <value>1．対局が始まると、記牌器は我々の3名の出撃キャラクターを識別し、上のリストでキャラクターに基づいて検索を行います。
+2．同じキャラクターを持つデッキが存在する場合、最も最近修正されたものが選ばれます；異なるキャラクターの順序は別のデッキと見なされます。
+3．出撃デッキはハイライト表示されます。</value>
+  </data>
+  <data name="UnknownDeck" xml:space="preserve">
+    <value>未知のデッキ</value>
+  </data>
+  <data name="UpdatePrompt_ChangeLog" xml:space="preserve">
+    <value>リリース履歴</value>
+  </data>
+  <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
+    <value>リリース履歴（プレビュー）</value>
+  </data>
+  <data name="Donate" xml:space="preserve">
+    <value>寄付</value>
+  </data>
+  <data name="Donate_Thanks" xml:space="preserve">
+    <value>ご支援ありがとうございます！このツールがお役に立てれば嬉しいです！</value>
+  </data>
+  <data name="Donate_ButtonText" xml:space="preserve">
+    <value>俺が払うよ ! </value>
+  </data>
+  <data name="Donate_Prompt" xml:space="preserve">
+    <value>もしお役に立ったなら、ぜひ寄付で応援お願いします~</value>
+  </data>
+  <data name="CurrentVersion_Title" xml:space="preserve">
+    <value>現在のバージョン</value>
+  </data>
+  <data name="LatestRelease_Title" xml:space="preserve">
+    <value>最新バージョン</value>
+  </data>
+  <data name="Welcome_Title" xml:space="preserve">
+    <value>LumiTrackerへようこそ！</value>
   </data>
   <data name="OB_SettingsText" xml:space="preserve">
     <value>観戦</value>
@@ -426,21 +464,61 @@
   <data name="OBConnectState_Reconnecting" xml:space="preserve">
     <value>再接続中...</value>
   </data>
-  <data name="AutoSelectActiveDeck" xml:space="preserve">
-    <value>自動でデッキを選択</value>
+  <data name="OB_AppSubTitle" xml:space="preserve">
+    <value>観戦サーバー</value>
   </data>
-  <data name="AutoSelectActiveDeck_ToolTip" xml:space="preserve">
-    <value>1．対局が始まると、記牌器は我々の3名の出撃キャラクターを識別し、上のリストでキャラクターに基づいて検索を行います。
-2．同じキャラクターを持つデッキが存在する場合、最も最近修正されたものが選ばれます；異なるキャラクターの順序は別のデッキと見なされます。
-3．出撃デッキはハイライト表示されます。</value>
+  <data name="Duel" xml:space="preserve">
+    <value>対局</value>
   </data>
-  <data name="UnknownDeck" xml:space="preserve">
-    <value>未知のデッキ</value>
+  <data name="Copy" xml:space="preserve">
+    <value>コピー</value>
   </data>
-  <data name="UpdatePrompt_ChangeLog" xml:space="preserve">
-    <value>リリース履歴</value>
+  <data name="OB_NatId" xml:space="preserve">
+    <value>NAT ID</value>
   </data>
-  <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
-    <value>リリース履歴（プレビュー）</value>
+  <data name="OB_ServerStarting" xml:space="preserve">
+    <value>サーバー起動中...</value>
+  </data>
+  <data name="OB_ServerStarted" xml:space="preserve">
+    <value>サーバー起動済み</value>
+  </data>
+  <data name="OB_IconDirectory" xml:space="preserve">
+    <value>アイコン場所</value>
+  </data>
+  <data name="OB_ChangeDir" xml:space="preserve">
+    <value>変更...</value>
+  </data>
+  <data name="OB_MaxTokens" xml:space="preserve">
+    <value>アイコン表示数</value>
+  </data>
+  <data name="OB_MyView" xml:space="preserve">
+    <value>私の視点</value>
+  </data>
+  <data name="OB_Header_Connected" xml:space="preserve">
+    <value>接続状態</value>
+  </data>
+  <data name="OB_Header_Name" xml:space="preserve">
+    <value>ユーザー名</value>
+  </data>
+  <data name="OB_Header_GameStarted" xml:space="preserve">
+    <value>対局状況</value>
+  </data>
+  <data name="OBConnectState_None" xml:space="preserve">
+    <value>未接続</value>
+  </data>
+  <data name="OB_GameNotStarted" xml:space="preserve">
+    <value>未開始</value>
+  </data>
+  <data name="OB_GameStarted" xml:space="preserve">
+    <value>対局中</value>
+  </data>
+  <data name="OB_HostCopiedToClipboard" xml:space="preserve">
+    <value>サーバーアドレスがクリップボードにコピーされました</value>
+  </data>
+  <data name="Player" xml:space="preserve">
+    <value>牌手</value>
+  </data>
+  <data name="OB_OpView" xml:space="preserve">
+    <value>相手の視点</value>
   </data>
 </root>

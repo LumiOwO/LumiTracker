@@ -100,15 +100,19 @@ namespace LumiTracker.OB.Views.Windows
 
             RootNavigation.Navigate(typeof(StartPage));
 
-            // Will only do this when just updated
-            if (Configuration.Get<bool>("just_updated"))
+            // Show donate dialog
+            var task = _contentDialogService.ShowStartupDialogIfNeededAsync(async () =>
             {
-                UpdateUtils.CleanCacheAndOldFiles();
-            }
-            if (Configuration.Get<bool>("check_updates_on_startup"))
-            {
-                Task task = _settingsViewModel.OnUpdateButtonClicked();
-            }
+                // Will only do this when just updated
+                if (Configuration.Get<bool>("just_updated"))
+                {
+                    UpdateUtils.CleanCacheAndOldFiles();
+                }
+                if (Configuration.Get<bool>("check_updates_on_startup"))
+                {
+                    await _settingsViewModel.OnUpdateButtonClicked();
+                }
+            });
         }
 
         private void MainWindow_ContentRendered(object? sender, EventArgs e)

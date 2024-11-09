@@ -80,6 +80,7 @@
                     Margin="3,3,3,3"
                     Source="{Binding AvatarUri, Mode=OneWay}" 
                     Stretch="Uniform"
+                    RenderOptions.BitmapScalingMode="HighQuality"
                     VerticalAlignment="Stretch"
                     HorizontalAlignment="Stretch"
                     />

@@ -10,7 +10,7 @@ namespace LumiTracker.Helpers
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            string none = $"<{LocalizationSource.Instance["UnknownDeck"]}>";
+            string none = $"<{Lang.UnknownDeck}>";
             if (values == null || values.Length != 3)
                 return none;
             if (!(values[0] is ObservableCollection<DeckInfo> deckInfos))
@@ -35,7 +35,7 @@ namespace LumiTracker.Helpers
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string title = (value as string)!;
-            return $"{LocalizationSource.Instance["AppName"]} {Configuration.GetAssemblyVersion()} - {title}";
+            return $"{Lang.AppName} {Configuration.GetAssemblyVersion()} - {title}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -49,7 +49,7 @@ namespace LumiTracker.Helpers
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string title = (value as string)!;
-            return $"{LocalizationSource.Instance["AppName"]} - {title}";
+            return $"{Lang.AppName} - {title}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -62,7 +62,7 @@ namespace LumiTracker.Helpers
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string unknown = LocalizationSource.Instance["UnknownCard"];
+            string unknown = Lang.UnknownCard;
             if (parameter is not int card_id || card_id < 0 || card_id >= (int)EActionCard.NumActions)
             {
                 return unknown;

@@ -22,7 +22,7 @@ namespace LumiTracker.ViewModels.Pages
 
         private void InitializeViewModel()
         {
-            AppVersion = $"{LocalizationSource.Instance["AppName"]} v{Configuration.GetAssemblyVersion()}";
+            AppVersion = $"{Lang.AppName} v{Configuration.GetAssemblyVersion()}";
             _isInitialized = true;
         }
 

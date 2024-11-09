@@ -27,24 +27,7 @@ namespace LumiTracker.OB.Services
             _host = host;
             _port = port;
             // Use a persistent GUID strategy to identify the client
-            _clientId = GetOrCreateClientId();
-        }
-
-        private string GetOrCreateClientId()
-        {
-            string clientIdFilePath = Path.Combine(Configuration.OBWorkingDir, "GUID.txt");
-            if (File.Exists(clientIdFilePath))
-            {
-                // Load existing client ID
-                return File.ReadAllText(clientIdFilePath);
-            }
-            else
-            {
-                // Create a new GUID as client ID and save it
-                string newClientId = Guid.NewGuid().ToString();
-                File.WriteAllText(clientIdFilePath, newClientId);
-                return newClientId;
-            }
+            _clientId = Configuration.GetOrCreateClientId(out bool isNewlyCreated);
         }
 
         // Connect to the server

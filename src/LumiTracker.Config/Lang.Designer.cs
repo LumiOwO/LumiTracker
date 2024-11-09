@@ -279,7 +279,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 复制.
+        ///   Looks up a localized string similar to Copy.
         /// </summary>
         public static string Copy {
             get {
@@ -293,6 +293,15 @@ namespace LumiTracker.Config {
         public static string CopyToClipboard {
             get {
                 return ResourceManager.GetString("CopyToClipboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current Version.
+        /// </summary>
+        public static string CurrentVersion_Title {
+            get {
+                return ResourceManager.GetString("CurrentVersion_Title", resourceCulture);
             }
         }
         
@@ -360,7 +369,43 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 对局.
+        ///   Looks up a localized string similar to Donate.
+        /// </summary>
+        public static string Donate {
+            get {
+                return ResourceManager.GetString("Donate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Join the Giving ! .
+        /// </summary>
+        public static string Donate_ButtonText {
+            get {
+                return ResourceManager.GetString("Donate_ButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If you found this useful, a donation would be appreciated~.
+        /// </summary>
+        public static string Donate_Prompt {
+            get {
+                return ResourceManager.GetString("Donate_Prompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thank You for Supporting! Your Generosity Brightens My Day!.
+        /// </summary>
+        public static string Donate_Thanks {
+            get {
+                return ResourceManager.GetString("Donate_Thanks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duel.
         /// </summary>
         public static string Duel {
             get {
@@ -549,6 +594,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Update Available.
+        /// </summary>
+        public static string LatestRelease_Title {
+            get {
+                return ResourceManager.GetString("LatestRelease_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading....
         /// </summary>
         public static string Loading {
@@ -612,7 +666,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 观战服务器.
+        ///   Looks up a localized string similar to Spectator Server.
         /// </summary>
         public static string OB_AppSubTitle {
             get {
@@ -621,7 +675,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 更改....
+        ///   Looks up a localized string similar to Change....
         /// </summary>
         public static string OB_ChangeDir {
             get {
@@ -639,7 +693,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 未开始.
+        ///   Looks up a localized string similar to Not Started.
         /// </summary>
         public static string OB_GameNotStarted {
             get {
@@ -648,7 +702,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 对局中.
+        ///   Looks up a localized string similar to In Game.
         /// </summary>
         public static string OB_GameStarted {
             get {
@@ -657,7 +711,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 连接状态.
+        ///   Looks up a localized string similar to Connection Status.
         /// </summary>
         public static string OB_Header_Connected {
             get {
@@ -666,7 +720,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 对局情况.
+        ///   Looks up a localized string similar to Game Status.
         /// </summary>
         public static string OB_Header_GameStarted {
             get {
@@ -675,7 +729,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 用户名.
+        ///   Looks up a localized string similar to Username.
         /// </summary>
         public static string OB_Header_Name {
             get {
@@ -693,7 +747,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 服务器地址已复制到剪贴板.
+        ///   Looks up a localized string similar to Server Address Copied to Clipboard.
         /// </summary>
         public static string OB_HostCopiedToClipboard {
             get {
@@ -702,7 +756,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 图标所在目录.
+        ///   Looks up a localized string similar to Icon Directory.
         /// </summary>
         public static string OB_IconDirectory {
             get {
@@ -711,7 +765,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 图标显示数量.
+        ///   Looks up a localized string similar to Max Icon Count.
         /// </summary>
         public static string OB_MaxTokens {
             get {
@@ -720,7 +774,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 我方视角.
+        ///   Looks up a localized string similar to My View.
         /// </summary>
         public static string OB_MyView {
             get {
@@ -729,7 +783,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 内网穿透ID.
+        ///   Looks up a localized string similar to NAT ID.
         /// </summary>
         public static string OB_NatId {
             get {
@@ -738,7 +792,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 对方视角.
+        ///   Looks up a localized string similar to Opponent&apos;s View.
         /// </summary>
         public static string OB_OpView {
             get {
@@ -756,7 +810,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 服务器已启动.
+        ///   Looks up a localized string similar to Server Started.
         /// </summary>
         public static string OB_ServerStarted {
             get {
@@ -765,7 +819,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 服务器启动中....
+        ///   Looks up a localized string similar to Server Starting....
         /// </summary>
         public static string OB_ServerStarting {
             get {
@@ -810,7 +864,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 未连接.
+        ///   Looks up a localized string similar to Not Connected.
         /// </summary>
         public static string OBConnectState_None {
             get {
@@ -855,7 +909,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 牌手.
+        ///   Looks up a localized string similar to Player.
         /// </summary>
         public static string Player {
             get {
@@ -1196,6 +1250,15 @@ namespace LumiTracker.Config {
         public static string UpdatePrompt_UpdateNow {
             get {
                 return ResourceManager.GetString("UpdatePrompt_UpdateNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome to LumiTracker !.
+        /// </summary>
+        public static string Welcome_Title {
+            get {
+                return ResourceManager.GetString("Welcome_Title", resourceCulture);
             }
         }
     }

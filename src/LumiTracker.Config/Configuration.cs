@@ -64,6 +64,11 @@ namespace LumiTracker.Config
             "log"
         );
 
+        public static readonly string ChangeLogDir = Path.Combine(
+            DocumentsDir,
+            "changelog"
+        );
+
         public static readonly string OBWorkingDir = Path.Combine(
             DocumentsDir,
             "ob"
@@ -322,7 +327,7 @@ namespace LumiTracker.Config
         public static string GetCharacterName(int c_id, bool is_short)
         {
             if (c_id < 0 || c_id >= (int)ECharacterCard.NumCharacters)
-                return LocalizationSource.Instance["UnknownCard"];
+                return Lang.UnknownCard;
 
             string key = GetLanguageName();
             if (is_short) key += "_short";
@@ -332,7 +337,7 @@ namespace LumiTracker.Config
         public static string GetActionCardName(int card_id)
         {
             if (card_id < 0 || card_id >= (int)EActionCard.NumActions)
-                return LocalizationSource.Instance["UnknownCard"];
+                return Lang.UnknownCard;
 
             return Database["actions"]![card_id]![GetLanguageName()]!.ToString();
         }
@@ -413,6 +418,23 @@ namespace LumiTracker.Config
             else
             {
                 Logger.LogError("[RevealInExplorer] Path not found.");
+            }
+        }
+
+        public static string GetOrCreateClientId(out bool isNewlyCreated)
+        {
+            string clientIdFilePath = Path.Combine(DocumentsDir, "GUID.txt");
+            if (File.Exists(clientIdFilePath))
+            {
+                isNewlyCreated = false;
+                return File.ReadAllText(clientIdFilePath);
+            }
+            else
+            {
+                isNewlyCreated = true;
+                string newClientId = Guid.NewGuid().ToString();
+                File.WriteAllText(clientIdFilePath, newClientId);
+                return newClientId;
             }
         }
     }

@@ -22,6 +22,7 @@
             BorderBrush="#33000000"
             VerticalAlignment="Center"
             Stretch="Uniform"
+            RenderOptions.BitmapScalingMode="HighQuality"
             MaxHeight="420"
             />
     </StackPanel>
