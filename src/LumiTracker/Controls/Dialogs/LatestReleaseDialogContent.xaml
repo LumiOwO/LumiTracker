@@ -46,7 +46,7 @@
             Padding="10, 8, 20, 0"
             IsReadOnly="True"
             VerticalContentAlignment="Top"
-            VerticalAlignment="Top"
+            VerticalAlignment="Stretch"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Disabled"
             PreviewMouseDown="OnPreviewMouseDown"

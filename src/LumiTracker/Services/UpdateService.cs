@@ -903,23 +903,30 @@ namespace LumiTracker.Services
 
         public static void CleanCacheAndOldFiles()
         {
-            if (Directory.Exists(Configuration.CacheDir))
+            try
             {
-                Configuration.Logger.LogInformation($"Removing cache dir...");
-                Directory.Delete(Configuration.CacheDir, recursive: true);
+                if (Directory.Exists(Configuration.CacheDir))
+                {
+                    Configuration.Logger.LogInformation($"Removing cache dir...");
+                    Directory.Delete(Configuration.CacheDir, recursive: true);
+                }
+
+                Configuration.Logger.LogInformation($"Removing old version files...");
+                foreach (var directory in Directory.GetDirectories(Configuration.RootDir))
+                {
+                    if (Path.GetFullPath(directory) == Path.GetFullPath(Configuration.AppDir))
+                        continue;
+                    string dirName = Path.GetFileName(directory);
+                    if (!dirName.StartsWith("LumiTrackerApp-"))
+                        continue;
+
+                    Configuration.Logger.LogInformation($"Removing {dirName}...");
+                    Directory.Delete(directory, recursive: true);
+                }
             }
-
-            Configuration.Logger.LogInformation($"Removing old version files...");
-            foreach (var directory in Directory.GetDirectories(Configuration.RootDir))
+            catch (Exception ex)
             {
-                if (Path.GetFullPath(directory) == Path.GetFullPath(Configuration.AppDir))
-                    continue;
-                string dirName = Path.GetFileName(directory);
-                if (!dirName.StartsWith("LumiTrackerApp-"))
-                    continue;
-
-                Configuration.Logger.LogInformation($"Removing {dirName}...");
-                Directory.Delete(directory, recursive: true);
+                Configuration.Logger.LogError($"[CleanCacheAndOldFiles] Failed to clean expired files: {ex.Message}");
             }
         }
     }
