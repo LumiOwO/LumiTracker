@@ -2,7 +2,6 @@
 using LumiTracker.Models;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Wpf.Ui.Controls;
 
 namespace LumiTracker.Controls
 {
@@ -63,7 +62,11 @@ namespace LumiTracker.Controls
 
         private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            e.Handled = true;
+            DependencyObject? source = e.OriginalSource as DependencyObject;
+            if (source is FrameworkElement element && element.DataContext is ActionCardViewListItem)
+            {
+                e.Handled = true;
+            }
         }
 
         private void OnMouseEnter(object sender, MouseEventArgs e)

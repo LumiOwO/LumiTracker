@@ -26,6 +26,8 @@
     <Grid
         DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:ActionCardViewListItem}}"
         HorizontalAlignment="Stretch"
+        Background="Transparent"
+        IsHitTestVisible="True"
         Width="{Binding ItemWidth}"
         Margin="0, -5, 0, -5"
         >

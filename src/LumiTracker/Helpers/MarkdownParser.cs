@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Windows.Media;
 using Swordfish.NET.Collections.Auxiliary;
+using LumiTracker.Config;
 
 public class MarkdownParser
 {
@@ -16,9 +17,11 @@ public class MarkdownParser
 
     public static void ParseMarkdown(FlowDocument document, string markdown)
     {
+        ELanguage lang = Configuration.GetELanguage();
+
         document.Blocks.Clear();
         document.PagePadding = new Thickness(0);
-        document.TextAlignment = TextAlignment.Justify;
+        document.TextAlignment = (lang == ELanguage.en_US ? TextAlignment.Justify : TextAlignment.Left);
         document.FontSize = 16;
 
         // Remove all '\r' characters
@@ -66,7 +69,7 @@ public class MarkdownParser
                 var list = new List { ListItems = { listItem } };
 
                 // Apply padding
-                var margin = new Thickness(leadingSpaces * 20, 2, 0, 2); // Adjust the multiplier as needed
+                var margin = new Thickness(leadingSpaces * 15, 2, 0, 2); // Adjust the multiplier as needed
                 list.Margin = margin;
 
                 document.Blocks.Add(list);

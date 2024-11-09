@@ -43,11 +43,14 @@
             Grid.Row="1"
             x:Name="RichTextBox" 
             Margin="10, 15, 10, 0"
+            Padding="10, 8, 20, 0"
             IsReadOnly="True"
             VerticalContentAlignment="Top"
             VerticalAlignment="Top"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Disabled"
+            PreviewMouseDown="OnPreviewMouseDown"
+            Focusable="False"
             />
     </Grid>
 
