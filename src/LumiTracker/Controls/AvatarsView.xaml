@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="LumiTracker.Controls.AvatarsView"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+            xmlns:helpers="clr-namespace:LumiTracker.Helpers"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            xmlns:ctrls="clr-namespace:LumiTracker.Controls"
+            xmlns:system="clr-namespace:System;assembly=mscorlib"
+            mc:Ignorable="d" 
+            d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+        <helpers:CharacterIdToAvatarUriConverter x:Key="CharacterIdToAvatarUriConverter" />
+        <helpers:CharacterIdToAvatarVisibilityConverter x:Key="CharacterIdToAvatarVisibilityConverter" />
+
+        <DataTemplate x:Key="AvatarViewTemplate" DataType="{x:Type system:Int32}">
+            <Grid
+                Margin="{Binding ImageOuterMargin, RelativeSource={RelativeSource AncestorType=ctrls:AvatarsView}}"
+                >
+                <Ellipse 
+                    x:Name="BackCircle"
+                    Grid.Row="0"
+                    Fill="#242b34" 
+                    Stroke="#b19974" 
+                    StrokeThickness="3" 
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Center"
+                    Width="{Binding ActualHeight, ElementName=BackCircle}"
+                    />
+
+                <Image 
+                    Grid.Row="0"
+                    Margin="{Binding ImageInnerMargin, RelativeSource={RelativeSource AncestorType=ctrls:AvatarsView}}"
+                    Visibility="{Binding ., 
+                        Converter={StaticResource CharacterIdToAvatarVisibilityConverter}, 
+                        Mode=OneWay}"
+                    Source="{Binding ., 
+                        Converter={StaticResource CharacterIdToAvatarUriConverter}, 
+                        Mode=OneWay}" 
+                    Stretch="Uniform"
+                    RenderOptions.BitmapScalingMode="HighQuality"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ItemsControl
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:AvatarsView}}"
+        ItemsSource="{Binding CharacterIds}"
+        ItemTemplate="{StaticResource AvatarViewTemplate}"
+    >
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <UniformGrid Columns="3"/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+    </ItemsControl>
+
+</UserControl>

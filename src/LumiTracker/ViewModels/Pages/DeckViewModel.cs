@@ -140,7 +140,7 @@ namespace LumiTracker.ViewModels.Pages
     public partial class DeckViewModel : ObservableObject, INavigationAware
     {
         [ObservableProperty]
-        private ObservableCollection<AvatarView> _avatars = [ new AvatarView(), new AvatarView(), new AvatarView() ];
+        private List<int> _currentCharacters = [ -1, -1, -1 ];
 
         [ObservableProperty]
         private ObservableCollection<ActionCardView> _currentDeck = [];
@@ -252,7 +252,7 @@ namespace LumiTracker.ViewModels.Pages
             }
             if (!valid)
             {
-                Avatars = [new AvatarView(), new AvatarView(), new AvatarView()];
+                CurrentCharacters = [-1, -1, -1];
                 CurrentDeck = [];
                 SelectedDeckName = "";
                 return;
@@ -283,7 +283,7 @@ namespace LumiTracker.ViewModels.Pages
             for (int i = 0; i < 3; i++)
             {
                 info.Characters[i] = cards[i];
-                Avatars[i] = new AvatarView(cards[i]);
+                CurrentCharacters[i] = cards[i];
             }
 
             ///////////////////////

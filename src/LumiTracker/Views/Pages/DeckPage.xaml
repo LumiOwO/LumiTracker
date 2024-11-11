@@ -16,6 +16,7 @@
         ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
         ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        ScrollViewer.CanContentScroll="False"
         Title="{svs:Localization DeckPageTitle}">
 
     <Page.Resources>
@@ -61,34 +62,6 @@
                 CountVisibility="Hidden"
                 SnapshotMargin="0, 0, 0, 0"
             />
-        </DataTemplate>
-
-        <DataTemplate x:Key="AvatarViewTemplate" DataType="{x:Type pages:AvatarView}">
-            <Grid
-                Margin="5,0,5,0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                >
-                <Ellipse 
-                    Grid.Row="0"
-                    Fill="#242b34" 
-                    Stroke="#b19974" 
-                    StrokeThickness="3" 
-                    HorizontalAlignment="Stretch" 
-                    VerticalAlignment="Stretch"
-                    />
-
-                <Image 
-                    Grid.Row="0"
-                    Visibility="{Binding AvatarImageVisibility, Mode=OneWay}"
-                    Margin="3,3,3,3"
-                    Source="{Binding AvatarUri, Mode=OneWay}" 
-                    Stretch="Uniform"
-                    RenderOptions.BitmapScalingMode="HighQuality"
-                    VerticalAlignment="Stretch"
-                    HorizontalAlignment="Stretch"
-                    />
-            </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="DeckInfoTemplate" DataType="{x:Type pages:DeckInfo}">
@@ -164,7 +137,7 @@
     </Page.Resources>
 
     <Grid
-        Margin="-22, -22, -20, 0"
+        Margin="-22, -22, -22, 0"
         >
 
         <Grid.ColumnDefinitions>
@@ -179,26 +152,22 @@
         </Grid.RowDefinitions>
 
         <!-- Avatars -->
-        <ItemsControl
+        <ctrls:AvatarsView
             Margin="0, 0, 5, 0"
             Grid.Column="0"
             Grid.Row="0"
-            ItemsSource="{Binding ViewModel.Avatars}"
-            ItemTemplate="{StaticResource AvatarViewTemplate}"
-            >
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Columns="3"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
+            CharacterIds="{Binding ViewModel.CurrentCharacters}"
+            ImageOuterMargin="3,0"
+            ImageInnerMargin="3"
+            />
+
 
         <!-- Deck name -->
         <TextBlock
             Grid.Column="0"
             Grid.Row="1"
             Text="{Binding ViewModel.SelectedDeckName}"
-            Margin="0, 15, 0, 0"
+            Margin="0, 10, 0, 0"
             FontWeight="Bold"
             FontSize="{Binding ActualHeight,
                     RelativeSource={RelativeSource AncestorType={x:Type Grid}},
@@ -211,7 +180,7 @@
 
         <!-- Controls -->
         <Grid
-            Margin="15, 20, 0, 0"
+            Margin="15, 8, 0, 0"
             Grid.Column="0"
             Grid.Row="2"
             >
@@ -339,6 +308,7 @@
             x:Name="DeckTabControl"
             Margin="0,-5,0,0"
             HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
             Background="{StaticResource MainContentBackground}"
             >
 
@@ -355,6 +325,7 @@
                     RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
                     }"
                 HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
                 >
                 <!--Header-->
                 <TabItem.Header>
@@ -362,7 +333,7 @@
                         Icon="PlayingCards20"
                         IconMargin="5,0,8,0"
                         TextMargin="0,0,0,1"
-                        Text="{svs:Localization MyDeck}"
+                        Text="牌组详情"
                         FontSize="{Binding ActualWidth, 
                             RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
                             Converter={StaticResource SizeWithRatioConverter}, 
@@ -394,7 +365,6 @@
             </TabItem>
 
             <TabItem
-                HorizontalAlignment="Stretch"
                 Width="{Binding Path=ActualWidth, 
                     Converter={StaticResource SizeWithRatioConverter},
                     ConverterParameter=0.5,
@@ -405,13 +375,15 @@
                     ConverterParameter=0.08,
                     RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
                     }"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
                 >
                 <TabItem.Header>
                     <ctrls:DeckWindowTabHeader
                         Icon="History24"
                         IconMargin="5,0,8,0"
                         TextMargin="0,0,0,1"
-                        Text="{svs:Localization MyDeck}"
+                        Text="对战历史"
                         FontSize="{Binding ActualWidth, 
                             RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
                             Converter={StaticResource SizeWithRatioConverter}, 
@@ -419,10 +391,19 @@
                             }"
                         />
                 </TabItem.Header>
-                <TextBlock
+                <ctrls:DeckPageDuelHistoryTab
                     Margin="0,-1,0,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
                     Background="{StaticResource MainContentBackground}"
-                    Text="1212123"
+                    BorderBrush="{StaticResource DeckPageBorderBrush}"
+                    BorderThickness="0.7, 0, 0.7, 0.7"
+                    TabControlWidth="{Binding Path=ActualWidth,
+                        RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
+                        }"
+                    TabControlHeight="{Binding Path=ActualHeight,
+                        RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
+                        }"
                     />
             </TabItem>
 
