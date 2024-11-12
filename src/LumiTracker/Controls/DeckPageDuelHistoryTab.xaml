@@ -19,10 +19,14 @@
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
         <helpers:SizeWithRatioVariableConverter x:Key="SizeWithRatioVariableConverter" />
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <helpers:BooleanNotToVisibilityConverter x:Key="BooleanNotToVisibilityConverter" />
         <helpers:MultiBooleanAndToVisibilityConverter x:Key="MultiBooleanAndToVisibilityConverter" />
         <helpers:GetActiveDeckNameConverter x:Key="GetActiveDeckNameConverter" />
         <helpers:HideNonPositiveIntValueConverter x:Key="HideNonPositiveIntValueConverter" />
         <helpers:HidePositiveIntValueConverter x:Key="HidePositiveIntValueConverter" />
+        <helpers:FloatToMinuteSecondsConverter x:Key="FloatToMinuteSecondsConverter" />
+        <helpers:WinRateFromStatsConverter x:Key="WinRateFromStatsConverter" />
+        
         
         <SolidColorBrush x:Key="WinBrush" Color="#ffb900" />
         <SolidColorBrush x:Key="LoseBrush" Color="#0078d4" />
@@ -31,6 +35,243 @@
         <SolidColorBrush x:Key="DateTimeBrush" Color="#a19f9d" />
         <SolidColorBrush x:Key="GoodWinRateBrush" Color="#4cd137" />
         <SolidColorBrush x:Key="BadWinRateBrush" Color="Red" />
+
+        <Style TargetType="ui:ListViewItem" BasedOn="{StaticResource {x:Type ui:ListViewItem}}">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <DataTemplate x:Key="MatchupStatsViewTemplate" DataType="{x:Type models:MatchupStats}">
+            <Border
+                BorderThickness="0,0,0,0.1"
+                BorderBrush="White"
+                Margin="5,0,5,0"
+                Padding="0,0,5,2"
+                >
+            <Grid
+                Height="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.075,
+                    RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                    }"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2.0*"/>
+                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="1.0*"/>
+                    <ColumnDefinition Width="1.8*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Foreground="{StaticResource GoodWinRateBrush}"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.025,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
+                    Text="{Binding ., 
+                        StringFormat={}{0:P1},
+                        Converter={StaticResource WinRateFromStatsConverter}}" 
+                    />
+                <TextBlock 
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Foreground="{StaticResource GameCountsBrush}"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.025,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
+                    Text="{Binding Totals}" />
+                <TextBlock 
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Foreground="{StaticResource PlainTextBrush}"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.025,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
+                    Text="{Binding AvgRounds}" />
+                <TextBlock 
+                    Grid.Column="3"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Foreground="{StaticResource PlainTextBrush}"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.025,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
+                    Text="{Binding AvgDuration,
+                        Converter={StaticResource FloatToMinuteSecondsConverter}}" />
+
+                <!-- VS text -->
+                <TextBlock
+                    Grid.Column="4"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Text="VS"
+                    Foreground="White"
+                    Margin="8,0,4,0"
+                    FontWeight="Bold"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.030,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
+                    />
+
+                <ctrls:AvatarsView
+                    Grid.Column="5"
+                    Margin="0,2,0,2"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    ImageOuterMargin="1"
+                    ImageInnerMargin="2"
+                    CharacterIds="{Binding OpCharacters}"
+                    />
+            </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DuelRecordViewTemplate" DataType="{x:Type models:DuelRecord}">
+            <Border
+                BorderThickness="0,0,0,0.1"
+                BorderBrush="White"
+                Margin="5,0,5,0"
+                Padding="8,0,5,8"
+                >
+            <Grid
+                Height="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.16,
+                    RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                    }"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Win/Lose info -->
+                <Grid
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2.5*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock 
+                        Grid.Row="0"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Visibility="{Binding IsWin,
+                            Converter={StaticResource BooleanToVisibilityConverter},
+                            ConverterParameter=Collapsed
+                            }"
+                        Foreground="{StaticResource WinBrush}"
+                        FontWeight="Bold"
+                        FontSize="28"
+                        Margin="0,0,0,0"
+                        Text="对局胜利" />
+                    <TextBlock 
+                        Grid.Row="0"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Visibility="{Binding IsWin,
+                            Converter={StaticResource BooleanNotToVisibilityConverter},
+                            ConverterParameter=Collapsed
+                            }"
+                        Foreground="{StaticResource LoseBrush}"
+                        FontWeight="Bold"
+                        FontSize="{Binding Path=TabControlHeight, 
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.05,
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                            }"
+                        Margin="0,0,0,0"
+                        Text="对局失败" />
+                    <TextBlock 
+                        Grid.Row="1"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Foreground="{StaticResource PlainTextBrush}"
+                        FontWeight="Bold"
+                        FontSize="{Binding Path=TabControlHeight, 
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.026,
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                            }"
+                        >
+                        <Run Text="{Binding Duration,
+                            Converter={StaticResource FloatToMinuteSecondsConverter}}"/>
+                        <Run Text=","/>
+                        <Run Text="回合"/>
+                        <Run Text="{Binding Rounds}"/>
+                    </TextBlock>
+                    <TextBlock 
+                        Grid.Row="2"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Foreground="{StaticResource DateTimeBrush}"
+                        FontSize="{Binding Path=TabControlHeight, 
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.022,
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                            }"
+                        Text="{Binding TimeStamp, 
+                            StringFormat={}{0:yyyy/MM/dd HH:mm}}" 
+                        />
+                </Grid>
+
+                <!-- VS text -->
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Text="VS"
+                    Foreground="White"
+                    Margin="0,0,15,0"
+                    FontWeight="Bold"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.06,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
+                    />
+
+                <!-- Op Avatars-->
+                <ctrls:AvatarsView
+                    Grid.Column="2"
+                    Margin="0,5"
+                    ImageOuterMargin="3"
+                    ImageInnerMargin="3"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    CharacterIds="{Binding OpCharacters}"
+                    />
+            </Grid>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid
@@ -77,13 +318,23 @@
                 Text="胜率"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
+                FontSize="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.028
+                    }"
                 />
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="1"
-                Text="80%"
+                Text="{Binding Stats, 
+                    StringFormat={}{0:P1},
+                    Converter={StaticResource WinRateFromStatsConverter}}"
                 Foreground="{StaticResource GoodWinRateBrush}"
                 HorizontalAlignment="Center"
+                FontSize="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.028
+                    }"
                 />
             <TextBlock
                 Grid.Row="1"
@@ -91,13 +342,21 @@
                 Text="场次"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
+                FontSize="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.028
+                    }"
                 />
             <TextBlock
                 Grid.Row="1"
                 Grid.Column="1"
-                Text="23"
+                Text="{Binding Stats.Totals}"
                 Foreground="{StaticResource GameCountsBrush}"
                 HorizontalAlignment="Center"
+                FontSize="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.028
+                    }"
                 />
             <TextBlock
                 Grid.Row="2"
@@ -105,13 +364,21 @@
                 Text="平均回合"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
+                FontSize="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.028
+                    }"
                 />
             <TextBlock
                 Grid.Row="2"
                 Grid.Column="1"
-                Text="6.0"
+                Text="{Binding Stats.AvgRounds}"
                 Foreground="{StaticResource PlainTextBrush}"
                 HorizontalAlignment="Center"
+                FontSize="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.028
+                    }"
                 />
             <TextBlock
                 Grid.Row="3"
@@ -119,12 +386,21 @@
                 Text="平均时长"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
+                FontSize="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.028
+                    }"
                 />
             <TextBlock
                 Grid.Row="3"
                 Grid.Column="1"
-                Text="10:00"
+                Text="{Binding Stats.AvgDuration,
+                    Converter={StaticResource FloatToMinuteSecondsConverter}}"
                 Foreground="{StaticResource PlainTextBrush}"
+                FontSize="{Binding Path=TabControlHeight, 
+                    Converter={StaticResource SizeWithRatioConverter},
+                    ConverterParameter=0.028
+                    }"
                 HorizontalAlignment="Center"
                 />
 
@@ -138,10 +414,23 @@
                 IsChecked="{Binding ViewModel.CheckSubscribeToBetaUpdates, Mode=TwoWay}"
                 Content="只看当前构筑"
                 Margin="0,5,0,0"
-                />
+                >
+                <CheckBox.LayoutTransform>
+                    <ScaleTransform 
+                        ScaleX="{Binding Path=TabControlHeight, 
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.0018
+                            }" 
+                        ScaleY="{Binding Path=TabControlHeight, 
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.0018
+                            }" 
+                        />
+                </CheckBox.LayoutTransform>
+            </CheckBox>
         </Grid>
 
-        <!-- Win Rates against Lineups -->
+        <!-- Matchups -->
         <Border
             Grid.Row="0"
             Grid.Column="1"
@@ -153,148 +442,22 @@
             CornerRadius="5"
             >
 
-        <ui:ListView
-            Margin="0,8,0,0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            >
-            <ListView.Items>
-            <Border
-                BorderThickness="0,0,0,0.1"
-                BorderBrush="White"
-                Margin="5,-5,5,0"
-                Padding="0,0,0,5"
-                >
-                <Grid
-                    Height="45"
-                    Margin="2,0,5,0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock 
-                        Grid.Column="0"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Foreground="{StaticResource GoodWinRateBrush}"
-                        Text="70%" />
-                    <TextBlock 
-                        Grid.Column="1"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Foreground="{StaticResource GameCountsBrush}"
-                        Text="200" />
-                    <TextBlock 
-                        Grid.Column="2"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Foreground="{StaticResource PlainTextBrush}"
-                        Text="98.0" />
-                                            <TextBlock 
-                        Grid.Column="3"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Foreground="{StaticResource PlainTextBrush}"
-                        Text="10:00" />
-
-                    <ctrls:AvatarsView
-                        Margin="10,0,0,0"
-                        Grid.Column="4"
-                        ImageOuterMargin="1"
-                        ImageInnerMargin="2"
-                        >
-                        <ctrls:AvatarsView.CharacterIds>
-                            <x:Array Type="{x:Type sys:Int32}">
-                                <sys:Int32>0</sys:Int32>
-                                <sys:Int32>1</sys:Int32>
-                                <sys:Int32>2</sys:Int32>
-                            </x:Array>
-                        </ctrls:AvatarsView.CharacterIds>
-                    </ctrls:AvatarsView>
-                </Grid>
-            </Border>
-
-                    <Border
-    BorderThickness="0,0,0,0.1"
-    BorderBrush="White"
-    Margin="5,-5,5,0"
-    Padding="0,0,0,5"
-    >
-                        <Grid
-        Height="45"
-        Margin="2,0,5,0"
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock 
-            Grid.Column="0"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Foreground="{StaticResource BadWinRateBrush}"
-            Text="70%" />
-                            <TextBlock 
-            Grid.Column="1"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Foreground="{StaticResource GameCountsBrush}"
-            Text="23" />
-                            <TextBlock 
-            Grid.Column="2"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Foreground="{StaticResource PlainTextBrush}"
-            Text="6.0" />
-                            <TextBlock 
-            Grid.Column="3"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Foreground="{StaticResource PlainTextBrush}"
-            Text="10:00" />
-
-                            <ctrls:AvatarsView
-            Margin="10,0,0,0"
-            Grid.Column="4"
-            ImageOuterMargin="1"
-            ImageInnerMargin="2"
-            >
-                                <ctrls:AvatarsView.CharacterIds>
-                                    <x:Array Type="{x:Type sys:Int32}">
-                                        <sys:Int32>0</sys:Int32>
-                                        <sys:Int32>1</sys:Int32>
-                                        <sys:Int32>2</sys:Int32>
-                                    </x:Array>
-                                </ctrls:AvatarsView.CharacterIds>
-                            </ctrls:AvatarsView>
-                        </Grid>
-                    </Border>
-                
-                
-                
-                </ListView.Items>
-        </ui:ListView>
+            <ui:ListView
+                Margin="0,0,0,0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                ItemsSource="{Binding Stats.MatchupStats}"
+                ItemTemplate="{StaticResource MatchupStatsViewTemplate}"
+                />
         </Border>
-
 
         <Separator
             Grid.Row="1"
             Grid.Column="0"
             Grid.ColumnSpan="2"
             BorderThickness="1.5"
-            Margin="3,5,3,0"
+            Margin="3,3,3,0"
             />
 
         <!-- Duel history -->
@@ -304,186 +467,9 @@
             Grid.ColumnSpan="2"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-        >
-            <ListView.Items>
-                
-
-                <Border
-    BorderThickness="0,0,0,0.1"
-    BorderBrush="White"
-    Margin="5,-5,5,0"
-    Padding="0,5"
-    >
-                <Grid
-                    Height="100"
-                    Margin="10,0,0,8"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="0.5*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                        <Grid
-                        Grid.Column="0"
-                            HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                            >
-                            <Grid.RowDefinitions>
-                        <RowDefinition Height="2.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock 
-                        Grid.Row="0"
-        VerticalAlignment="Center"
-        HorizontalAlignment="Center"
-        Foreground="{StaticResource WinBrush}"
-                        FontWeight="Bold"
-                        FontSize="28"
-                        Margin="0,0,0,0"
-        Text="对局胜利" />
-                    <TextBlock 
-        Grid.Column="0"
-                Grid.Row="1"
-        VerticalAlignment="Center"
-        HorizontalAlignment="Center"
-        Foreground="{StaticResource PlainTextBrush}"
-                        FontWeight="Bold"
-        Text="10:00, 回合 6" />
-                    <TextBlock 
-        Grid.Column="0"
-                Grid.Row="2"
-        VerticalAlignment="Center"
-        HorizontalAlignment="Center"
-                        Foreground="{StaticResource DateTimeBrush}"
-        Text="2024/11/03 22:20" />
-                        </Grid>
-                    
-                        <TextBlock
-                        Grid.Column="1"
-                         VerticalAlignment="Center"
-                         HorizontalAlignment="Center"
-                        Text="VS"
-                            Foreground="White"
-                            Margin="0,0,10,0"
-                        FontWeight="Bold"
-                        FontSize="32"
-                        />
-
-                    <ctrls:AvatarsView
-        Margin="0,5"
-        Grid.Column="2"
-        ImageOuterMargin="3"
-        ImageInnerMargin="3"
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        >
-                        <ctrls:AvatarsView.CharacterIds>
-                            <x:Array Type="{x:Type sys:Int32}">
-                                <sys:Int32>0</sys:Int32>
-                                <sys:Int32>1</sys:Int32>
-                                <sys:Int32>2</sys:Int32>
-                            </x:Array>
-                        </ctrls:AvatarsView.CharacterIds>
-                    </ctrls:AvatarsView>
-                </Grid>
-                </Border>
-
-
-
-
-
-
-
-
-                <Border
-BorderThickness="0,0,0,0.1"
-BorderBrush="White"
-Margin="5,-5,5,0"
-Padding="0,0,0,5"
->
-                    <Grid
-                Height="100"
-                Margin="10,0,0,8"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="0.5*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Grid
-                    Grid.Column="0"
-                        HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                        >
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="2.5*"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock 
-                    Grid.Row="0"
-    VerticalAlignment="Center"
-    HorizontalAlignment="Center"
-    Foreground="{StaticResource LoseBrush}"
-                    FontWeight="Bold"
-                    FontSize="28"
-                    Margin="0,0,0,0"
-    Text="对局失败" />
-                            <TextBlock 
-    Grid.Column="0"
-            Grid.Row="1"
-    VerticalAlignment="Center"
-    HorizontalAlignment="Center"
-    Foreground="{StaticResource PlainTextBrush}"
-                    FontWeight="Bold"
-    Text="10:00, 回合 11" />
-                            <TextBlock 
-    Grid.Column="0"
-            Grid.Row="2"
-    VerticalAlignment="Center"
-    HorizontalAlignment="Center"
-                                Foreground="{StaticResource DateTimeBrush}"
-    Text="2024/11/03 22:20" />
-                        </Grid>
-
-                        <TextBlock
-                    Grid.Column="1"
-                     VerticalAlignment="Center"
-                     HorizontalAlignment="Center"
-                    Text="VS"
-                            Foreground="White"
-                        Margin="0,0,10,0"
-                    FontWeight="Bold"
-                    FontSize="32"
-                    />
-
-                        <ctrls:AvatarsView
-    Margin="0,5"
-    Grid.Column="2"
-    ImageOuterMargin="3"
-    ImageInnerMargin="3"
-    HorizontalAlignment="Stretch"
-    VerticalAlignment="Stretch"
-    >
-                            <ctrls:AvatarsView.CharacterIds>
-                                <x:Array Type="{x:Type sys:Int32}">
-                                    <sys:Int32>0</sys:Int32>
-                                    <sys:Int32>1</sys:Int32>
-                                    <sys:Int32>2</sys:Int32>
-                                </x:Array>
-                            </ctrls:AvatarsView.CharacterIds>
-                        </ctrls:AvatarsView>
-                    </Grid>
-                </Border>
-
-            </ListView.Items>
-        </ui:ListView>
+            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+            ItemsSource="{Binding Stats.DuelRecords}"
+            ItemTemplate="{StaticResource DuelRecordViewTemplate}"
+            />
     </Grid>
 </UserControl>

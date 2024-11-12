@@ -112,7 +112,6 @@
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.1
                         }"
-                Icon="{Binding Icon}"
                 Foreground="#f0f0f0"
                 FontSize="{Binding ActualHeight,
                     RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
@@ -123,6 +122,29 @@
                 Opacity="{Binding Opacity}"
                 Command="{Binding ClickCommand}">
 
+                <StackPanel
+                    Orientation="Horizontal"
+                    >
+                <ui:SymbolIcon 
+                    Margin="0,1,6,0"
+                    Symbol="{Binding Icon}"
+                    >
+                    <ui:SymbolIcon.LayoutTransform>
+                    <ScaleTransform 
+                        ScaleX="{Binding ActualHeight,
+                            RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.0025
+                            }" 
+                        ScaleY="{Binding ActualHeight,
+                            RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.0025
+                            }" 
+                        />
+                    </ui:SymbolIcon.LayoutTransform>
+                </ui:SymbolIcon>
+
                 <TextBlock 
                     FontWeight="Bold"
                     FontSize="{Binding ActualHeight,
@@ -132,6 +154,8 @@
                         }"
                     Opacity="{Binding Opacity}"
                     Text="{Binding TextItem.Text}"/>
+                </StackPanel>
+
             </ui:Button>
         </DataTemplate>
     </Page.Resources>
@@ -404,6 +428,7 @@
                     TabControlHeight="{Binding Path=ActualHeight,
                         RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
                         }"
+                    Stats="{Binding ViewModel.DeckStatistics}"
                     />
             </TabItem>
 

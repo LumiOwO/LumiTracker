@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using LumiTracker.Models;
+using System.Windows.Controls;
 
 namespace LumiTracker.Controls
 {
@@ -7,8 +8,17 @@ namespace LumiTracker.Controls
     /// </summary>
     public partial class DeckPageDuelHistoryTab : UserControl
     {
+        public static readonly DependencyProperty StatsProperty = DependencyProperty.Register(
+            "Stats", typeof(DeckStatistics), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(null));
+
+        public DeckStatistics Stats
+        {
+            get { return (DeckStatistics)GetValue(StatsProperty); }
+            set { SetValue(StatsProperty, value); }
+        }
+
         public static readonly DependencyProperty TabControlHeightProperty = DependencyProperty.Register(
-        "TabControlHeight", typeof(double), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(1.0));
+            "TabControlHeight", typeof(double), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(1.0));
 
         public double TabControlHeight
         {

@@ -154,6 +154,9 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private string _selectedDeckName = "";
 
+        [ObservableProperty]
+        private DeckStatistics _deckStatistics = new DeckStatistics();
+
         partial void OnSelectedDeckIndexChanged(int oldValue, int newValue)
         {
             Select(newValue);
