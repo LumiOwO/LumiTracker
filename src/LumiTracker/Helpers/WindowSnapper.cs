@@ -166,7 +166,38 @@ namespace LumiTracker.Helpers
             var bounds = GetWindowBounds(_dst_hwnd);
             if (_isFirstTick || bounds != _lastBounds)
             {
-                Rect clientRect = SnapToWindow(bounds);
+                // Get dpi scale
+                const int MONITOR_DEFAULTTONEAREST = 0x00000002;
+                IntPtr hMonitor = MonitorFromWindow(_dst_hwnd, MONITOR_DEFAULTTONEAREST);
+                MONITORINFOEX monitorInfo = new MONITORINFOEX();
+                monitorInfo.cbSize = Marshal.SizeOf(monitorInfo);
+                GetMonitorInfo(hMonitor, ref monitorInfo);
+                int PhysicalHeight = monitorInfo.rcMonitor.Bottom - monitorInfo.rcMonitor.Top;
+
+                uint dpiX, dpiY;
+                int result = GetDpiForMonitor(hMonitor, MonitorDpiType.MDT_EFFECTIVE_DPI, out dpiX, out dpiY);
+                float LogicalHeight = (float)PhysicalHeight * 96 / dpiY;
+
+                // Calculate the scale factor
+                float scale = (float)PhysicalHeight / LogicalHeight;
+
+                // Snap to game window
+                Rect clientRect = SnapToWindow(bounds, scale);
+
+                // Trigger GenshinWindowResized if needed
+                bool isMinimized = IsIconic(_dst_hwnd);
+                if (isMinimized || bounds.Height != _lastBounds.Height || bounds.Width != _lastBounds.Width)
+                {
+                    Configuration.Logger.LogInformation(
+                        $"Game window resized to {clientRect.Width} x {clientRect.Height}, isMinimized: {isMinimized}, " +
+                        $"clientRect: [{clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}], " +
+                        $"scale=({PhysicalHeight}/{LogicalHeight})={scale}"
+                        );
+                    GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height, isMinimized);
+                }
+                Configuration.Logger.LogDebug($"Game window moved to [{bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}]");
+
+                // Update last bounds
                 _lastBounds = bounds;
             }
             //Configuration.Logger.LogDebug($"bounds: {bounds.Width}, {bounds.Height}");
@@ -204,7 +235,7 @@ namespace LumiTracker.Helpers
             _isFirstTick = false;
         }
 
-        private Rect SnapToWindow(Rect bounds)
+        private Rect SnapToWindow(Rect bounds, float scale)
         {
             // Get client rect
             Rect clientRect = new Rect();
@@ -213,33 +244,6 @@ namespace LumiTracker.Helpers
 
             POINT clientLeftTop = new POINT { x = clientRect.Left, y = clientRect.Top };
             ClientToScreen(_dst_hwnd, ref clientLeftTop);
-
-            // Get dpi scale
-            const int MONITOR_DEFAULTTONEAREST = 0x00000002;
-            IntPtr hMonitor = MonitorFromWindow(_dst_hwnd, MONITOR_DEFAULTTONEAREST);
-            MONITORINFOEX monitorInfo = new MONITORINFOEX();
-            monitorInfo.cbSize = Marshal.SizeOf(monitorInfo);
-            GetMonitorInfo(hMonitor, ref monitorInfo);
-            int PhysicalHeight = monitorInfo.rcMonitor.Bottom - monitorInfo.rcMonitor.Top;
-
-            uint dpiX, dpiY;
-            int result = GetDpiForMonitor(hMonitor, MonitorDpiType.MDT_EFFECTIVE_DPI, out dpiX, out dpiY);
-            float LogicalHeight = (float)PhysicalHeight * 96 / dpiY;
-
-            // Calculate the scale factor
-            float scale = (float)PhysicalHeight / LogicalHeight;
-
-            if (bounds.Height != _lastBounds.Height || bounds.Width != _lastBounds.Width)
-            {
-                bool isMinimized = IsIconic(_dst_hwnd);
-                Configuration.Logger.LogInformation(
-                    $"Game window resized to {clientRect.Width} x {clientRect.Height}, isMinimized: {isMinimized}, " +
-                    $"clientRect: [{clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}], " +
-                    $"scale=({PhysicalHeight}/{LogicalHeight})={scale}"
-                    );
-                GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height, isMinimized);
-            }
-            Configuration.Logger.LogDebug($"Game window moved to [{bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}]");
 
             // Snap to target window
             if (_src_window != null)
