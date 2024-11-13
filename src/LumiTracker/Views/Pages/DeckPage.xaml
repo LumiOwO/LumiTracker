@@ -23,13 +23,10 @@
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
 
-        <SolidColorBrush 
-            x:Key="MainContentBackground"
-            Color="#ff282c34" />
-
-        <SolidColorBrush 
-            x:Key="DeckPageBorderBrush"
-            Color="#5aaaaaaa" />
+        <SolidColorBrush x:Key="MainContentBackground" Color="#ff282c34" />
+        <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
+        <SolidColorBrush x:Key="DeckNameBrush" Color="White" />
+        <SolidColorBrush x:Key="DeckNameBloomBrush" Color="#ff82b1ff" />
 
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <ctrls:ActionCardViewListItem
@@ -101,7 +98,7 @@
         <DataTemplate x:Key="ControlButtonTemplate" DataType="{x:Type pages:ControlButton}">
             <ui:Button 
                 Appearance="{Binding Appearance}"
-                Margin="0, 0, 0, 20"
+                Margin="0, 20, 0, 0"
                 Width="{Binding ActualWidth,
                     RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
                     Converter={StaticResource SizeWithRatioConverter}, 
@@ -110,14 +107,9 @@
                 Height="{Binding ActualHeight,
                         RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
                         Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.1
+                        ConverterParameter=0.11
                         }"
                 Foreground="#f0f0f0"
-                FontSize="{Binding ActualHeight,
-                    RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
-                    Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=0.04
-                    }"
                 IsEnabled="{Binding IsEnabled}"
                 Opacity="{Binding Opacity}"
                 Command="{Binding ClickCommand}">
@@ -134,12 +126,12 @@
                         ScaleX="{Binding ActualHeight,
                             RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
                             Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.0025
+                            ConverterParameter=0.00265
                             }" 
                         ScaleY="{Binding ActualHeight,
                             RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
                             Converter={StaticResource SizeWithRatioConverter}, 
-                            ConverterParameter=0.0025
+                            ConverterParameter=0.00265
                             }" 
                         />
                     </ui:SymbolIcon.LayoutTransform>
@@ -150,7 +142,7 @@
                     FontSize="{Binding ActualHeight,
                         RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
                         Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.04
+                        ConverterParameter=0.042
                         }"
                     Opacity="{Binding Opacity}"
                     Text="{Binding TextItem.Text}"/>
@@ -185,26 +177,47 @@
             ImageInnerMargin="3"
             />
 
-
-        <!-- Deck name -->
+        <!-- Deck name Glowing Bloom Effect -->
         <TextBlock
             Grid.Column="0"
             Grid.Row="1"
             Text="{Binding ViewModel.SelectedDeckName}"
-            Margin="0, 10, 0, 0"
             FontWeight="Bold"
+            Foreground="{StaticResource DeckNameBloomBrush}"  
+            Margin="0, 7, 0, 0"
             FontSize="{Binding ActualHeight,
                     RelativeSource={RelativeSource AncestorType={x:Type Grid}},
                     Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=0.045
+                    ConverterParameter=0.055
+                    }"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+            <TextBlock.Effect>
+                <BlurEffect Radius="5" />
+            </TextBlock.Effect>
+        </TextBlock>
+
+        <!-- Deck name Text -->
+        <TextBlock
+            Grid.Column="0"
+            Grid.Row="1"
+            Text="{Binding ViewModel.SelectedDeckName}"
+            Margin="0, 7, 0, 0"
+            FontWeight="Bold"
+            Foreground="{StaticResource DeckNameBrush}"
+            FontSize="{Binding ActualHeight,
+                    RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.055
                     }"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            />
+            >
+        </TextBlock>
 
         <!-- Controls -->
         <Grid
-            Margin="15, 8, 0, 0"
+            Margin="15, 15, 0, 2"
             Grid.Column="0"
             Grid.Row="2"
             >
@@ -213,19 +226,6 @@
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
 
-
-            <Grid
-                Grid.Column="0"
-                Margin="0,4,0,0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Top"
-                Height="{Binding ActualHeight,
-                    RelativeSource={RelativeSource AncestorType={x:Type Grid}},
-                    Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=0.98
-                    }"
-                >
-            
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -233,7 +233,11 @@
 
             <!-- Deck List -->
             <Border 
+                Grid.Column="0"
                 Grid.Row="0"
+                Margin="0,0,0,3"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
                 BorderBrush="{StaticResource DeckPageBorderBrush}" 
                 BorderThickness="0.7"
                 Background="{StaticResource MainContentBackground}"
@@ -246,25 +250,29 @@
                     ItemTemplate="{StaticResource DeckInfoTemplate}"
                     SelectedIndex="{Binding ViewModel.SelectedDeckIndex, Mode=TwoWay}"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch">
-
-                </ui:ListView>
+                    VerticalAlignment="Stretch"
+                    />
             </Border>
 
+            <!-- Auto Selection Tool Tip -->
             <StackPanel 
+                Grid.Column="0"
                 Grid.Row="1"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"
-                Margin="0,2,0,0"
+                Margin="0,1,0,0"
                 Orientation="Horizontal"
                 ToolTipService.InitialShowDelay="200"
                 ToolTipService.BetweenShowDelay="500"
                 >
                 <ToolTipService.ToolTip>
-                    <ToolTip MaxWidth="415"
+                    <ToolTip 
+                        MaxWidth="440"
+                        BorderBrush="{StaticResource DeckPageBorderBrush}"
+                        Background="{StaticResource MainContentBackground}"
                         Placement="MousePoint">
                         <TextBlock
-                            FontSize="12"
+                            FontSize="14"
                             TextWrapping="Wrap"
                             Text="{svs:Localization AutoSelectActiveDeck_ToolTip}" />
                     </ToolTip>
@@ -293,23 +301,68 @@
                     />
             </StackPanel>
 
-            </Grid>
+            <!-- Build Version Selection -->
+            <StackPanel
+                Grid.Column="1"
+                Grid.Row="0"
+                Width="{Binding ActualWidth,
+                    ElementName=ControlButtonsView,
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.75
+                    }"
+                Margin="0,2,0,0"
+                VerticalAlignment="Top">
 
+                <TextBlock 
+                    Text="构筑版本" 
+                    FontSize="{Binding ActualHeight,
+                        ElementName=ControlButtonsView,
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.045
+                        }"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"/>
+
+                <ComboBox
+                    Margin="0,8,0,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Height="{Binding ActualHeight,
+                        ElementName=ControlButtonsView,
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.1
+                        }"
+                    SelectedIndex="{Binding ViewModel.SelectedClientIndex, Mode=TwoWay}"
+                    ItemsSource="{Binding ViewModel.ClientTypes, Mode=OneWay}"
+                    >
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type svs:LocalizationTextItem}">
+                            <ContentPresenter
+                                Content="{Binding Text}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="SelectionChanged">
+                            <b:InvokeCommandAction 
+                                Command="{Binding ViewModel.SelectedClientChangedCommand}"
+                                />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                </ComboBox>
+            </StackPanel>
+            
             <!-- Buttons -->
             <ItemsControl
                 Grid.Column="1"
+                Grid.Row="0"
                 x:Name="ControlButtonsView"
-                Margin="0, 0, 0, 0"
+                Margin="0, 0, 0, 3"
                 ScrollViewer.VerticalScrollBarVisibility="Hidden"
                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                 ItemsSource="{Binding ViewModel.Buttons}"
                 ItemTemplate="{StaticResource ControlButtonTemplate}"
                 Background="Transparent"
-                Height="{Binding ActualHeight,
-                    RelativeSource={RelativeSource AncestorType={x:Type Grid}},
-                    Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=0.98
-                    }"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
                 
@@ -318,11 +371,46 @@
                         <UniformGrid 
                             Columns="1" 
                             HorizontalAlignment="Center"
-                            VerticalAlignment="Top"
+                            VerticalAlignment="Bottom"
                             />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
+
+            <!-- Friend Link -->
+            <StackPanel
+                Grid.Row="1"
+                Grid.Column="1"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,1,0,0"
+                >
+                <TextBlock 
+                    Text="友情链接："
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="{Binding ActualHeight,
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.022
+                        }"
+                    />
+                <ui:HyperlinkButton
+                    Padding="0,0"
+                    Margin="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    NavigateUri="https://www.summoners.top/"
+                    ToolTip="https://www.summoners.top/">
+                    <TextBlock 
+                        FontSize="{Binding ActualHeight,
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.022
+                            }"
+                        Text="召唤之巅"
+                        />
+                </ui:HyperlinkButton>
+            </StackPanel>
         </Grid>
 
         <TabControl 

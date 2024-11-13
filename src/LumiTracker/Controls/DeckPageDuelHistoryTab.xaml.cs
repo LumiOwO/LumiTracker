@@ -1,5 +1,8 @@
 ﻿using LumiTracker.Models;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Shapes;
 
 namespace LumiTracker.Controls
 {
@@ -38,6 +41,58 @@ namespace LumiTracker.Controls
         public DeckPageDuelHistoryTab()
         {
             InitializeComponent();
+        }
+
+        public static readonly DependencyProperty SettingsPanelOpenProperty = DependencyProperty.Register(
+            "SettingsPanelOpen", typeof(bool), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(false));
+
+        public bool SettingsPanelOpen
+        {
+            get { return (bool)GetValue(SettingsPanelOpenProperty); }
+            set { SetValue(SettingsPanelOpenProperty, value); }
+        }
+
+        [RelayCommand]
+        private void OnSettingsButtonClick()
+        {
+            if (!SettingsPanelOpen)
+            {
+                SettingsPanelOpen = true;
+            }
+        }
+
+        private void OnMatchupStatsPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            DependencyObject? source = e.OriginalSource as DependencyObject;
+            if (source is Image || source is Ellipse || source is Run)
+            {
+                e.Handled = true;
+            }
+            else if (source is FrameworkElement element && element.DataContext is MatchupStats)
+            {
+                e.Handled = true;
+            }
+            else
+            {
+                e.Handled = false;
+            }
+        }
+
+        private void OnDuelRecordPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            DependencyObject? source = e.OriginalSource as DependencyObject;
+            if (source is Image || source is Ellipse || source is Run)
+            {
+                e.Handled = true;
+            }
+            else if (source is FrameworkElement element && element.DataContext is DuelRecord)
+            {
+                e.Handled = true;
+            }
+            else
+            {
+                e.Handled = false;
+            }
         }
     }
 }
