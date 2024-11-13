@@ -207,7 +207,7 @@
             VerticalAlignment="Stretch"
             FontWeight="Bold" 
             Unchecked="OnUnchecked"
-            Margin="0,0,0,0"
+            Margin="-1,-1,-1,-1"
             >
             <TextBlock 
                 Foreground="Black"
@@ -244,12 +244,20 @@
                 ConverterParameter=Hidden,
                 Mode=OneWay
                 }"
+            Padding="0"
+            Appearance="Primary"
             Click="OnChecked"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Left"
             >
 
-            <ui:Button.Icon>
+            <StackPanel
+                Orientation="Horizontal"
+                Margin="3,0,5,0"
+                VerticalAlignment="Center"
+                >
                 <ui:SymbolIcon 
-                    Foreground="White"
+                    Foreground="#333333"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     FontWeight="Bold"
@@ -257,19 +265,21 @@
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.015
                         }"
-                    Margin="-8,0,0,0" 
+                    Margin="0,0,0,0" 
                     Symbol="ChevronRight48" />
-            </ui:Button.Icon>
 
-            <ui:SymbolIcon 
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                FontSize="{Binding Height, 
-                    Converter={StaticResource SizeWithRatioConverter}, 
-                    ConverterParameter=0.025
-                    }"
-                Margin="-7,3,-6,0" 
-                Symbol="PlayingCards20" />
+                <ui:SymbolIcon 
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="Black"
+                    FontSize="{Binding Height, 
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.025
+                        }"
+                    Margin="2,3,0,0" 
+                    Symbol="PlayingCards20" />
+
+            </StackPanel>
         </ui:Button>
 
         </Grid>
