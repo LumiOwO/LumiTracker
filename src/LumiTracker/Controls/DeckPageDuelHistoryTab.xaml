@@ -330,7 +330,7 @@
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="1"
-                Text="{Binding Stats, 
+                Text="{Binding Stats.Summary, 
                     StringFormat={}{0:P1},
                     Converter={StaticResource WinRateFromStatsConverter}}"
                 Foreground="{StaticResource GoodWinRateBrush}"
@@ -354,7 +354,7 @@
             <TextBlock
                 Grid.Row="1"
                 Grid.Column="1"
-                Text="{Binding Stats.Totals}"
+                Text="{Binding Stats.Summary.Totals}"
                 Foreground="{StaticResource GameCountsBrush}"
                 HorizontalAlignment="Center"
                 FontSize="{Binding Path=TabControlHeight, 
@@ -376,7 +376,7 @@
             <TextBlock
                 Grid.Row="2"
                 Grid.Column="1"
-                Text="{Binding Stats.AvgRounds}"
+                Text="{Binding Stats.Summary.AvgRounds}"
                 Foreground="{StaticResource PlainTextBrush}"
                 HorizontalAlignment="Center"
                 FontSize="{Binding Path=TabControlHeight, 
@@ -398,7 +398,7 @@
             <TextBlock
                 Grid.Row="3"
                 Grid.Column="1"
-                Text="{Binding Stats.AvgDuration,
+                Text="{Binding Stats.Summary.AvgDuration,
                     Converter={StaticResource FloatToMinuteSecondsConverter}}"
                 Foreground="{StaticResource PlainTextBrush}"
                 FontSize="{Binding Path=TabControlHeight, 
@@ -465,7 +465,7 @@
                         <CheckBox
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            IsChecked="{Binding ViewModel.CheckSubscribeToBetaUpdates, Mode=TwoWay}"
+                            IsChecked="{Binding ShowCurrentVersionOnly, Mode=TwoWay}"
                             Margin="0,5,0,0"
                             >
                             <TextBlock 
@@ -479,7 +479,7 @@
                         <CheckBox
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            IsChecked="{Binding ViewModel.CheckSubscribeToBetaUpdates, Mode=TwoWay}"
+                            IsChecked="{Binding HideRecordsBeforeImport, Mode=TwoWay}"
                             Margin="0,5,0,0"
                             >
                             <TextBlock 
@@ -513,7 +513,7 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                ItemsSource="{Binding Stats.MatchupStats}"
+                ItemsSource="{Binding Stats.AllMatchupStats}"
                 ItemTemplate="{StaticResource MatchupStatsViewTemplate}"
                 PreviewMouseDown="OnMatchupStatsPreviewMouseDown"
                 />

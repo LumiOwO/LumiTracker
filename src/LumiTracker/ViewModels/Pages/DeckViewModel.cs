@@ -3,97 +3,15 @@ using LumiTracker.Config;
 using Microsoft.Extensions.Logging;
 using LumiTracker.Models;
 using System.Collections.ObjectModel;
-using Newtonsoft.Json;
 using System.Windows.Media;
 using System.IO;
 using System.Windows.Input;
 using LumiTracker.Services;
 using System.Windows.Data;
-using Newtonsoft.Json.Linq;
 using Wpf.Ui;
 
 namespace LumiTracker.ViewModels.Pages
 {
-    public partial class AvatarView : ObservableObject
-    {
-        [ObservableProperty]
-        public string _avatarUri = "pack://siteoforigin:,,,/assets/images/avatars/0.png";
-
-        [ObservableProperty]
-        public Visibility _avatarImageVisibility = Visibility.Hidden;
-
-        public AvatarView() { }
-
-        public AvatarView(int character_id)
-        {
-            if (character_id >= 0 && character_id < (int)ECharacterCard.NumCharacters)
-            {
-                AvatarUri = $"pack://siteoforigin:,,,/assets/images/avatars/{character_id}.png";
-                AvatarImageVisibility = Visibility.Visible;
-            }
-            else
-            {
-                AvatarUri = "pack://siteoforigin:,,,/assets/images/avatars/0.png";
-                AvatarImageVisibility = Visibility.Hidden;
-            }
-        }
-    }
-
-    public partial class DeckInfo : ObservableObject
-    {
-        [JsonProperty("sharecode")]
-        public string ShareCode = "";
-
-        [JsonProperty("name")]
-        [ObservableProperty]
-        [property: JsonIgnore]
-        private string _name = Lang.DefaultDeckName;
-
-        [JsonProperty("characters")]
-        public int[] Characters = [];
-
-        [JsonProperty("last_modified")]
-        [JsonConverter(typeof(CustomDateTimeConverter), "yyyy/MM/dd HH:mm:ss")]
-        public DateTime LastModified = CustomDateTimeConverter.MinTime;
-
-        [ObservableProperty]
-        [property: JsonIgnore]
-        private FontWeight _textWeight = FontWeights.Light;
-
-        [ObservableProperty]
-        [property: JsonIgnore]
-        private Brush? _textColor = (SolidColorBrush?)Application.Current?.Resources?["TextFillColorPrimaryBrush"];
-    }
-
-    public partial class DeckList : ObservableObject
-    {
-        public static readonly SolidColorBrush HighlightColor = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
-
-        [JsonProperty("active")]
-        [ObservableProperty]
-        [property: JsonIgnore]
-        private int _activeIndex = -1;
-
-        [JsonProperty("decks")]
-        [ObservableProperty]
-        [property: JsonIgnore]
-        private ObservableCollection<DeckInfo> _deckInfos = [];
-
-        partial void OnActiveIndexChanged(int oldValue, int newValue)
-        {
-            if (oldValue >= 0 && oldValue < DeckInfos.Count)
-            {
-                DeckInfos[oldValue].TextWeight = FontWeights.Light;
-                DeckInfos[oldValue].TextColor  = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
-            }
-            if (newValue >= 0 && newValue < DeckInfos.Count)
-            {
-                DeckInfos[newValue].TextWeight = FontWeights.Bold;
-                DeckInfos[newValue].TextColor  = HighlightColor;
-            }
-        }
-    }
-
     enum EControlButtonType : int
     {
         //SetAsActiveDeck,
@@ -137,42 +55,117 @@ namespace LumiTracker.ViewModels.Pages
         }
     }
 
+    public partial class DeckStatistics : ObservableObject
+    {
+        private BuildStats Total { get; set; }
+
+        private ObservableCollection<BuildStats> AllBuildStats { get; set; }
+
+        /////////////////////////
+        // Current
+        [ObservableProperty]
+        private BuildStats _current;
+
+        public DeckStatistics()
+        {
+            Total = new();
+            AllBuildStats = [new(), new(), new(), new()];
+            Current = Total;
+        }
+    }
+
+    public partial class DeckItem(DeckInfo deckInfo) : ObservableObject
+    {
+        [ObservableProperty]
+        private DeckInfo _info = deckInfo;
+
+        [ObservableProperty]
+        private ObservableCollection<ActionCardView> _actionCards = [];
+
+        [ObservableProperty]
+        private DeckStatistics? _stats = new ();
+
+        [ObservableProperty]
+        private FontWeight _weightInNameList = FontWeights.Light;
+
+        [ObservableProperty]
+        private Brush? _colorInNameList = (SolidColorBrush?)Application.Current?.Resources?["TextFillColorPrimaryBrush"];
+
+        public void OnSelected()
+        {
+            if (ActionCards.Count == 0)
+            {
+                ///////////////////////
+                // Decode share code
+                ImportFromShareCode(Info.ShareCode);
+            }
+
+            // TODO: Init DeckStatistics
+        }
+
+        public bool ImportFromShareCode(string sharecode)
+        {
+            int[]? cards = DeckUtils.DecodeShareCode(sharecode);
+            if (cards == null)
+            {
+                Configuration.Logger.LogWarning($"[DeckItem.DecodeShareCode] Invalid share code: {sharecode}");
+                return false;
+            }
+            Info.ShareCode = sharecode;
+            Info.Characters = cards[..3].ToList();
+
+            ///////////////////////
+            // Current Deck
+
+            // Sort in case of non-standard order
+            Array.Sort(cards, 3, 30,
+                Comparer<int>.Create((x, y) => DeckUtils.ActionCardCompare(x, y)));
+
+            // To column major
+            ActionCardView[] views = new ActionCardView[30];
+            for (int x = 0; x < 2; x++)
+            {
+                for (int y = 0; y < 15; y++)
+                {
+                    // transpose
+                    int srcIdx = 3 + x * 15 + y;
+                    int dstIdx = y * 2 + x;
+                    views[dstIdx] = new ActionCardView(null, cards[srcIdx], inGame: false);
+                }
+            }
+
+            ActionCards = new ObservableCollection<ActionCardView>(views);
+            return true;
+        }
+    }
+
     public partial class DeckViewModel : ObservableObject, INavigationAware
     {
         [ObservableProperty]
-        private List<int> _currentCharacters = [ -1, -1, -1 ];
+        private ObservableCollection<DeckItem> _deckItems = [];
 
         [ObservableProperty]
-        private ObservableCollection<ActionCardView> _currentDeck = [];
+        private int _selectedIndex = -1;
 
         [ObservableProperty]
-        private DeckList _userDeckList = new ();
+        private int _activeDeckIndex = -1;
 
+        /////////////////////////
+        // UI
         [ObservableProperty]
-        private int _selectedDeckIndex = -1;
-
-        [ObservableProperty]
-        private string _selectedDeckName = "";
-
-        [ObservableProperty]
-        private DeckStatistics _deckStatistics = new DeckStatistics();
-
-        partial void OnSelectedDeckIndexChanged(int oldValue, int newValue)
-        {
-            Select(newValue);
-        }
+        private DeckItem? _selectedDeckItem = null;
 
         [ObservableProperty]
         private ControlButton[] _buttons = new ControlButton[(int)EControlButtonType.NumControlButtons];
+
+        private ISnackbarService? SnackbarService;
+
+        private StyledContentDialogService? ContentDialogService;
 
         private static readonly string UserDecksDescPath = Path.Combine(
             Configuration.ConfigDir,
             "decks.json"
         );
-
-        private ISnackbarService? SnackbarService;
-
-        private StyledContentDialogService? ContentDialogService;
 
         public DeckViewModel(ISnackbarService? snackbarService, StyledContentDialogService? contentDialogService)
         {
@@ -227,21 +220,41 @@ namespace LumiTracker.ViewModels.Pages
             );
 
             /////////////////////////
-            // Load deck infos
-            if (!File.Exists(UserDecksDescPath))
+            // TODO: Load deck infos
+            //if (!File.Exists(UserDecksDescPath))
+            //{
+            //    return;
+            //}
+            //var userDecksDesc = Configuration.LoadJObject(UserDecksDescPath);
+            //var userDecks = userDecksDesc.ToObject<DeckInformations>();
+            //if (userDecks == null)
+            //{
+            //    Configuration.Logger.LogWarning($"Failed to load user decks.");
+            //    return;
+            //}
+            //DeckInformations.DeckInfos   = userDecks.DeckInfos;
+            //DeckInformations.ActiveIndex = Math.Clamp(userDecks.ActiveIndex, -1, DeckInformations.DeckInfos.Count - 1);
+            //SelectedDeckIndex = DeckInformations.ActiveIndex;
+        }
+
+        partial void OnSelectedIndexChanged(int oldValue, int newValue)
+        {
+            Select(newValue);
+        }
+
+        public static readonly SolidColorBrush HighlightColor = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
+        partial void OnActiveDeckIndexChanged(int oldValue, int newValue)
+        {
+            if (oldValue >= 0 && oldValue < DeckItems.Count)
             {
-                return;
+                DeckItems[oldValue].WeightInNameList = FontWeights.Light;
+                DeckItems[oldValue].ColorInNameList  = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
             }
-            var userDecksDesc = Configuration.LoadJObject(UserDecksDescPath);
-            var userDecks = userDecksDesc.ToObject<DeckList>();
-            if (userDecks == null)
+            if (newValue >= 0 && newValue < DeckItems.Count)
             {
-                Configuration.Logger.LogWarning($"Failed to load user decks.");
-                return;
+                DeckItems[newValue].WeightInNameList = FontWeights.Bold;
+                DeckItems[newValue].ColorInNameList  = HighlightColor;
             }
-            UserDeckList.DeckInfos   = userDecks.DeckInfos;
-            UserDeckList.ActiveIndex = Math.Clamp(userDecks.ActiveIndex, -1, UserDeckList.DeckInfos.Count - 1);
-            SelectedDeckIndex        = UserDeckList.ActiveIndex;
         }
 
         private void Select(int index)
@@ -253,89 +266,39 @@ namespace LumiTracker.ViewModels.Pages
             {
                 Buttons[(int)i].IsEnabled = valid;
             }
-            if (!valid)
+
+            if (valid)
             {
-                CurrentCharacters = [-1, -1, -1];
-                CurrentDeck = [];
-                SelectedDeckName = "";
-                return;
+                Configuration.Logger.LogDebug($"Select deck[{index}], {DeckItems.Count} decks in total");
+                DeckItems[index].OnSelected();
+                SelectedDeckItem = DeckItems[index];
             }
-
-            ///////////////////////
-            // Decode share code
-            DeckInfo info = UserDeckList.DeckInfos[index];
-            string sharecode = info.ShareCode;
-            Configuration.Logger.LogDebug($"Select deck[{index}], {UserDeckList.DeckInfos.Count} decks in total");
-            DecodeShareCode(info, sharecode);
-        }
-
-        private bool DecodeShareCode(DeckInfo info, string sharecode) 
-        {
-            int[]? cards = DeckUtils.DecodeShareCode(sharecode);
-            if (cards == null)
+            else
             {
-                Configuration.Logger.LogWarning($"Invalid share code: {sharecode}");
-                return false;
+                SelectedDeckItem = null;
             }
-            info.ShareCode = sharecode;
-            SelectedDeckName = info.Name;
-
-            ///////////////////////
-            // Avatars
-            info.Characters = new int[3];
-            for (int i = 0; i < 3; i++)
-            {
-                info.Characters[i] = cards[i];
-                CurrentCharacters[i] = cards[i];
-            }
-
-            ///////////////////////
-            // Current Deck
-
-            // Sort in case of non-standard order
-            Array.Sort(cards, 3, 30, 
-                Comparer<int>.Create((x, y) => DeckUtils.ActionCardCompare(x, y)));
-
-            // To column major
-            int[] transposed = new int[30];
-            for (int x = 0; x < 2; x++)
-            {
-                for (int y = 0; y < 15; y++)
-                {
-                    transposed[y * 2 + x] = cards[3 + x * 15 + y];
-                }
-            }
-
-            ObservableCollection<ActionCardView> currentDeck = new ();
-            foreach (int card_id in transposed)
-            {
-                currentDeck.Add(new ActionCardView(null, card_id, inGame: false));
-            }
-            CurrentDeck = currentDeck;
-
-            return true;
         }
 
         public void SaveDeckList()
         {
-            Configuration.SaveJObject(JObject.FromObject(UserDeckList), UserDecksDescPath);
+            // TODO: Save deck infos
+            //Configuration.SaveJObject(JObject.FromObject(UserDeckList), UserDecksDescPath);
         }
-
 
         [RelayCommand]
         private void OnSetAsActiveDeckClicked()
         {
             Configuration.Logger.LogDebug("OnSetAsActiveDeckClicked");
-            if (SelectedDeckIndex < 0)
+            if (SelectedIndex < 0 || SelectedDeckItem == null)
             {
                 return;
             }
 
-            UserDeckList.ActiveIndex = SelectedDeckIndex;
+            ActiveDeckIndex = SelectedIndex;
             SaveDeckList();
             SnackbarService?.Show(
                 Lang.SetAsActiveSuccess_Title,
-                Lang.SetAsActiveSuccess_Message + SelectedDeckName,
+                Lang.SetAsActiveSuccess_Message + SelectedDeckItem.Info.Name,
                 ControlAppearance.Success,
                 new SymbolIcon(SymbolRegular.CheckmarkCircle24),
                 TimeSpan.FromSeconds(2)
@@ -346,14 +309,14 @@ namespace LumiTracker.ViewModels.Pages
         private async Task OnEditDeckNameClicked()
         {
             Configuration.Logger.LogDebug("OnEditDeckNameClicked");
-            if (SelectedDeckIndex < 0 || ContentDialogService == null)
+            if (SelectedIndex < 0 || SelectedDeckItem == null || ContentDialogService == null)
             {
                 return;
             }
 
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
                 Lang.EditDeckName_Title,
-                SelectedDeckName,
+                SelectedDeckItem.Info.Name,
                 Lang.EditDeckName_Placeholder
             );
 
@@ -363,8 +326,7 @@ namespace LumiTracker.ViewModels.Pages
                 {
                     name = Lang.DefaultDeckName;
                 }
-                UserDeckList.DeckInfos[SelectedDeckIndex].Name = name;
-                SelectedDeckName = name;
+                SelectedDeckItem.Info.Name = name;
                 SaveDeckList();
             }
         }
@@ -373,7 +335,7 @@ namespace LumiTracker.ViewModels.Pages
         private async Task OnReimportDeckClicked()
         {
             Configuration.Logger.LogDebug("OnReimportDeckClicked");
-            if (SelectedDeckIndex < 0 || ContentDialogService == null)
+            if (SelectedIndex < 0 || SelectedDeckItem == null || ContentDialogService == null)
             {
                 return;
             }
@@ -386,11 +348,10 @@ namespace LumiTracker.ViewModels.Pages
 
             if (result == ContentDialogResult.Primary)
             {
-                var info = UserDeckList.DeckInfos[SelectedDeckIndex];
-                bool success = DecodeShareCode(info, sharecode);
+                bool success = SelectedDeckItem.ImportFromShareCode(sharecode);
                 if (success)
                 {
-                    info.LastModified = DateTime.Now;
+                    SelectedDeckItem.Info.LastModified = DateTime.Now;
                     SaveDeckList();
                 }
                 else
@@ -410,14 +371,12 @@ namespace LumiTracker.ViewModels.Pages
         private void OnShareDeckClicked()
         {
             Configuration.Logger.LogDebug("OnShareDeckClicked");
-            if (SelectedDeckIndex < 0)
+            if (SelectedIndex < 0 || SelectedDeckItem == null)
             {
                 return;
             }
 
-            var info = UserDeckList.DeckInfos[SelectedDeckIndex];
-            string sharecode = info.ShareCode;
-
+            string sharecode = SelectedDeckItem.Info.ShareCode;
             Clipboard.SetText(sharecode);
             SnackbarService?.Show(
                 Lang.CopyToClipboard,
@@ -445,24 +404,30 @@ namespace LumiTracker.ViewModels.Pages
 
             if (result == ContentDialogResult.Primary)
             {
-                var info = new DeckInfo();
-                bool success = DecodeShareCode(info, sharecode);
-                if (success)
+                int[]? cards = DeckUtils.DecodeShareCode(sharecode);
+                if (cards != null)
                 {
                     string deckName = "";
-                    foreach (int c_id in info.Characters)
+                    foreach (int c_id in cards[..3])
                     {
                         if (deckName != "") deckName += "+";
                         deckName += Configuration.GetCharacterName(c_id, is_short: true);
                     }
-                    info.Name = deckName;
-                    UserDeckList.DeckInfos.Add(info);
-                    SelectedDeckIndex = UserDeckList.DeckInfos.Count - 1;
-                    info.LastModified = DateTime.Now;
+
+                    var info = new DeckInfo()
+                    {
+                        ShareCode    = sharecode,
+                        Characters   = cards[..3].ToList(),
+                        Name         = deckName,
+                        LastModified = DateTime.Now,
+                    };
+                    DeckItems.Add(new DeckItem(info));
+                    SelectedIndex = DeckItems.Count - 1;
                     SaveDeckList();
                 }
                 else
                 {
+                    Configuration.Logger.LogWarning($"[OnAddNewDeckClicked] Invalid share code: {sharecode}");
                     SnackbarService?.Show(
                         Lang.InvalidSharingCode_Title,
                         Lang.InvalidSharingCode_Message + sharecode,
@@ -478,38 +443,38 @@ namespace LumiTracker.ViewModels.Pages
         private async Task OnDeleteDeckClicked()
         {
             Configuration.Logger.LogDebug("OnDeleteDeckClicked");
-            if (SelectedDeckIndex < 0 || ContentDialogService == null)
+            if (SelectedIndex < 0 || SelectedDeckItem == null || ContentDialogService == null)
             {
                 return;
             }
 
-            var result = await ContentDialogService.ShowDeleteConfirmDialogAsync(SelectedDeckName);
+            var result = await ContentDialogService.ShowDeleteConfirmDialogAsync(SelectedDeckItem.Info.Name);
 
             if (result == ContentDialogResult.Primary)
             {
-                Configuration.Logger.LogDebug($"Before delete: SelectedDeckIndex = {SelectedDeckIndex}, ActiveIndex = {UserDeckList.ActiveIndex}");
+                Configuration.Logger.LogDebug($"Before delete: SelectedIndex = {SelectedIndex}, ActiveDeckIndex = {ActiveDeckIndex}");
 
-                int prevSelectedDeckIndex = SelectedDeckIndex;
-                UserDeckList.DeckInfos.RemoveAt(SelectedDeckIndex); // SelectedDeckIndex -> -1
+                int prevSelectedIndex = SelectedIndex;
+                DeckItems.RemoveAt(SelectedIndex); // SelectedIndex -> -1
 
                 // Update active index
-                if (prevSelectedDeckIndex == UserDeckList.ActiveIndex)
+                if (prevSelectedIndex == ActiveDeckIndex)
                 {
-                    UserDeckList.ActiveIndex = -1;
+                    ActiveDeckIndex = -1;
                 }
-                else if (prevSelectedDeckIndex < UserDeckList.ActiveIndex)
+                else if (prevSelectedIndex < ActiveDeckIndex)
                 {
-                    UserDeckList.ActiveIndex--;
+                    ActiveDeckIndex--;
                 }
-                else // (SelectedDeckIndex > prevActiveIndex)
+                else // (prevSelectedIndex > ActiveDeckIndex)
                 {
 
                 }
 
-                // Restore SelectedDeckIndex
-                SelectedDeckIndex = Math.Min(prevSelectedDeckIndex, UserDeckList.DeckInfos.Count - 1);
+                // Restore SelectedIndex
+                SelectedIndex = Math.Min(prevSelectedIndex, DeckItems.Count - 1);
 
-                Configuration.Logger.LogDebug($"After delete: SelectedDeckIndex = {SelectedDeckIndex}, ActiveIndex = {UserDeckList.ActiveIndex}");
+                Configuration.Logger.LogDebug($"After delete: SelectedIndex = {SelectedIndex}, ActiveDeckIndex = {ActiveDeckIndex}");
 
                 SaveDeckList();
             }
@@ -517,14 +482,13 @@ namespace LumiTracker.ViewModels.Pages
 
         public void OnNavigatedTo()
         {
-            int ActiveIndex = UserDeckList.ActiveIndex;
-            if (ActiveIndex >= 0 && ActiveIndex < UserDeckList.DeckInfos.Count)
+            if (ActiveDeckIndex >= 0 && ActiveDeckIndex < DeckItems.Count)
             {
-                SelectedDeckIndex = ActiveIndex;
+                SelectedIndex = ActiveDeckIndex;
             }
-            else if (SelectedDeckIndex < 0 && UserDeckList.DeckInfos.Count > 0)
+            else if (SelectedIndex < 0 && DeckItems.Count > 0)
             {
-                SelectedDeckIndex = 0;
+                SelectedIndex = 0;
             }
         }
 

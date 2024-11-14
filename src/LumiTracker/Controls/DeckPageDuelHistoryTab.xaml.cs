@@ -12,11 +12,11 @@ namespace LumiTracker.Controls
     public partial class DeckPageDuelHistoryTab : UserControl
     {
         public static readonly DependencyProperty StatsProperty = DependencyProperty.Register(
-            "Stats", typeof(DeckStatistics), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(null));
+            "Stats", typeof(BuildStats), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(null));
 
-        public DeckStatistics Stats
+        public BuildStats Stats
         {
-            get { return (DeckStatistics)GetValue(StatsProperty); }
+            get { return (BuildStats)GetValue(StatsProperty); }
             set { SetValue(StatsProperty, value); }
         }
 
@@ -31,11 +31,29 @@ namespace LumiTracker.Controls
 
         public static readonly DependencyProperty TabControlWidthProperty = DependencyProperty.Register(
             "TabControlWidth", typeof(double), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(1.0));
-
+        
         public double TabControlWidth
         {
             get { return (double)GetValue(TabControlWidthProperty); }
             set { SetValue(TabControlWidthProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowCurrentVersionOnlyProperty = DependencyProperty.Register(
+            "ShowCurrentVersionOnly", typeof(bool), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(false));
+
+        public bool ShowCurrentVersionOnly
+        {
+            get { return (bool)GetValue(ShowCurrentVersionOnlyProperty); }
+            set { SetValue(ShowCurrentVersionOnlyProperty, value); }
+        }
+
+        public static readonly DependencyProperty HideRecordsBeforeImportProperty = DependencyProperty.Register(
+            "HideRecordsBeforeImport", typeof(bool), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(false));
+
+        public bool HideRecordsBeforeImport
+        {
+            get { return (bool)GetValue(HideRecordsBeforeImportProperty); }
+            set { SetValue(HideRecordsBeforeImportProperty, value); }
         }
 
         public DeckPageDuelHistoryTab()

@@ -33,10 +33,6 @@ namespace LumiTracker.Helpers
             {
                 winRate = 1.0f * matchupStats.Wins / matchupStats.Totals;
             }
-            else if (value is DeckStatistics deckStats && deckStats.Totals > 0)
-            {
-                winRate = 1.0f * deckStats.Wins / deckStats.Totals;
-            }
             return winRate;
         }
 

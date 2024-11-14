@@ -104,7 +104,7 @@ namespace LumiTracker.ViewModels.Windows
             if (gameStart)
             {
                 MyDeck = new CardList(Enumerable.Repeat(-1, 30).ToArray(), inGame: true);
-                DeckViewModel.UserDeckList.ActiveIndex = -1;
+                DeckViewModel.ActiveDeckIndex = -1;
             }
             else
             {
@@ -205,21 +205,21 @@ namespace LumiTracker.ViewModels.Windows
                 return;
             }
 
-            var sortedDeckInfos = DeckViewModel.UserDeckList.DeckInfos
-                .Select((info, index) => new { Info = info, Index = index })
+            var sortedDeckInfos = DeckViewModel.DeckItems
+                .Select((item, index) => new { Info = item.Info, Index = index })
                 .OrderByDescending(x => x.Info.LastModified);
 
             bool found = false;
             foreach (var item in sortedDeckInfos)
             {
                 var info = item.Info;
-                if (info.Characters.Length == 3
+                if (info.Characters.Count == 3
                     && card_ids[0] == info.Characters[0]
                     && card_ids[1] == info.Characters[1]
                     && card_ids[2] == info.Characters[2] )
                 {
                     InitDeckOnGameStart(info.ShareCode);
-                    DeckViewModel.UserDeckList.ActiveIndex = item.Index;
+                    DeckViewModel.ActiveDeckIndex = item.Index;
                     DeckViewModel.SaveDeckList();
                     Configuration.Logger.LogInformation($"Set deck[{item.Index}] as active deck.");
                     found = true;

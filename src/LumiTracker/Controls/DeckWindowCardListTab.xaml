@@ -171,9 +171,9 @@
             >
                 <Run.Text>
                     <MultiBinding Converter="{StaticResource GetActiveDeckNameConverter}" >
-                        <Binding Path="ViewModel.DeckViewModel.UserDeckList.DeckInfos" />
-                        <Binding Path="ViewModel.DeckViewModel.UserDeckList.ActiveIndex" />
-                        <Binding Path="ViewModel.DeckViewModel.SelectedDeckName" />
+                        <Binding Path="ViewModel.DeckViewModel.DeckItems" />
+                        <Binding Path="ViewModel.DeckViewModel.ActiveDeckIndex" />
+                        <Binding Path="ViewModel.DeckViewModel.SelectedDeckItem.Info.Name" />
                     </MultiBinding>
                 </Run.Text>
             </Run>
