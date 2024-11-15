@@ -24,8 +24,8 @@
         <helpers:GetActiveDeckNameConverter x:Key="GetActiveDeckNameConverter" />
         <helpers:HideNonPositiveIntValueConverter x:Key="HideNonPositiveIntValueConverter" />
         <helpers:HidePositiveIntValueConverter x:Key="HidePositiveIntValueConverter" />
-        <helpers:FloatToMinuteSecondsConverter x:Key="FloatToMinuteSecondsConverter" />
-        <helpers:WinRateFromStatsConverter x:Key="WinRateFromStatsConverter" />
+        <helpers:IsGoodWinRateConverter x:Key="IsGoodWinRateConverter" />
+        <helpers:TrueFalseCondSwitchConverter x:Key="TrueFalseCondSwitchConverter" />
         
         
         <SolidColorBrush x:Key="WinBrush" Color="#ffb900" />
@@ -48,7 +48,7 @@
             <Border
                 BorderThickness="0,0,0,0.1"
                 BorderBrush="White"
-                Margin="5,0,5,0"
+                Margin="5,0,0,0"
                 Padding="0,0,5,2"
                 >
             <Grid
@@ -62,10 +62,10 @@
                 VerticalAlignment="Stretch"
                 >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.0*"/>
-                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="1.9*"/>
                     <ColumnDefinition Width="1.0*"/>
-                    <ColumnDefinition Width="1.8*"/>
+                    <ColumnDefinition Width="1.0*"/>
+                    <ColumnDefinition Width="1.9*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
@@ -74,16 +74,21 @@
                     Grid.Column="0"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
-                    Foreground="{StaticResource GoodWinRateBrush}"
                     FontSize="{Binding Path=TabControlHeight, 
                         Converter={StaticResource SizeWithRatioConverter},
                         ConverterParameter=0.025,
                         RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                         }"
-                    Text="{Binding ., 
-                        StringFormat={}{0:P1},
-                        Converter={StaticResource WinRateFromStatsConverter}}" 
-                    />
+                    Text="{Binding WinRate, StringFormat={}{0:P1}}" 
+                >
+                    <TextBlock.Foreground>
+                        <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                            <Binding Source="{StaticResource GoodWinRateBrush}" />
+                            <Binding Source="{StaticResource BadWinRateBrush}"  />
+                            <Binding Path="WinRate" Converter="{StaticResource IsGoodWinRateConverter}" />
+                        </MultiBinding>
+                    </TextBlock.Foreground>
+                </TextBlock>
                 <TextBlock 
                     Grid.Column="1"
                     VerticalAlignment="Center"
@@ -106,18 +111,33 @@
                         RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                         }"
                     Text="{Binding AvgRounds}" />
-                <TextBlock 
+                <StackPanel 
                     Grid.Column="3"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
-                    Foreground="{StaticResource PlainTextBrush}"
-                    FontSize="{Binding Path=TabControlHeight, 
-                        Converter={StaticResource SizeWithRatioConverter},
-                        ConverterParameter=0.025,
-                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
-                        }"
-                    Text="{Binding AvgDuration,
-                        Converter={StaticResource FloatToMinuteSecondsConverter}}" />
+                    Orientation="Horizontal"
+                    >
+                    <ui:SymbolIcon 
+                        Symbol="Clock24"
+                        Margin="0,0,1,0"
+                        Foreground="{StaticResource PlainTextBrush}"
+                        FontSize="{Binding Path=TabControlHeight, 
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.023,
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                            }"
+                        />
+                    <TextBlock
+                        Foreground="{StaticResource PlainTextBrush}"
+                        FontSize="{Binding Path=TabControlHeight, 
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.025,
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                            }"
+                        Text="{Binding AvgDurationInMinutes, StringFormat={}{0:F1}, Mode=OneWay}"
+                        >
+                    </TextBlock>
+                </StackPanel>
 
                 <!-- VS text -->
                 <TextBlock
@@ -126,18 +146,18 @@
                     HorizontalAlignment="Right"
                     Text="VS"
                     Foreground="White"
-                    Margin="8,0,4,0"
+                    Margin="5,0,1,0"
                     FontWeight="Bold"
                     FontSize="{Binding Path=TabControlHeight, 
                         Converter={StaticResource SizeWithRatioConverter},
-                        ConverterParameter=0.030,
+                        ConverterParameter=0.028,
                         RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                         }"
                     />
 
                 <ctrls:AvatarsView
                     Grid.Column="5"
-                    Margin="0,2,0,2"
+                    Margin="0,3,0,3"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Right"
                     ImageOuterMargin="1"
@@ -188,24 +208,6 @@
                         Grid.Row="0"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center"
-                        Visibility="{Binding IsWin,
-                            Converter={StaticResource BooleanToVisibilityConverter},
-                            ConverterParameter=Collapsed
-                            }"
-                        Foreground="{StaticResource WinBrush}"
-                        FontWeight="Bold"
-                        FontSize="28"
-                        Margin="0,0,0,0"
-                        Text="对局胜利" />
-                    <TextBlock 
-                        Grid.Row="0"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Visibility="{Binding IsWin,
-                            Converter={StaticResource BooleanNotToVisibilityConverter},
-                            ConverterParameter=Collapsed
-                            }"
-                        Foreground="{StaticResource LoseBrush}"
                         FontWeight="Bold"
                         FontSize="{Binding Path=TabControlHeight, 
                             Converter={StaticResource SizeWithRatioConverter},
@@ -213,25 +215,55 @@
                             RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                             }"
                         Margin="0,0,0,0"
-                        Text="对局失败" />
-                    <TextBlock 
+                    >
+                        <TextBlock.Foreground>
+                            <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                                <Binding Source="{StaticResource WinBrush}" />
+                                <Binding Source="{StaticResource LoseBrush}"  />
+                                <Binding Path="IsWin" />
+                            </MultiBinding>
+                        </TextBlock.Foreground>
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                                <Binding Source="对局胜利" />
+                                <Binding Source="对局失败"  />
+                                <Binding Path="IsWin" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <StackPanel 
                         Grid.Row="1"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center"
-                        Foreground="{StaticResource PlainTextBrush}"
-                        FontWeight="Bold"
-                        FontSize="{Binding Path=TabControlHeight, 
-                            Converter={StaticResource SizeWithRatioConverter},
-                            ConverterParameter=0.026,
-                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
-                            }"
+                        Orientation="Horizontal"
                         >
-                        <Run Text="{Binding Duration,
-                            Converter={StaticResource FloatToMinuteSecondsConverter}}"/>
-                        <Run Text=","/>
-                        <Run Text="回合"/>
-                        <Run Text="{Binding Rounds}"/>
-                    </TextBlock>
+                        <ui:SymbolIcon 
+                            Symbol="Clock24"
+                            Margin="0,0,2,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource PlainTextBrush}"
+                            FontSize="{Binding Path=TabControlHeight, 
+                                Converter={StaticResource SizeWithRatioConverter},
+                                ConverterParameter=0.024,
+                                RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                                }"
+                                />
+                        <TextBlock
+                            Foreground="{StaticResource PlainTextBrush}"
+                            FontWeight="Bold"
+                            FontSize="{Binding Path=TabControlHeight, 
+                                Converter={StaticResource SizeWithRatioConverter},
+                                ConverterParameter=0.026,
+                                RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                                }"
+                            >
+                            <Run Text="{Binding DurationInMinutes, StringFormat={}{0:F1}, Mode=OneWay}" />
+                            <Run Text="分钟" />
+                            <Run Text=","/>
+                            <Run Text="回合"/>
+                            <Run Text="{Binding Rounds}"/>
+                        </TextBlock>
+                    </StackPanel>
                     <TextBlock 
                         Grid.Row="2"
                         VerticalAlignment="Center"
@@ -286,12 +318,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="2.6*"/>
+            <RowDefinition Height="2.5*"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1.8*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Summary -->
@@ -313,7 +345,7 @@
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1.2*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock
@@ -330,16 +362,21 @@
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="1"
-                Text="{Binding Stats.Summary, 
-                    StringFormat={}{0:P1},
-                    Converter={StaticResource WinRateFromStatsConverter}}"
-                Foreground="{StaticResource GoodWinRateBrush}"
+                Text="{Binding Stats.Summary.WinRate, StringFormat={}{0:P1}}"
                 HorizontalAlignment="Center"
                 FontSize="{Binding Path=TabControlHeight, 
                     Converter={StaticResource SizeWithRatioConverter},
                     ConverterParameter=0.028
                     }"
-                />
+            >
+                <TextBlock.Foreground>
+                    <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                        <Binding Source="{StaticResource GoodWinRateBrush}" />
+                        <Binding Source="{StaticResource BadWinRateBrush}"  />
+                        <Binding Path="Stats.Summary.WinRate" Converter="{StaticResource IsGoodWinRateConverter}" />
+                    </MultiBinding>
+                </TextBlock.Foreground>
+            </TextBlock>
             <TextBlock
                 Grid.Row="1"
                 Grid.Column="0"
@@ -395,18 +432,32 @@
                     ConverterParameter=0.028
                     }"
                 />
-            <TextBlock
+            <StackPanel 
                 Grid.Row="3"
                 Grid.Column="1"
-                Text="{Binding Stats.Summary.AvgDuration,
-                    Converter={StaticResource FloatToMinuteSecondsConverter}}"
-                Foreground="{StaticResource PlainTextBrush}"
-                FontSize="{Binding Path=TabControlHeight, 
-                    Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.028
-                    }"
                 HorizontalAlignment="Center"
-                />
+                VerticalAlignment="Top"
+                Orientation="Horizontal"
+                >
+                <ui:SymbolIcon 
+                    Symbol="Clock24"
+                    Margin="0,0,2,0"
+                    Foreground="{StaticResource PlainTextBrush}"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.025
+                        }"
+                    />
+                <TextBlock
+                    Foreground="{StaticResource PlainTextBrush}"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.028
+                        }"
+                    >
+                    <Run Text="{Binding Stats.Summary.AvgDurationInMinutes, StringFormat={}{0:F1}min, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>
 
             <!-- Settings -->
             <Grid

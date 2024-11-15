@@ -9,6 +9,7 @@ using System.Windows.Input;
 using LumiTracker.Services;
 using System.Windows.Data;
 using Wpf.Ui;
+using Newtonsoft.Json.Linq;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -62,9 +63,12 @@ namespace LumiTracker.ViewModels.Pages
         private ObservableCollection<BuildStats> AllBuildStats { get; set; }
 
         /////////////////////////
-        // Current
+        // UI
         [ObservableProperty]
         private BuildStats _current;
+
+        [ObservableProperty]
+        private bool _loaded = false;
 
         public DeckStatistics()
         {
@@ -83,7 +87,7 @@ namespace LumiTracker.ViewModels.Pages
         private ObservableCollection<ActionCardView> _actionCards = [];
 
         [ObservableProperty]
-        private DeckStatistics? _stats = new ();
+        private DeckStatistics? _stats = null;
 
         [ObservableProperty]
         private FontWeight _weightInNameList = FontWeights.Light;
@@ -101,6 +105,10 @@ namespace LumiTracker.ViewModels.Pages
             }
 
             // TODO: Init DeckStatistics
+            if (Stats == null)
+            {
+                Stats = new ();
+            }
         }
 
         public bool ImportFromShareCode(string sharecode)
@@ -162,11 +170,6 @@ namespace LumiTracker.ViewModels.Pages
 
         private StyledContentDialogService? ContentDialogService;
 
-        private static readonly string UserDecksDescPath = Path.Combine(
-            Configuration.ConfigDir,
-            "decks.json"
-        );
-
         public DeckViewModel(ISnackbarService? snackbarService, StyledContentDialogService? contentDialogService)
         {
             /////////////////////////
@@ -219,22 +222,7 @@ namespace LumiTracker.ViewModels.Pages
                 isEnabled  : true
             );
 
-            /////////////////////////
-            // TODO: Load deck infos
-            //if (!File.Exists(UserDecksDescPath))
-            //{
-            //    return;
-            //}
-            //var userDecksDesc = Configuration.LoadJObject(UserDecksDescPath);
-            //var userDecks = userDecksDesc.ToObject<DeckInformations>();
-            //if (userDecks == null)
-            //{
-            //    Configuration.Logger.LogWarning($"Failed to load user decks.");
-            //    return;
-            //}
-            //DeckInformations.DeckInfos   = userDecks.DeckInfos;
-            //DeckInformations.ActiveIndex = Math.Clamp(userDecks.ActiveIndex, -1, DeckInformations.DeckInfos.Count - 1);
-            //SelectedDeckIndex = DeckInformations.ActiveIndex;
+            LoadDeckInformations();
         }
 
         partial void OnSelectedIndexChanged(int oldValue, int newValue)
@@ -278,8 +266,41 @@ namespace LumiTracker.ViewModels.Pages
                 SelectedDeckItem = null;
             }
         }
+        public void LoadDeckInformations()
+        {
+            string UserDecksDescPath = Path.Combine(Configuration.ConfigDir, "decks.json");
+            if (!File.Exists(UserDecksDescPath))
+            {
+                return;
+            }
 
-        public void SaveDeckList()
+            try
+            {
+                var userDecksDesc = Configuration.LoadJObject(UserDecksDescPath);
+                if (userDecksDesc.Count == 0)
+                {
+                    throw new Exception("Loaded an empty desc file.");
+                }
+
+                List<DeckItem> deckItems = new ();
+                foreach (var jItem in (userDecksDesc["decks"] as JArray)!)
+                {
+                    DeckInfo info = jItem.ToObject<DeckInfo>()!;
+                    deckItems.Add(new DeckItem(info));
+                }
+                DeckItems = new ObservableCollection<DeckItem>(deckItems);
+
+                int active = (int)userDecksDesc["active"]!;
+                ActiveDeckIndex = Math.Clamp(active, -1, DeckItems.Count - 1);
+                SelectedIndex = ActiveDeckIndex;
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"Failed to load user decks: {ex.Message}");
+            }
+        }
+
+        public void SaveDeckInformations()
         {
             // TODO: Save deck infos
             //Configuration.SaveJObject(JObject.FromObject(UserDeckList), UserDecksDescPath);
@@ -295,7 +316,7 @@ namespace LumiTracker.ViewModels.Pages
             }
 
             ActiveDeckIndex = SelectedIndex;
-            SaveDeckList();
+            SaveDeckInformations();
             SnackbarService?.Show(
                 Lang.SetAsActiveSuccess_Title,
                 Lang.SetAsActiveSuccess_Message + SelectedDeckItem.Info.Name,
@@ -314,6 +335,9 @@ namespace LumiTracker.ViewModels.Pages
                 return;
             }
 
+            // TODO: remove this
+            SelectedDeckItem.Stats!.Current.Summary.Totals += 1;
+
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
                 Lang.EditDeckName_Title,
                 SelectedDeckItem.Info.Name,
@@ -327,7 +351,7 @@ namespace LumiTracker.ViewModels.Pages
                     name = Lang.DefaultDeckName;
                 }
                 SelectedDeckItem.Info.Name = name;
-                SaveDeckList();
+                SaveDeckInformations();
             }
         }
 
@@ -352,7 +376,7 @@ namespace LumiTracker.ViewModels.Pages
                 if (success)
                 {
                     SelectedDeckItem.Info.LastModified = DateTime.Now;
-                    SaveDeckList();
+                    SaveDeckInformations();
                 }
                 else
                 {
@@ -423,7 +447,7 @@ namespace LumiTracker.ViewModels.Pages
                     };
                     DeckItems.Add(new DeckItem(info));
                     SelectedIndex = DeckItems.Count - 1;
-                    SaveDeckList();
+                    SaveDeckInformations();
                 }
                 else
                 {
@@ -476,7 +500,7 @@ namespace LumiTracker.ViewModels.Pages
 
                 Configuration.Logger.LogDebug($"After delete: SelectedIndex = {SelectedIndex}, ActiveDeckIndex = {ActiveDeckIndex}");
 
-                SaveDeckList();
+                SaveDeckInformations();
             }
         }
 

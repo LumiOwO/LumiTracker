@@ -220,7 +220,7 @@ namespace LumiTracker.ViewModels.Windows
                 {
                     InitDeckOnGameStart(info.ShareCode);
                     DeckViewModel.ActiveDeckIndex = item.Index;
-                    DeckViewModel.SaveDeckList();
+                    DeckViewModel.SaveDeckInformations();
                     Configuration.Logger.LogInformation($"Set deck[{item.Index}] as active deck.");
                     found = true;
                     break;

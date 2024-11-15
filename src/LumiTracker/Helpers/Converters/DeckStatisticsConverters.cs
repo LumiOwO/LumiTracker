@@ -5,35 +5,15 @@ using System.Windows.Data;
 
 namespace LumiTracker.Helpers
 {
-    public class FloatToMinuteSecondsConverter : IValueConverter
+    public class IsGoodWinRateConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string timeStr = "--:--";
-            if (value is float floatValue)
+            if (value is double winRate && winRate >= 0.5)
             {
-                TimeSpan time = TimeSpan.FromSeconds(floatValue);
-                timeStr = $"{(int)time.TotalMinutes}:{time.Seconds:D2}";
+                return true;
             }
-            return timeStr;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class WinRateFromStatsConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            float winRate = 0;
-            if (value is MatchupStats matchupStats && matchupStats.Totals > 0)
-            {
-                winRate = 1.0f * matchupStats.Wins / matchupStats.Totals;
-            }
-            return winRate;
+            return false;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

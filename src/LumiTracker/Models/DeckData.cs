@@ -8,8 +8,6 @@ namespace LumiTracker.Models
 {
     public partial class DeckInfo : ObservableObject
     {
-        /////////////////////////
-        // Serializable
         [JsonProperty("sharecode")]
         public string ShareCode = "";
 
@@ -27,10 +25,15 @@ namespace LumiTracker.Models
         [JsonConverter(typeof(CustomDateTimeConverter), "yyyy/MM/dd HH:mm:ss")]
         public DateTime LastModified = CustomDateTimeConverter.MinTime;
 
-        [JsonProperty("versions")]
+        [JsonProperty("edits")]
         [ObservableProperty]
         [property: JsonIgnore]
-        public ObservableCollection<string>? _buildVersions = null;
+        public ObservableCollection<string>? _editVersionCodes = null;
+
+        [JsonProperty("current")]
+        [ObservableProperty]
+        [property: JsonIgnore]
+        private int? _currentVersionIndex = null;
 
         [JsonProperty("current_version_only")]
         [ObservableProperty]
@@ -46,23 +49,36 @@ namespace LumiTracker.Models
     public partial class MatchupStats : ObservableObject
     {
         [ObservableProperty]
-        private int _wins;
+        private int _wins = 0;
         [ObservableProperty]
-        private int _totals;
+        private int _totals = 0;
         [ObservableProperty]
-        private float _avgRounds;
+        private double _avgRounds = 0;
         [ObservableProperty]
-        private float _avgDuration; // seconds
+        private double _avgDuration = 0; // seconds
         [ObservableProperty]
-        private List<int> _opCharacters;
+        private List<int> _opCharacters = [-1, -1, -1];
 
-        public MatchupStats()
+        [ObservableProperty]
+        private SolidColorBrush _WinRateColor = new SolidColorBrush(Color.FromArgb(0xff, 0x4c, 0xd1, 0x37));
+
+        public double AvgDurationInMinutes => AvgDuration / 60.0; // Minutes
+
+        public double WinRate => Math.Max(Wins, 0.0) / Math.Max(Totals, 1.0);
+
+        partial void OnAvgDurationChanged(double oldValue, double newValue)
         {
-            _wins = 20;
-            _totals = 50;
-            _avgRounds = 6.0f;
-            _avgDuration = 600;
-            _opCharacters = [9, 10, 11];
+            OnPropertyChanged("AvgDurationInMinutes");
+        }
+
+        partial void OnWinsChanged(int oldValue, int newValue)
+        {
+            OnPropertyChanged("WinRate");
+        }
+
+        partial void OnTotalsChanged(int oldValue, int newValue)
+        {
+            OnPropertyChanged("WinRate");
         }
     }
 
@@ -71,13 +87,20 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private bool _isWin;
         [ObservableProperty]
-        private float _duration;
+        private double _duration; // seconds
         [ObservableProperty]
         private int _rounds;
         [ObservableProperty]
         private DateTime _timeStamp;
         [ObservableProperty]
         private List<int> _opCharacters;
+
+        public double DurationInMinutes => Duration / 60.0; // Minutes
+
+        partial void OnDurationChanged(double oldValue, double newValue)
+        {
+            OnPropertyChanged("DurationInMinutes");
+        }
 
         public DuelRecord()
         {
@@ -102,9 +125,15 @@ namespace LumiTracker.Models
 
         public BuildStats()
         {
-            Summary = new();
-            AllMatchupStats = [new(), new(), new(), new(),];
-            DuelRecords = [new(), new(), new(), new(),];
+            Summary = new() { Totals = 3, Wins = 2, AvgRounds = 6.0, AvgDuration = 500 };
+            AllMatchupStats = [
+                new(){ Totals = 2, Wins = 1, AvgRounds = 6.5, AvgDuration = 600, OpCharacters = [98, 81, 93] }, 
+                new(){ Totals = 1, Wins = 0, AvgRounds = 5, AvgDuration = 300, OpCharacters = [27, 73, 88]}];
+            DuelRecords = [
+                new(){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), OpCharacters = [98, 81, 93] }, 
+                new(){ IsWin = false, Rounds = 6, Duration = 620, TimeStamp = new DateTime(2024, 11, 15, 20, 0, 0), OpCharacters = [98, 81, 93] },  
+                new(){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), OpCharacters = [27, 73, 88] }, 
+                ];
         }
     }
 

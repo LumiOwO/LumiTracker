@@ -41,4 +41,30 @@ namespace LumiTracker.Helpers
             throw new NotImplementedException();
         }
     }
+
+    public class TrueFalseCondSwitchConverter : IMultiValueConverter
+    {
+        public object? Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length < 3)
+            {
+                return null;
+            }
+
+            var trueValue  = values[0];
+            var falseValue = values[1];
+            var condition  = values[2];
+            if (condition is bool boolValue)
+            {
+                return boolValue ? trueValue : falseValue;
+            }
+
+            return null;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
