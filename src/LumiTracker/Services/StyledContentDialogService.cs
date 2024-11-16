@@ -266,7 +266,7 @@ namespace LumiTracker.Services
 
         private async Task _ShowStartupDialogIfNeededAsync()
         {
-            string guid = Configuration.GetOrCreateClientId(out bool guidNewlyCreated);
+            Guid guid = Configuration.GetOrCreateGuid(out bool guidNewlyCreated);
             bool just_updated = Configuration.Get<bool>("just_updated");
 
             if (!guidNewlyCreated && just_updated)

@@ -86,6 +86,11 @@ namespace LumiTracker.Config
             "db.json"
         );
 
+        public static readonly string GuidFilePath = Path.Combine(
+            DocumentsDir, 
+            "GUID.txt"
+        );
+
         // File paths that can be customized
         public static string DefaultConfigPath = Path.Combine(
             AssetsDir,
@@ -421,21 +426,38 @@ namespace LumiTracker.Config
             }
         }
 
-        public static string GetOrCreateClientId(out bool isNewlyCreated)
+        private static Guid _guid = Guid.Empty;
+        public static Guid GetOrCreateGuid(out bool isNewlyCreated)
         {
-            string clientIdFilePath = Path.Combine(DocumentsDir, "GUID.txt");
-            if (File.Exists(clientIdFilePath))
+            isNewlyCreated = false;
+            if (_guid == Guid.Empty)
             {
-                isNewlyCreated = false;
-                return File.ReadAllText(clientIdFilePath);
+                try
+                {
+                    if (File.Exists(GuidFilePath))
+                    {
+                        string guidStr = File.ReadAllText(GuidFilePath);
+                        if (!Guid.TryParse(guidStr, out _guid))
+                        {
+                            Logger.LogError("[GetOrCreateGuid] Failed to parse guid.");
+                        }
+                    }
+                }
+                catch (Exception ex) 
+                {
+                    Logger.LogError($"[GetOrCreateGuid] Unexpected Exception: {ex.Message}");
+                }
+
+                // Create a new guid if failed to load
+                if (_guid == Guid.Empty)
+                {
+                    isNewlyCreated = true;
+                    _guid = Guid.NewGuid();
+                    File.WriteAllText(GuidFilePath, _guid.ToString());
+                }
             }
-            else
-            {
-                isNewlyCreated = true;
-                string newClientId = Guid.NewGuid().ToString();
-                File.WriteAllText(clientIdFilePath, newClientId);
-                return newClientId;
-            }
+
+            return _guid;
         }
     }
 

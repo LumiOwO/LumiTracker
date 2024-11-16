@@ -135,6 +135,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Build Version.
+        /// </summary>
+        public static string BuildVersion {
+            get {
+                return ResourceManager.GetString("BuildVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {
@@ -315,6 +324,24 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cards.
+        /// </summary>
+        public static string DeckTab_Cards {
+            get {
+                return ResourceManager.GetString("DeckTab_Cards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Games.
+        /// </summary>
+        public static string DeckTab_Games {
+            get {
+                return ResourceManager.GetString("DeckTab_Games", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Deck Window.
         /// </summary>
         public static string DeckWindowTitle {
@@ -329,6 +356,15 @@ namespace LumiTracker.Config {
         public static string DefaultDeckName {
             get {
                 return ResourceManager.GetString("DefaultDeckName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Defeat.
+        /// </summary>
+        public static string Defeat {
+            get {
+                return ResourceManager.GetString("Defeat", resourceCulture);
             }
         }
         
@@ -464,6 +500,15 @@ namespace LumiTracker.Config {
         public static string FreeDeclaration {
             get {
                 return ResourceManager.GetString("FreeDeclaration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Friend Link.
+        /// </summary>
+        public static string FriendLink {
+            get {
+                return ResourceManager.GetString("FriendLink", resourceCulture);
             }
         }
         
@@ -1017,11 +1062,83 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Duration.
+        /// </summary>
+        public static string Stats_AvgDuration {
+            get {
+                return ResourceManager.GetString("Stats_AvgDuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rounds.
+        /// </summary>
+        public static string Stats_AvgRounds {
+            get {
+                return ResourceManager.GetString("Stats_AvgRounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show Current Build Only.
+        /// </summary>
+        public static string Stats_CurrentVersionOnly {
+            get {
+                return ResourceManager.GetString("Stats_CurrentVersionOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Games.
+        /// </summary>
+        public static string Stats_Games {
+            get {
+                return ResourceManager.GetString("Stats_Games", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide Records Before Imported.
+        /// </summary>
+        public static string Stats_HideExpired {
+            get {
+                return ResourceManager.GetString("Stats_HideExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to min.
+        /// </summary>
+        public static string Stats_Minute {
+            get {
+                return ResourceManager.GetString("Stats_Minute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Win Rate.
+        /// </summary>
+        public static string Stats_WinRate {
+            get {
+                return ResourceManager.GetString("Stats_WinRate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Join Preview Release Channel.
         /// </summary>
         public static string SubscribeToBetaUpdates {
             get {
                 return ResourceManager.GetString("SubscribeToBetaUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://www.summoners.top/en.
+        /// </summary>
+        public static string SummonersTop_URL {
+            get {
+                return ResourceManager.GetString("SummonersTop_URL", resourceCulture);
             }
         }
         
@@ -1250,6 +1367,15 @@ namespace LumiTracker.Config {
         public static string UpdatePrompt_UpdateNow {
             get {
                 return ResourceManager.GetString("UpdatePrompt_UpdateNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Victory.
+        /// </summary>
+        public static string Victory {
+            get {
+                return ResourceManager.GetString("Victory", resourceCulture);
             }
         }
         

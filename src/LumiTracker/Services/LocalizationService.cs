@@ -18,15 +18,26 @@ namespace LumiTracker.Services
 
     public class LocalizationExtension : Binding
     {
-        public LocalizationExtension(string name) : base("[" + name + "]")
+        public string Key
+        {
+            get => Path.Path.TrimStart('[').TrimEnd(']');
+            set => Path = new PropertyPath($"[{value}]");
+        }
+
+        public LocalizationExtension(string key) : base("[" + key + "]")
         {
             Mode   = BindingMode.OneWay;
             Source = LocalizationSource.Instance;
         }
 
-        public static LocalizationExtension Create(string name = "None")
+        public LocalizationExtension() : this("None")
         {
-            return new LocalizationExtension(name);
+
+        }
+
+        public static LocalizationExtension Create(string key = "None")
+        {
+            return new LocalizationExtension(key);
         }
 
         public static LocalizationExtension Create<T>(T value) where T : Enum

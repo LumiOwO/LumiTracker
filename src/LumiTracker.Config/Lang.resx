@@ -440,6 +440,48 @@
   <data name="Welcome_Title" xml:space="preserve">
     <value>Welcome to LumiTracker !</value>
   </data>
+  <data name="BuildVersion" xml:space="preserve">
+    <value>Build Version</value>
+  </data>
+  <data name="FriendLink" xml:space="preserve">
+    <value>Friend Link</value>
+  </data>
+  <data name="DeckTab_Cards" xml:space="preserve">
+    <value>Cards</value>
+  </data>
+  <data name="DeckTab_Games" xml:space="preserve">
+    <value>Games</value>
+  </data>
+  <data name="Victory" xml:space="preserve">
+    <value>Victory</value>
+  </data>
+  <data name="Defeat" xml:space="preserve">
+    <value>Defeat</value>
+  </data>
+  <data name="Stats_Minute" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="Stats_WinRate" xml:space="preserve">
+    <value>Win Rate</value>
+  </data>
+  <data name="Stats_Games" xml:space="preserve">
+    <value>Games</value>
+  </data>
+  <data name="Stats_AvgRounds" xml:space="preserve">
+    <value>Rounds</value>
+  </data>
+  <data name="Stats_AvgDuration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="Stats_CurrentVersionOnly" xml:space="preserve">
+    <value>Show Current Build Only</value>
+  </data>
+  <data name="Stats_HideExpired" xml:space="preserve">
+    <value>Hide Records Before Imported</value>
+  </data>
+  <data name="SummonersTop_URL" xml:space="preserve">
+    <value>https://www.summoners.top/en</value>
+  </data>
   <data name="OB_SettingsText" xml:space="preserve">
     <value>Spectate</value>
   </data>

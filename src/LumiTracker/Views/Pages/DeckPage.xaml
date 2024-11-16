@@ -24,7 +24,6 @@
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
         <helpers:NullableBooleanConverter x:Key="NullableBooleanConverter" />
         <helpers:NullableIndexConverter x:Key="NullableIndexConverter" />
-        <helpers:RangeConverter x:Key="RangeConverter" />
 
         <SolidColorBrush x:Key="MainContentBackground" Color="#ff282c34" />
         <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
@@ -313,7 +312,7 @@
                 VerticalAlignment="Top">
 
                 <TextBlock 
-                    Text="构筑版本" 
+                    Text="{svs:Localization BuildVersion}" 
                     FontSize="{Binding ActualHeight,
                         ElementName=ControlButtonsView,
                         Converter={StaticResource SizeWithRatioConverter}, 
@@ -326,7 +325,11 @@
                 <ComboBox
                     Margin="0,8,0,0"
                     HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
                     VerticalAlignment="Stretch"
+                    VerticalContentAlignment="Center"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    MaxDropDownHeight="200"
                     Height="{Binding ActualHeight,
                         ElementName=ControlButtonsView,
                         Converter={StaticResource SizeWithRatioConverter}, 
@@ -337,25 +340,28 @@
                         Mode=TwoWay, 
                         Converter={StaticResource NullableIndexConverter}
                         }"
-                    ItemsSource="{Binding ViewModel.DeckItems.Count, 
-                        Mode=OneWay,
-                        Converter={StaticResource RangeConverter},
-                        ConverterParameter=1
-                        }"
+                    ItemsSource="{Binding ViewModel.SelectedDeckItem.Stats.AllBuildStats, Mode=OneWay}"
                     >
-                    <!--<ComboBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type svs:LocalizationTextItem}">
-                            <ContentPresenter
-                                Content="{Binding Text}"/>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type models:BuildStats}">
+                            <TextBlock 
+                                Text="{Binding CreatedAt, StringFormat={}{0:MM/dd HH:mm}}"
+                                Margin="3,0,0,0"
+                                FontSize="{Binding ActualHeight,
+                                    RelativeSource={RelativeSource AncestorType={x:Type ComboBox}},
+                                    Converter={StaticResource SizeWithRatioConverter}, 
+                                    ConverterParameter=0.4
+                                    }"
+                                />
                         </DataTemplate>
-                    </ComboBox.ItemTemplate>-->
-                    <!--<b:Interaction.Triggers>
+                    </ComboBox.ItemTemplate>
+                    <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction 
-                                Command="{Binding ViewModel.SelectedClientChangedCommand}"
+                            <b:InvokeCommandAction
+                                Command="{Binding ViewModel.SelectedDeckItem.Stats.CurrentVersionIndexChangedCommand}"
                                 />
                         </b:EventTrigger>
-                    </b:Interaction.Triggers>-->
+                    </b:Interaction.Triggers>
                 </ComboBox>
             </StackPanel>
             
@@ -363,6 +369,7 @@
             <ItemsControl
                 Grid.Column="1"
                 Grid.Row="0"
+                Panel.ZIndex="-999"
                 x:Name="ControlButtonsView"
                 Margin="0, 0, 0, 3"
                 ScrollViewer.VerticalScrollBarVisibility="Hidden"
@@ -394,7 +401,7 @@
                 Margin="0,1,0,0"
                 >
                 <TextBlock 
-                    Text="友情链接："
+                    Text="{svs:Localization FriendLink, StringFormat={}{0}：}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     FontSize="{Binding ActualHeight,
@@ -407,8 +414,8 @@
                     Margin="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    NavigateUri="https://www.summoners.top/"
-                    ToolTip="https://www.summoners.top/">
+                    NavigateUri="{svs:Localization SummonersTop_URL}"
+                    ToolTip="{svs:Localization SummonersTop_URL}">
                     <TextBlock 
                         FontSize="{Binding ActualHeight,
                             Converter={StaticResource SizeWithRatioConverter}, 
@@ -452,7 +459,7 @@
                         Icon="PlayingCards20"
                         IconMargin="5,0,8,0"
                         TextMargin="0,0,0,1"
-                        Text="牌组详情"
+                        Text="{svs:Localization DeckTab_Cards}"
                         FontSize="{Binding ActualWidth, 
                             RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
                             Converter={StaticResource SizeWithRatioConverter}, 
@@ -502,7 +509,7 @@
                         Icon="History24"
                         IconMargin="5,0,8,0"
                         TextMargin="0,0,0,1"
-                        Text="对战历史"
+                        Text="{svs:Localization DeckTab_Games}"
                         FontSize="{Binding ActualWidth, 
                             RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
                             Converter={StaticResource SizeWithRatioConverter}, 

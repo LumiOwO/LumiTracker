@@ -252,7 +252,26 @@ namespace LumiTracker.Config
     {
         private readonly string _dateFormat;
 
-        public static readonly DateTime MinTime = new DateTime(2024, 10, 31, 0, 0, 0); // 2024/10/31 00:00:00
+        private static DateTime? _minTime = null;
+
+        public static DateTime MinTime 
+        { 
+            get 
+            {
+                if (_minTime == null)
+                {
+                    if (File.Exists(Configuration.GuidFilePath))
+                    {
+                        _minTime = File.GetCreationTime(Configuration.GuidFilePath);
+                    }
+                    else
+                    {
+                        _minTime = new DateTime(2024, 10, 31, 0, 0, 0); // 2024/10/31 00:00:00
+                    }
+                }
+                return (DateTime)_minTime;
+            }
+        }
 
         public CustomDateTimeConverter(string dateFormat)
         {

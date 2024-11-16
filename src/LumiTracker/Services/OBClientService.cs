@@ -27,7 +27,7 @@ namespace LumiTracker.OB.Services
             _host = host;
             _port = port;
             // Use a persistent GUID strategy to identify the client
-            _clientId = Configuration.GetOrCreateClientId(out bool isNewlyCreated);
+            _clientId = Configuration.GetOrCreateGuid(out bool isNewlyCreated).ToString();
         }
 
         // Connect to the server

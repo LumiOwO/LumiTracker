@@ -57,24 +57,39 @@ namespace LumiTracker.ViewModels.Pages
     }
 
     public partial class DeckStatistics : ObservableObject
-    {
-        private BuildStats Total { get; set; }
+    { 
+        [ObservableProperty]
+        private BuildStats _total;
 
-        private ObservableCollection<BuildStats> AllBuildStats { get; set; }
+        // This is ensured to have at least 1 BuildStats
+        [ObservableProperty]
+        private ObservableCollection<BuildStats> _allBuildStats; 
 
         /////////////////////////
         // UI
         [ObservableProperty]
         private BuildStats _current;
 
-        [ObservableProperty]
-        private bool _loaded = false;
-
         public DeckStatistics()
         {
+            // TODO: sync AllBuildStats with info.edits
             Total = new();
-            AllBuildStats = [new(), new(), new(), new()];
+            AllBuildStats = [new(), new(), new(), new(), new(), new(), new(), new()];
             Current = Total;
+        }
+
+        public void StartLoadTask(int? CurrentVersionIndex)
+        {
+            Task task = OnCurrentVersionIndexChanged(CurrentVersionIndex);
+
+        }
+
+        [RelayCommand]
+        public async Task OnCurrentVersionIndexChanged(int? CurrentVersionIndex)
+        {
+            CurrentVersionIndex = Math.Max(CurrentVersionIndex ?? 0, 0);
+            // TODO: Load at CurrentVersionIndex asyncly
+            await Task.Delay(100);
         }
     }
 
@@ -87,7 +102,7 @@ namespace LumiTracker.ViewModels.Pages
         private ObservableCollection<ActionCardView> _actionCards = [];
 
         [ObservableProperty]
-        private DeckStatistics? _stats = null;
+        private DeckStatistics _stats = new ();
 
         [ObservableProperty]
         private FontWeight _weightInNameList = FontWeights.Light;
@@ -105,9 +120,8 @@ namespace LumiTracker.ViewModels.Pages
             }
 
             // TODO: Init DeckStatistics
-            if (Stats == null)
             {
-                Stats = new ();
+                Stats.StartLoadTask(Info.CurrentVersionIndex);
             }
         }
 

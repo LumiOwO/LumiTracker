@@ -34,7 +34,7 @@
         <SolidColorBrush x:Key="PlainTextBrush" Color="#dfe4ea" />
         <SolidColorBrush x:Key="DateTimeBrush" Color="#a19f9d" />
         <SolidColorBrush x:Key="GoodWinRateBrush" Color="#4cd137" />
-        <SolidColorBrush x:Key="BadWinRateBrush" Color="Red" />
+        <SolidColorBrush x:Key="BadWinRateBrush" Color="#f5222d" />
         <SolidColorBrush x:Key="MainContentBackground" Color="#282c34" />
         <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
 
@@ -62,7 +62,7 @@
                 VerticalAlignment="Stretch"
                 >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.9*"/>
+                    <ColumnDefinition Width="1.8*"/>
                     <ColumnDefinition Width="1.0*"/>
                     <ColumnDefinition Width="1.0*"/>
                     <ColumnDefinition Width="1.9*"/>
@@ -110,7 +110,7 @@
                         ConverterParameter=0.025,
                         RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                         }"
-                    Text="{Binding AvgRounds}" />
+                    Text="{Binding AvgRounds, StringFormat={}{0:F1}}" />
                 <StackPanel 
                     Grid.Column="3"
                     VerticalAlignment="Center"
@@ -123,10 +123,25 @@
                         Foreground="{StaticResource PlainTextBrush}"
                         FontSize="{Binding Path=TabControlHeight, 
                             Converter={StaticResource SizeWithRatioConverter},
-                            ConverterParameter=0.023,
+                            ConverterParameter=0.025,
                             RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                             }"
-                        />
+                    >
+                        <ui:SymbolIcon.LayoutTransform>
+                            <ScaleTransform 
+                                ScaleX="{Binding TabControlHeight,
+                                    Converter={StaticResource SizeWithRatioConverter}, 
+                                    RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                    ConverterParameter=0.0012
+                                    }" 
+                                ScaleY="{Binding TabControlHeight,
+                                    Converter={StaticResource SizeWithRatioConverter}, 
+                                    RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                    ConverterParameter=0.0012
+                                    }" 
+                                />
+                        </ui:SymbolIcon.LayoutTransform>
+                    </ui:SymbolIcon>
                     <TextBlock
                         Foreground="{StaticResource PlainTextBrush}"
                         FontSize="{Binding Path=TabControlHeight, 
@@ -146,7 +161,7 @@
                     HorizontalAlignment="Right"
                     Text="VS"
                     Foreground="White"
-                    Margin="5,0,1,0"
+                    Margin="5,0,3,0"
                     FontWeight="Bold"
                     FontSize="{Binding Path=TabControlHeight, 
                         Converter={StaticResource SizeWithRatioConverter},
@@ -157,10 +172,10 @@
 
                 <ctrls:AvatarsView
                     Grid.Column="5"
-                    Margin="0,3,0,3"
+                    Margin="0,4,0,4"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Right"
-                    ImageOuterMargin="1"
+                    ImageOuterMargin="0"
                     ImageInnerMargin="2"
                     CharacterIds="{Binding OpCharacters}"
                     />
@@ -173,7 +188,7 @@
                 BorderThickness="0,0,0,0.1"
                 BorderBrush="White"
                 Margin="5,0,5,0"
-                Padding="8,0,5,8"
+                Padding="8,0,0,8"
                 >
             <Grid
                 IsHitTestVisible="True"
@@ -187,7 +202,7 @@
                 VerticalAlignment="Stretch"
                 >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2.3*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
@@ -225,8 +240,8 @@
                         </TextBlock.Foreground>
                         <TextBlock.Text>
                             <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
-                                <Binding Source="对局胜利" />
-                                <Binding Source="对局失败"  />
+                                <svs:Localization Key="Victory" />
+                                <svs:Localization Key="Defeat"  />
                                 <Binding Path="IsWin" />
                             </MultiBinding>
                         </TextBlock.Text>
@@ -244,10 +259,25 @@
                             Foreground="{StaticResource PlainTextBrush}"
                             FontSize="{Binding Path=TabControlHeight, 
                                 Converter={StaticResource SizeWithRatioConverter},
-                                ConverterParameter=0.024,
+                                ConverterParameter=0.026,
                                 RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                                 }"
-                                />
+                            >
+                            <ui:SymbolIcon.LayoutTransform>
+                                <ScaleTransform 
+                                    ScaleX="{Binding TabControlHeight,
+                                        Converter={StaticResource SizeWithRatioConverter}, 
+                                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                        ConverterParameter=0.0013
+                                        }" 
+                                    ScaleY="{Binding TabControlHeight,
+                                        Converter={StaticResource SizeWithRatioConverter}, 
+                                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                        ConverterParameter=0.0013
+                                        }" 
+                                    />
+                            </ui:SymbolIcon.LayoutTransform>
+                        </ui:SymbolIcon>
                         <TextBlock
                             Foreground="{StaticResource PlainTextBrush}"
                             FontWeight="Bold"
@@ -258,9 +288,9 @@
                                 }"
                             >
                             <Run Text="{Binding DurationInMinutes, StringFormat={}{0:F1}, Mode=OneWay}" />
-                            <Run Text="分钟" />
+                            <Run Text="{svs:Localization Stats_Minute}" />
                             <Run Text=","/>
-                            <Run Text="回合"/>
+                            <Run Text="{svs:Localization Round}"/>
                             <Run Text="{Binding Rounds}"/>
                         </TextBlock>
                     </StackPanel>
@@ -286,7 +316,7 @@
                     HorizontalAlignment="Center"
                     Text="VS"
                     Foreground="White"
-                    Margin="0,0,15,0"
+                    Margin="0,0,0,0"
                     FontWeight="Bold"
                     FontSize="{Binding Path=TabControlHeight, 
                         Converter={StaticResource SizeWithRatioConverter},
@@ -299,7 +329,7 @@
                 <ctrls:AvatarsView
                     Grid.Column="2"
                     Margin="0,5"
-                    ImageOuterMargin="3"
+                    ImageOuterMargin="2"
                     ImageInnerMargin="3"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Stretch"
@@ -351,7 +381,7 @@
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="0"
-                Text="胜率"
+                Text="{svs:Localization Stats_WinRate}"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
                 FontSize="{Binding Path=TabControlHeight, 
@@ -380,7 +410,7 @@
             <TextBlock
                 Grid.Row="1"
                 Grid.Column="0"
-                Text="场次"
+                Text="{svs:Localization Stats_Games}"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
                 FontSize="{Binding Path=TabControlHeight, 
@@ -402,7 +432,7 @@
             <TextBlock
                 Grid.Row="2"
                 Grid.Column="0"
-                Text="平均回合"
+                Text="{svs:Localization Stats_AvgRounds}"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
                 FontSize="{Binding Path=TabControlHeight, 
@@ -413,7 +443,7 @@
             <TextBlock
                 Grid.Row="2"
                 Grid.Column="1"
-                Text="{Binding Stats.Summary.AvgRounds}"
+                Text="{Binding Stats.Summary.AvgRounds, StringFormat={}{0:F1}}"
                 Foreground="{StaticResource PlainTextBrush}"
                 HorizontalAlignment="Center"
                 FontSize="{Binding Path=TabControlHeight, 
@@ -424,7 +454,7 @@
             <TextBlock
                 Grid.Row="3"
                 Grid.Column="0"
-                Text="平均时长"
+                Text="{svs:Localization Stats_AvgDuration}"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
                 FontSize="{Binding Path=TabControlHeight, 
@@ -445,7 +475,7 @@
                     Foreground="{StaticResource PlainTextBrush}"
                     FontSize="{Binding Path=TabControlHeight, 
                         Converter={StaticResource SizeWithRatioConverter},
-                        ConverterParameter=0.025
+                        ConverterParameter=0.024
                         }"
                     />
                 <TextBlock
@@ -463,7 +493,8 @@
             <Grid
                 Grid.Row="4"
                 Grid.Column="0"
-                HorizontalAlignment="Center"
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Margin="0,0,0,0"
                 >
@@ -525,7 +556,7 @@
                                     ConverterParameter=0.028
                                     }"
                                 Margin="0,0,0,1"
-                                Text="只看当前构筑"/>
+                                Text="{svs:Localization Stats_CurrentVersionOnly}"/>
                         </CheckBox>
                         <CheckBox
                             HorizontalAlignment="Left"
@@ -539,7 +570,7 @@
                                     ConverterParameter=0.028
                                     }"
                                 Margin="0,0,0,1"
-                                Text="隐藏导入前的对局"/>
+                                Text="{svs:Localization Stats_HideExpired}"/>
                         </CheckBox>
                     </StackPanel>
                 </ui:Flyout>
