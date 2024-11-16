@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         xmlns:pages="clr-namespace:LumiTracker.ViewModels.Pages"
         xmlns:svs="clr-namespace:LumiTracker.Services"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:helpers="clr-namespace:LumiTracker.Helpers"
         xmlns:models="clr-namespace:LumiTracker.Models"
@@ -24,7 +25,8 @@
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
         <helpers:NullableBooleanConverter x:Key="NullableBooleanConverter" />
         <helpers:NullableIndexConverter x:Key="NullableIndexConverter" />
-
+        <helpers:MultiParametersConverter x:Key="MultiParametersConverter" />
+        
         <SolidColorBrush x:Key="MainContentBackground" Color="#ff282c34" />
         <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
         <SolidColorBrush x:Key="DeckNameBrush" Color="White" />
@@ -324,6 +326,7 @@
 
                 <ComboBox
                     Margin="0,8,0,0"
+                    x:Name="BuildVersionSelectionComboBox"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
                     VerticalAlignment="Stretch"
@@ -336,11 +339,11 @@
                         ConverterParameter=0.1
                         }"
                     SelectedIndex="{Binding
-                        Path=ViewModel.SelectedDeckItem.Info.CurrentVersionIndex,
-                        Mode=TwoWay, 
-                        Converter={StaticResource NullableIndexConverter}
+                        Path=ViewModel.SelectedBuildVersionIndex,
+                        Mode=OneWay
                         }"
                     ItemsSource="{Binding ViewModel.SelectedDeckItem.Stats.AllBuildStats, Mode=OneWay}"
+                    IsSynchronizedWithCurrentItem="True"
                     >
                     <ComboBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:BuildStats}">
@@ -358,8 +361,15 @@
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">
                             <b:InvokeCommandAction
-                                Command="{Binding ViewModel.SelectedDeckItem.Stats.CurrentVersionIndexChangedCommand}"
-                                />
+                                Command="{Binding ViewModel.CurrentVersionIndexChangedCommand}"
+                            >
+                                <b:InvokeCommandAction.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource MultiParametersConverter}">
+                                        <Binding Path="ViewModel.SelectedIndex"/>
+                                        <Binding Path="SelectedIndex" ElementName="BuildVersionSelectionComboBox"/>
+                                    </MultiBinding>
+                                </b:InvokeCommandAction.CommandParameter>
+                            </b:InvokeCommandAction>
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
                 </ComboBox>
@@ -531,8 +541,8 @@
                         RelativeSource={RelativeSource AncestorType={x:Type TabControl}}
                         }"
                     Stats="{Binding ViewModel.SelectedDeckItem.Stats.Current}"
-                    ShowCurrentVersionOnly="{Binding
-                        Path=ViewModel.SelectedDeckItem.Info.ShowCurrentVersionOnly, 
+                    IncludeAllBuildVersions="{Binding
+                        Path=ViewModel.SelectedDeckItem.Info.IncludeAllBuildVersions, 
                         Mode=TwoWay, 
                         Converter={StaticResource NullableBooleanConverter}
                         }"

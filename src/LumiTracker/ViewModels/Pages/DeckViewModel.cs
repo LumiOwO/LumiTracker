@@ -57,39 +57,37 @@ namespace LumiTracker.ViewModels.Pages
     }
 
     public partial class DeckStatistics : ObservableObject
-    { 
+    {
         [ObservableProperty]
         private BuildStats _total;
 
         // This is ensured to have at least 1 BuildStats
         [ObservableProperty]
-        private ObservableCollection<BuildStats> _allBuildStats; 
+        private ObservableCollection<BuildStats> _allBuildStats;
 
         /////////////////////////
         // UI
         [ObservableProperty]
         private BuildStats _current;
 
+        // TODO: remove this
+        static private int _count = 0;
         public DeckStatistics()
         {
             // TODO: sync AllBuildStats with info.edits
             Total = new();
-            AllBuildStats = [new(), new(), new(), new(), new(), new(), new(), new()];
+            AllBuildStats = [
+                new() { CreatedAt = new DateTime(2024, 10, 31, 0, _count, 0)}, 
+                new() { CreatedAt = new DateTime(2024, 10, 31, 1, _count, 0)}, 
+                new() { CreatedAt = new DateTime(2024, 10, 31, 2, _count, 0)},
+                new() { CreatedAt = new DateTime(2024, 10, 31, 3, _count, 0)},  
+                new() { CreatedAt = new DateTime(2024, 10, 31, 4, _count, 0)},  
+                new() { CreatedAt = new DateTime(2024, 10, 31, 5, _count, 0)},  
+                new() { CreatedAt = new DateTime(2024, 10, 31, 6, _count, 0)},  
+                new() { CreatedAt = new DateTime(2024, 10, 31, 7, _count, 0)},  
+                ];
+            _count++;
             Current = Total;
-        }
-
-        public void StartLoadTask(int? CurrentVersionIndex)
-        {
-            Task task = OnCurrentVersionIndexChanged(CurrentVersionIndex);
-
-        }
-
-        [RelayCommand]
-        public async Task OnCurrentVersionIndexChanged(int? CurrentVersionIndex)
-        {
-            CurrentVersionIndex = Math.Max(CurrentVersionIndex ?? 0, 0);
-            // TODO: Load at CurrentVersionIndex asyncly
-            await Task.Delay(100);
         }
     }
 
@@ -121,7 +119,7 @@ namespace LumiTracker.ViewModels.Pages
 
             // TODO: Init DeckStatistics
             {
-                Stats.StartLoadTask(Info.CurrentVersionIndex);
+                Task task = LoadStatsAsync(Info.CurrentVersionIndex);
             }
         }
 
@@ -159,6 +157,12 @@ namespace LumiTracker.ViewModels.Pages
             ActionCards = new ObservableCollection<ActionCardView>(views);
             return true;
         }
+
+        public async Task LoadStatsAsync(int? index)
+        {
+            // TODO: Load at CurrentVersionIndex asyncly
+            await Task.Delay(100);
+        }
     }
 
     public partial class DeckViewModel : ObservableObject, INavigationAware
@@ -172,10 +176,11 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private int _activeDeckIndex = -1;
 
-        /////////////////////////
-        // UI
         [ObservableProperty]
         private DeckItem? _selectedDeckItem = null;
+
+        [ObservableProperty]
+        private int _selectedBuildVersionIndex = -1;
 
         [ObservableProperty]
         private ControlButton[] _buttons = new ControlButton[(int)EControlButtonType.NumControlButtons];
@@ -272,14 +277,41 @@ namespace LumiTracker.ViewModels.Pages
             if (valid)
             {
                 Configuration.Logger.LogDebug($"Select deck[{index}], {DeckItems.Count} decks in total");
-                DeckItems[index].OnSelected();
                 SelectedDeckItem = DeckItems[index];
+                SelectedDeckItem.OnSelected();
+                SelectedBuildVersionIndex = Math.Max(SelectedDeckItem.Info.CurrentVersionIndex ?? 0, 0);
             }
             else
             {
                 SelectedDeckItem = null;
+                SelectedBuildVersionIndex = -1;
             }
         }
+
+        [RelayCommand]
+        public void OnCurrentVersionIndexChanged(object[] parameters)
+        {
+            // Note 1: Changing ItemSource will also trigger this...
+            // we only want to call this function when user changed the build version from ComboBox,
+            // and not trigger when the deck item is changed.
+            //
+            // Note 2: This is a RelayCommand, means that it will not be called immediately when SelectIndex changed.
+            // So SelectedDeckItem will always have been updated here when trigger by ItemSource change.
+            int SelectedDeckIndexWhenTriggered = (int)parameters[0];
+            if (SelectedDeckItem == null || SelectedDeckIndexWhenTriggered != SelectedIndex) return;
+
+            int buildIndex = (int)parameters[1];
+            int CurrentVersionIndex = Math.Max(buildIndex, 0);
+            SelectedDeckItem.Info.CurrentVersionIndex = CurrentVersionIndex;
+
+            if (!SelectedDeckItem.Info.IncludeAllBuildVersions ?? true)
+            {
+                SelectedDeckItem.Stats.Current = SelectedDeckItem.Stats.AllBuildStats[CurrentVersionIndex];
+            }
+
+            Task task = SelectedDeckItem.LoadStatsAsync(CurrentVersionIndex);
+        }
+
         public void LoadDeckInformations()
         {
             string UserDecksDescPath = Path.Combine(Configuration.ConfigDir, "decks.json");

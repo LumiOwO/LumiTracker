@@ -473,8 +473,8 @@
   <data name="Stats_AvgDuration" xml:space="preserve">
     <value>Duration</value>
   </data>
-  <data name="Stats_CurrentVersionOnly" xml:space="preserve">
-    <value>Show Current Build Only</value>
+  <data name="Stats_IncludeAllBuildVersions" xml:space="preserve">
+    <value>Include All Build Versions</value>
   </data>
   <data name="Stats_HideExpired" xml:space="preserve">
     <value>Hide Records Before Imported</value>

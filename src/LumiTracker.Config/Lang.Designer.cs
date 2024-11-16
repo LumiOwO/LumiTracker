@@ -1080,15 +1080,6 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show Current Build Only.
-        /// </summary>
-        public static string Stats_CurrentVersionOnly {
-            get {
-                return ResourceManager.GetString("Stats_CurrentVersionOnly", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Games.
         /// </summary>
         public static string Stats_Games {
@@ -1103,6 +1094,15 @@ namespace LumiTracker.Config {
         public static string Stats_HideExpired {
             get {
                 return ResourceManager.GetString("Stats_HideExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Include All Build Versions.
+        /// </summary>
+        public static string Stats_IncludeAllBuildVersions {
+            get {
+                return ResourceManager.GetString("Stats_IncludeAllBuildVersions", resourceCulture);
             }
         }
         

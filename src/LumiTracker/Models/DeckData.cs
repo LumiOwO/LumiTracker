@@ -49,10 +49,10 @@ namespace LumiTracker.Models
         [property: JsonIgnore]
         private int? _currentVersionIndex = null;
 
-        [JsonProperty("current_version_only")]
+        [JsonProperty("all_versions")]
         [ObservableProperty]
         [property: JsonIgnore]
-        private bool? _showCurrentVersionOnly = null;
+        private bool? _includeAllBuildVersions = null;
 
         [JsonProperty("hide_expired")]
         [ObservableProperty]
@@ -72,9 +72,6 @@ namespace LumiTracker.Models
         private double _avgDuration = 0; // seconds
         [ObservableProperty]
         private List<int> _opCharacters = [-1, -1, -1];
-
-        [ObservableProperty]
-        private SolidColorBrush _WinRateColor = new SolidColorBrush(Color.FromArgb(0xff, 0x4c, 0xd1, 0x37));
 
         public double AvgDurationInMinutes => AvgDuration / 60.0; // Minutes
 
@@ -145,9 +142,12 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private ObservableCollection<DuelRecord> _duelRecords;
 
+        // TODO: remove this
+        static private int _count = 0;
+
         public BuildStats()
         {
-            Summary = new() { Totals = 3, Wins = 2, AvgRounds = 6.0, AvgDuration = 500 };
+            Summary = new() { Totals = 3 + (_count++), Wins = 2, AvgRounds = 6.0, AvgDuration = 500 };
             AllMatchupStats = [
                 new(){ Totals = 2, Wins = 1, AvgRounds = 6.5, AvgDuration = 600, OpCharacters = [98, 81, 93] },
                 new(){ Totals = 1, Wins = 0, AvgRounds = 5, AvgDuration = 300, OpCharacters = [27, 73, 88]}];

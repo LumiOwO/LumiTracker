@@ -441,13 +441,13 @@
     <value>LumiTrackerへようこそ！</value>
   </data>
   <data name="BuildVersion" xml:space="preserve">
-    <value>ビルドバージョン</value>
+    <value>構築バージョン</value>
   </data>
   <data name="FriendLink" xml:space="preserve">
     <value>友達リンク</value>
   </data>
   <data name="DeckTab_Cards" xml:space="preserve">
-    <value>ビルド詳細</value>
+    <value>構築詳細</value>
   </data>
   <data name="DeckTab_Games" xml:space="preserve">
     <value>対戦記録</value>
@@ -473,8 +473,8 @@
   <data name="Stats_AvgDuration" xml:space="preserve">
     <value>時間</value>
   </data>
-  <data name="Stats_CurrentVersionOnly" xml:space="preserve">
-    <value>現在のビルドのみ表示</value>
+  <data name="Stats_IncludeAllBuildVersions" xml:space="preserve">
+    <value>すべての構築バージョンを集計</value>
   </data>
   <data name="Stats_HideExpired" xml:space="preserve">
     <value>インポート前の対局を隠す</value>

@@ -38,13 +38,13 @@ namespace LumiTracker.Controls
             set { SetValue(TabControlWidthProperty, value); }
         }
 
-        public static readonly DependencyProperty ShowCurrentVersionOnlyProperty = DependencyProperty.Register(
-            "ShowCurrentVersionOnly", typeof(bool), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(false));
+        public static readonly DependencyProperty IncludeAllBuildVersionsProperty = DependencyProperty.Register(
+            "IncludeAllBuildVersions", typeof(bool), typeof(DeckPageDuelHistoryTab), new PropertyMetadata(false));
 
-        public bool ShowCurrentVersionOnly
+        public bool IncludeAllBuildVersions
         {
-            get { return (bool)GetValue(ShowCurrentVersionOnlyProperty); }
-            set { SetValue(ShowCurrentVersionOnlyProperty, value); }
+            get { return (bool)GetValue(IncludeAllBuildVersionsProperty); }
+            set { SetValue(IncludeAllBuildVersionsProperty, value); }
         }
 
         public static readonly DependencyProperty HideRecordsBeforeImportProperty = DependencyProperty.Register(

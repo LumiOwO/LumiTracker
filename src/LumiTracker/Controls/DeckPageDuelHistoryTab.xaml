@@ -547,7 +547,7 @@
                         <CheckBox
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            IsChecked="{Binding ShowCurrentVersionOnly, Mode=TwoWay}"
+                            IsChecked="{Binding IncludeAllBuildVersions, Mode=TwoWay}"
                             Margin="0,5,0,0"
                             >
                             <TextBlock 
@@ -556,7 +556,7 @@
                                     ConverterParameter=0.028
                                     }"
                                 Margin="0,0,0,1"
-                                Text="{svs:Localization Stats_CurrentVersionOnly}"/>
+                                Text="{svs:Localization Stats_IncludeAllBuildVersions}"/>
                         </CheckBox>
                         <CheckBox
                             HorizontalAlignment="Left"
