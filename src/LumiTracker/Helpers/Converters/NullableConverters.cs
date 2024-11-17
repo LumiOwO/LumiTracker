@@ -23,29 +23,4 @@ namespace LumiTracker.Helpers
             return false;
         }
     }
-
-    public class NullableIndexConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            int index = 0;
-            if (value is int)
-            {
-                index = (int)value;
-            }
-
-            return Math.Max(index, 0);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            int index = 0;
-            if (value is int)
-            {
-                index = (int)value;
-            }
-
-            return Math.Max(index, 0);
-        }
-    }
 }

@@ -24,7 +24,6 @@
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
         <helpers:NullableBooleanConverter x:Key="NullableBooleanConverter" />
-        <helpers:NullableIndexConverter x:Key="NullableIndexConverter" />
         <helpers:MultiParametersConverter x:Key="MultiParametersConverter" />
         
         <SolidColorBrush x:Key="MainContentBackground" Color="#ff282c34" />
@@ -338,12 +337,9 @@
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.1
                         }"
-                    SelectedIndex="{Binding
-                        Path=ViewModel.SelectedBuildVersionIndex,
-                        Mode=OneWay
-                        }"
                     ItemsSource="{Binding ViewModel.SelectedDeckItem.Stats.AllBuildStats, Mode=OneWay}"
                     IsSynchronizedWithCurrentItem="True"
+                    SelectionChanged="OnCurrentVersionIndexChanged"
                     >
                     <ComboBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:BuildStats}">
@@ -358,20 +354,6 @@
                                 />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
-                    <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="SelectionChanged">
-                            <b:InvokeCommandAction
-                                Command="{Binding ViewModel.CurrentVersionIndexChangedCommand}"
-                            >
-                                <b:InvokeCommandAction.CommandParameter>
-                                    <MultiBinding Converter="{StaticResource MultiParametersConverter}">
-                                        <Binding Path="ViewModel.SelectedIndex"/>
-                                        <Binding Path="SelectedIndex" ElementName="BuildVersionSelectionComboBox"/>
-                                    </MultiBinding>
-                                </b:InvokeCommandAction.CommandParameter>
-                            </b:InvokeCommandAction>
-                        </b:EventTrigger>
-                    </b:Interaction.Triggers>
                 </ComboBox>
             </StackPanel>
             

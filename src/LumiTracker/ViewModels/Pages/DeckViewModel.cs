@@ -165,6 +165,8 @@ namespace LumiTracker.ViewModels.Pages
         }
     }
 
+    public delegate void OnSelectedDeckItemChangedCallback(DeckItem? SelectedDeckItem);
+
     public partial class DeckViewModel : ObservableObject, INavigationAware
     {
         [ObservableProperty]
@@ -179,8 +181,8 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private DeckItem? _selectedDeckItem = null;
 
-        [ObservableProperty]
-        private int _selectedBuildVersionIndex = -1;
+        public event OnSelectedDeckItemChangedCallback? SelectedDeckItemChanged;
+        public bool IsChangingDeckItem { get; private set; } = false;
 
         [ObservableProperty]
         private ControlButton[] _buttons = new ControlButton[(int)EControlButtonType.NumControlButtons];
@@ -274,34 +276,24 @@ namespace LumiTracker.ViewModels.Pages
                 Buttons[(int)i].IsEnabled = valid;
             }
 
+            IsChangingDeckItem = true;
             if (valid)
             {
                 Configuration.Logger.LogDebug($"Select deck[{index}], {DeckItems.Count} decks in total");
                 SelectedDeckItem = DeckItems[index];
                 SelectedDeckItem.OnSelected();
-                SelectedBuildVersionIndex = Math.Max(SelectedDeckItem.Info.CurrentVersionIndex ?? 0, 0);
             }
             else
             {
                 SelectedDeckItem = null;
-                SelectedBuildVersionIndex = -1;
             }
+            IsChangingDeckItem = false;
+            SelectedDeckItemChanged?.Invoke(SelectedDeckItem);
         }
 
-        [RelayCommand]
-        public void OnCurrentVersionIndexChanged(object[] parameters)
+        public void OnCurrentVersionIndexChanged(int CurrentVersionIndex)
         {
-            // Note 1: Changing ItemSource will also trigger this...
-            // we only want to call this function when user changed the build version from ComboBox,
-            // and not trigger when the deck item is changed.
-            //
-            // Note 2: This is a RelayCommand, means that it will not be called immediately when SelectIndex changed.
-            // So SelectedDeckItem will always have been updated here when trigger by ItemSource change.
-            int SelectedDeckIndexWhenTriggered = (int)parameters[0];
-            if (SelectedDeckItem == null || SelectedDeckIndexWhenTriggered != SelectedIndex) return;
-
-            int buildIndex = (int)parameters[1];
-            int CurrentVersionIndex = Math.Max(buildIndex, 0);
+            if (SelectedDeckItem == null) return;
             SelectedDeckItem.Info.CurrentVersionIndex = CurrentVersionIndex;
 
             if (!SelectedDeckItem.Info.IncludeAllBuildVersions ?? true)
