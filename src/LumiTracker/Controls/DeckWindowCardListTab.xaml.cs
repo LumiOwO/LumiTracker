@@ -60,12 +60,11 @@ namespace LumiTracker.Controls
             InitializeComponent();
         }
 
-        private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void DisableListViewSelection(object sender, SelectionChangedEventArgs e)
         {
-            DependencyObject? source = e.OriginalSource as DependencyObject;
-            if (source is FrameworkElement element && element.DataContext is ActionCardViewListItem)
+            if (sender is ListView listView)
             {
-                e.Handled = true;
+                listView.SelectedIndex = -1;
             }
         }
 

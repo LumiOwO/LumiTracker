@@ -31,9 +31,12 @@ namespace LumiTracker.Views.Pages
             Inited = true;
         }
 
-        private void OnCardsListClicked(object sender, MouseButtonEventArgs e)
+        private void DisableListViewSelection(object sender, SelectionChangedEventArgs e)
         {
-            e.Handled = true;
+            if (sender is System.Windows.Controls.ListView listView)
+            {
+                listView.SelectedIndex = -1;
+            }
         }
 
         private void OnSelectedDeckItemChanged(DeckItem? SelectedDeckItem)

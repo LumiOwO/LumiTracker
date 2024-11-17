@@ -1,8 +1,5 @@
 ﻿using LumiTracker.Models;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Shapes;
 
 namespace LumiTracker.Controls
 {
@@ -78,38 +75,11 @@ namespace LumiTracker.Controls
                 SettingsPanelOpen = true;
             }
         }
-
-        private void OnMatchupStatsPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void DisableListViewSelection(object sender, SelectionChangedEventArgs e)
         {
-            DependencyObject? source = e.OriginalSource as DependencyObject;
-            if (source is Image || source is Ellipse || source is Run)
+            if (sender is ListView listView)
             {
-                e.Handled = true;
-            }
-            else if (source is FrameworkElement element && element.DataContext is MatchupStats)
-            {
-                e.Handled = true;
-            }
-            else
-            {
-                e.Handled = false;
-            }
-        }
-
-        private void OnDuelRecordPreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            DependencyObject? source = e.OriginalSource as DependencyObject;
-            if (source is Image || source is Ellipse || source is Run)
-            {
-                e.Handled = true;
-            }
-            else if (source is FrameworkElement element && element.DataContext is DuelRecord)
-            {
-                e.Handled = true;
-            }
-            else
-            {
-                e.Handled = false;
+                listView.SelectedIndex = -1;
             }
         }
     }

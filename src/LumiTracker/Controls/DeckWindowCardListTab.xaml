@@ -81,7 +81,7 @@
             MaxWidth="{Binding WindowWidth}"
             ItemsSource="{Binding CardList.Data.CollectionView}"
             ItemTemplate="{StaticResource ActionCardViewTemplate}"
-            PreviewMouseDown="OnPreviewMouseDown"
+            SelectionChanged="DisableListViewSelection"
             MouseEnter="OnMouseEnter"
             MouseLeave="OnMouseLeave"
         />

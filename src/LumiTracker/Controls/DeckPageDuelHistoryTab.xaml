@@ -197,7 +197,7 @@
                     ConverterParameter=0.16,
                     RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                     }"
-                Margin="0,0,0,0"
+                Margin="0,0,2,0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 >
@@ -597,7 +597,7 @@
                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                 ItemsSource="{Binding Stats.AllMatchupStats}"
                 ItemTemplate="{StaticResource MatchupStatsViewTemplate}"
-                PreviewMouseDown="OnMatchupStatsPreviewMouseDown"
+                SelectionChanged="DisableListViewSelection"
                 />
         </Border>
 
@@ -619,7 +619,7 @@
             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
             ItemsSource="{Binding Stats.DuelRecords}"
             ItemTemplate="{StaticResource DuelRecordViewTemplate}"
-            PreviewMouseDown="OnDuelRecordPreviewMouseDown"
+            SelectionChanged="DisableListViewSelection"
             />
     </Grid>
 </UserControl>

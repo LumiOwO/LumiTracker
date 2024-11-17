@@ -467,7 +467,7 @@
                     Margin="0,-1,0,0"
                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                    PreviewMouseDown="OnCardsListClicked"
+                    SelectionChanged="DisableListViewSelection"
                     ItemsSource="{Binding ViewModel.SelectedDeckItem.ActionCards}"
                     ItemTemplate="{StaticResource ActionCardViewTemplate}"
                     Background="{StaticResource MainContentBackground}"
