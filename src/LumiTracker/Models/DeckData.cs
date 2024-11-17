@@ -95,6 +95,11 @@ namespace LumiTracker.Models
             OnPropertyChanged(nameof(WinRate));
         }
 
+        partial void OnOpCharactersChanged(List<int>? oldValue, List<int> newValue)
+        {
+            OnPropertyChanged(nameof(Key));
+        }
+
         public void AddStats(MatchupStats other)
         {
             // For reference: Brute-force way
@@ -175,8 +180,17 @@ namespace LumiTracker.Models
     public partial class BuildStats : ObservableObject
     {
         public Guid Guid { get; set; } = Guid.Empty;
-        public ELoadState LoadState { get; set; } = ELoadState.NotLoaded;
         public SpinLock LoadStateLock { get; } = new SpinLock();
+
+        [ObservableProperty]
+        public ELoadState _loadState = ELoadState.NotLoaded;
+
+        public bool IsLoading => (LoadState == ELoadState.Loading);
+
+        partial void OnLoadStateChanged(ELoadState oldValue, ELoadState newValue)
+        {
+            OnPropertyChanged(nameof(IsLoading));
+        }
 
         [ObservableProperty]
         private DateTime _createdAt = new DateTime(2024, 11, 15, 19, 10, 0); // TODO: remove this
@@ -200,12 +214,20 @@ namespace LumiTracker.Models
         {
             // Notify MatchupStats ui update 
             AllMatchupStats = new ObservableCollection<MatchupStats>(
-                AllMatchupStatsData.Values.OrderByDescending(stats => stats.Totals)
+                AllMatchupStatsData.Values.OrderByDescending(stats => 
+                {
+                    if (stats.Key == DeckUtils.UnknownCharactersKey)
+                    {
+                        return int.MinValue;
+                    }
+                    return stats.Totals;
+                })
             );
         }
 
         public async Task LoadDataAsync()
         {
+            await Task.Delay(1000); /// TODO: remove this
             // TODO: use guid to load
             DuelRecord[] records = [
                 new(98, 81, 93){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), },
@@ -213,13 +235,9 @@ namespace LumiTracker.Models
                 new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
                 new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
                 new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-
+                new(31, -1, -1){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(-1, 21, -1){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(-1, 21, -1){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
                 ];
 
             foreach (var record in records)

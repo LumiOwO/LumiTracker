@@ -26,6 +26,7 @@
         <helpers:HidePositiveIntValueConverter x:Key="HidePositiveIntValueConverter" />
         <helpers:IsGoodWinRateConverter x:Key="IsGoodWinRateConverter" />
         <helpers:TrueFalseCondSwitchConverter x:Key="TrueFalseCondSwitchConverter" />
+        <helpers:KeyToVisibilityConverter x:Key="KeyToVisibilityConverter" />
         
         
         <SolidColorBrush x:Key="WinBrush" Color="#ffb900" />
@@ -178,6 +179,27 @@
                     ImageOuterMargin="1"
                     ImageInnerMargin="2"
                     CharacterIds="{Binding OpCharacters}"
+                    Visibility="{Binding Key, Mode=OneWay, 
+                        Converter={StaticResource KeyToVisibilityConverter},
+                        ConverterParameter=False
+                        }"
+                    />
+                <TextBlock
+                    Grid.Column="5"
+                    Margin="0,0,0,2"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Text="{svs:Localization Stats_OtherMatchups}"
+                    Visibility="{Binding Key, Mode=OneWay, 
+                        Converter={StaticResource KeyToVisibilityConverter},
+                        ConverterParameter=True
+                        }"
+                    Foreground="White"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.033,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
                     />
             </Grid>
             </Border>

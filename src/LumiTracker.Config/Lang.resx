@@ -482,6 +482,12 @@
   <data name="SummonersTop_URL" xml:space="preserve">
     <value>https://www.summoners.top/en</value>
   </data>
+  <data name="NoData" xml:space="preserve">
+    <value>No Data</value>
+  </data>
+  <data name="Stats_OtherMatchups" xml:space="preserve">
+    <value>Others</value>
+  </data>
   <data name="OB_SettingsText" xml:space="preserve">
     <value>Spectate</value>
   </data>

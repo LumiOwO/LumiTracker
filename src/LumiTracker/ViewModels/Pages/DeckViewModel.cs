@@ -135,12 +135,13 @@ namespace LumiTracker.ViewModels.Pages
 
             try
             {
+                Configuration.Logger.LogDebug($"[AsyncLoadTotal] Begin to load Total...");
                 var tasks = new List<Task>();
                 for (int i = 0; i < AllBuildStats.Count; i++)
                 {
                     tasks.Add(AsyncLoadAt(i));
                 }
-                await Task.WhenAll(tasks).ConfigureAwait(false);
+                await Task.WhenAll(tasks);
 
                 foreach (BuildStats stats in AllBuildStats)
                 {
@@ -156,6 +157,8 @@ namespace LumiTracker.ViewModels.Pages
 
                 loadLock.Enter(ref lockTaken);
                 Total.LoadState = ELoadState.Loaded;
+
+                Configuration.Logger.LogDebug($"[AsyncLoadTotal] Total loaded.");
             }
             catch (Exception ex)
             {
@@ -197,15 +200,17 @@ namespace LumiTracker.ViewModels.Pages
 
             try
             {
+                Configuration.Logger.LogDebug($"[AsyncLoadAt({index})] Begin to load BuildStats...");
                 // TODO: load from file
-                await stats.LoadDataAsync().ConfigureAwait(false);
+                await stats.LoadDataAsync();
 
                 loadLock.Enter(ref lockTaken);
                 stats.LoadState = ELoadState.Loaded;
+                Configuration.Logger.LogDebug($"[AsyncLoadAt({index})] BuildStats loaded.");
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"[AsyncLoadAt({index})] Failed to load Total. {ex.Message}");
+                Configuration.Logger.LogError($"[AsyncLoadAt({index})] Failed to load BuildStat. {ex.Message}");
                 if (!lockTaken)
                 {
                     loadLock.Enter(ref lockTaken);
@@ -225,12 +230,15 @@ namespace LumiTracker.ViewModels.Pages
 
         public void AddRecord(DuelRecord record)
         {
+            BuildStats stats = AllBuildStats[Info.CurrentVersionIndex ?? 0];
+
+            // Add record to current
             bool lockTaken = false;
-            var loadLock = Total.LoadStateLock;
+            var loadLock = stats.LoadStateLock;
             try
             {
                 loadLock.Enter(ref lockTaken);
-                if (Total.LoadState != ELoadState.Loaded)
+                if (stats.LoadState != ELoadState.Loaded)
                 {
                     Configuration.Logger.LogError("[AddRecord] Try to add a record, but the build is not loaded!");
                     return;
@@ -241,11 +249,25 @@ namespace LumiTracker.ViewModels.Pages
                 if (lockTaken) loadLock.Exit();
                 lockTaken = false;
             }
+            stats.AddRecord(record);
 
-            Total.AddRecord(record);
-            if (Current != Total)
+            // Add record to total if Total loaded
+            loadLock = Total.LoadStateLock;
+            bool totalLoaded = false;
+            try
             {
-                Current.AddRecord(record);
+                loadLock.Enter(ref lockTaken);
+                totalLoaded = (Total.LoadState == ELoadState.Loaded);
+            }
+            finally
+            {
+                if (lockTaken) loadLock.Exit();
+                lockTaken = false;
+            }
+
+            if (totalLoaded)
+            {
+                Total.AddRecord(record);
             }
         }
 
@@ -326,19 +348,6 @@ namespace LumiTracker.ViewModels.Pages
             // TODO: Init DeckStatistics
             {
                 Stats.UpdateCurrent(Info.IncludeAllBuildVersions, Info.CurrentVersionIndex);
-            }
-        }
-
-        public void LoadAll()
-        {
-            if (ActionCards.Count == 0)
-            {
-                ImportFromShareCode(Info.ShareCode);
-            }
-
-            // TODO: Init DeckStatistics
-            {
-                Task task = Stats.AsyncLoadTotal();
             }
         }
 
@@ -461,12 +470,14 @@ namespace LumiTracker.ViewModels.Pages
 
         partial void OnSelectedIndexChanged(int oldValue, int newValue)
         {
+            Configuration.Logger.LogDebug($"[OnSelectedIndexChanged] {oldValue} -> {newValue}");
             Select(newValue);
         }
 
         public static readonly SolidColorBrush HighlightColor = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
         partial void OnActiveDeckIndexChanged(int oldValue, int newValue)
         {
+            Configuration.Logger.LogDebug($"[OnActiveDeckIndexChanged] {oldValue} -> {newValue}");
             if (oldValue >= 0 && oldValue < DeckItems.Count)
             {
                 DeckItems[oldValue].WeightInNameList = FontWeights.Light;
@@ -476,7 +487,7 @@ namespace LumiTracker.ViewModels.Pages
             {
                 DeckItems[newValue].WeightInNameList = FontWeights.Bold;
                 DeckItems[newValue].ColorInNameList  = HighlightColor;
-                DeckItems[newValue].LoadAll();
+                DeckItems[newValue].LoadCurrent();
             }
         }
 
@@ -537,8 +548,8 @@ namespace LumiTracker.ViewModels.Pages
                 DeckItems = new ObservableCollection<DeckItem>(deckItems);
 
                 // TODO: no longer need active index save & load
-                //int active = (int)userDecksDesc["active"]!;
-                //ActiveDeckIndex = Math.Clamp(active, -1, DeckItems.Count - 1);
+                // int active = (int)userDecksDesc["active"]!;
+                // ActiveDeckIndex = Math.Clamp(active, -1, DeckItems.Count - 1);
                 //SelectedIndex = ActiveDeckIndex;
             }
             catch (Exception ex)
@@ -563,7 +574,7 @@ namespace LumiTracker.ViewModels.Pages
             }
 
             ActiveDeckIndex = SelectedIndex;
-            SaveDeckInformations();
+            //SaveDeckInformations();
             SnackbarService?.Show(
                 Lang.SetAsActiveSuccess_Title,
                 Lang.SetAsActiveSuccess_Message + SelectedDeckItem.Info.Name,

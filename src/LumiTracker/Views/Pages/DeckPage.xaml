@@ -25,6 +25,12 @@
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
         <helpers:NullableBooleanConverter x:Key="NullableBooleanConverter" />
         <helpers:MultiParametersConverter x:Key="MultiParametersConverter" />
+        <helpers:HideNegativeIntValueConverter x:Key="HideNegativeIntValueConverter" />
+        <helpers:HideNonPositiveIntValueConverter x:Key="HideNonPositiveIntValueConverter" />
+        <helpers:HidePositiveIntValueConverter x:Key="HidePositiveIntValueConverter" />
+        <helpers:IsNotNullValueConverter x:Key="IsNotNullValueConverter" />
+        <helpers:TrueFalseCondSwitchConverter x:Key="TrueFalseCondSwitchConverter" />
+        <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
         
         <SolidColorBrush x:Key="MainContentBackground" Color="#ff282c34" />
         <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
@@ -241,7 +247,9 @@
                 BorderThickness="0.7"
                 Background="{StaticResource MainContentBackground}"
                 >
+                <Grid>
                 <ui:ListView
+                    Grid.Row="0"
                     x:Name="UserDeckListView"
                     Margin="0, 0, 0, 2"
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
@@ -251,6 +259,24 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     />
+                <TextBlock 
+                    Grid.Row="0"
+                    Visibility="{Binding ViewModel.DeckItems.Count, Mode=OneWay,
+                        Converter={StaticResource HidePositiveIntValueConverter},
+                        ConverterParameter=Collapsed
+                        }"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Margin="0,3,0,0"
+                    Foreground="Gray"
+                    FontSize="{Binding ActualHeight,
+                        ElementName=UserDeckListView,
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.040
+                        }"
+                    Text="{svs:Localization NoData}"
+                    />
+                </Grid>
             </Border>
 
             <!-- Auto Selection Tool Tip -->
@@ -302,6 +328,10 @@
 
             <!-- Build Version Selection -->
             <StackPanel
+                IsEnabled="{Binding ViewModel.SelectedDeckItem, 
+                    Mode=OneWay, 
+                    Converter={StaticResource IsNotNullValueConverter}
+                    }"
                 Grid.Column="1"
                 Grid.Row="0"
                 Width="{Binding ActualWidth,
@@ -311,6 +341,23 @@
                     }"
                 Margin="0,2,0,0"
                 VerticalAlignment="Top">
+                <StackPanel.Opacity>
+                    <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                        <Binding>
+                            <Binding.Source>
+                                <sys:Double>1.0</sys:Double>
+                            </Binding.Source>
+                        </Binding>
+                        <Binding>
+                            <Binding.Source>
+                                <sys:Double>0.4</sys:Double>
+                            </Binding.Source>
+                        </Binding>
+                        <Binding Path="ViewModel.SelectedDeckItem" 
+                                 Converter="{StaticResource IsNotNullValueConverter}" Mode="OneWay" />
+                    </MultiBinding>
+                </StackPanel.Opacity>
+
 
                 <TextBlock 
                     Text="{svs:Localization BuildVersion}" 
@@ -459,7 +506,14 @@
                             }"
                         />
                 </TabItem.Header>
+                    
+                <Grid>
                 <ListView
+                    Grid.Row="0"
+                    Visibility="{Binding ViewModel.DeckItems.Count, Mode=OneWay,
+                        Converter={StaticResource HideNonPositiveIntValueConverter},
+                        ConverterParameter=Collapsed
+                        }"
                     x:Name="CardListView"
                     BorderBrush="{StaticResource DeckPageBorderBrush}"
                     BorderThickness="0.7, 0, 0.7, 0.7"
@@ -480,6 +534,24 @@
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>
+                <TextBlock 
+                    Grid.Row="0"
+                    Visibility="{Binding ViewModel.DeckItems.Count, Mode=OneWay,
+                        Converter={StaticResource HidePositiveIntValueConverter},
+                        ConverterParameter=Collapsed
+                        }"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="0,0,0,50"
+                    Foreground="Gray"
+                    FontSize="{Binding ActualWidth, 
+                        RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.05
+                        }"
+                    Text="{svs:Localization NoData}"
+                    />
+                </Grid>
             </TabItem>
 
             <TabItem
@@ -509,7 +581,14 @@
                             }"
                         />
                 </TabItem.Header>
+                <Grid>
                 <ctrls:DeckPageDuelHistoryTab
+                    Grid.Row="0"
+                    Visibility="{Binding ViewModel.SelectedDeckItem.Stats.Current.DuelRecords.Count, Mode=OneWay,
+                        Converter={StaticResource HideNonPositiveIntValueConverter},
+                        ConverterParameter=Collapsed,
+                        FallbackValue=Collapsed
+                        }"
                     Margin="0,-1,0,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
@@ -534,6 +613,59 @@
                         Converter={StaticResource NullableBooleanConverter}
                         }"
                     />
+                <StackPanel
+                    Grid.Row="0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding ViewModel.SelectedDeckItem.Stats.Current.DuelRecords.Count, Mode=OneWay,
+                        Converter={StaticResource HidePositiveIntValueConverter},
+                        ConverterParameter=Collapsed,
+                        FallbackValue=Visible
+                        }"
+                    Margin="0,0,0,50"
+                    >
+                    <ui:ProgressRing
+                        Visibility="{Binding ViewModel.SelectedDeckItem.Stats.Current.IsLoading, Mode=OneWay,
+                            Converter={StaticResource BooleanToVisibilityConverter},
+                            ConverterParameter=Collapsed,
+                            FallbackValue=Collapsed
+                            }"
+                        IsIndeterminate="True"
+                        Margin="0,0,5,0"
+                        Width="{Binding ActualWidth, 
+                            RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.045
+                            }"
+                        Height="{Binding ActualWidth, 
+                            RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.045
+                            }"
+                        />
+                    <TextBlock 
+                        Foreground="Gray"
+                        FontSize="{Binding ActualWidth, 
+                            RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                            Converter={StaticResource SizeWithRatioConverter}, 
+                            ConverterParameter=0.05
+                            }"
+                        >
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                                <svs:Localization Key="Loading"/>
+                                <svs:Localization Key="NoData"/>
+                                <Binding 
+                                    Path="ViewModel.SelectedDeckItem.Stats.Current.IsLoading" 
+                                    Mode="OneWay"
+                                    FallbackValue="False"
+                                    />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+                </Grid>
             </TabItem>
 
         </TabControl>

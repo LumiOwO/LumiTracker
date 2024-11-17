@@ -344,15 +344,15 @@ namespace LumiTracker.Models
             }
         }
 
+        public static readonly string UnknownCharactersKey = "#Unknown";
         public static string CharacterIdsToKey(List<int> ids, bool ignoreOrder = true)
         {
-            const string Unknown = "#Unknown";
-            if (ids.Count != 3) return Unknown;
+            if (ids.Count != 3) return UnknownCharactersKey;
             foreach (var id in ids)
             {
                 if (id < 0 || id >= (int)ECharacterCard.NumCharacters)
                 {
-                    return Unknown;
+                    return UnknownCharactersKey;
                 }
             }
 

@@ -480,7 +480,13 @@
     <value>インポート前の対局を隠す</value>
   </data>
   <data name="SummonersTop_URL" xml:space="preserve">
-    <value>https://www.summoners.top/</value>
+    <value>https://www.summoners.top</value>
+  </data>
+  <data name="NoData" xml:space="preserve">
+    <value>データなし</value>
+  </data>
+  <data name="Stats_OtherMatchups" xml:space="preserve">
+    <value>他の編成</value>
   </data>
   <data name="OB_SettingsText" xml:space="preserve">
     <value>観戦</value>

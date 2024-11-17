@@ -693,6 +693,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No Data.
+        /// </summary>
+        public static string NoData {
+            get {
+                return ResourceManager.GetString("NoData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to None.
         /// </summary>
         public static string None {
@@ -1112,6 +1121,15 @@ namespace LumiTracker.Config {
         public static string Stats_Minute {
             get {
                 return ResourceManager.GetString("Stats_Minute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Others.
+        /// </summary>
+        public static string Stats_OtherMatchups {
+            get {
+                return ResourceManager.GetString("Stats_OtherMatchups", resourceCulture);
             }
         }
         
