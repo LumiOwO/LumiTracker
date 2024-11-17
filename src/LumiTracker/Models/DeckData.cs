@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
-using System.Windows.Media;
+using LumiTracker.Watcher;
 
 namespace LumiTracker.Models
 {
@@ -42,7 +42,7 @@ namespace LumiTracker.Models
         [JsonProperty("edits")]
         [ObservableProperty]
         [property: JsonIgnore]
-        public ObservableCollection<BuildEdit>? _editVersionCodes = null;
+        public ObservableCollection<BuildEdit>? _editVersions = null;
 
         [JsonProperty("current")]
         [ObservableProperty]
@@ -60,7 +60,7 @@ namespace LumiTracker.Models
         private bool? _hideRecordsBeforeImport = null;
     }
 
-    public partial class MatchupStats : ObservableObject
+    public partial class MatchupStats(int cid0, int cid1, int cid2) : ObservableObject
     {
         [ObservableProperty]
         private int _wins = 0;
@@ -71,55 +71,98 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private double _avgDuration = 0; // seconds
         [ObservableProperty]
-        private List<int> _opCharacters = [-1, -1, -1];
+        private List<int> _opCharacters = [cid0, cid1, cid2];
 
+        public string Key => DeckUtils.CharacterIdsToKey(OpCharacters);
+
+        /////////////////////
+        // UI
         public double AvgDurationInMinutes => AvgDuration / 60.0; // Minutes
 
         public double WinRate => Math.Max(Wins, 0.0) / Math.Max(Totals, 1.0);
 
         partial void OnAvgDurationChanged(double oldValue, double newValue)
         {
-            OnPropertyChanged("AvgDurationInMinutes");
+            OnPropertyChanged(nameof(AvgDurationInMinutes));
         }
 
         partial void OnWinsChanged(int oldValue, int newValue)
         {
-            OnPropertyChanged("WinRate");
+            OnPropertyChanged(nameof(WinRate));
         }
 
         partial void OnTotalsChanged(int oldValue, int newValue)
         {
-            OnPropertyChanged("WinRate");
+            OnPropertyChanged(nameof(WinRate));
+        }
+
+        public void AddStats(MatchupStats other)
+        {
+            // For reference: Brute-force way
+            //AvgRounds = ((AvgRounds * Totals) + (other.AvgRounds * other.Totals)) / (Totals + other.Totals);
+            double wAll     = 1.0 * Totals       / (Totals + other.Totals);
+            double wExpired = 1.0 * other.Totals / (Totals + other.Totals);
+            AvgRounds   = AvgRounds   * wAll + other.AvgRounds   * wExpired;
+            AvgDuration = AvgDuration * wAll + other.AvgDuration * wExpired;
+
+            Wins   += other.Wins;
+            Totals += other.Totals;
+        }
+
+        public void RemoveStats(MatchupStats other)
+        {
+            if (Totals <= other.Totals)
+            {
+                AvgRounds = AvgDuration = Wins = Totals = 0;
+                return;
+            }
+
+            // For reference: Brute-force way
+            //AvgRounds = ((AvgRounds * Totals) - (other.AvgRounds * other.Totals)) / (Totals - other.Totals);
+            double wAll     = 1.0 * Totals       / (Totals - other.Totals);
+            double wExpired = 1.0 * other.Totals / (Totals - other.Totals);
+            AvgRounds   = AvgRounds   * wAll - other.AvgRounds   * wExpired;
+            AvgDuration = AvgDuration * wAll - other.AvgDuration * wExpired;
+
+            Wins   -= other.Wins;
+            Totals -= other.Totals;
         }
     }
 
-    public partial class DuelRecord : ObservableObject
+    public partial class DuelRecord(int cid0, int cid1, int cid2) : ObservableObject
     {
         [ObservableProperty]
-        private bool _isWin;
+        private bool _isWin = false;
         [ObservableProperty]
-        private double _duration; // seconds
+        private double _duration = 0; // seconds
         [ObservableProperty]
-        private int _rounds;
+        private int _rounds = 0;
         [ObservableProperty]
-        private DateTime _timeStamp;
+        private DateTime _timeStamp = CustomDateTimeConverter.MinTime;
         [ObservableProperty]
-        private List<int> _opCharacters;
+        private List<int> _opCharacters = [cid0, cid1, cid2];
 
+        /////////////////////
+        // UI
         public double DurationInMinutes => Duration / 60.0; // Minutes
+
+        [ObservableProperty]
+        private bool _shouldHide = false;
 
         partial void OnDurationChanged(double oldValue, double newValue)
         {
-            OnPropertyChanged("DurationInMinutes");
+            OnPropertyChanged(nameof(DurationInMinutes));
         }
 
-        public DuelRecord()
+        public MatchupStats GetStats()
         {
-            _isWin = false;
-            _duration = 300;
-            _rounds = 7;
-            _timeStamp = DateTime.Now;
-            _opCharacters = [19, 50, 51];
+            return new MatchupStats(cid0, cid1, cid2)
+            {
+                Wins         = IsWin ? 1 : 0,
+                Totals       = 1,
+                AvgRounds    = Rounds,
+                AvgDuration  = Duration,
+            };
         }
     }
 
@@ -128,34 +171,177 @@ namespace LumiTracker.Models
         public Guid Guid { get; set; } = Guid.Empty;
 
         [ObservableProperty]
-        private bool _loaded = false;
+        private SpinLockedValue<bool> _loaded  = new(false);
 
         [ObservableProperty]
-        private DateTime _createdAt = CustomDateTimeConverter.MinTime;
+        private SpinLockedValue<bool> _loading = new (false);
 
         [ObservableProperty]
-        private MatchupStats _summary;
+        private DateTime _createdAt = new DateTime(2024, 11, 15, 19, 10, 0); // TODO: remove this
 
         [ObservableProperty]
-        private ObservableCollection<MatchupStats> _allMatchupStats;
+        private MatchupStats _summary = new (-1, -1, -1);
 
         [ObservableProperty]
-        private ObservableCollection<DuelRecord> _duelRecords;
+        private ObservableCollection<MatchupStats> _allMatchupStats = [];
 
-        // TODO: remove this
-        static private int _count = 0;
+        [ObservableProperty]
+        private ObservableCollection<DuelRecord> _duelRecords = [];
 
-        public BuildStats()
+        // TODO: initialize this
+        private bool ShouldHideExpiredRecords { get; set; } = false;
+        private MatchupStats SummaryBeforeImport { get; set; } = new (-1, -1, -1);
+        private Dictionary<string, MatchupStats> MatchupStatsDataBeforeImport { get; set; } = [];
+        private Dictionary<string, MatchupStats> AllMatchupStatsData { get; set; } = [];
+
+        private void NotifyMatchupStatsChanged()
         {
-            Summary = new() { Totals = 3 + (_count++), Wins = 2, AvgRounds = 6.0, AvgDuration = 500 };
-            AllMatchupStats = [
-                new(){ Totals = 2, Wins = 1, AvgRounds = 6.5, AvgDuration = 600, OpCharacters = [98, 81, 93] },
-                new(){ Totals = 1, Wins = 0, AvgRounds = 5, AvgDuration = 300, OpCharacters = [27, 73, 88]}];
-            DuelRecords = [
-                new(){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), OpCharacters = [98, 81, 93] },
-                new(){ IsWin = false, Rounds = 6, Duration = 620, TimeStamp = new DateTime(2024, 11, 15, 20, 0, 0), OpCharacters = [98, 81, 93] },
-                new(){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), OpCharacters = [27, 73, 88] },
-                ];
+            // Notify MatchupStats ui update 
+            AllMatchupStats = new ObservableCollection<MatchupStats>(
+                AllMatchupStatsData.Values.OrderByDescending(stats => stats.Totals)
+            );
+        }
+
+        public async Task LoadAsync()
+        {
+            if (Loading.Value || Loaded.Value) return;
+            Loading.Value = true;
+            {
+                // TODO: use guid to load
+                DuelRecord[] records = [
+                    new(98, 81, 93){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), },
+                    new(98, 81, 93){ IsWin = false, Rounds = 6, Duration = 620, TimeStamp = new DateTime(2024, 11, 15, 20, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+
+                    ];
+
+                foreach (var record in records)
+                {
+                    AddRecord(record, false);
+                }
+                NotifyMatchupStatsChanged();
+                Loaded.Value  = true;
+            }
+            Loading.Value = false;
+        }
+
+        public void AddRecord(DuelRecord record, bool should_notify = true)
+        {
+            // TODO: need QA
+            MatchupStats stats = record.GetStats();
+            string key = stats.Key;
+            var cids = stats.OpCharacters;
+
+            if (!AllMatchupStatsData.TryGetValue(key, out MatchupStats? all))
+            {
+                all = new MatchupStats(cids[0], cids[1], cids[2]);
+                AllMatchupStatsData[key] = all;
+            }
+            all.AddStats(stats);
+            Summary.AddStats(stats);
+
+            DuelRecords.Insert(0, record);
+
+            if (record.TimeStamp <= CreatedAt)
+            {
+                if (!MatchupStatsDataBeforeImport.TryGetValue(key, out MatchupStats? expired))
+                {
+                    expired = new MatchupStats(cids[0], cids[1], cids[2]);
+                    MatchupStatsDataBeforeImport[key] = expired;
+                }
+                expired.AddStats(stats);
+                SummaryBeforeImport.AddStats(stats);
+            }
+
+            if (should_notify)
+            {
+                NotifyMatchupStatsChanged();
+            }
+        }
+
+        public void Merge(BuildStats other)
+        {
+            foreach (var record in other.DuelRecords)
+            {
+                AddRecord(record, false);
+            }
+            NotifyMatchupStatsChanged();
+        }
+
+        public void HideExpiredRecords(bool shouldHide)
+        {
+            // TODO: fix hide expired logic
+            if (!Loaded.Value) return;
+
+            if (ShouldHideExpiredRecords == shouldHide) return;
+            ShouldHideExpiredRecords = shouldHide;
+
+            if (shouldHide)
+            {
+                foreach (var pair in MatchupStatsDataBeforeImport)
+                {
+                    string key = pair.Key;
+                    MatchupStats expired = pair.Value;
+                    if (!AllMatchupStatsData.TryGetValue(key, out MatchupStats? all))
+                    {
+                        Configuration.Logger.LogError($"[HideExpiredRecords] Key {key} not found in AllMatchupStatsData.");
+                        continue;
+                    }
+                    if (all.Totals == expired.Totals)
+                    {
+                        AllMatchupStatsData.Remove(key);
+                        continue;
+                    }
+                    else if (all.Totals < expired.Totals)
+                    {
+                        Configuration.Logger.LogError($"[HideExpiredRecords] {key}: Number of expired is greater then number of all.");
+                        AllMatchupStatsData.Remove(key);
+                        continue;
+                    }
+
+                    all.RemoveStats(expired);
+                }
+                Summary.RemoveStats(SummaryBeforeImport);
+
+                foreach (var record in DuelRecords)
+                {
+                    record.ShouldHide = record.TimeStamp <= CreatedAt;
+                }
+            }
+            else
+            {
+                foreach (var pair in MatchupStatsDataBeforeImport)
+                {
+                    string key = pair.Key;
+                    MatchupStats expired = pair.Value;
+                    var cids = expired.OpCharacters;
+
+                    MatchupStats? all = null;
+                    if (!AllMatchupStatsData.TryGetValue(key, out all))
+                    {
+                        all = new MatchupStats(cids[0], cids[1], cids[2]);
+                        AllMatchupStatsData[key] = all;
+                    }
+                    
+                    all.AddStats(expired);
+                }
+                Summary.AddStats(SummaryBeforeImport);
+
+                foreach (var record in DuelRecords)
+                {
+                    record.ShouldHide = false;
+                }
+            }
+
+            NotifyMatchupStatsChanged();
         }
     }
 }

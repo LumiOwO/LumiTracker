@@ -10,6 +10,7 @@ using LumiTracker.Services;
 using System.Windows.Data;
 using Wpf.Ui;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -58,49 +59,139 @@ namespace LumiTracker.ViewModels.Pages
 
     public partial class DeckStatistics : ObservableObject
     {
+        private DeckInfo Info { get; }
+
         [ObservableProperty]
-        private BuildStats _total;
+        private BuildStats _total = new ();
 
         // This is ensured to have at least 1 BuildStats
         [ObservableProperty]
-        private ObservableCollection<BuildStats> _allBuildStats;
+        private ObservableCollection<BuildStats> _allBuildStats = [];
 
         /////////////////////////
         // UI
         [ObservableProperty]
         private BuildStats _current;
 
-        // TODO: remove this
-        static private int _count = 0;
-        public DeckStatistics()
+        public DeckStatistics(DeckInfo info)
         {
-            // TODO: sync AllBuildStats with info.edits
-            Total = new();
-            AllBuildStats = [
-                new() { CreatedAt = new DateTime(2024, 10, 31, 0, _count, 0)}, 
-                new() { CreatedAt = new DateTime(2024, 10, 31, 1, _count, 0)}, 
-                new() { CreatedAt = new DateTime(2024, 10, 31, 2, _count, 0)},
-                new() { CreatedAt = new DateTime(2024, 10, 31, 3, _count, 0)},  
-                new() { CreatedAt = new DateTime(2024, 10, 31, 4, _count, 0)},  
-                new() { CreatedAt = new DateTime(2024, 10, 31, 5, _count, 0)},  
-                new() { CreatedAt = new DateTime(2024, 10, 31, 6, _count, 0)},  
-                new() { CreatedAt = new DateTime(2024, 10, 31, 7, _count, 0)},  
-                ];
-            _count++;
-            Current = Total;
+            Info = info;
+            Info.PropertyChanged += OnDeckInfoPropertyChanged;
+
+            var first = new BuildStats();
+            first.CreatedAt = Info.CreatedAt;
+            // TODO: add guid
+            //first.Guid = Info.ShareCode;
+            _allBuildStats.Add(first);
+            if (info.EditVersions != null)
+            {
+                foreach (BuildEdit edit in info.EditVersions)
+                {
+                    var stats = new BuildStats();
+                    stats.CreatedAt = edit.CreatedAt;
+                    // TODO: add guid
+                    //stats.Guid = edit.ShareCode;
+                    _allBuildStats.Add(stats);
+                }
+            }
+            // TODO: remove this
+            _allBuildStats = [new(), new(), new(), new(), new(), new(), new()];
+
+            _current = _allBuildStats[0];
+        }
+
+        public void UpdateCurrent(bool? IncludeAllBuildVersions, int? CurrentVersionIndex)
+        {
+            bool IsIncludeAllBuildVersions = IncludeAllBuildVersions ?? false;
+            if (!IsIncludeAllBuildVersions)
+            {
+                int index = CurrentVersionIndex ?? 0;
+                Current = AllBuildStats[index];
+                Task task = AsyncLoadAt(index);
+            }
+            else
+            {
+                Current = Total;
+                Task task = AsyncLoadTotal();
+            }
+        }
+
+        public async Task AsyncLoadTotal()
+        {
+            if (Total.Loading.Value || Total.Loaded.Value) return;
+            Total.Loading.Value = true;
+            {
+                var tasks = new List<Task>();
+                for (int i = 0; i < AllBuildStats.Count; i++)
+                {
+                    tasks.Add(AsyncLoadAt(i));
+                }
+                await Task.WhenAll(tasks);
+
+                foreach (BuildStats stats in AllBuildStats)
+                {
+                    Total.Merge(stats);
+                }
+                Total.Loaded.Value = true;
+            }
+            Total.Loading.Value = false;
+        }
+
+        public async Task AsyncLoadAt(int index)
+        {
+            BuildStats stats = AllBuildStats[index];
+            // TODO: load from file
+            await stats.LoadAsync();
+        }
+
+        public void AddRecord(DuelRecord record)
+        {
+            if (!Total.Loaded.Value)
+            {
+                Configuration.Logger.LogError("[AddRecord] Try to add a record, but the build is not loaded!");
+                return;
+            }
+
+            Total.AddRecord(record);
+            if (Current != Total)
+            {
+                Current.AddRecord(record);
+            }
+        }
+
+        private void OnHideRecordsBeforeImportChanged(bool? HideRecordsBeforeImport)
+        {
+            bool hide = HideRecordsBeforeImport ?? false;
+            foreach (var stats in AllBuildStats)
+            {
+                stats.HideExpiredRecords(hide);
+            }
+            Total.HideExpiredRecords(hide);
+        }
+
+        private void OnDeckInfoPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DeckInfo.IncludeAllBuildVersions) || e.PropertyName == nameof(DeckInfo.CurrentVersionIndex))
+            {
+                UpdateCurrent(Info.IncludeAllBuildVersions, Info.CurrentVersionIndex);
+            }
+            else if (e.PropertyName == nameof(DeckInfo.HideRecordsBeforeImport))
+            {
+                OnHideRecordsBeforeImportChanged(Info.HideRecordsBeforeImport);
+            }
         }
     }
 
-    public partial class DeckItem(DeckInfo deckInfo) : ObservableObject
+    public partial class DeckItem : ObservableObject
     {
         [ObservableProperty]
-        private DeckInfo _info = deckInfo;
+        private DeckInfo _info;
 
         [ObservableProperty]
         private ObservableCollection<ActionCardView> _actionCards = [];
 
         [ObservableProperty]
-        private DeckStatistics _stats = new ();
+        private DeckStatistics _stats;
 
         [ObservableProperty]
         private FontWeight _weightInNameList = FontWeights.Light;
@@ -108,18 +199,35 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private Brush? _colorInNameList = (SolidColorBrush?)Application.Current?.Resources?["TextFillColorPrimaryBrush"];
 
-        public void OnSelected()
+        public DeckItem(DeckInfo deckInfo)
+        {
+            _info  = deckInfo;
+            _stats = new DeckStatistics(deckInfo);
+        }
+
+        public void LoadCurrent()
         {
             if (ActionCards.Count == 0)
             {
-                ///////////////////////
-                // Decode share code
                 ImportFromShareCode(Info.ShareCode);
             }
 
             // TODO: Init DeckStatistics
             {
-                Task task = LoadStatsAsync(Info.CurrentVersionIndex);
+                Stats.UpdateCurrent(Info.IncludeAllBuildVersions, Info.CurrentVersionIndex);
+            }
+        }
+
+        public void LoadAll()
+        {
+            if (ActionCards.Count == 0)
+            {
+                ImportFromShareCode(Info.ShareCode);
+            }
+
+            // TODO: Init DeckStatistics
+            {
+                Task task = Stats.AsyncLoadTotal();
             }
         }
 
@@ -156,12 +264,6 @@ namespace LumiTracker.ViewModels.Pages
 
             ActionCards = new ObservableCollection<ActionCardView>(views);
             return true;
-        }
-
-        public async Task LoadStatsAsync(int? index)
-        {
-            // TODO: Load at CurrentVersionIndex asyncly
-            await Task.Delay(100);
         }
     }
 
@@ -263,6 +365,7 @@ namespace LumiTracker.ViewModels.Pages
             {
                 DeckItems[newValue].WeightInNameList = FontWeights.Bold;
                 DeckItems[newValue].ColorInNameList  = HighlightColor;
+                DeckItems[newValue].LoadAll();
             }
         }
 
@@ -281,7 +384,7 @@ namespace LumiTracker.ViewModels.Pages
             {
                 Configuration.Logger.LogDebug($"Select deck[{index}], {DeckItems.Count} decks in total");
                 SelectedDeckItem = DeckItems[index];
-                SelectedDeckItem.OnSelected();
+                SelectedDeckItem.LoadCurrent();
             }
             else
             {
@@ -294,14 +397,8 @@ namespace LumiTracker.ViewModels.Pages
         public void OnCurrentVersionIndexChanged(int CurrentVersionIndex)
         {
             if (SelectedDeckItem == null) return;
+
             SelectedDeckItem.Info.CurrentVersionIndex = CurrentVersionIndex;
-
-            if (!SelectedDeckItem.Info.IncludeAllBuildVersions ?? true)
-            {
-                SelectedDeckItem.Stats.Current = SelectedDeckItem.Stats.AllBuildStats[CurrentVersionIndex];
-            }
-
-            Task task = SelectedDeckItem.LoadStatsAsync(CurrentVersionIndex);
         }
 
         public void LoadDeckInformations()
@@ -328,9 +425,10 @@ namespace LumiTracker.ViewModels.Pages
                 }
                 DeckItems = new ObservableCollection<DeckItem>(deckItems);
 
-                int active = (int)userDecksDesc["active"]!;
-                ActiveDeckIndex = Math.Clamp(active, -1, DeckItems.Count - 1);
-                SelectedIndex = ActiveDeckIndex;
+                // TODO: no longer need active index save & load
+                //int active = (int)userDecksDesc["active"]!;
+                //ActiveDeckIndex = Math.Clamp(active, -1, DeckItems.Count - 1);
+                //SelectedIndex = ActiveDeckIndex;
             }
             catch (Exception ex)
             {

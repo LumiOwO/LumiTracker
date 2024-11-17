@@ -343,5 +343,27 @@ namespace LumiTracker.Models
                 Configuration.Logger.LogDebug(output);
             }
         }
+
+        public static string CharacterIdsToKey(List<int> ids, bool ignoreOrder = true)
+        {
+            const string Unknown = "#Unknown";
+            if (ids.Count != 3) return Unknown;
+            foreach (var id in ids)
+            {
+                if (id < 0 || id >= (int)ECharacterCard.NumCharacters)
+                {
+                    return Unknown;
+                }
+            }
+
+            if (ignoreOrder)
+            {
+                return "#" + string.Join(",", ids.OrderBy(x => x));
+            }
+            else
+            {
+                return "#" + string.Join(",", ids);
+            }
+        }
     }
 }

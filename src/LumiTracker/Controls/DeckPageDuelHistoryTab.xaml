@@ -175,7 +175,7 @@
                     Margin="0,4,0,4"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Right"
-                    ImageOuterMargin="0"
+                    ImageOuterMargin="1"
                     ImageInnerMargin="2"
                     CharacterIds="{Binding OpCharacters}"
                     />
@@ -185,6 +185,9 @@
 
         <DataTemplate x:Key="DuelRecordViewTemplate" DataType="{x:Type models:DuelRecord}">
             <Border
+                Visibility="{Binding ShouldHide,
+                    Converter={StaticResource BooleanNotToVisibilityConverter},
+                    ConverterParameter=Collapsed}"
                 BorderThickness="0,0,0,0.1"
                 BorderBrush="White"
                 Margin="5,0,5,0"

@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Versioning;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LumiTracker.Watcher
+﻿namespace LumiTracker.Watcher
 {
-    public class SpinLockedValue<T>(T? Value)
+    public class SpinLockedValue<T>(T? InitValue)
     {
         private SpinLock _spinLock = new SpinLock();
-        private T? _value = Value;
+        private T? _value = InitValue;
 
         public T? Value
         {
