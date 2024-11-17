@@ -118,38 +118,128 @@ namespace LumiTracker.ViewModels.Pages
 
         public async Task AsyncLoadTotal()
         {
-            if (Total.Loading.Value || Total.Loaded.Value) return;
-            Total.Loading.Value = true;
+            bool lockTaken = false;
+            var loadLock = Total.LoadStateLock;
+            try
+            {
+                loadLock.Enter(ref lockTaken);
+                if (Total.LoadState >= ELoadState.Loading) return;
+
+                Total.LoadState = ELoadState.Loading;
+            }
+            finally
+            {
+                if (lockTaken) loadLock.Exit();
+                lockTaken = false;
+            }
+
+            try
             {
                 var tasks = new List<Task>();
                 for (int i = 0; i < AllBuildStats.Count; i++)
                 {
                     tasks.Add(AsyncLoadAt(i));
                 }
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
 
                 foreach (BuildStats stats in AllBuildStats)
                 {
-                    Total.Merge(stats);
+                    foreach (var record in stats.DuelRecords)
+                    {
+                        Total.AddRecord(record, false);
+                    }
                 }
-                Total.Loaded.Value = true;
+                Total.DuelRecords = new ObservableCollection<DuelRecord>(
+                    Total.DuelRecords.OrderByDescending(x => x.TimeStamp)
+                );
+                Total.NotifyMatchupStatsChanged();
+
+                loadLock.Enter(ref lockTaken);
+                Total.LoadState = ELoadState.Loaded;
             }
-            Total.Loading.Value = false;
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"[AsyncLoadTotal] Failed to load Total. {ex.Message}");
+                if (!lockTaken)
+                {
+                    loadLock.Enter(ref lockTaken);
+                }
+                Total.LoadState = ELoadState.NotLoaded;
+            }
+            finally
+            {
+                if (lockTaken) loadLock.Exit();
+            }
+
+            if (Info.HideRecordsBeforeImport ?? false)
+            {
+                Total.HideExpiredRecords(true);
+            }
         }
 
         public async Task AsyncLoadAt(int index)
         {
             BuildStats stats = AllBuildStats[index];
-            // TODO: load from file
-            await stats.LoadAsync();
+            bool lockTaken = false;
+            var loadLock = stats.LoadStateLock;
+            try
+            {
+                loadLock.Enter(ref lockTaken);
+                if (stats.LoadState >= ELoadState.Loading) return;
+
+                stats.LoadState = ELoadState.Loading;
+            }
+            finally
+            {
+                if (lockTaken) loadLock.Exit();
+                lockTaken = false;
+            }
+
+            try
+            {
+                // TODO: load from file
+                await stats.LoadDataAsync().ConfigureAwait(false);
+
+                loadLock.Enter(ref lockTaken);
+                stats.LoadState = ELoadState.Loaded;
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"[AsyncLoadAt({index})] Failed to load Total. {ex.Message}");
+                if (!lockTaken)
+                {
+                    loadLock.Enter(ref lockTaken);
+                }
+                stats.LoadState = ELoadState.NotLoaded;
+            }
+            finally
+            {
+                if (lockTaken) loadLock.Exit();
+            }
+
+            if (Info.HideRecordsBeforeImport ?? false)
+            {
+                stats.HideExpiredRecords(true);
+            }
         }
 
         public void AddRecord(DuelRecord record)
         {
-            if (!Total.Loaded.Value)
+            bool lockTaken = false;
+            var loadLock = Total.LoadStateLock;
+            try
             {
-                Configuration.Logger.LogError("[AddRecord] Try to add a record, but the build is not loaded!");
-                return;
+                loadLock.Enter(ref lockTaken);
+                if (Total.LoadState != ELoadState.Loaded)
+                {
+                    Configuration.Logger.LogError("[AddRecord] Try to add a record, but the build is not loaded!");
+                    return;
+                }
+            }
+            finally
+            {
+                if (lockTaken) loadLock.Exit();
+                lockTaken = false;
             }
 
             Total.AddRecord(record);
@@ -159,14 +249,35 @@ namespace LumiTracker.ViewModels.Pages
             }
         }
 
-        private void OnHideRecordsBeforeImportChanged(bool? HideRecordsBeforeImport)
+        private void HideExpiredRecordsIfAvailable(BuildStats stats)
         {
-            bool hide = HideRecordsBeforeImport ?? false;
+            bool lockTaken = false;
+            var loadLock = stats.LoadStateLock;
+            try
+            {
+                loadLock.Enter(ref lockTaken);
+                if (stats.LoadState != ELoadState.Loaded)
+                {
+                    return;
+                }
+            }
+            finally
+            {
+                if (lockTaken) loadLock.Exit();
+                lockTaken = false;
+            }
+
+            bool hide = Info.HideRecordsBeforeImport ?? false;
+            stats.HideExpiredRecords(hide);
+        }
+
+        private void OnHideRecordsBeforeImportChanged()
+        {
             foreach (var stats in AllBuildStats)
             {
-                stats.HideExpiredRecords(hide);
+                HideExpiredRecordsIfAvailable(stats);
             }
-            Total.HideExpiredRecords(hide);
+            HideExpiredRecordsIfAvailable(Total);
         }
 
         private void OnDeckInfoPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -177,7 +288,7 @@ namespace LumiTracker.ViewModels.Pages
             }
             else if (e.PropertyName == nameof(DeckInfo.HideRecordsBeforeImport))
             {
-                OnHideRecordsBeforeImportChanged(Info.HideRecordsBeforeImport);
+                OnHideRecordsBeforeImportChanged();
             }
         }
     }

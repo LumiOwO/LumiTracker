@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
-using LumiTracker.Watcher;
 
 namespace LumiTracker.Models
 {
@@ -166,15 +165,18 @@ namespace LumiTracker.Models
         }
     }
 
+    public enum ELoadState : int
+    {
+        NotLoaded,
+        Loading,
+        Loaded
+    }
+
     public partial class BuildStats : ObservableObject
     {
         public Guid Guid { get; set; } = Guid.Empty;
-
-        [ObservableProperty]
-        private SpinLockedValue<bool> _loaded  = new(false);
-
-        [ObservableProperty]
-        private SpinLockedValue<bool> _loading = new (false);
+        public ELoadState LoadState { get; set; } = ELoadState.NotLoaded;
+        public SpinLock LoadStateLock { get; } = new SpinLock();
 
         [ObservableProperty]
         private DateTime _createdAt = new DateTime(2024, 11, 15, 19, 10, 0); // TODO: remove this
@@ -194,7 +196,7 @@ namespace LumiTracker.Models
         private Dictionary<string, MatchupStats> MatchupStatsDataBeforeImport { get; set; } = [];
         private Dictionary<string, MatchupStats> AllMatchupStatsData { get; set; } = [];
 
-        private void NotifyMatchupStatsChanged()
+        public void NotifyMatchupStatsChanged()
         {
             // Notify MatchupStats ui update 
             AllMatchupStats = new ObservableCollection<MatchupStats>(
@@ -202,35 +204,29 @@ namespace LumiTracker.Models
             );
         }
 
-        public async Task LoadAsync()
+        public async Task LoadDataAsync()
         {
-            if (Loading.Value || Loaded.Value) return;
-            Loading.Value = true;
+            // TODO: use guid to load
+            DuelRecord[] records = [
+                new(98, 81, 93){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), },
+                new(98, 81, 93){ IsWin = false, Rounds = 6, Duration = 620, TimeStamp = new DateTime(2024, 11, 15, 20, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
+
+                ];
+
+            foreach (var record in records)
             {
-                // TODO: use guid to load
-                DuelRecord[] records = [
-                    new(98, 81, 93){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), },
-                    new(98, 81, 93){ IsWin = false, Rounds = 6, Duration = 620, TimeStamp = new DateTime(2024, 11, 15, 20, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                    new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-
-                    ];
-
-                foreach (var record in records)
-                {
-                    AddRecord(record, false);
-                }
-                NotifyMatchupStatsChanged();
-                Loaded.Value  = true;
+                AddRecord(record, false);
             }
-            Loading.Value = false;
+            NotifyMatchupStatsChanged();
         }
 
         public void AddRecord(DuelRecord record, bool should_notify = true)
@@ -267,20 +263,8 @@ namespace LumiTracker.Models
             }
         }
 
-        public void Merge(BuildStats other)
-        {
-            foreach (var record in other.DuelRecords)
-            {
-                AddRecord(record, false);
-            }
-            NotifyMatchupStatsChanged();
-        }
-
         public void HideExpiredRecords(bool shouldHide)
         {
-            // TODO: fix hide expired logic
-            if (!Loaded.Value) return;
-
             if (ShouldHideExpiredRecords == shouldHide) return;
             ShouldHideExpiredRecords = shouldHide;
 
