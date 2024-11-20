@@ -92,8 +92,6 @@ namespace LumiTracker.ViewModels.Pages
                     _allBuildStats.Add(stats);
                 }
             }
-            // TODO: remove this
-            _allBuildStats = [new(), new(), new(), new(), new(), new(), new()];
 
             _current = _allBuildStats[0];
         }

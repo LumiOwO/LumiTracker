@@ -201,7 +201,8 @@ namespace LumiTracker.Models
 
                 if (x.Totals != y.Totals)
                 {
-                    return x.Totals.CompareTo(y.Totals);
+                    // Descending
+                    return -x.Totals.CompareTo(y.Totals);
                 }
                 else
                 {
@@ -309,8 +310,13 @@ namespace LumiTracker.Models
             if (all == null)
             {
                 all = new MatchupStats(cids[0], cids[1], cids[2]);
-                AllMatchupStats.Add(all);
             }
+            else
+            {
+                // Need to remove from OrderedSet, or the order will not update
+                AllMatchupStats.Remove(all);
+            }
+            AllMatchupStats.Add(all);
             all.AddStats(stats);
             Summary.AddStats(stats);
 
@@ -321,8 +327,13 @@ namespace LumiTracker.Models
                 if (after == null)
                 {
                     after = new MatchupStats(cids[0], cids[1], cids[2]);
-                    MatchupStatsAfterImport.Add(after);
                 }
+                else
+                {
+                    // Need to remove from OrderedSet, or the order will not update
+                    MatchupStatsAfterImport.Remove(after);
+                }
+                MatchupStatsAfterImport.Add(after);
                 after.AddStats(stats);
                 SummaryAfterImport.AddStats(stats);
             }
