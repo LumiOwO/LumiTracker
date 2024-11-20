@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
+using Swordfish.NET.Collections;
 
 namespace LumiTracker.Models
 {
@@ -112,25 +113,6 @@ namespace LumiTracker.Models
             Wins   += other.Wins;
             Totals += other.Totals;
         }
-
-        public void RemoveStats(MatchupStats other)
-        {
-            if (Totals <= other.Totals)
-            {
-                AvgRounds = AvgDuration = Wins = Totals = 0;
-                return;
-            }
-
-            // For reference: Brute-force way
-            //AvgRounds = ((AvgRounds * Totals) - (other.AvgRounds * other.Totals)) / (Totals - other.Totals);
-            double wAll     = 1.0 * Totals       / (Totals - other.Totals);
-            double wExpired = 1.0 * other.Totals / (Totals - other.Totals);
-            AvgRounds   = AvgRounds   * wAll - other.AvgRounds   * wExpired;
-            AvgDuration = AvgDuration * wAll - other.AvgDuration * wExpired;
-
-            Wins   -= other.Wins;
-            Totals -= other.Totals;
-        }
     }
 
     public partial class DuelRecord(int cid0, int cid1, int cid2) : ObservableObject
@@ -151,7 +133,7 @@ namespace LumiTracker.Models
         public double DurationInMinutes => Duration / 60.0; // Minutes
 
         [ObservableProperty]
-        private bool _shouldHide = false;
+        private bool _expired = false;
 
         partial void OnDurationChanged(double oldValue, double newValue)
         {
@@ -193,43 +175,49 @@ namespace LumiTracker.Models
         }
 
         [ObservableProperty]
+        private ObservableCollection<DuelRecord> _duelRecords = [];
+
+        [ObservableProperty]
         private DateTime _createdAt = new DateTime(2024, 11, 15, 19, 10, 0); // TODO: remove this
+
+        private static readonly Comparer<MatchupStats> MatchupStatsComparer 
+            = Comparer<MatchupStats>.Create((x, y) =>
+            {
+                string x_key = x.Key;
+                string y_key = y.Key;
+                if (x_key == y_key) return 0;
+                // Unknown matchup will be at the bottom
+                if (x_key == DeckUtils.UnknownCharactersKey) return 1;
+                if (y_key == DeckUtils.UnknownCharactersKey) return -1;
+
+                if (x.Totals != y.Totals)
+                {
+                    return x.Totals.CompareTo(y.Totals);
+                }
+                else
+                {
+                    return x_key.CompareTo(y_key);
+                }
+            });
+
+        [ObservableProperty]
+        private ConcurrentObservableSortedSet<MatchupStats> _allMatchupStats = new (MatchupStatsComparer);
 
         [ObservableProperty]
         private MatchupStats _summary = new (-1, -1, -1);
-
-        [ObservableProperty]
-        private ObservableCollection<MatchupStats> _allMatchupStats = [];
-
-        [ObservableProperty]
-        private ObservableCollection<DuelRecord> _duelRecords = [];
-
+        
         // TODO: initialize this
-        private bool ShouldHideExpiredRecords { get; set; } = false;
-        private MatchupStats SummaryBeforeImport { get; set; } = new (-1, -1, -1);
-        private Dictionary<string, MatchupStats> MatchupStatsDataBeforeImport { get; set; } = [];
-        private Dictionary<string, MatchupStats> AllMatchupStatsData { get; set; } = [];
+        [ObservableProperty]
+        private ConcurrentObservableSortedSet<MatchupStats> _matchupStatsAfterImport = new (MatchupStatsComparer);
 
-        public void NotifyMatchupStatsChanged()
-        {
-            // Notify MatchupStats ui update 
-            AllMatchupStats = new ObservableCollection<MatchupStats>(
-                AllMatchupStatsData.Values.OrderByDescending(stats => 
-                {
-                    if (stats.Key == DeckUtils.UnknownCharactersKey)
-                    {
-                        return int.MinValue;
-                    }
-                    return stats.Totals;
-                })
-            );
-        }
+        [ObservableProperty]
+        private MatchupStats _summaryAfterImport = new (-1, -1, -1);
 
         public async Task LoadDataAsync()
         {
             await Task.Delay(1000); /// TODO: remove this
             // TODO: use guid to load
-            DuelRecord[] records = [
+            List<DuelRecord> records = [
                 new(98, 81, 93){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), },
                 new(98, 81, 93){ IsWin = false, Rounds = 6, Duration = 620, TimeStamp = new DateTime(2024, 11, 15, 20, 0, 0), },
                 new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
@@ -240,110 +228,56 @@ namespace LumiTracker.Models
                 new(-1, 21, -1){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
                 ];
 
-            foreach (var record in records)
-            {
-                AddRecord(record, false);
-            }
-            NotifyMatchupStatsChanged();
+            SetRecords(records);
         }
 
-        public void AddRecord(DuelRecord record, bool should_notify = true)
+        public void AddRecord(DuelRecord record)
+        {
+            AddRecordToStats(record);
+            DuelRecords.Insert(0, record);
+        }
+
+        public void SetRecords(List<DuelRecord> records)
+        {
+            foreach (var record in records)
+            {
+                AddRecordToStats(record);
+            }
+            DuelRecords = new ObservableCollection<DuelRecord>(records.OrderByDescending(x => x.TimeStamp));
+        }
+
+        private void AddRecordToStats(DuelRecord record)
         {
             // TODO: need QA
             MatchupStats stats = record.GetStats();
             string key = stats.Key;
             var cids = stats.OpCharacters;
 
-            if (!AllMatchupStatsData.TryGetValue(key, out MatchupStats? all))
+            MatchupStats? all = AllMatchupStats.FirstOrDefault(m => m.Key == key);
+            if (all == null)
             {
                 all = new MatchupStats(cids[0], cids[1], cids[2]);
-                AllMatchupStatsData[key] = all;
+                AllMatchupStats.Add(all);
             }
             all.AddStats(stats);
             Summary.AddStats(stats);
 
-            DuelRecords.Insert(0, record);
-
-            if (record.TimeStamp <= CreatedAt)
+            if (record.TimeStamp > CreatedAt)
             {
-                if (!MatchupStatsDataBeforeImport.TryGetValue(key, out MatchupStats? expired))
+                record.Expired = false;
+                MatchupStats? after = MatchupStatsAfterImport.FirstOrDefault(m => m.Key == key);
+                if (after == null)
                 {
-                    expired = new MatchupStats(cids[0], cids[1], cids[2]);
-                    MatchupStatsDataBeforeImport[key] = expired;
+                    after = new MatchupStats(cids[0], cids[1], cids[2]);
+                    MatchupStatsAfterImport.Add(after);
                 }
-                expired.AddStats(stats);
-                SummaryBeforeImport.AddStats(stats);
-            }
-
-            if (should_notify)
-            {
-                NotifyMatchupStatsChanged();
-            }
-        }
-
-        public void HideExpiredRecords(bool shouldHide)
-        {
-            if (ShouldHideExpiredRecords == shouldHide) return;
-            ShouldHideExpiredRecords = shouldHide;
-
-            if (shouldHide)
-            {
-                foreach (var pair in MatchupStatsDataBeforeImport)
-                {
-                    string key = pair.Key;
-                    MatchupStats expired = pair.Value;
-                    if (!AllMatchupStatsData.TryGetValue(key, out MatchupStats? all))
-                    {
-                        Configuration.Logger.LogError($"[HideExpiredRecords] Key {key} not found in AllMatchupStatsData.");
-                        continue;
-                    }
-                    if (all.Totals == expired.Totals)
-                    {
-                        AllMatchupStatsData.Remove(key);
-                        continue;
-                    }
-                    else if (all.Totals < expired.Totals)
-                    {
-                        Configuration.Logger.LogError($"[HideExpiredRecords] {key}: Number of expired is greater then number of all.");
-                        AllMatchupStatsData.Remove(key);
-                        continue;
-                    }
-
-                    all.RemoveStats(expired);
-                }
-                Summary.RemoveStats(SummaryBeforeImport);
-
-                foreach (var record in DuelRecords)
-                {
-                    record.ShouldHide = record.TimeStamp <= CreatedAt;
-                }
+                after.AddStats(stats);
+                SummaryAfterImport.AddStats(stats);
             }
             else
             {
-                foreach (var pair in MatchupStatsDataBeforeImport)
-                {
-                    string key = pair.Key;
-                    MatchupStats expired = pair.Value;
-                    var cids = expired.OpCharacters;
-
-                    MatchupStats? all = null;
-                    if (!AllMatchupStatsData.TryGetValue(key, out all))
-                    {
-                        all = new MatchupStats(cids[0], cids[1], cids[2]);
-                        AllMatchupStatsData[key] = all;
-                    }
-                    
-                    all.AddStats(expired);
-                }
-                Summary.AddStats(SummaryBeforeImport);
-
-                foreach (var record in DuelRecords)
-                {
-                    record.ShouldHide = false;
-                }
+                record.Expired = true;
             }
-
-            NotifyMatchupStatsChanged();
         }
     }
 }

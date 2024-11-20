@@ -27,6 +27,7 @@
         <helpers:IsGoodWinRateConverter x:Key="IsGoodWinRateConverter" />
         <helpers:TrueFalseCondSwitchConverter x:Key="TrueFalseCondSwitchConverter" />
         <helpers:KeyToVisibilityConverter x:Key="KeyToVisibilityConverter" />
+        <helpers:RecordsBeforeImportVisibilityConverter x:Key="RecordsBeforeImportVisibilityConverter" />
         
         
         <SolidColorBrush x:Key="WinBrush" Color="#ffb900" />
@@ -44,6 +45,249 @@
             <Setter Property="Margin" Value="0"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
+
+        <DataTemplate x:Key="SummaryViewTemplate" DataType="{x:Type models:MatchupStats}">
+            <Grid
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Margin="10,10,0,0"
+                >
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1.2*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Text="{svs:Localization Stats_WinRate}"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Center"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.028
+                        }"
+                    />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Text="{Binding WinRate, StringFormat={}{0:P1}}"
+                    HorizontalAlignment="Center"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.028
+                        }"
+                >
+                    <TextBlock.Foreground>
+                        <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                            <Binding Source="{StaticResource GoodWinRateBrush}" />
+                            <Binding Source="{StaticResource BadWinRateBrush}"  />
+                            <Binding Path=".WinRate" Converter="{StaticResource IsGoodWinRateConverter}" />
+                        </MultiBinding>
+                    </TextBlock.Foreground>
+                </TextBlock>
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Text="{svs:Localization Stats_Games}"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Center"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.028
+                        }"
+                    />
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Text="{Binding Totals}"
+                    Foreground="{StaticResource GameCountsBrush}"
+                    HorizontalAlignment="Center"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.028
+                        }"
+                    />
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Text="{svs:Localization Stats_AvgRounds}"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Center"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.028
+                        }"
+                    />
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Text="{Binding AvgRounds, StringFormat={}{0:F1}}"
+                    Foreground="{StaticResource PlainTextBrush}"
+                    HorizontalAlignment="Center"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.028
+                        }"
+                    />
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Text="{svs:Localization Stats_AvgDuration}"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Center"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.028
+                        }"
+                    />
+                <StackPanel 
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Orientation="Horizontal"
+                    >
+                    <ui:SymbolIcon 
+                        Symbol="Clock24"
+                        Margin="0,0,2,0"
+                        Foreground="{StaticResource PlainTextBrush}"
+                        FontSize="{Binding Path=TabControlHeight, 
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.024
+                            }"
+                        />
+                    <TextBlock
+                        Foreground="{StaticResource PlainTextBrush}"
+                        FontSize="{Binding Path=TabControlHeight, 
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.028
+                            }"
+                        >
+                        <Run Text="{Binding AvgDurationInMinutes, StringFormat={}{0:F1}min, Mode=OneWay}" />
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- Settings -->
+                <Grid
+                    Grid.Row="4"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="0,0,0,0"
+                    >
+                    <ui:Button
+                        Grid.Row="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Padding="6,2,7,2"
+                        Margin="5,0,0,5"
+                        Command="{Binding SettingsButtonClickCommand, Mode=OneWay, 
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                            }"
+                        >
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="Settings24">
+                                <ui:SymbolIcon.LayoutTransform>
+                                    <ScaleTransform 
+                                        ScaleX="{Binding TabControlHeight,
+                                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                            Converter={StaticResource SizeWithRatioConverter}, 
+                                            ConverterParameter=0.002
+                                            }" 
+                                        ScaleY="{Binding TabControlHeight,
+                                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                            Converter={StaticResource SizeWithRatioConverter}, 
+                                            ConverterParameter=0.002
+                                            }" 
+                                        />
+                                </ui:SymbolIcon.LayoutTransform>
+                            </ui:SymbolIcon>
+                        </ui:Button.Icon>
+                        <TextBlock
+                            Text="{svs:Localization Settings}"
+                            Padding="0"
+                            Margin="-3,0,0,1"
+                            FontSize="{Binding Path=TabControlHeight, 
+                                RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                Converter={StaticResource SizeWithRatioConverter},
+                                ConverterParameter=0.028
+                                }"
+                            />
+                    </ui:Button>
+
+                    <ui:Flyout
+                        Grid.Row="0"
+                        IsOpen="{Binding SettingsPanelOpen, Mode=TwoWay, 
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                            }"
+                        Placement="Bottom"
+                        Background="{StaticResource MainContentBackground}"
+                        BorderBrush="{StaticResource DeckPageBorderBrush}"
+                        Padding="15,2,15,10"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Left"
+                        >
+                        <StackPanel>
+                            <CheckBox
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding IncludeAllBuildVersions, Mode=TwoWay, 
+                                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                                    }"
+                                Margin="0,5,0,0"
+                                >
+                                <TextBlock 
+                                    FontSize="{Binding Path=TabControlHeight, 
+                                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                        Converter={StaticResource SizeWithRatioConverter},
+                                        ConverterParameter=0.028
+                                        }"
+                                    Margin="0,0,0,1"
+                                    Text="{svs:Localization Stats_IncludeAllBuildVersions}"/>
+                            </CheckBox>
+                            <CheckBox
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding HideRecordsBeforeImport, Mode=TwoWay, 
+                                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                                        }"
+                                Margin="0,5,0,0"
+                                >
+                                <TextBlock 
+                                    FontSize="{Binding Path=TabControlHeight, 
+                                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
+                                        Converter={StaticResource SizeWithRatioConverter},
+                                        ConverterParameter=0.028
+                                        }"
+                                    Margin="0,0,0,1"
+                                    Text="{svs:Localization Stats_HideExpired}"/>
+                            </CheckBox>
+                        </StackPanel>
+                    </ui:Flyout>
+                </Grid>
+    
+            </Grid>
+        </DataTemplate>
 
         <DataTemplate x:Key="MatchupStatsViewTemplate" DataType="{x:Type models:MatchupStats}">
             <Border
@@ -207,14 +451,21 @@
 
         <DataTemplate x:Key="DuelRecordViewTemplate" DataType="{x:Type models:DuelRecord}">
             <Border
-                Visibility="{Binding ShouldHide,
-                    Converter={StaticResource BooleanNotToVisibilityConverter},
-                    ConverterParameter=Collapsed}"
                 BorderThickness="0,0,0,0.1"
                 BorderBrush="White"
                 Margin="5,0,5,0"
                 Padding="8,0,0,8"
                 >
+            <Border.Visibility>
+                <MultiBinding 
+                    Converter="{StaticResource RecordsBeforeImportVisibilityConverter}"
+                    ConverterParameter="Collapsed">
+                    <Binding Path="Expired" />
+                    <Binding Path="HideRecordsBeforeImport" 
+                        RelativeSource="{RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}"/>
+                </MultiBinding>
+            </Border.Visibility>
+                
             <Grid
                 IsHitTestVisible="True"
                 Height="{Binding Path=TabControlHeight, 
@@ -382,226 +633,19 @@
         </Grid.ColumnDefinitions>
 
         <!-- Summary -->
-        <Grid
+        <ContentControl
             Grid.Row="0"
             Grid.Column="0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Margin="10,10,0,0"
+            ContentTemplate="{StaticResource SummaryViewTemplate}"
             >
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="1.2*"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="0"
-                Text="{svs:Localization Stats_WinRate}"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                FontSize="{Binding Path=TabControlHeight, 
-                    Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.028
-                    }"
-                />
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="1"
-                Text="{Binding Stats.Summary.WinRate, StringFormat={}{0:P1}}"
-                HorizontalAlignment="Center"
-                FontSize="{Binding Path=TabControlHeight, 
-                    Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.028
-                    }"
-            >
-                <TextBlock.Foreground>
-                    <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
-                        <Binding Source="{StaticResource GoodWinRateBrush}" />
-                        <Binding Source="{StaticResource BadWinRateBrush}"  />
-                        <Binding Path="Stats.Summary.WinRate" Converter="{StaticResource IsGoodWinRateConverter}" />
-                    </MultiBinding>
-                </TextBlock.Foreground>
-            </TextBlock>
-            <TextBlock
-                Grid.Row="1"
-                Grid.Column="0"
-                Text="{svs:Localization Stats_Games}"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                FontSize="{Binding Path=TabControlHeight, 
-                    Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.028
-                    }"
-                />
-            <TextBlock
-                Grid.Row="1"
-                Grid.Column="1"
-                Text="{Binding Stats.Summary.Totals}"
-                Foreground="{StaticResource GameCountsBrush}"
-                HorizontalAlignment="Center"
-                FontSize="{Binding Path=TabControlHeight, 
-                    Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.028
-                    }"
-                />
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="0"
-                Text="{svs:Localization Stats_AvgRounds}"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                FontSize="{Binding Path=TabControlHeight, 
-                    Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.028
-                    }"
-                />
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="1"
-                Text="{Binding Stats.Summary.AvgRounds, StringFormat={}{0:F1}}"
-                Foreground="{StaticResource PlainTextBrush}"
-                HorizontalAlignment="Center"
-                FontSize="{Binding Path=TabControlHeight, 
-                    Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.028
-                    }"
-                />
-            <TextBlock
-                Grid.Row="3"
-                Grid.Column="0"
-                Text="{svs:Localization Stats_AvgDuration}"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                FontSize="{Binding Path=TabControlHeight, 
-                    Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.028
-                    }"
-                />
-            <StackPanel 
-                Grid.Row="3"
-                Grid.Column="1"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Orientation="Horizontal"
-                >
-                <ui:SymbolIcon 
-                    Symbol="Clock24"
-                    Margin="0,0,2,0"
-                    Foreground="{StaticResource PlainTextBrush}"
-                    FontSize="{Binding Path=TabControlHeight, 
-                        Converter={StaticResource SizeWithRatioConverter},
-                        ConverterParameter=0.024
-                        }"
-                    />
-                <TextBlock
-                    Foreground="{StaticResource PlainTextBrush}"
-                    FontSize="{Binding Path=TabControlHeight, 
-                        Converter={StaticResource SizeWithRatioConverter},
-                        ConverterParameter=0.028
-                        }"
-                    >
-                    <Run Text="{Binding Stats.Summary.AvgDurationInMinutes, StringFormat={}{0:F1}min, Mode=OneWay}" />
-                </TextBlock>
-            </StackPanel>
-
-            <!-- Settings -->
-            <Grid
-                Grid.Row="4"
-                Grid.Column="0"
-                Grid.ColumnSpan="2"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Margin="0,0,0,0"
-                >
-                <ui:Button
-                    Grid.Row="0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Padding="6,2,7,2"
-                    Margin="5,0,0,5"
-                    Command="{Binding SettingsButtonClickCommand, Mode=OneWay}"
-                    >
-                    <ui:Button.Icon>
-                        <ui:SymbolIcon Symbol="Settings24">
-                            <ui:SymbolIcon.LayoutTransform>
-                                <ScaleTransform 
-                                    ScaleX="{Binding TabControlHeight,
-                                        Converter={StaticResource SizeWithRatioConverter}, 
-                                        ConverterParameter=0.002
-                                        }" 
-                                    ScaleY="{Binding TabControlHeight,
-                                        Converter={StaticResource SizeWithRatioConverter}, 
-                                        ConverterParameter=0.002
-                                        }" 
-                                    />
-                            </ui:SymbolIcon.LayoutTransform>
-                        </ui:SymbolIcon>
-                    </ui:Button.Icon>
-                    <TextBlock
-                        Text="{svs:Localization Settings}"
-                        Padding="0"
-                        Margin="-3,0,0,1"
-                        FontSize="{Binding Path=TabControlHeight, 
-                            Converter={StaticResource SizeWithRatioConverter},
-                            ConverterParameter=0.028
-                            }"
-                        />
-                </ui:Button>
-
-                <ui:Flyout
-                    Grid.Row="0"
-                    IsOpen="{Binding SettingsPanelOpen, Mode=TwoWay}"
-                    Placement="Bottom"
-                    Background="{StaticResource MainContentBackground}"
-                    BorderBrush="{StaticResource DeckPageBorderBrush}"
-                    Padding="15,2,15,10"
-                    Margin="5,0,0,0"
-                    HorizontalAlignment="Left"
-                    >
-                    <StackPanel>
-                        <CheckBox
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            IsChecked="{Binding IncludeAllBuildVersions, Mode=TwoWay}"
-                            Margin="0,5,0,0"
-                            >
-                            <TextBlock 
-                                FontSize="{Binding Path=TabControlHeight, 
-                                    Converter={StaticResource SizeWithRatioConverter},
-                                    ConverterParameter=0.028
-                                    }"
-                                Margin="0,0,0,1"
-                                Text="{svs:Localization Stats_IncludeAllBuildVersions}"/>
-                        </CheckBox>
-                        <CheckBox
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            IsChecked="{Binding HideRecordsBeforeImport, Mode=TwoWay}"
-                            Margin="0,5,0,0"
-                            >
-                            <TextBlock 
-                                FontSize="{Binding Path=TabControlHeight, 
-                                    Converter={StaticResource SizeWithRatioConverter},
-                                    ConverterParameter=0.028
-                                    }"
-                                Margin="0,0,0,1"
-                                Text="{svs:Localization Stats_HideExpired}"/>
-                        </CheckBox>
-                    </StackPanel>
-                </ui:Flyout>
-            </Grid>
-            
-        </Grid>
+            <ContentControl.Content>
+                <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                    <Binding Path="Stats.SummaryAfterImport" />
+                    <Binding Path="Stats.Summary"  />
+                    <Binding Path="HideRecordsBeforeImport" Mode="OneWay" />
+                </MultiBinding>
+            </ContentControl.Content>
+        </ContentControl>
 
         <!-- Matchups -->
         <Border
@@ -620,10 +664,17 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                ItemsSource="{Binding Stats.AllMatchupStats}"
                 ItemTemplate="{StaticResource MatchupStatsViewTemplate}"
                 SelectionChanged="DisableListViewSelection"
-                />
+                >
+                <ui:ListView.ItemsSource>
+                    <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                        <Binding Path="Stats.MatchupStatsAfterImport.CollectionView" />
+                        <Binding Path="Stats.AllMatchupStats.CollectionView"  />
+                        <Binding Path="HideRecordsBeforeImport" Mode="OneWay" />
+                    </MultiBinding>
+                </ui:ListView.ItemsSource>
+            </ui:ListView>
         </Border>
 
         <Separator

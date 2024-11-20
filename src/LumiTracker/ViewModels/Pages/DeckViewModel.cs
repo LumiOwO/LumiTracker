@@ -143,17 +143,12 @@ namespace LumiTracker.ViewModels.Pages
                 }
                 await Task.WhenAll(tasks);
 
+                List<DuelRecord> records = [];
                 foreach (BuildStats stats in AllBuildStats)
                 {
-                    foreach (var record in stats.DuelRecords)
-                    {
-                        Total.AddRecord(record, false);
-                    }
+                    records.AddRange(stats.DuelRecords);
                 }
-                Total.DuelRecords = new ObservableCollection<DuelRecord>(
-                    Total.DuelRecords.OrderByDescending(x => x.TimeStamp)
-                );
-                Total.NotifyMatchupStatsChanged();
+                Total.SetRecords(records);
 
                 loadLock.Enter(ref lockTaken);
                 Total.LoadState = ELoadState.Loaded;
@@ -172,11 +167,6 @@ namespace LumiTracker.ViewModels.Pages
             finally
             {
                 if (lockTaken) loadLock.Exit();
-            }
-
-            if (Info.HideRecordsBeforeImport ?? false)
-            {
-                Total.HideExpiredRecords(true);
             }
         }
 
@@ -220,11 +210,6 @@ namespace LumiTracker.ViewModels.Pages
             finally
             {
                 if (lockTaken) loadLock.Exit();
-            }
-
-            if (Info.HideRecordsBeforeImport ?? false)
-            {
-                stats.HideExpiredRecords(true);
             }
         }
 
@@ -271,46 +256,11 @@ namespace LumiTracker.ViewModels.Pages
             }
         }
 
-        private void HideExpiredRecordsIfAvailable(BuildStats stats)
-        {
-            bool lockTaken = false;
-            var loadLock = stats.LoadStateLock;
-            try
-            {
-                loadLock.Enter(ref lockTaken);
-                if (stats.LoadState != ELoadState.Loaded)
-                {
-                    return;
-                }
-            }
-            finally
-            {
-                if (lockTaken) loadLock.Exit();
-                lockTaken = false;
-            }
-
-            bool hide = Info.HideRecordsBeforeImport ?? false;
-            stats.HideExpiredRecords(hide);
-        }
-
-        private void OnHideRecordsBeforeImportChanged()
-        {
-            foreach (var stats in AllBuildStats)
-            {
-                HideExpiredRecordsIfAvailable(stats);
-            }
-            HideExpiredRecordsIfAvailable(Total);
-        }
-
         private void OnDeckInfoPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(DeckInfo.IncludeAllBuildVersions) || e.PropertyName == nameof(DeckInfo.CurrentVersionIndex))
             {
                 UpdateCurrent(Info.IncludeAllBuildVersions, Info.CurrentVersionIndex);
-            }
-            else if (e.PropertyName == nameof(DeckInfo.HideRecordsBeforeImport))
-            {
-                OnHideRecordsBeforeImportChanged();
             }
         }
     }

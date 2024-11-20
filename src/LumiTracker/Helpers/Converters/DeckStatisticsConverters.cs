@@ -41,4 +41,20 @@ namespace LumiTracker.Helpers
         }
     }
 
+    public class RecordsBeforeImportVisibilityConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length != 2 || !values.All(v => v is bool) || !(parameter is string invisibleType))
+                return false;
+
+            return VisibilityConverterUtils.ToVisibility(invisibleType, () => !values.Cast<bool>().All(b => b));
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }

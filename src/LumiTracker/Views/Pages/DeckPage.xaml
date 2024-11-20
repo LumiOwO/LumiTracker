@@ -266,13 +266,13 @@
                         ConverterParameter=Collapsed
                         }"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,3,0,0"
+                    VerticalAlignment="Center"
+                    Margin="0,0,0,0"
                     Foreground="Gray"
                     FontSize="{Binding ActualHeight,
                         ElementName=UserDeckListView,
                         Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.040
+                        ConverterParameter=0.036
                         }"
                     Text="{svs:Localization NoData}"
                     />
