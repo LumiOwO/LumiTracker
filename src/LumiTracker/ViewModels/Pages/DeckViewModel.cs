@@ -78,8 +78,7 @@ namespace LumiTracker.ViewModels.Pages
             Info = info;
             Info.PropertyChanged += OnDeckInfoPropertyChanged;
 
-            var first = new BuildStats();
-            first.CreatedAt = Info.CreatedAt;
+            var first = new BuildStats(Info.ShareCode, Info.CreatedAt);
             // TODO: add guid
             //first.Guid = Info.ShareCode;
             _allBuildStats.Add(first);
@@ -87,8 +86,7 @@ namespace LumiTracker.ViewModels.Pages
             {
                 foreach (BuildEdit edit in info.EditVersions)
                 {
-                    var stats = new BuildStats();
-                    stats.CreatedAt = edit.CreatedAt;
+                    var stats = new BuildStats(edit.ShareCode, edit.CreatedAt);
                     // TODO: add guid
                     //stats.Guid = edit.ShareCode;
                     _allBuildStats.Add(stats);
@@ -271,9 +269,6 @@ namespace LumiTracker.ViewModels.Pages
         private DeckInfo _info;
 
         [ObservableProperty]
-        private ObservableCollection<ActionCardView> _actionCards = [];
-
-        [ObservableProperty]
         private DeckStatistics _stats;
 
         [ObservableProperty]
@@ -290,26 +285,22 @@ namespace LumiTracker.ViewModels.Pages
 
         public void LoadCurrent()
         {
-            if (ActionCards.Count == 0)
-            {
-                ImportFromShareCode(Info.ShareCode);
-            }
-
-            // TODO: Init DeckStatistics
-            {
-                Stats.UpdateCurrent(Info.IncludeAllBuildVersions, Info.CurrentVersionIndex);
-            }
+            Stats.UpdateCurrent(Info.IncludeAllBuildVersions, Info.CurrentVersionIndex);
         }
 
         public bool ImportFromShareCode(string sharecode)
         {
+            // TODO: fix this logic
+            // Info.Characters means the selected build's characters
+            // if Characters not same, create new deck
+            // if guid exist, select that build 
             int[]? cards = DeckUtils.DecodeShareCode(sharecode);
             if (cards == null)
             {
                 Configuration.Logger.LogWarning($"[DeckItem.DecodeShareCode] Invalid share code: {sharecode}");
                 return false;
             }
-            Info.ShareCode = sharecode;
+            Info.ShareCode = sharecode; // TODO: remove this line
             Info.Characters = cards[..3].ToList();
 
             ///////////////////////
@@ -332,7 +323,7 @@ namespace LumiTracker.ViewModels.Pages
                 }
             }
 
-            ActionCards = new ObservableCollection<ActionCardView>(views);
+            //ActionCards = new ObservableCollection<ActionCardView>(views);
             return true;
         }
     }

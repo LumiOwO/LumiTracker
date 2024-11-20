@@ -12,8 +12,10 @@ namespace LumiTracker.Models
         public string ShareCode = "";
 
         [JsonProperty("created_at")]
+        [ObservableProperty]
+        [property: JsonIgnore]
         [JsonConverter(typeof(CustomDateTimeConverter), "yyyy/MM/dd HH:mm:ss")]
-        public DateTime CreatedAt = CustomDateTimeConverter.MinTime;
+        private DateTime _createdAt = CustomDateTimeConverter.MinTime;
     }
 
     public partial class DeckInfo : ObservableObject
@@ -161,26 +163,33 @@ namespace LumiTracker.Models
 
     public partial class BuildStats : ObservableObject
     {
-        public Guid Guid { get; set; } = Guid.Empty;
-        public SpinLock LoadStateLock { get; } = new SpinLock();
-
         [ObservableProperty]
         public ELoadState _loadState = ELoadState.NotLoaded;
-
+        public SpinLock LoadStateLock { get; } = new SpinLock();
         public bool IsLoading => (LoadState == ELoadState.Loading);
+        public bool IsLoaded => (LoadState == ELoadState.Loaded);
 
         partial void OnLoadStateChanged(ELoadState oldValue, ELoadState newValue)
         {
             OnPropertyChanged(nameof(IsLoading));
+            OnPropertyChanged(nameof(IsLoaded));
         }
+
+        /////////////////////////
+        // These will be loaded when LoadState == ELoadState.Loaded
+        public Guid Guid { get; set; } = Guid.Empty;
+
+        public BuildEdit Edit { get; set; } // Must be init in constructor
+
+        [ObservableProperty]
+        private ObservableCollection<ActionCardView> _actionCards = [];
+
+        public List<int> Characters { get; set; } = [-1, -1, -1];
 
         [ObservableProperty]
         private ObservableCollection<DuelRecord> _duelRecords = [];
 
-        [ObservableProperty]
-        private DateTime _createdAt = new DateTime(2024, 11, 15, 19, 10, 0); // TODO: remove this
-
-        private static readonly Comparer<MatchupStats> MatchupStatsComparer 
+        private static readonly Comparer<MatchupStats> MatchupStatsComparer
             = Comparer<MatchupStats>.Create((x, y) =>
             {
                 string x_key = x.Key;
@@ -201,21 +210,64 @@ namespace LumiTracker.Models
             });
 
         [ObservableProperty]
-        private ConcurrentObservableSortedSet<MatchupStats> _allMatchupStats = new (MatchupStatsComparer);
+        private ConcurrentObservableSortedSet<MatchupStats> _allMatchupStats = new(MatchupStatsComparer);
 
         [ObservableProperty]
-        private MatchupStats _summary = new (-1, -1, -1);
-        
+        private MatchupStats _summary = new(-1, -1, -1);
+
         // TODO: initialize this
         [ObservableProperty]
-        private ConcurrentObservableSortedSet<MatchupStats> _matchupStatsAfterImport = new (MatchupStatsComparer);
+        private ConcurrentObservableSortedSet<MatchupStats> _matchupStatsAfterImport = new(MatchupStatsComparer);
 
         [ObservableProperty]
-        private MatchupStats _summaryAfterImport = new (-1, -1, -1);
+        private MatchupStats _summaryAfterImport = new(-1, -1, -1);
+
+        public BuildStats(string sharecode, DateTime CreatedAt)
+        {
+            Edit = new BuildEdit { ShareCode = sharecode, CreatedAt = CreatedAt };
+        }
+
+        public BuildStats(BuildEdit edit) : this(edit.ShareCode, edit.CreatedAt)
+        {
+
+        }
+
+        // TODO: remove this
+        public BuildStats() : this("GBGxSYwYGGHRho8ZGEHxlEgYFICB9IEPGEAQ9rMQCzExA4UUGMFQTMIYDKEgitEZDWAA", new DateTime(2024, 11, 15, 19, 10, 0))
+        {
+
+        }
 
         public async Task LoadDataAsync()
         {
             await Task.Delay(1000); /// TODO: remove this
+
+            // TODO: set guid here
+            int[]? cards = DeckUtils.DecodeShareCode(Edit.ShareCode);
+            if (cards == null)
+            {
+                Configuration.Logger.LogWarning($"[LoadDataAsync] Invalid share code: {Edit.ShareCode}");
+                cards = Enumerable.Repeat(-1, 33).ToArray();
+            }
+            Characters = cards[..3].ToList();
+
+            // Sort in case of non-standard order
+            Array.Sort(cards, 3, 30,
+                Comparer<int>.Create((x, y) => DeckUtils.ActionCardCompare(x, y)));
+            // To column major
+            ActionCardView[] views = new ActionCardView[30];
+            for (int x = 0; x < 2; x++)
+            {
+                for (int y = 0; y < 15; y++)
+                {
+                    // transpose
+                    int srcIdx = 3 + x * 15 + y;
+                    int dstIdx = y * 2 + x;
+                    views[dstIdx] = new ActionCardView(null, cards[srcIdx], inGame: false);
+                }
+            }
+            ActionCards = new ObservableCollection<ActionCardView>(views);
+
             // TODO: use guid to load
             List<DuelRecord> records = [
                 new(98, 81, 93){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), },
@@ -262,7 +314,7 @@ namespace LumiTracker.Models
             all.AddStats(stats);
             Summary.AddStats(stats);
 
-            if (record.TimeStamp > CreatedAt)
+            if (record.TimeStamp > Edit.CreatedAt)
             {
                 record.Expired = false;
                 MatchupStats? after = MatchupStatsAfterImport.FirstOrDefault(m => m.Key == key);

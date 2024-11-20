@@ -31,7 +31,8 @@
         <helpers:IsNotNullValueConverter x:Key="IsNotNullValueConverter" />
         <helpers:TrueFalseCondSwitchConverter x:Key="TrueFalseCondSwitchConverter" />
         <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
-        
+        <helpers:ActionCardViewsConverter x:Key="ActionCardViewsConverter" />
+
         <SolidColorBrush x:Key="MainContentBackground" Color="#ff282c34" />
         <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
         <SolidColorBrush x:Key="DeckNameBrush" Color="White" />
@@ -391,7 +392,7 @@
                     <ComboBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:BuildStats}">
                             <TextBlock 
-                                Text="{Binding CreatedAt, StringFormat={}{0:MM/dd HH:mm}}"
+                                Text="{Binding Edit.CreatedAt, StringFormat={}{0:MM/dd HH:mm}}"
                                 Margin="3,0,0,0"
                                 FontSize="{Binding ActualHeight,
                                     RelativeSource={RelativeSource AncestorType={x:Type ComboBox}},
@@ -522,35 +523,77 @@
                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                     SelectionChanged="DisableListViewSelection"
-                    ItemsSource="{Binding ViewModel.SelectedDeckItem.ActionCards}"
                     ItemTemplate="{StaticResource ActionCardViewTemplate}"
                     Background="{StaticResource MainContentBackground}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch">
 
-                    <ListView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="2" />
-                        </ItemsPanelTemplate>
-                    </ListView.ItemsPanel>
-                </ListView>
-                <TextBlock 
-                    Grid.Row="0"
-                    Visibility="{Binding ViewModel.DeckItems.Count, Mode=OneWay,
-                        Converter={StaticResource HidePositiveIntValueConverter},
-                        ConverterParameter=Collapsed
-                        }"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Margin="0,0,0,50"
-                    Foreground="Gray"
-                    FontSize="{Binding ActualWidth, 
-                        RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
-                        Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.05
-                        }"
-                    Text="{svs:Localization NoData}"
-                    />
+                        <ListView.ItemsSource>
+                            <MultiBinding Converter="{StaticResource ActionCardViewsConverter}">
+                                <Binding Path="ViewModel.SelectedDeckItem.Stats" />
+                                <Binding Path="ViewModel.SelectedDeckItem.Info.CurrentVersionIndex" />
+                                <Binding Path="ViewModel.SelectedDeckItem.Stats.Current.IsLoaded" />
+                            </MultiBinding>
+                        </ListView.ItemsSource>
+
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="2" />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
+                    <StackPanel
+                        Grid.Row="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding ItemsSource.Count, Mode=OneWay,
+                            ElementName=CardListView,
+                            Converter={StaticResource HidePositiveIntValueConverter},
+                            ConverterParameter=Collapsed
+                            }"
+                        Margin="0,0,0,50"
+                        >
+                        <ui:ProgressRing
+                            Visibility="{Binding ViewModel.SelectedDeckItem.Stats.Current.IsLoading, Mode=OneWay,
+                                Converter={StaticResource BooleanToVisibilityConverter},
+                                ConverterParameter=Collapsed,
+                                FallbackValue=Collapsed
+                                }"
+                            IsIndeterminate="{Binding ViewModel.SelectedDeckItem.Stats.Current.IsLoading, Mode=OneWay}"
+                            Margin="0,0,5,0"
+                            Width="{Binding ActualWidth, 
+                                RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                                Converter={StaticResource SizeWithRatioConverter}, 
+                                ConverterParameter=0.045
+                                }"
+                            Height="{Binding ActualWidth, 
+                                RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                                Converter={StaticResource SizeWithRatioConverter}, 
+                                ConverterParameter=0.045
+                                }"
+                            />
+                        <TextBlock 
+                            Foreground="Gray"
+                            FontSize="{Binding ActualWidth, 
+                                RelativeSource={RelativeSource AncestorType={x:Type TabControl}},
+                                Converter={StaticResource SizeWithRatioConverter}, 
+                                ConverterParameter=0.05
+                                }"
+                            >
+                            <TextBlock.Text>
+                                <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                                    <svs:Localization Key="Loading"/>
+                                    <svs:Localization Key="NoData"/>
+                                    <Binding 
+                                        Path="ViewModel.SelectedDeckItem.Stats.Current.IsLoading" 
+                                        Mode="OneWay"
+                                        FallbackValue="False"
+                                        />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
                 </Grid>
             </TabItem>
 
@@ -631,7 +674,7 @@
                             ConverterParameter=Collapsed,
                             FallbackValue=Collapsed
                             }"
-                        IsIndeterminate="True"
+                        IsIndeterminate="{Binding ViewModel.SelectedDeckItem.Stats.Current.IsLoading, Mode=OneWay}"
                         Margin="0,0,5,0"
                         Width="{Binding ActualWidth, 
                             RelativeSource={RelativeSource AncestorType={x:Type TabControl}},

@@ -1,5 +1,7 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Models;
+using LumiTracker.ViewModels.Pages;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -57,4 +59,25 @@ namespace LumiTracker.Helpers
         }
     }
 
+    public class ActionCardViewsConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            ObservableCollection<ActionCardView> empty = [];
+            if (values == null || values.Length != 3 || values[0] is not DeckStatistics)
+                return empty;
+
+            DeckStatistics stats = (values[0] as DeckStatistics)!;
+            int index = (values[1] is int ? (int)values[1] : 0);
+            bool isLoaded = (values[2] is bool ? (bool)values[2] : false);
+            return isLoaded ? stats.AllBuildStats[index].ActionCards : empty;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    
 }

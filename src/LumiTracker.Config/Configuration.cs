@@ -133,6 +133,11 @@ namespace LumiTracker.Config
             _logger = loggerFactory.CreateLogger<Configuration>();
             _logger.LogInformation($"App Version: {AppName}-{GetAssemblyVersion()}");
 
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+
             _ini = LoadIniSettings(IniFilePath);
             _db = LoadJObjectInternal(DbFilePath);
             if (File.Exists(UserConfigPath))
