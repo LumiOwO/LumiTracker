@@ -74,6 +74,11 @@ namespace LumiTracker.Config
             "ob"
         );
 
+        public static readonly string DeckBuildsDir = Path.Combine(
+            DocumentsDir,
+            "builds"
+        );
+
         // Files
         public static readonly string IniFilePath = Path.Combine(
             RootDir,
@@ -247,13 +252,8 @@ namespace LumiTracker.Config
 
                 using (var stringWriter = new StringWriter())
                 {
-                    var customWriter = new CustomJsonTextWriter(stringWriter)
-                    {
-                        Formatting  = Formatting.Indented,
-                        Indentation = 2,
-                        IndentChar  = ' ',
-                    };
-                    var serializer = new JsonSerializer();
+                    var customWriter = new CustomJsonTextWriter(stringWriter, indented: true);
+                    var serializer   = new JsonSerializer();
                     serializer.Serialize(customWriter, jObject);
 
                     File.WriteAllText(path, stringWriter.ToString());

@@ -11,6 +11,8 @@ using System.Windows.Data;
 using Wpf.Ui;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -98,9 +100,10 @@ namespace LumiTracker.ViewModels.Pages
         public void UpdateCurrent(bool? IncludeAllBuildVersions, int? CurrentVersionIndex)
         {
             bool IsIncludeAllBuildVersions = IncludeAllBuildVersions ?? false;
+            int index = Math.Clamp(CurrentVersionIndex ?? 0, 0, AllBuildStats.Count - 1);
+            Configuration.Logger.LogDebug($"[UpdateCurrent] IsTotal = {IsIncludeAllBuildVersions}, Index = {index}");
             if (!IsIncludeAllBuildVersions)
             {
-                int index = Math.Clamp(CurrentVersionIndex ?? 0, 0, AllBuildStats.Count - 1);
                 Current = AllBuildStats[index];
                 Task task = AsyncLoadAt(index);
             }
@@ -208,9 +211,10 @@ namespace LumiTracker.ViewModels.Pages
             }
         }
 
-        public void AddRecord(DuelRecord record)
+        public async Task AddRecord(DuelRecord record)
         {
-            BuildStats stats = AllBuildStats[Info.CurrentVersionIndex ?? 0];
+            // TODO: need QA
+            BuildStats stats = SelectedBuildVersion;
 
             // Add record to current
             bool lockTaken = false;
@@ -232,6 +236,15 @@ namespace LumiTracker.ViewModels.Pages
 
             record.Expired = record.TimeStamp <= stats.Edit.CreatedAt;
             stats.AddRecord(record);
+            try
+            {
+                await SaveRecordToDisk(record, stats.Guid);
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"[AddRecord] Failed to save record to disk: {ex.Message}");
+            }
+
 
             // Add record to total if Total loaded
             loadLock = Total.LoadStateLock;
@@ -250,6 +263,45 @@ namespace LumiTracker.ViewModels.Pages
             if (totalLoaded)
             {
                 Total.AddRecord(record);
+            }
+        }
+
+        private async Task SaveRecordToDisk(DuelRecord record, Guid guid)
+        {
+            string dataDir = Path.Combine(Configuration.DeckBuildsDir, guid.ToString());
+            if (!Directory.Exists(dataDir))
+            {
+                Directory.CreateDirectory(dataDir);
+            }
+            string jsonPath = Path.Combine(dataDir, $"{DateTime.Now:yyyyMM}.json");
+
+            // Open the file in append mode
+            using (var stream = new FileStream(jsonPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+            {
+                bool empty = (stream.Length == 0);
+                if (!empty)
+                {
+                    // Move back to overwrite the closing bracket ']'
+                    stream.Seek(-1, SeekOrigin.End);
+                }
+
+                using (var writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen: true))
+                using (var jsonWriter = new CustomJsonTextWriter(writer, indented: true))
+                {
+                    if (empty)
+                    {
+                        // File is empty, start a new JSON array
+                        await writer.WriteLineAsync("[");
+                    }
+                    else
+                    {
+                        await writer.WriteLineAsync(",");
+                    }
+                    var serializer = new JsonSerializer();
+                    serializer.Serialize(jsonWriter, record);
+                    await writer.WriteLineAsync();
+                    await writer.WriteAsync("]");
+                }
             }
         }
 
@@ -589,6 +641,10 @@ namespace LumiTracker.ViewModels.Pages
             {
                 return;
             }
+
+            // TODO: remove this
+            await SelectedDeckItem.Stats.AddRecord(
+                new(98, 81, 93) { IsWin = true, Rounds = 7, Duration = 580, TimeStamp = DateTime.Now });
 
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
                 Lang.EditDeckName_Title,

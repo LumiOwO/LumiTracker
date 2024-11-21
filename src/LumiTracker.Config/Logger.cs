@@ -10,8 +10,11 @@ namespace LumiTracker.Config
 {
     public class CustomJsonTextWriter : JsonTextWriter
     {
-        public CustomJsonTextWriter(TextWriter writer) : base(writer)
+        public CustomJsonTextWriter(TextWriter writer, bool indented) : base(writer)
         {
+            Formatting  = indented ? Formatting.Indented : Formatting.None;
+            Indentation = 2;
+            IndentChar  = ' ';
         }
 
         protected override void WriteIndent()
@@ -93,13 +96,8 @@ namespace LumiTracker.Config
                 bool indented = forceIndent  ? true  :
                                 forceCompact ? false :
                                 ContainsDictOrArray(token);
-                var customWriter = new CustomJsonTextWriter(stringWriter)
-                {
-                    Formatting  = indented ? Formatting.Indented : Formatting.None,
-                    Indentation = 2,
-                    IndentChar  = ' ',
-                };
-                var serializer = new JsonSerializer();
+                var customWriter = new CustomJsonTextWriter(stringWriter, indented);
+                var serializer   = new JsonSerializer();
                 serializer.Serialize(customWriter, token);
                 res = stringWriter.ToString();
             }

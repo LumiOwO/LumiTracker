@@ -30,7 +30,7 @@ namespace LumiTracker.Helpers
         {
             if (!(value is string key && parameter is string inverseString))
             {
-                throw new NotImplementedException();
+                return Visibility.Hidden;
             }
 
             bool inverse = (inverseString == Boolean.TrueString);
@@ -48,7 +48,9 @@ namespace LumiTracker.Helpers
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values == null || values.Length != 2 || !values.All(v => v is bool) || !(parameter is string invisibleType))
-                return false;
+            {
+                return Visibility.Collapsed;
+            }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => !values.Cast<bool>().All(b => b));
         }

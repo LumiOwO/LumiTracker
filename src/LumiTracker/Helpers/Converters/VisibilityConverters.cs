@@ -32,7 +32,7 @@ namespace LumiTracker.Helpers
         {
             if (!(value is bool isVisible && parameter is string invisibleType))
             {
-                throw new NotImplementedException();
+                return Visibility.Collapsed;
             }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => isVisible);
@@ -50,7 +50,7 @@ namespace LumiTracker.Helpers
         {
             if (!(value is bool notVisible && parameter is string invisibleType))
             {
-                throw new NotImplementedException();
+                return Visibility.Collapsed;
             }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => !notVisible);
@@ -68,7 +68,7 @@ namespace LumiTracker.Helpers
         {
             if (!(value is string s && parameter is string invisibleType))
             {
-                throw new NotImplementedException();
+                return Visibility.Collapsed;
             }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => s != "");
@@ -86,7 +86,7 @@ namespace LumiTracker.Helpers
         {
             if (!(value is double v && parameter is string invisibleType))
             {
-                throw new NotImplementedException();
+                return Visibility.Collapsed;
             }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => v != 0.0);
@@ -103,7 +103,9 @@ namespace LumiTracker.Helpers
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values == null || values.Length == 0 || !values.All(v => v is bool) || !(parameter is string invisibleType))
-                return false;
+            {
+                return Visibility.Collapsed;
+            }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => values.Cast<bool>().All(b => b));
         }
@@ -120,7 +122,7 @@ namespace LumiTracker.Helpers
         {
             if (!(value is int intValue && parameter is string invisibleType))
             {
-                throw new NotImplementedException();
+                return Visibility.Collapsed;
             }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => intValue >= 0);
@@ -138,7 +140,7 @@ namespace LumiTracker.Helpers
         {
             if (!(value is int intValue && parameter is string invisibleType))
             {
-                throw new NotImplementedException();
+                return Visibility.Collapsed;
             }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => intValue > 0);
@@ -156,7 +158,7 @@ namespace LumiTracker.Helpers
         {
             if (!(value is int intValue && parameter is string invisibleType))
             {
-                throw new NotImplementedException();
+                return Visibility.Collapsed;
             }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => intValue <= 0);
@@ -174,7 +176,7 @@ namespace LumiTracker.Helpers
         {
             if (parameter is not string invisibleType)
             {
-                throw new NotImplementedException();
+                return Visibility.Collapsed;
             }
 
             return VisibilityConverterUtils.ToVisibility(invisibleType, () => value != null);

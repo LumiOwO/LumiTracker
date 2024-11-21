@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 using Swordfish.NET.Collections;
+using System.IO;
 
 namespace LumiTracker.Models
 {
@@ -65,7 +66,7 @@ namespace LumiTracker.Models
         private bool? _hideRecordsBeforeImport = null;
     }
 
-    public partial class MatchupStats(int cid0, int cid1, int cid2) : ObservableObject
+    public partial class MatchupStats : ObservableObject
     {
         [ObservableProperty]
         private int _wins = 0;
@@ -76,9 +77,14 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private double _avgDuration = 0; // seconds
         [ObservableProperty]
-        private List<int> _opCharacters = [cid0, cid1, cid2];
+        private List<int> _opCharacters = [-1, -1, -1];
 
         public string Key => DeckUtils.CharacterIdsToKey(OpCharacters);
+
+        public MatchupStats(int cid0, int cid1, int cid2)
+        {
+            _opCharacters = [cid0, cid1, cid2];
+        }
 
         /////////////////////
         // UI
@@ -120,24 +126,46 @@ namespace LumiTracker.Models
         }
     }
 
-    public partial class DuelRecord(int cid0, int cid1, int cid2) : ObservableObject
+    public partial class DuelRecord : ObservableObject
     {
+        [JsonProperty("win")]
         [ObservableProperty]
+        [property: JsonIgnore]
         private bool _isWin = false;
+
+        [JsonProperty("duration")]
         [ObservableProperty]
+        [property: JsonIgnore]
         private double _duration = 0; // seconds
+
+        [JsonProperty("rounds")]
         [ObservableProperty]
+        [property: JsonIgnore]
         private int _rounds = 0;
+
+        [JsonProperty("timestamp")]
         [ObservableProperty]
+        [property: JsonIgnore]
+        [JsonConverter(typeof(CustomDateTimeConverter), "yyyy/MM/dd HH:mm:ss")]
         private DateTime _timeStamp = CustomDateTimeConverter.MinTime;
+
+        [JsonProperty("op")]
         [ObservableProperty]
-        private List<int> _opCharacters = [cid0, cid1, cid2];
+        [property: JsonIgnore]
+        private List<int> _opCharacters = [-1, -1, -1];
+
+        public DuelRecord(int cid0, int cid1, int cid2)
+        {
+            _opCharacters = [cid0, cid1, cid2];
+        }
 
         /////////////////////
         // UI
+        [property: JsonIgnore]
         public double DurationInMinutes => Duration / 60.0; // Minutes
 
         [ObservableProperty]
+        [property: JsonIgnore]
         private bool _expired = false;
 
         partial void OnDurationChanged(double oldValue, double newValue)
@@ -147,7 +175,8 @@ namespace LumiTracker.Models
 
         public MatchupStats GetStats()
         {
-            return new MatchupStats(cid0, cid1, cid2)
+            var cids = OpCharacters;
+            return new MatchupStats(cids[0], cids[1], cids[2])
             {
                 Wins         = IsWin ? 1 : 0,
                 Totals       = 1,
@@ -261,8 +290,6 @@ namespace LumiTracker.Models
 
         public async Task LoadDataAsync()
         {
-            await Task.Delay(1000); /// TODO: remove this
-
             // To column major
             ActionCardView[] views = new ActionCardView[30];
             for (int x = 0; x < 2; x++)
@@ -277,18 +304,34 @@ namespace LumiTracker.Models
             }
             ActionCards = new ObservableCollection<ActionCardView>(views);
 
-            // TODO: use guid to load
-            List<DuelRecord> records = [
-                new(98, 81, 93){ IsWin = true,  Rounds = 7, Duration = 580, TimeStamp = new DateTime(2024, 11, 15, 19, 0, 0), Expired = true},
-                new(98, 81, 93){ IsWin = false, Rounds = 6, Duration = 620, TimeStamp = new DateTime(2024, 11, 15, 20, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(27, 73, 88){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(31, -1, -1){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(-1, 21, -1){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                new(-1, 21, -1){ IsWin = false,  Rounds = 5, Duration = 300, TimeStamp = new DateTime(2024, 11, 15, 21, 0, 0), },
-                ];
+            List<DuelRecord> records = [];
+            string dataDir = Path.Combine(Configuration.DeckBuildsDir, Guid.ToString());
+            if (Directory.Exists(dataDir))
+            {
+                foreach (var filePath in Directory.GetFiles(dataDir, "*.json"))
+                {
+                    try
+                    {
+                        // Read and parse each JSON file
+                        string fileContent = await File.ReadAllTextAsync(filePath);
+                        var curRecords = JsonConvert.DeserializeObject<List<DuelRecord>>(fileContent);
+                        if (curRecords == null)
+                        {
+                            throw new Exception("Failed to parse json.");
+                        }
+                        records.AddRange(curRecords);
+                    }
+                    catch (Exception ex)
+                    {
+                        Configuration.Logger.LogError($"Error when parsing {filePath}: {ex.Message}");
+                    }
+                }
+            }
 
+            foreach (var record in records)
+            {
+                record.Expired = (record.TimeStamp <= Edit.CreatedAt);
+            }
             SetRecords(records);
         }
 
@@ -314,7 +357,6 @@ namespace LumiTracker.Models
         private void AddRecordToStats(DuelRecord record, 
             ConcurrentObservableSortedSet<MatchupStats> allStats, ConcurrentObservableSortedSet<MatchupStats> afterStats)
         {
-            // TODO: need QA
             MatchupStats stats = record.GetStats();
             string key = stats.Key;
             var cids = stats.OpCharacters;
