@@ -21,7 +21,7 @@ namespace LumiTracker.Views.Pages
             DataContext = this;
 
             InitializeComponent();
-            ViewModel.SelectedDeckItemChanged += OnSelectedDeckItemChanged;
+            ViewModel.SelectedCurrentVersionIndexChanged += OnSelectedCurrentVersionIndexChanged;
 
             Resources["TabViewItemHeaderBackground"] = new SolidColorBrush((Color)Application.Current.Resources["SubtleFillColorTertiary"]);
             Resources["TabViewItemHeaderBackgroundSelected"] = (SolidColorBrush)Resources["MainContentBackground"];
@@ -39,7 +39,7 @@ namespace LumiTracker.Views.Pages
             }
         }
 
-        private void OnSelectedDeckItemChanged(DeckItem? SelectedDeckItem)
+        private void OnSelectedCurrentVersionIndexChanged(DeckItem? SelectedDeckItem)
         {
             IsBuildVersionSelectedByCode = true;
             if (SelectedDeckItem != null)
@@ -62,7 +62,7 @@ namespace LumiTracker.Views.Pages
             if (!Inited) 
             {
                 // DeckViewModel will be inited when startup, so ViewModel has already loaded when this triggered
-                OnSelectedDeckItemChanged(ViewModel.SelectedDeckItem);
+                OnSelectedCurrentVersionIndexChanged(ViewModel.SelectedDeckItem);
                 return;
             }
 

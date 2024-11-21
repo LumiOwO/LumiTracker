@@ -135,7 +135,8 @@ namespace LumiTracker.Config
 
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
-                ObjectCreationHandling = ObjectCreationHandling.Replace
+                ObjectCreationHandling = ObjectCreationHandling.Replace,
+                NullValueHandling      = NullValueHandling.Ignore,
             };
 
             _ini = LoadIniSettings(IniFilePath);

@@ -206,24 +206,30 @@ namespace LumiTracker.ViewModels.Windows
             }
 
             var sortedDeckInfos = DeckViewModel.DeckItems
-                .Select((item, index) => new { Info = item.Info, Index = index })
-                .OrderByDescending(x => x.Info.LastModified);
+                .Select((item, index) => new 
+                { 
+                    Index = index, 
+                    CharacterIds = item.Stats.SelectedBuildVersion.CharacterIds.ToList(),
+                    LastModified = item.Info.LastModified,
+                    ShareCode    = item.Info.ShareCode,
+                })
+                .OrderByDescending(x => x.LastModified);
 
             bool found = false;
-            foreach (var item in sortedDeckInfos)
+            string key = DeckUtils.CharacterIdsToKey(card_ids[0], card_ids[1], card_ids[2], ignoreOrder: false);
+            if (key != DeckUtils.UnknownCharactersKey)
             {
-                var info = item.Info;
-                if (info.Characters.Count == 3
-                    && card_ids[0] == info.Characters[0]
-                    && card_ids[1] == info.Characters[1]
-                    && card_ids[2] == info.Characters[2] )
+                foreach (var item in sortedDeckInfos)
                 {
-                    InitDeckOnGameStart(info.ShareCode);
-                    DeckViewModel.ActiveDeckIndex = item.Index;
-                    DeckViewModel.SaveDeckInformations();
-                    Configuration.Logger.LogInformation($"Set deck[{item.Index}] as active deck.");
-                    found = true;
-                    break;
+                    var curKey = DeckUtils.CharacterIdsToKey(item.CharacterIds, ignoreOrder: false);
+                    if (key == curKey)
+                    {
+                        InitDeckOnGameStart(item.ShareCode);
+                        DeckViewModel.ActiveDeckIndex = item.Index;
+                        Configuration.Logger.LogInformation($"Set deck[{item.Index}] as active deck.");
+                        found = true;
+                        break;
+                    }
                 }
             }
 

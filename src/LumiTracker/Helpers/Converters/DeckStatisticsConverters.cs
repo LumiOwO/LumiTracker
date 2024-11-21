@@ -69,6 +69,8 @@ namespace LumiTracker.Helpers
 
             DeckStatistics stats = (values[0] as DeckStatistics)!;
             int index = (values[1] is int ? (int)values[1] : 0);
+            if (index < 0 || index >= stats.AllBuildStats.Count) return empty;
+
             bool isLoaded = (values[2] is bool ? (bool)values[2] : false);
             return isLoaded ? stats.AllBuildStats[index].ActionCards : empty;
         }

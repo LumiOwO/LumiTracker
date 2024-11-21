@@ -73,22 +73,21 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private BuildStats _current;
 
+        public BuildStats SelectedBuildVersion => 
+            AllBuildStats[Math.Clamp(Info.CurrentVersionIndex ?? 0, 0, AllBuildStats.Count - 1)];
+
         public DeckStatistics(DeckInfo info)
         {
             Info = info;
             Info.PropertyChanged += OnDeckInfoPropertyChanged;
 
             var first = new BuildStats(Info.ShareCode, Info.CreatedAt);
-            // TODO: add guid
-            //first.Guid = Info.ShareCode;
             _allBuildStats.Add(first);
             if (info.EditVersions != null)
             {
                 foreach (BuildEdit edit in info.EditVersions)
                 {
                     var stats = new BuildStats(edit.ShareCode, edit.CreatedAt);
-                    // TODO: add guid
-                    //stats.Guid = edit.ShareCode;
                     _allBuildStats.Add(stats);
                 }
             }
@@ -101,7 +100,7 @@ namespace LumiTracker.ViewModels.Pages
             bool IsIncludeAllBuildVersions = IncludeAllBuildVersions ?? false;
             if (!IsIncludeAllBuildVersions)
             {
-                int index = CurrentVersionIndex ?? 0;
+                int index = Math.Clamp(CurrentVersionIndex ?? 0, 0, AllBuildStats.Count - 1);
                 Current = AllBuildStats[index];
                 Task task = AsyncLoadAt(index);
             }
@@ -110,6 +109,7 @@ namespace LumiTracker.ViewModels.Pages
                 Current = Total;
                 Task task = AsyncLoadTotal();
             }
+            OnPropertyChanged(nameof(SelectedBuildVersion));
         }
 
         public async Task AsyncLoadTotal()
@@ -187,7 +187,6 @@ namespace LumiTracker.ViewModels.Pages
             try
             {
                 Configuration.Logger.LogDebug($"[AsyncLoadAt({index})] Begin to load BuildStats...");
-                // TODO: load from file
                 await stats.LoadDataAsync();
 
                 loadLock.Enter(ref lockTaken);
@@ -230,6 +229,8 @@ namespace LumiTracker.ViewModels.Pages
                 if (lockTaken) loadLock.Exit();
                 lockTaken = false;
             }
+
+            record.Expired = record.TimeStamp <= stats.Edit.CreatedAt;
             stats.AddRecord(record);
 
             // Add record to total if Total loaded
@@ -285,48 +286,9 @@ namespace LumiTracker.ViewModels.Pages
         {
             Stats.UpdateCurrent(Info.IncludeAllBuildVersions, Info.CurrentVersionIndex);
         }
-
-        public bool ImportFromShareCode(string sharecode)
-        {
-            // TODO: fix this logic
-            // Info.Characters means the selected build's characters
-            // if Characters not same, create new deck
-            // if guid exist, select that build 
-            int[]? cards = DeckUtils.DecodeShareCode(sharecode);
-            if (cards == null)
-            {
-                Configuration.Logger.LogWarning($"[DeckItem.DecodeShareCode] Invalid share code: {sharecode}");
-                return false;
-            }
-            Info.ShareCode = sharecode; // TODO: remove this line
-            Info.Characters = cards[..3].ToList();
-
-            ///////////////////////
-            // Current Deck
-
-            // Sort in case of non-standard order
-            Array.Sort(cards, 3, 30,
-                Comparer<int>.Create((x, y) => DeckUtils.ActionCardCompare(x, y)));
-
-            // To column major
-            ActionCardView[] views = new ActionCardView[30];
-            for (int x = 0; x < 2; x++)
-            {
-                for (int y = 0; y < 15; y++)
-                {
-                    // transpose
-                    int srcIdx = 3 + x * 15 + y;
-                    int dstIdx = y * 2 + x;
-                    views[dstIdx] = new ActionCardView(null, cards[srcIdx], inGame: false);
-                }
-            }
-
-            //ActionCards = new ObservableCollection<ActionCardView>(views);
-            return true;
-        }
     }
 
-    public delegate void OnSelectedDeckItemChangedCallback(DeckItem? SelectedDeckItem);
+    public delegate void OnSelectedCurrentVersionIndexChangedCallback(DeckItem? SelectedDeckItem);
 
     public partial class DeckViewModel : ObservableObject, INavigationAware
     {
@@ -342,7 +304,7 @@ namespace LumiTracker.ViewModels.Pages
         [ObservableProperty]
         private DeckItem? _selectedDeckItem = null;
 
-        public event OnSelectedDeckItemChangedCallback? SelectedDeckItemChanged;
+        public event OnSelectedCurrentVersionIndexChangedCallback? SelectedCurrentVersionIndexChanged;
         public bool IsChangingDeckItem { get; private set; } = false;
 
         [ObservableProperty]
@@ -452,7 +414,7 @@ namespace LumiTracker.ViewModels.Pages
                 SelectedDeckItem = null;
             }
             IsChangingDeckItem = false;
-            SelectedDeckItemChanged?.Invoke(SelectedDeckItem);
+            SelectedCurrentVersionIndexChanged?.Invoke(SelectedDeckItem);
         }
 
         public void OnCurrentVersionIndexChanged(int CurrentVersionIndex)
@@ -462,9 +424,9 @@ namespace LumiTracker.ViewModels.Pages
             SelectedDeckItem.Info.CurrentVersionIndex = CurrentVersionIndex;
         }
 
+        private static readonly string UserDecksDescPath = Path.Combine(Configuration.ConfigDir, "decks.json");
         public void LoadDeckInformations()
         {
-            string UserDecksDescPath = Path.Combine(Configuration.ConfigDir, "decks.json");
             if (!File.Exists(UserDecksDescPath))
             {
                 return;
@@ -482,14 +444,15 @@ namespace LumiTracker.ViewModels.Pages
                 foreach (var jItem in (userDecksDesc["decks"] as JArray)!)
                 {
                     DeckInfo info = jItem.ToObject<DeckInfo>()!;
+                    info.PropertyChanged += OnDeckInfoPropertyChanged;
                     deckItems.Add(new DeckItem(info));
                 }
                 DeckItems = new ObservableCollection<DeckItem>(deckItems);
 
-                // TODO: no longer need active index save & load
+                // no longer need active index save & load
                 // int active = (int)userDecksDesc["active"]!;
                 // ActiveDeckIndex = Math.Clamp(active, -1, DeckItems.Count - 1);
-                //SelectedIndex = ActiveDeckIndex;
+                // SelectedIndex = ActiveDeckIndex;
             }
             catch (Exception ex)
             {
@@ -499,8 +462,103 @@ namespace LumiTracker.ViewModels.Pages
 
         public void SaveDeckInformations()
         {
-            // TODO: Save deck infos
-            //Configuration.SaveJObject(JObject.FromObject(UserDeckList), UserDecksDescPath);
+            List<DeckInfo> deckInfos = [];
+            foreach (var item in DeckItems)
+            {
+                deckInfos.Add(item.Info);
+            }
+
+            Configuration.SaveJObject(JObject.FromObject(new
+            {
+                decks = deckInfos,
+            }), UserDecksDescPath);
+        }
+
+        private bool DisableAutoSaveWhenDeckInfoChanged { get; set; } = false;
+        private void OnDeckInfoPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DeckInfo.LastModified))
+            {
+                return;
+            }
+
+            if (SelectedDeckItem != null && SelectedDeckItem.Info == sender)
+            {
+                SelectedDeckItem.Info.LastModified = DateTime.Now;
+            }
+            if (e.PropertyName == nameof(DeckInfo.CurrentVersionIndex))
+            {
+                SelectedCurrentVersionIndexChanged?.Invoke(SelectedDeckItem);
+            }
+
+            if (!DisableAutoSaveWhenDeckInfoChanged)
+            {
+                SaveDeckInformations();
+            }
+        }
+
+        private void AddNewDeck(string sharecode, int[] cards)
+        {
+            string deckName = "";
+            foreach (int c_id in cards[..3])
+            {
+                if (deckName != "") deckName += "+";
+                deckName += Configuration.GetCharacterName(c_id, is_short: true);
+            }
+
+            var info = new DeckInfo()
+            {
+                ShareCode    = sharecode,
+                Name         = deckName,
+                LastModified = DateTime.Now,
+                CreatedAt    = DateTime.Now,
+            };
+            info.PropertyChanged += OnDeckInfoPropertyChanged;
+            DeckItems.Add(new DeckItem(info));
+            SelectedIndex = DeckItems.Count - 1;
+            SaveDeckInformations();
+        }
+
+        private void ReimportDeck(string sharecode, int[] cards)
+        {
+            var item = SelectedDeckItem!;
+            // If characters changed, create a new deck
+            string oldKey = DeckUtils.CharacterIdsToKey(item.Stats.SelectedBuildVersion.CharacterIds, ignoreOrder: true);
+            string newKey = DeckUtils.CharacterIdsToKey(cards[0], cards[1], cards[2], ignoreOrder: true);
+            if (oldKey != newKey)
+            {
+                AddNewDeck(sharecode, cards);
+                return;
+            }
+
+            // If build already added, change current build version to it
+            Guid guid = DeckUtils.DeckBuildGuid(cards);
+            var allStats = item.Stats.AllBuildStats;
+            for (int i = 0; i < allStats.Count; i++)
+            {
+                if (allStats[i].Guid == guid)
+                {
+                    item.Info.CurrentVersionIndex = i;
+                    return;
+                }
+            }
+
+            // Add new build version
+            DisableAutoSaveWhenDeckInfoChanged = true;
+            BuildEdit edit = new BuildEdit() { ShareCode = sharecode, CreatedAt = DateTime.Now };
+            if (item.Info.EditVersions != null)
+            {
+                item.Info.EditVersions.Add(edit);
+            }
+            else
+            {
+                item.Info.EditVersions = [edit];
+            }
+            item.Stats.AllBuildStats.Add(new BuildStats(edit));
+            item.Info.CurrentVersionIndex = item.Stats.AllBuildStats.Count - 1;
+
+            DisableAutoSaveWhenDeckInfoChanged = false;
+            SaveDeckInformations();
         }
 
         [RelayCommand]
@@ -532,9 +590,6 @@ namespace LumiTracker.ViewModels.Pages
                 return;
             }
 
-            // TODO: remove this
-            SelectedDeckItem.Stats!.Current.Summary.Totals += 1;
-
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
                 Lang.EditDeckName_Title,
                 SelectedDeckItem.Info.Name,
@@ -548,7 +603,6 @@ namespace LumiTracker.ViewModels.Pages
                     name = Lang.DefaultDeckName;
                 }
                 SelectedDeckItem.Info.Name = name;
-                SaveDeckInformations();
             }
         }
 
@@ -569,14 +623,14 @@ namespace LumiTracker.ViewModels.Pages
 
             if (result == ContentDialogResult.Primary)
             {
-                bool success = SelectedDeckItem.ImportFromShareCode(sharecode);
-                if (success)
+                int[]? cards = DeckUtils.DecodeShareCode(sharecode);
+                if (cards != null)
                 {
-                    SelectedDeckItem.Info.LastModified = DateTime.Now;
-                    SaveDeckInformations();
+                    ReimportDeck(sharecode, cards);
                 }
                 else
                 {
+                    Configuration.Logger.LogWarning($"[OnReimportDeckClicked] Invalid share code: {sharecode}");
                     SnackbarService?.Show(
                         Lang.InvalidSharingCode_Title,
                         Lang.InvalidSharingCode_Message + sharecode,
@@ -628,23 +682,7 @@ namespace LumiTracker.ViewModels.Pages
                 int[]? cards = DeckUtils.DecodeShareCode(sharecode);
                 if (cards != null)
                 {
-                    string deckName = "";
-                    foreach (int c_id in cards[..3])
-                    {
-                        if (deckName != "") deckName += "+";
-                        deckName += Configuration.GetCharacterName(c_id, is_short: true);
-                    }
-
-                    var info = new DeckInfo()
-                    {
-                        ShareCode    = sharecode,
-                        Characters   = cards[..3].ToList(),
-                        Name         = deckName,
-                        LastModified = DateTime.Now,
-                    };
-                    DeckItems.Add(new DeckItem(info));
-                    SelectedIndex = DeckItems.Count - 1;
-                    SaveDeckInformations();
+                    AddNewDeck(sharecode, cards);
                 }
                 else
                 {

@@ -1,6 +1,7 @@
 ﻿using LumiTracker.Config;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using System.Security.Cryptography;
 
 namespace LumiTracker.Models
 {
@@ -363,6 +364,28 @@ namespace LumiTracker.Models
             else
             {
                 return "#" + string.Join(",", ids);
+            }
+        }
+
+        public static string CharacterIdsToKey(int cid0, int cid1, int cid2, bool ignoreOrder = true)
+        {
+            return CharacterIdsToKey([cid0, cid1, cid2], ignoreOrder);
+        }
+
+        public static Guid DeckBuildGuid(int[]? cards, bool should_sort = true)
+        {
+            if (cards == null || cards.Length != 33) return Guid.Empty;
+
+            if (should_sort)
+            {
+                Array.Sort(cards, 3, cards.Length - 3);
+            }
+
+            byte[] byteArray = cards.SelectMany(BitConverter.GetBytes).ToArray();
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] hash = md5.ComputeHash(byteArray);
+                return new Guid(hash);
             }
         }
     }

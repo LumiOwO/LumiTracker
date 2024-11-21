@@ -178,7 +178,7 @@
             Margin="0, 0, 5, 0"
             Grid.Column="0"
             Grid.Row="0"
-            CharacterIds="{Binding ViewModel.SelectedDeckItem.Info.Characters}"
+            CharacterIds="{Binding ViewModel.SelectedDeckItem.Stats.SelectedBuildVersion.CharacterIds}"
             ImageOuterMargin="3,0"
             ImageInnerMargin="3"
             />
