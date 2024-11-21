@@ -70,6 +70,7 @@ class GameStartTask(TaskBase):
         feature = ExtractFeature_Control(buffer)
         ctrl_ids, dists = self.db.SearchByFeature(feature, EAnnType.CTRLS)
         start = (dists[0] <= cfg.strict_threshold) and (ctrl_ids[0] == ECtrlType.GAME_START.value)
+        # LogDebug(start=start, dists=dists[0])
         start = self.filter.Filter(start, dists[0])
 
         self.detected = start

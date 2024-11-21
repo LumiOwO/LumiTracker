@@ -12,7 +12,7 @@ def main():
     frame_manager = FrameManager()
     task = GTasks.GameStart
 
-    image_path = 'temp/Snipaste_2024-10-29_23-55-13.png'
+    image_path = 'temp/Snipaste_2024-11-20_23-20-19.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -34,6 +34,7 @@ def main():
         plt.imshow(cv2.cvtColor(buffer, cv2.COLOR_BGR2RGB))
         plt.show()
 
+    task.Tick()
     task.DetectCharacters()
 
 if __name__ == "__main__":
