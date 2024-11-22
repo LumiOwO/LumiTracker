@@ -1,6 +1,30 @@
 import enum
 from ._enums_gen import EActionCard, ECharacterCard
 
+def _IsExtra(card_id):
+    return card_id >= EActionCard.NumActions.value
+
+def _IsExtraGolden(card_id):
+    start = EActionCard.NumActions.value
+    end   = start + EActionCard.NumExtraGoldens.value
+    return (card_id >= start) and (card_id < end)
+
+def _IsExtraMyArcaneLegend(card_id):
+    start = EActionCard.NumActions.value + EActionCard.NumExtraGoldens.value
+    end   = start + EActionCard.NumArcaneLegends.value
+    return (card_id >= start) and (card_id < end)
+
+def _IsExtraOpArcaneLegend(card_id):
+    num_arcanes = EActionCard.NumArcaneLegends.value
+    start = EActionCard.NumActions.value + EActionCard.NumExtraGoldens.value + num_arcanes
+    end   = start + num_arcanes
+    return (card_id >= start) and (card_id < end)
+
+EActionCard.IsExtra               = staticmethod(_IsExtra)
+EActionCard.IsExtraGolden         = staticmethod(_IsExtraGolden)
+EActionCard.IsExtraMyArcaneLegend = staticmethod(_IsExtraMyArcaneLegend)
+EActionCard.IsExtraOpArcaneLegend = staticmethod(_IsExtraOpArcaneLegend)
+
 class ELanguage(enum.Enum):
     FollowSystem = 0
     zh_HANS      = enum.auto()

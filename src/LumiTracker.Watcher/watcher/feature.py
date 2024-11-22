@@ -3,7 +3,7 @@ import cv2
 from abc import ABC, abstractmethod
 
 from .config import LogWarning, cfg, LogDebug, override
-from .enums import EAnnType, EActionCard, ECharacterCard, ECtrlType
+from .enums import EAnnType, EActionCard, ECharacterCard, ECtrlType, EGameEvent
 
 import itertools
 
@@ -420,7 +420,7 @@ class CardHandler(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def RemapCardId(self, card_id, db):
+    def RemapCardId(self, card_id, db, dist, threshold, strict_threshold):
         raise NotImplementedError()
 
     @abstractmethod
@@ -504,14 +504,22 @@ class CardHandler(ABC):
             if dists_a[i] != dist_a:
                 dist_a_next = dists_a[i]
                 break
-            set_a.add(self.RemapCardId(card_ids_a[i], db))
+            remapped_a = self.RemapCardId(card_ids_a[i], db, dist_a, threshold, strict_threshold)
+            if remapped_a < 0:
+                return PackedResult()
+            set_a.add(remapped_a)
+
         dist_d_next = dists_d[3]
         set_d = set()
         for i in range(3):
             if dists_d[i] != dist_d:
                 dist_d_next = dists_d[i]
                 break
-            set_d.add(self.RemapCardId(card_ids_d[i], db))
+            remapped_d = self.RemapCardId(card_ids_d[i], db, dist_d, threshold, strict_threshold)
+            if remapped_d < 0:
+                return PackedResult()
+            set_d.add(remapped_d)
+
         intersection = set_a & set_d
 
         # Invalid if AHash detect different card from DHash
@@ -594,18 +602,40 @@ class CardHandler(ABC):
 
 
 class ActionCardHandler(CardHandler):
-    def __init__(self):
+    def __init__(self, game_event=EGameEvent.NONE):
         super().__init__()
+        self.event = game_event
 
     @override
     def GetAnnTypes(self):
         return EAnnType.ACTIONS_A, EAnnType.ACTIONS_D
 
     @override
-    def RemapCardId(self, card_id, db):
-        if card_id >= EActionCard.NumActions.value:
-            card_id = db["extras"][card_id - EActionCard.NumActions.value]
-        return card_id
+    def RemapCardId(self, card_id, db, dist, threshold, strict_threshold):
+        if not EActionCard.IsExtra(card_id):
+            return card_id
+
+        if EActionCard.IsExtraGolden(card_id):
+            return db["extras"][card_id - EActionCard.NumActions.value]
+
+        # Now it must be an Extra ArcaneLegend
+
+        # Extra ArcaneLegend should use strict threshold
+        if dist > strict_threshold:
+            return -1
+
+        # Check whether the game event is matched
+        if EActionCard.IsExtraMyArcaneLegend(card_id):
+            target_event = EGameEvent.MY_PLAYED
+        elif EActionCard.IsExtraOpArcaneLegend(card_id):
+            target_event = EGameEvent.OP_PLAYED
+        else:
+            target_event = EGameEvent.NONE
+        if self.event != target_event:
+            return -1
+
+        # Remap extra cards
+        return db["extras"][card_id - EActionCard.NumActions.value]
 
     @override
     def ExtractFeatures(self, feature_buffer):
@@ -613,7 +643,7 @@ class ActionCardHandler(CardHandler):
 
     @override
     def AllowEarlyReturn(self, card_id):
-        return card_id < EActionCard.NumActions.value
+        return not EActionCard.IsExtra(card_id)
 
 
 class CharacterCardHandler(CardHandler):
@@ -625,7 +655,7 @@ class CharacterCardHandler(CardHandler):
         return EAnnType.CHARACTERS_A, EAnnType.CHARACTERS_D
 
     @override
-    def RemapCardId(self, card_id, db):
+    def RemapCardId(self, card_id, db, dist, threshold, strict_threshold):
         return card_id
 
     @override

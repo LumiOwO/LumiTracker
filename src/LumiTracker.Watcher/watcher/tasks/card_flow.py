@@ -410,7 +410,7 @@ class CardFlowTask(CenterCropTask):
 
         # Set threshold
         threshold = 0.8
-        found = np.any(result >= threshold)
+        found = np.any(result > threshold)
 
         if cfg.DEBUG:
             bboxes = []

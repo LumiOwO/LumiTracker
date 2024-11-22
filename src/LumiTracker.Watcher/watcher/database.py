@@ -233,7 +233,9 @@ class Database:
         # extras
         extra_cards_dir = os.path.join(action_cards_dir, "extras")
         extra_image_names = os.listdir(extra_cards_dir)
-        num_extras = len(extra_image_names) + len(arcane_legends) * 2
+        num_extra_goldens = len(extra_image_names)
+        num_arcane_legends = len(arcane_legends)
+        num_extras = num_extra_goldens + num_arcane_legends * 2
         extras = [None] * num_extras
         ahash_extras = [None] * num_extras
         dhash_extras = [None] * num_extras
@@ -263,8 +265,8 @@ class Database:
             (-22, 0, 315, 540), # my
             (128, 50, 315, 540), # op
         ]
-        for i, (mapped_id, image) in enumerate(arcane_legends):
-            for j, (left, top, width, height) in enumerate(boxes):
+        for j, (left, top, width, height) in enumerate(boxes):
+            for i, (mapped_id, image) in enumerate(arcane_legends):
                 r = min(left + width, 420)
                 b = min(top + height, 720)
                 l = max(left, 0)
@@ -282,12 +284,12 @@ class Database:
                 handler.frame_buffer = buffer
                 ahash, dhash = handler.ExtractCardFeatures()
 
-                extra_id = i * 2 + j + len(extra_image_names)
+                extra_id = j * num_arcane_legends + i + num_extra_goldens
                 extras[extra_id] = mapped_id
                 ahash_extras[extra_id] = ahash
                 dhash_extras[extra_id] = dhash
 
-        print(f"Added {len(ahash_extras)} extra images = {len(extra_image_names)} goldens + {len(arcane_legends) * 2} arcane legends")
+        print(f"Added {len(ahash_extras)} extra images = {num_extra_goldens} goldens + {num_arcane_legends} arcane legends * 2")
 
         ahashs += ahash_extras
         dhashs += dhash_extras
@@ -346,7 +348,7 @@ class Database:
                     dt=dt, 
                     )
         
-        return num_sharable
+        return num_sharable, num_extra_goldens, num_arcane_legends
 
     def _UpdateCharacters(self, save_image_assets):
         with open(os.path.join(cfg.cards_dir, "generated", "characters.csv"), 
@@ -421,7 +423,9 @@ class Database:
         ann_dhash = self.CreateAndSaveAnn(dhashs, EAnnType.CHARACTERS_D)
         self.anns[EAnnType.CHARACTERS_D.value] = ann_dhash
 
-    def _UpdateGeneratedEnums(self, num_sharable_actions):
+    def _UpdateGeneratedEnums(self, actions_counts_pack):
+        num_sharable_actions, num_extra_goldens, num_arcane_legends = actions_counts_pack
+
         eActions = [StringToVariableName(action["en-US"]) for action in self.data["actions"]]
         eCharacters = [StringToVariableName(character["en-US"]) for character in self.data["characters"]]
 
@@ -451,6 +455,8 @@ class Database:
         WriteLine(f"NumActions,")
         WriteLine(f"NumSharables = {num_sharable_actions},")
         WriteLine(f"NumTokens = NumActions - NumSharables,")
+        WriteLine(f"NumExtraGoldens = {num_extra_goldens},")
+        WriteLine(f"NumArcaneLegends = {num_arcane_legends},")
         indent -= 1
         WriteLine("}")
         WriteLine("")
@@ -491,6 +497,8 @@ class Database:
         WriteLine(f"NumActions = enum.auto()")
         WriteLine(f"NumSharables = {num_sharable_actions}")
         WriteLine(f"NumTokens = NumActions - NumSharables")
+        WriteLine(f"NumExtraGoldens = {num_extra_goldens}")
+        WriteLine(f"NumArcaneLegends = {num_arcane_legends}")
         indent -= 1
         WriteLine("")
 
@@ -567,9 +575,9 @@ class Database:
 
     def _Update(self, save_image_assets):
         self._UpdateControls()
-        num_sharable_actions = self._UpdateActionCards(save_image_assets)
+        actions_counts_pack = self._UpdateActionCards(save_image_assets)
         self._UpdateCharacters(save_image_assets)
-        self._UpdateGeneratedEnums(num_sharable_actions)
+        self._UpdateGeneratedEnums(actions_counts_pack)
         self._UpdateExtraInfos()
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:

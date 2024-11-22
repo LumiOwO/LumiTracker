@@ -367,6 +367,8 @@ class EActionCard(enum.Enum):
     NumActions = enum.auto()
     NumSharables = 339
     NumTokens = NumActions - NumSharables
+    NumExtraGoldens = 2
+    NumArcaneLegends = 9
 
 class ECharacterCard(enum.Enum):
     Ganyu = 0

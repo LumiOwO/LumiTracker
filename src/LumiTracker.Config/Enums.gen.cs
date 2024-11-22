@@ -368,6 +368,8 @@ namespace LumiTracker.Config
         NumActions,
         NumSharables = 339,
         NumTokens = NumActions - NumSharables,
+        NumExtraGoldens = 2,
+        NumArcaneLegends = 9,
     }
     
     public enum ECharacterCard : int

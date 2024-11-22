@@ -16,7 +16,7 @@ class CardPlayedTask(TaskBase):
     def __init__(self, frame_manager, is_op):
         super().__init__(frame_manager)
         self.event_type   = EGameEvent.OP_PLAYED if is_op else EGameEvent.MY_PLAYED
-        self.card_handler = ActionCardHandler()
+        self.card_handler = ActionCardHandler(self.event_type)
         self.Reset()
     
     @override
