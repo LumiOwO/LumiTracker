@@ -58,9 +58,10 @@
                 />
         </DataTemplate>
 
-        <Style TargetType="ListViewItem">
+        <Style TargetType="ui:ListViewItem" BasedOn="{StaticResource {x:Type ui:ListViewItem}}">
             <Setter Property="Focusable" Value="False" />
             <Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="Padding" Value="2,4,4,3"/>
         </Style>
 
     </UserControl.Resources>

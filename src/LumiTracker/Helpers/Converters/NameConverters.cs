@@ -17,8 +17,8 @@ namespace LumiTracker.Helpers
                 return none;
             if (!(values[1] is int index))
                 return none;
-            if (!(values[2] is string __selectedDeckName)) // Only used for triggering
-                return none;
+            //if (!(values[2] is string __selectedDeckName)) // Only used for triggering
+            //    return none;
             if (index < 0 || index >= deckItems.Count)
                 return none;
             return deckItems[index].Info.Name;
