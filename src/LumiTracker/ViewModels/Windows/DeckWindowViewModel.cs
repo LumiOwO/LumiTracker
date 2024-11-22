@@ -112,23 +112,15 @@ namespace LumiTracker.ViewModels.Windows
             }
         }
 
-        public void InitDeckOnGameStart(string sharecode)
+        public void InitDeckOnGameStart(string sharecode, int[] action_cards)
         {
-            if (!MyDeck.InGame || MyDeck.OperationCount != 1)
+            if (!MyDeck.InGame || !MyDeck.Data.Keys.All(x => x == -1))
             {
-                return;
-            }
-
-            int[]? cards = DeckUtils.DecodeShareCode(sharecode);
-            if (cards == null)
-            {
-                Configuration.Logger.LogWarning($"Invalid share code: {sharecode}");
                 return;
             }
 
             // Update the initial deck
-            MyDeck.Remove(Enumerable.Repeat(-1, 30).ToArray(), keep_zero: false);
-            MyDeck.Add(cards[3..]);
+            MyDeck = new CardList(action_cards, inGame: true);
 
             // Try to message to server
             if (_hook is GameWatcher gameWatcher)
@@ -226,7 +218,6 @@ namespace LumiTracker.ViewModels.Windows
                     Index = index, 
                     CharacterIds = item.Stats.SelectedBuildVersion.CharacterIds.ToList(),
                     LastModified = item.Info.LastModified,
-                    ShareCode    = item.Info.ShareCode,
                 })
                 .OrderByDescending(x => x.LastModified);
 
@@ -239,9 +230,12 @@ namespace LumiTracker.ViewModels.Windows
                     var curKey = DeckUtils.CharacterIdsToKey(item.CharacterIds, ignoreOrder: false);
                     if (key == curKey)
                     {
-                        InitDeckOnGameStart(item.ShareCode);
-                        DeckViewModel.ActiveDeckIndex = item.Index;
                         Configuration.Logger.LogInformation($"Set deck[{item.Index}] as active deck.");
+                        DeckViewModel.ActiveDeckIndex = item.Index;
+
+                        var build = DeckViewModel.DeckItems[item.Index].Stats.SelectedBuildVersion;
+                        InitDeckOnGameStart(build.Edit.ShareCode, build.Cards[3..]);
+
                         found = true;
                         break;
                     }

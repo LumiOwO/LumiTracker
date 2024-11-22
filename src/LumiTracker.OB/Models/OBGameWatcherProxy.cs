@@ -1,4 +1,5 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Models;
 using LumiTracker.OB.ViewModels.Pages;
 using LumiTracker.ViewModels.Pages;
 using LumiTracker.ViewModels.Windows;
@@ -44,7 +45,15 @@ namespace LumiTracker.OB
             if (message.Event == EGameEvent.INITIAL_DECK)
             {
                 string sharecode = message.Data["sharecode"].ToString();
-                DeckWindowViewModel.InitDeckOnGameStart(sharecode);
+                int[]? cards = DeckUtils.DecodeShareCode(sharecode);
+                if (cards == null)
+                {
+                    Configuration.Logger.LogWarning($"Invalid share code: {sharecode}");
+                }
+                else
+                {
+                    DeckWindowViewModel.InitDeckOnGameStart(sharecode, cards[3..]);
+                }
             }
             else
             {
