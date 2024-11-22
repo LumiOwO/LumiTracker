@@ -168,7 +168,6 @@ namespace LumiTracker.Watcher
         }
 
         private static readonly float LOG_INTERVAL = Configuration.Get<float>("LOG_INTERVAL");
-        private SpinLockedValue<long> _last_fps_time = new(Stopwatch.GetTimestamp());
         private SpinLockedValue<bool> ShouldCancel = new (false);
         private Task? _processWatcherTask;
         private Task? _windowWatcherTask;
@@ -418,15 +417,28 @@ namespace LumiTracker.Watcher
             return true;
         }
 
+        private long?  _last_fps_time = null;
+        private double _fps_sum       = 0;
+
         private void OnLogFPS(float fps)
         {
-            long cur_fps_time = Stopwatch.GetTimestamp();
-            float elapsedSeconds = (cur_fps_time - _last_fps_time.Value) / (float)Stopwatch.Frequency;
+            if (_last_fps_time == null)
+            {
+                _last_fps_time = Stopwatch.GetTimestamp();
+            }
+            _fps_sum += fps;
+
+            long last_fps_time    = (long)_last_fps_time;
+            long cur_fps_time     = Stopwatch.GetTimestamp();
+            double elapsedSeconds = (cur_fps_time - last_fps_time) / (double)Stopwatch.Frequency;
+
             if (elapsedSeconds >= LOG_INTERVAL)
             {
-                string message_str = $"{LogHelper.AnsiMagenta}@{LogHelper.AnsiEnd} FPS = {fps}";
+                string message_str = $"{LogHelper.AnsiMagenta}@{LogHelper.AnsiEnd} FPS = {_fps_sum / elapsedSeconds}";
                 Configuration.Logger.LogInformation(message_str);
-                _last_fps_time.Value = cur_fps_time;
+
+                _last_fps_time = cur_fps_time;
+                _fps_sum       = 0;
             }
         }
     }
