@@ -405,7 +405,7 @@ namespace LumiTracker.Watcher
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogError($"JSON Serialization Error: {ex.Message}");
+                Configuration.Logger.LogError($"JSON deserialization Error: {ex.Message}");
                 return false;
             }
 

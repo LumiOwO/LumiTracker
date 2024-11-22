@@ -29,7 +29,7 @@ namespace LumiTracker.Watcher
 
     public delegate void OnOpActionCardPlayedCallback(int card_id);
 
-    public delegate void OnGameOverCallback();
+    public delegate void OnGameOverCallback(Dictionary<string, JToken> record);
 
     public delegate void OnRoundDetectedCallback(int round);
 
@@ -104,9 +104,9 @@ namespace LumiTracker.Watcher
             OpActionCardPlayed?.Invoke(card_id);
         }
 
-        protected void InvokeGameOver()
+        protected void InvokeGameOver(Dictionary<string, JToken> record)
         {
-            GameOver?.Invoke();
+            GameOver?.Invoke(record);
         }
 
         protected void InvokeRoundDetected(int round)
@@ -214,7 +214,7 @@ namespace LumiTracker.Watcher
             else if (type == EGameEvent.GAME_OVER)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnGameOver");
-                InvokeGameOver();
+                InvokeGameOver(message.Data);
             }
             else if (type == EGameEvent.ROUND)
             {

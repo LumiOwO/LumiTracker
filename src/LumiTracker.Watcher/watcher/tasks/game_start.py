@@ -131,3 +131,4 @@ class GameStartTask(TaskBase):
                 cards=self.cards,
                 names=[ChracterName(card_id, self.db) for card_id in self.cards[3:]],
                 )
+            self.fm.op_characters = self.cards[3:]

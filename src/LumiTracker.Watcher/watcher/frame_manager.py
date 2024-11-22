@@ -34,9 +34,11 @@ class FrameManager:
 
         # control signals
         self.game_started    = False
+        self.game_start_time = datetime.now()
         self.round           = 0
         self.my_card_back    = np.zeros((0,))
         self.op_card_back    = np.zeros((0,))
+        self.op_characters   = [-1, -1, -1]
 
         # logs
         self.prev_log_time   = time.perf_counter()
@@ -52,6 +54,13 @@ class FrameManager:
         self.client_type     = client_type
         self.content_box     = ()
         self.content_not_found_warned = False
+
+    def StartNewGame(self):
+        self.game_start_time = datetime.now()
+        self.round           = 0
+        self.my_card_back    = np.zeros((0,))
+        self.op_card_back    = np.zeros((0,))
+        self.op_characters   = [-1, -1, -1]
 
     def Resize(self, client_width, client_height):
         if client_width == 0 or client_height == 0:

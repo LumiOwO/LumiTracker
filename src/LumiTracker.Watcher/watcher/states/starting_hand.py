@@ -33,9 +33,7 @@ class GameStateStartingHand(GameState):
     @override
     def OnEnter(self, from_state):
         GTasks.Reset()
-        self.fm.round        = 0
-        self.fm.my_card_back = np.zeros((0,))
-        self.fm.op_card_back = np.zeros((0,))
+        self.fm.StartNewGame()
 
     @override
     def OnExit(self, to_state):

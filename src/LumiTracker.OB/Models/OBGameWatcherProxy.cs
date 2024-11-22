@@ -4,6 +4,7 @@ using LumiTracker.ViewModels.Pages;
 using LumiTracker.ViewModels.Windows;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System.IO;
 
 namespace LumiTracker.OB
@@ -124,7 +125,7 @@ namespace LumiTracker.OB
             ClientInfo.GameStarted = true;
         }
 
-        private void OnGameOver()
+        private void OnGameOver(Dictionary<string, JToken> record)
         {
             ResetOBData();
             ClientInfo.GameStarted = false;

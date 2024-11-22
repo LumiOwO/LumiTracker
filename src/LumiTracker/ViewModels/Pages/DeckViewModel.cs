@@ -213,7 +213,6 @@ namespace LumiTracker.ViewModels.Pages
 
         public async Task AddRecord(DuelRecord record)
         {
-            // TODO: need QA
             BuildStats stats = SelectedBuildVersion;
 
             // Add record to current
@@ -234,7 +233,7 @@ namespace LumiTracker.ViewModels.Pages
                 lockTaken = false;
             }
 
-            record.Expired = record.TimeStamp <= stats.Edit.CreatedAt;
+            record.Expired = (record.EndTime <= stats.Edit.CreatedAt);
             stats.AddRecord(record);
             try
             {
@@ -303,6 +302,7 @@ namespace LumiTracker.ViewModels.Pages
                     await writer.WriteAsync("]");
                 }
             }
+            Configuration.Logger.LogDebug("Record saved to disk.");
         }
 
         private void OnDeckInfoPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -442,6 +442,20 @@ namespace LumiTracker.ViewModels.Pages
                 DeckItems[newValue].ColorInNameList  = HighlightColor;
                 DeckItems[newValue].LoadCurrent();
             }
+        }
+
+        public void AddRecordToActiveDeck(DuelRecord record)
+        {
+            if (ActiveDeckIndex < 0 || ActiveDeckIndex >= DeckItems.Count)
+            {
+                Configuration.Logger.LogError($"[AddRecordToActiveDeck] Invalid ActiveDeckIndex {ActiveDeckIndex}");
+                return;
+            }
+
+            Application.Current.Dispatcher.Invoke(async () =>
+            {
+                await DeckItems[ActiveDeckIndex].Stats.AddRecord(record);
+            });
         }
 
         private void Select(int index)
@@ -641,10 +655,6 @@ namespace LumiTracker.ViewModels.Pages
             {
                 return;
             }
-
-            // TODO: remove this
-            await SelectedDeckItem.Stats.AddRecord(
-                new(98, 81, 93) { IsWin = true, Rounds = 7, Duration = 580, TimeStamp = DateTime.Now });
 
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
                 Lang.EditDeckName_Title,

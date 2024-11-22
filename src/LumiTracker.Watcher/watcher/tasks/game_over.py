@@ -12,6 +12,7 @@ import logging
 import os
 import cv2
 import enum
+from datetime import datetime
 
 class EGameResult(enum.Enum):
     Null = 0
@@ -47,10 +48,17 @@ class GameOverTask(TaskBase):
         if res != EGameResult.Null:
             self.fm.game_started = False
 
+            game_end_time = datetime.now()
+            duration = (game_end_time - self.fm.game_start_time).total_seconds()
             LogInfo(
                 info=f"Game Over, last dist in window = {dist}",
                 type=f"{self.event_type.name}",
-                is_win=(res == EGameResult.Win),
+                # Same fields as DuelRecord, so it can be directly deserialize
+                win=(res == EGameResult.Win),
+                duration=duration,
+                rounds=self.fm.round,
+                endtime=game_end_time.strftime("%Y/%m/%d %H:%M:%S"),
+                op=self.fm.op_characters,
                 )
 
     def DetectGameResult(self):

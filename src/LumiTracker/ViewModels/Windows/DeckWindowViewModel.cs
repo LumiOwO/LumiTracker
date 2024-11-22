@@ -162,8 +162,23 @@ namespace LumiTracker.ViewModels.Windows
             UpdatePlayedActionCard(card_id, is_op: true);
         }
 
-        private void OnGameOver()
+        private void OnGameOver(Dictionary<string, JToken> record)
         {
+            try
+            {
+                var duelRecord = JObject.FromObject(record).ToObject<DuelRecord>();
+                if (duelRecord == null)
+                {
+                    throw new Exception("[OnGameOver] Failed to parse DuelRecord.");
+                }
+
+                DeckViewModel.AddRecordToActiveDeck(duelRecord);
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"JSON deserialization Error: {ex.Message}");
+            }
+
             Reset(gameStart: false);
         }
 

@@ -143,11 +143,11 @@ namespace LumiTracker.Models
         [property: JsonIgnore]
         private int _rounds = 0;
 
-        [JsonProperty("timestamp")]
+        [JsonProperty("endtime")]
         [ObservableProperty]
         [property: JsonIgnore]
         [JsonConverter(typeof(CustomDateTimeConverter), "yyyy/MM/dd HH:mm:ss")]
-        private DateTime _timeStamp = CustomDateTimeConverter.MinTime;
+        private DateTime _endTime = CustomDateTimeConverter.MinTime;
 
         [JsonProperty("op")]
         [ObservableProperty]
@@ -330,7 +330,7 @@ namespace LumiTracker.Models
 
             foreach (var record in records)
             {
-                record.Expired = (record.TimeStamp <= Edit.CreatedAt);
+                record.Expired = (record.EndTime <= Edit.CreatedAt);
             }
             SetRecords(records);
         }
@@ -351,7 +351,7 @@ namespace LumiTracker.Models
             }
             AllMatchupStats         = allStats;
             MatchupStatsAfterImport = afterStats;
-            DuelRecords = new ObservableCollection<DuelRecord>(records.OrderByDescending(x => x.TimeStamp));
+            DuelRecords = new ObservableCollection<DuelRecord>(records.OrderByDescending(x => x.EndTime));
         }
 
         private void AddRecordToStats(DuelRecord record, 

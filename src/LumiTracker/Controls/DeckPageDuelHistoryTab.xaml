@@ -580,7 +580,7 @@
                             ConverterParameter=0.022,
                             RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                             }"
-                        Text="{Binding TimeStamp, 
+                        Text="{Binding EndTime, 
                             StringFormat={}{0:yyyy/MM/dd HH:mm}}" 
                         />
                 </Grid>
