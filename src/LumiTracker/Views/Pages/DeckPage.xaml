@@ -403,9 +403,9 @@
                     >
                     <ComboBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:BuildStats}">
-                            <TextBlock 
-                                Text="{Binding Edit.CreatedAt, StringFormat={}{0:MM/dd HH:mm}}"
-                                Margin="3,0,0,0"
+                            <TextBlock
+                                Text="{Binding Edit.CreatedAt, StringFormat={}{0:MM/dd HH:mm:ss}}"
+                                Margin="0,0,0,0"
                                 FontSize="{Binding ActualHeight,
                                     RelativeSource={RelativeSource AncestorType={x:Type ComboBox}},
                                     Converter={StaticResource SizeWithRatioConverter}, 

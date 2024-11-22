@@ -1,6 +1,5 @@
 ﻿using LumiTracker.ViewModels.Pages;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using Wpf.Ui.Controls;
 
@@ -17,6 +16,8 @@ namespace LumiTracker.Views.Pages
 
         public DeckPage(DeckViewModel viewModel)
         {
+            Loaded += DeckPage_Loaded;
+
             ViewModel = viewModel;
             DataContext = this;
 
@@ -29,6 +30,20 @@ namespace LumiTracker.Views.Pages
             Resources["TabViewForeground"] = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
 
             Inited = true;
+        }
+
+        private void DeckPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            var chevron = BuildVersionSelectionComboBox.Template.FindName("ChevronIcon", BuildVersionSelectionComboBox) as SymbolIcon;
+            if (chevron != null)
+            {
+                chevron.Margin = new Thickness(0, 0, 0, 0);
+                var parentGrid = chevron.Parent as Grid;
+                if (parentGrid != null)
+                {
+                    parentGrid.Margin = new Thickness(0, 0, 8, 0);
+                }
+            }
         }
 
         private void DisableListViewSelection(object sender, SelectionChangedEventArgs e)
