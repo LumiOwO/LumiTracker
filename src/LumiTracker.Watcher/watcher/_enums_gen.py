@@ -333,6 +333,15 @@ class EActionCard(enum.Enum):
     StageTepetl = enum.auto()
     EremiteTeatime = enum.auto()
     SaurusCrackers = enum.auto()
+    DivineRetribution = enum.auto()
+    RequiresAppropriateRest = enum.auto()
+    BeastlyCorrosion = enum.auto()
+    FlowingPurity = enum.auto()
+    MaidensFadingBeauty = enum.auto()
+    Iktomisaurus = enum.auto()
+    ScionsOfTheCanopy = enum.auto()
+    UltimateSurfingBuddy = enum.auto()
+    GlitteringGemstones = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -351,9 +360,12 @@ class EActionCard(enum.Enum):
     MistBubbleSlime = enum.auto()
     SpiritOfOmenPyroScorpion = enum.auto()
     SpiritOfOmenDendroSpiritSerpent = enum.auto()
+    LargeBolsteringBubblebalm = enum.auto()
+    MediumBolsteringBubblebalm = enum.auto()
+    SmallBolsteringBubblebalm = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 330
+    NumSharables = 339
     NumTokens = NumActions - NumSharables
 
 class ECharacterCard(enum.Enum):
@@ -458,6 +470,9 @@ class ECharacterCard(enum.Enum):
     Chiori = enum.auto()
     AbyssLectorVioletLightning = enum.auto()
     EremiteFloralRingDancer = enum.auto()
+    Rosaria = enum.auto()
+    Sigewinne = enum.auto()
+    GoldenWolflord = enum.auto()
     
     NumCharacters = enum.auto()
 

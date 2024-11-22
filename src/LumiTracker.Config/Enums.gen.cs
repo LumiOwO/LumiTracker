@@ -334,6 +334,15 @@ namespace LumiTracker.Config
         StageTepetl,
         EremiteTeatime,
         SaurusCrackers,
+        DivineRetribution,
+        RequiresAppropriateRest,
+        BeastlyCorrosion,
+        FlowingPurity,
+        MaidensFadingBeauty,
+        Iktomisaurus,
+        ScionsOfTheCanopy,
+        UltimateSurfingBuddy,
+        GlitteringGemstones,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -352,9 +361,12 @@ namespace LumiTracker.Config
         MistBubbleSlime,
         SpiritOfOmenPyroScorpion,
         SpiritOfOmenDendroSpiritSerpent,
+        LargeBolsteringBubblebalm,
+        MediumBolsteringBubblebalm,
+        SmallBolsteringBubblebalm,
         
         NumActions,
-        NumSharables = 330,
+        NumSharables = 339,
         NumTokens = NumActions - NumSharables,
     }
     
@@ -461,6 +473,9 @@ namespace LumiTracker.Config
         Chiori,
         AbyssLectorVioletLightning,
         EremiteFloralRingDancer,
+        Rosaria,
+        Sigewinne,
+        GoldenWolflord,
         
         NumCharacters,
     }
