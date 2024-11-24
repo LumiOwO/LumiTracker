@@ -21,7 +21,7 @@ class RoundTask(TaskBase):
 
     @override
     def Reset(self):
-        self.filter = StreamFilter(null_val=-1)
+        self.filter = StreamFilter(null_val=-1, cooldown=30)
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
@@ -42,9 +42,12 @@ class RoundTask(TaskBase):
         self.buffer = buffer
 
         cur_round = self.DetectCurrentRound(buffer)
+        # before = cur_round
         cur_round = self.filter.Filter(cur_round, dist=0)
+        # after = cur_round
+        # LogDebug(before=before, after=after)
 
-        if cur_round != -1:
+        if (cur_round != -1) and (self.fm.round != cur_round):
             self.fm.round = cur_round
             LogInfo(
                 info=f"Found Round Text",
