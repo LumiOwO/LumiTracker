@@ -2,6 +2,7 @@ using LumiTracker.Config;
 using LumiTracker.Controls;
 using Microsoft.Extensions.Logging;
 using System.IO;
+using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
@@ -111,6 +112,11 @@ namespace LumiTracker.Services
 
         private StyledContentDialog GetReleaseLogDialog(string title, string body, bool isStartup)
         {
+            return GetReleaseLogDialog(title, body, isStartup, out bool allWhiteSpace);
+        }
+
+        private StyledContentDialog GetReleaseLogDialog(string title, string body, bool isStartup, out bool allWhiteSpace)
+        {
             // Init
             var content = new LatestReleaseDialogContent();
             // Get update info of current language
@@ -120,6 +126,7 @@ namespace LumiTracker.Services
                 body = textMultiLangs[(int)Configuration.GetELanguage() - 1];
                 body = body.TrimStart();
             }
+            allWhiteSpace = string.IsNullOrWhiteSpace(body);
             MarkdownParser.ParseMarkdown(content.RichTextBox.Document, body);
 
             // Show latest release info dialog
@@ -141,6 +148,52 @@ namespace LumiTracker.Services
                 dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24);
                 dialog.PrimaryButtonAppearance = ControlAppearance.Success;
             }
+
+            return styledDialog;
+        }
+
+        private readonly string noticesUrl = $"https://gitee.com/LumiOwO/LumiTracker-Beta/raw/master/notices.md";
+        private async Task<StyledContentDialog?> GetNoticesDialog()
+        {
+            string body = "";
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
+                    client.Timeout = TimeSpan.FromSeconds(5);
+
+                    HttpResponseMessage response = await client.GetAsync(noticesUrl);
+                    response.EnsureSuccessStatusCode();
+                    body = await response.Content.ReadAsStringAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogWarning($"Failed to fetch announcement: {ex.Message}");
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                return null;
+            }
+
+            var styledDialog = GetReleaseLogDialog(Lang.Notices, body, false, out bool allWhiteSpace);
+            if (allWhiteSpace)
+            {
+                return null;
+            }
+
+            var dialog = styledDialog.Dialog;
+            dialog.IsPrimaryButtonEnabled = false;
+            dialog.CloseButtonText = Lang.OK;
+            dialog.CloseButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24);
+            dialog.CloseButtonAppearance = ControlAppearance.Success;
+
+            var content = (dialog.Content as LatestReleaseDialogContent)!;
+            content.ShowDonationPrompt = false;
+            content.RichTextBox.Margin = new Thickness(10, 0, 10, 0);
 
             return styledDialog;
         }
@@ -264,12 +317,13 @@ namespace LumiTracker.Services
             return result;
         }
 
-        private async Task _ShowStartupDialogIfNeededAsync()
+        private async Task _ShowWelcomeOrChangelogAsync()
         {
-            Guid guid = Configuration.GetOrCreateGuid(out bool guidNewlyCreated);
+            // Welcome dialog & Changelog dialog
+            bool guid_newly_created = Configuration.Get<bool>("guid_newly_created");
             bool just_updated = Configuration.Get<bool>("just_updated");
 
-            if (!guidNewlyCreated && just_updated)
+            if (!guid_newly_created && just_updated)
             {
                 StyledContentDialog? styledDialog = null;
                 try
@@ -302,7 +356,7 @@ namespace LumiTracker.Services
                 }
             }
 
-            if (just_updated || guidNewlyCreated)
+            if (just_updated || guid_newly_created)
             {
                 ContentDialogResult result = await ShowWelcomeDialogAsync();
                 if (result == ContentDialogResult.Primary)
@@ -314,7 +368,18 @@ namespace LumiTracker.Services
 
         public async Task ShowStartupDialogIfNeededAsync(Func<Task> OnDialogClosed)
         {
-            await _ShowStartupDialogIfNeededAsync();
+            // Start notice fetch task
+            var fetchNoticesTask = GetNoticesDialog();
+
+            await _ShowWelcomeOrChangelogAsync();
+
+            // Show notice if needed
+            StyledContentDialog? noticesDialog = await fetchNoticesTask;
+            if (noticesDialog != null)
+            {
+                await MainService.ShowAsync(noticesDialog.Dialog, default);
+            }
+
             await OnDialogClosed();
         }
     }

@@ -113,6 +113,10 @@ namespace LumiTracker
 
             // Ensures guid is created
             Guid guid = Configuration.GetOrCreateGuid(out bool guidNewlyCreated);
+            if (guidNewlyCreated)
+            {
+                Configuration.SetTemporal("guid_newly_created", true);
+            }
 
             if (e.Args.Length == 1 && e.Args[0] == "just_updated")
             {

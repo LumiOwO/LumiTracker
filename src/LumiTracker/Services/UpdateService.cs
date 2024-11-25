@@ -157,7 +157,7 @@ namespace LumiTracker.Services
         }
     }
 
-    public class UpdateService
+    public class UpdateService : IDisposable
     {
         public async Task TryUpdateAsync(UpdateContext ctx)
         {
@@ -288,6 +288,12 @@ namespace LumiTracker.Services
             subClient = new HttpClient();
             subClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
             subClient.Timeout = TimeSpan.FromSeconds(5);
+        }
+
+        public void Dispose()
+        {
+            mainClient?.Dispose();
+            subClient?.Dispose();
         }
 
         private async Task<bool> GetLatestVersionMeta(UpdateContext ctx)

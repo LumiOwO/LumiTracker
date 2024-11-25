@@ -711,6 +711,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Notices.
+        /// </summary>
+        public static string Notices {
+            get {
+                return ResourceManager.GetString("Notices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Don&apos;t show this again.
         /// </summary>
         public static string NotShowAgain {

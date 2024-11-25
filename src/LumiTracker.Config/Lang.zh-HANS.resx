@@ -488,6 +488,9 @@
   <data name="Stats_OtherMatchups" xml:space="preserve">
     <value>其他阵容</value>
   </data>
+  <data name="Notices" xml:space="preserve">
+    <value>公告</value>
+  </data>
   <data name="OB_SettingsText" xml:space="preserve">
     <value>观战</value>
   </data>

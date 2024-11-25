@@ -11,6 +11,7 @@
             mc:Ignorable="d">
     <UserControl.Resources>
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
         <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#909090"/>
     </UserControl.Resources>
@@ -34,6 +35,9 @@
             Margin="10,0,0,0"
             FontWeight="Bold"
             FontSize="20"
+            Visibility="{Binding ShowDonationPrompt, 
+                Converter={StaticResource BooleanToVisibilityConverter},
+                ConverterParameter=Collapsed}"
             >
             <Run Text="{svs:Localization Donate_Prompt}"/>
             <Run Foreground="Red" Text="♥"/>
