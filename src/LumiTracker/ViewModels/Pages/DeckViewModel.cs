@@ -101,7 +101,8 @@ namespace LumiTracker.ViewModels.Pages
         {
             bool IsIncludeAllBuildVersions = IncludeAllBuildVersions ?? false;
             int index = Math.Clamp(CurrentVersionIndex ?? 0, 0, AllBuildStats.Count - 1);
-            Configuration.Logger.LogDebug($"[UpdateCurrent] IsTotal = {IsIncludeAllBuildVersions}, Index = {index}");
+            Configuration.Logger.LogDebug(
+                $"[UpdateCurrent] IsTotal = {IsIncludeAllBuildVersions}, Index = {index}, Guid = {SelectedBuildVersion.Guid}");
             if (!IsIncludeAllBuildVersions)
             {
                 Current = AllBuildStats[index];
@@ -237,7 +238,7 @@ namespace LumiTracker.ViewModels.Pages
             stats.AddRecord(record);
             try
             {
-                await SaveRecordToDisk(record, stats.Guid);
+                await SaveRecordToDisk(record, stats);
             }
             catch (Exception ex)
             {
@@ -265,16 +266,42 @@ namespace LumiTracker.ViewModels.Pages
             }
         }
 
-        private async Task SaveRecordToDisk(DuelRecord record, Guid guid)
+        private async Task SaveRecordToDisk(DuelRecord record, BuildStats stats)
         {
-            string dataDir = Path.Combine(Configuration.DeckBuildsDir, guid.ToString());
+            string dataDir = Path.Combine(Configuration.DeckBuildsDir, stats.Guid.ToString());
             if (!Directory.Exists(dataDir))
             {
                 Directory.CreateDirectory(dataDir);
             }
-            string jsonPath = Path.Combine(dataDir, $"{DateTime.Now:yyyyMM}.json");
+            // Create the meta file if not exist
+            // Note: Maybe more informations in meta
+            string metaPath = Path.Combine(dataDir, "meta.json");
+            if (!File.Exists(metaPath))
+            {
+                try
+                {
+                    var meta = new
+                    {
+                        sharecode = stats.Edit.ShareCode,
+                        guid = stats.Guid,
+                    };
 
-            // Open the file in append mode
+                    using (var stream = new FileStream(metaPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (var writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen: true))
+                    using (var jsonWriter = new CustomJsonTextWriter(writer, indented: true))
+                    {
+                        var serializer = new JsonSerializer();
+                        await Task.Run(() => serializer.Serialize(jsonWriter, meta));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Configuration.Logger.LogError($"[SaveRecordToDisk] Failed to save meta file for deck build {stats.Guid}: {ex.Message}");
+                }
+            }
+
+            // Open the json file in append mode
+            string jsonPath = Path.Combine(dataDir, $"{DateTime.Now:yyyyMM}.json");
             using (var stream = new FileStream(jsonPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
             {
                 bool empty = (stream.Length == 0);
@@ -717,7 +744,7 @@ namespace LumiTracker.ViewModels.Pages
                 return;
             }
 
-            string sharecode = SelectedDeckItem.Info.ShareCode;
+            string sharecode = SelectedDeckItem.Stats.SelectedBuildVersion.Edit.ShareCode;
             Clipboard.SetText(sharecode);
             SnackbarService?.Show(
                 Lang.CopyToClipboard,

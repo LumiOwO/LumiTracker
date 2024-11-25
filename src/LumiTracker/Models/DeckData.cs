@@ -310,6 +310,18 @@ namespace LumiTracker.Models
             {
                 foreach (var filePath in Directory.GetFiles(dataDir, "*.json"))
                 {
+                    // Extract just the filename
+                    var filename = Path.GetFileName(filePath);
+                    // Filter
+                    if (!(
+                        filename.Length == 11 &&        // Total length of "YYYYMM.json"
+                        filename.EndsWith(".json") &&   // Ends with ".json"
+                        filename[..6].All(char.IsDigit) // First 6 characters are digits
+                        ))
+                    {
+                        continue;
+                    }
+
                     try
                     {
                         // Read and parse each JSON file
