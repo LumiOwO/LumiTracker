@@ -4,6 +4,7 @@
 
 [中文](README.md) | English | [Documentation](https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe)
 
+[Overview Video](https://www.bilibili.com/video/BV19NxhecEFV)
 
 ## Features
 
