@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 using Swordfish.NET.Collections;
 using System.IO;
+using System.ComponentModel;
 
 namespace LumiTracker.Models
 {
@@ -14,30 +15,39 @@ namespace LumiTracker.Models
         [property: JsonIgnore]
         private string _shareCode = "";
 
+        [JsonProperty("name")]
+        [ObservableProperty]
+        [property: JsonIgnore]
+        private string? _name = null;
+
         [JsonProperty("created_at")]
         [ObservableProperty]
         [property: JsonIgnore]
         [JsonConverter(typeof(CustomDateTimeConverter), "yyyy/MM/dd HH:mm:ss")]
         private DateTime _createdAt = CustomDateTimeConverter.MinTime;
+
+        [property: JsonIgnore]
+        public DeckInfo? Info { get; set; } = null;
+
+        public BuildEdit(DeckInfo? info)
+        {
+            Info = info;
+            // Subscribe to the PropertyChanged event
+            PropertyChanged += OnPropertyChanged;
+        }
+
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            Info?.NotifyEditChanged();
+        }
     }
 
     public partial class DeckInfo : ObservableObject
     {
-        [JsonProperty("sharecode")]
+        // Should be compatible with old format
         [ObservableProperty]
         [property: JsonIgnore]
-        private string _shareCode = "";
-
-        [JsonProperty("name")]
-        [ObservableProperty]
-        [property: JsonIgnore]
-        private string _name = Lang.DefaultDeckName;
-
-        [JsonProperty("created_at")]
-        [ObservableProperty]
-        [property: JsonIgnore]
-        [JsonConverter(typeof(CustomDateTimeConverter), "yyyy/MM/dd HH:mm:ss")]
-        private DateTime _createdAt = CustomDateTimeConverter.MinTime;
+        private BuildEdit _edit;
 
         [JsonProperty("last_modified")]
         [ObservableProperty]
@@ -64,6 +74,16 @@ namespace LumiTracker.Models
         [ObservableProperty]
         [property: JsonIgnore]
         private bool? _hideRecordsBeforeImport = null;
+
+        public DeckInfo()
+        {
+            _edit = new BuildEdit(this);
+        }
+
+        public void NotifyEditChanged()
+        {
+            OnPropertyChanged(nameof(Edit));
+        }
     }
 
     public partial class MatchupStats : ObservableObject
@@ -257,9 +277,9 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private MatchupStats _summaryAfterImport = new(-1, -1, -1);
 
-        public BuildStats(string sharecode, DateTime CreatedAt)
+        public BuildStats(BuildEdit edit)
         {
-            Edit = new BuildEdit { ShareCode = sharecode, CreatedAt = CreatedAt };
+            Edit = edit;
 
             int[]? cards = DeckUtils.DecodeShareCode(Edit.ShareCode);
             Guid = DeckUtils.DeckBuildGuid(cards);
@@ -278,14 +298,9 @@ namespace LumiTracker.Models
             CharacterIds = new List<int>(cards[..3]);
         }
 
-        public BuildStats(BuildEdit edit) : this(edit.ShareCode, edit.CreatedAt)
-        {
-
-        }
-
         public BuildStats()
         {
-            Edit = new BuildEdit { ShareCode = "", CreatedAt = DateTime.MinValue };
+            Edit = new BuildEdit(null) { ShareCode = "", CreatedAt = DateTime.MinValue };
         }
 
         public async Task LoadDataAsync()

@@ -32,6 +32,9 @@
         <helpers:TrueFalseCondSwitchConverter x:Key="TrueFalseCondSwitchConverter" />
         <helpers:MultiBooleanAndConverter x:Key="MultiBooleanAndConverter" />
         <helpers:ActionCardViewsConverter x:Key="ActionCardViewsConverter" />
+        <helpers:DeckNameFromBuildStatsConverter x:Key="DeckNameFromBuildStatsConverter" />
+        <helpers:IsNullOrWhiteSpaceConverter x:Key="IsNullOrWhiteSpaceConverter" />
+        <helpers:BuildVersionNameConverter x:Key="BuildVersionNameConverter" />
 
         <SolidColorBrush x:Key="MainContentBackground" Color="#ff282c34" />
         <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
@@ -88,7 +91,6 @@
                     Margin="0,-1"
                     FontWeight="{Binding WeightInNameList}"
                     Foreground="{Binding ColorInNameList}"
-                    Text="{Binding Info.Name}"
                     TextWrapping="NoWrap"
                     TextTrimming="CharacterEllipsis"
                     FontSize="{Binding ActualHeight,
@@ -96,7 +98,14 @@
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.04
                         }"
-                    />
+                    >
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource DeckNameFromBuildStatsConverter}">
+                            <Binding Path="Stats.SelectedBuildVersion" />
+                            <Binding Path="Stats.SelectedBuildVersion.Edit.Name"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
 
             </Grid>
         </DataTemplate>
@@ -201,7 +210,6 @@
 
         <!-- Deck name Glowing Bloom Effect -->
         <TextBlock
-            Text="{Binding ViewModel.SelectedDeckItem.Info.Name}"
             TextTrimming="CharacterEllipsis"
             FontWeight="Bold"
             Foreground="{StaticResource DeckNameBloomBrush}"  
@@ -211,6 +219,12 @@
                     }"
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource DeckNameFromBuildStatsConverter}">
+                    <Binding Path="ViewModel.SelectedDeckItem.Stats.SelectedBuildVersion" />
+                    <Binding Path="ViewModel.SelectedDeckItem.Stats.SelectedBuildVersion.Edit.Name"/>
+                </MultiBinding>
+            </TextBlock.Text>
             <TextBlock.Effect>
                 <BlurEffect Radius="5" />
             </TextBlock.Effect>
@@ -218,7 +232,6 @@
 
         <!-- Deck name Text -->
         <TextBlock
-            Text="{Binding ViewModel.SelectedDeckItem.Info.Name}"
             TextTrimming="CharacterEllipsis"
             FontWeight="Bold"
             Foreground="{StaticResource DeckNameBrush}"
@@ -227,8 +240,14 @@
                     ConverterParameter=0.06
                     }"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            />
+            VerticalAlignment="Center">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource DeckNameFromBuildStatsConverter}">
+                    <Binding Path="ViewModel.SelectedDeckItem.Stats.SelectedBuildVersion" />
+                    <Binding Path="ViewModel.SelectedDeckItem.Stats.SelectedBuildVersion.Edit.Name"/>
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
 
         </Grid>
         </Viewbox>
@@ -400,20 +419,98 @@
                     ItemsSource="{Binding ViewModel.SelectedDeckItem.Stats.AllBuildStats, Mode=OneWay}"
                     IsSynchronizedWithCurrentItem="True"
                     SelectionChanged="OnCurrentVersionIndexChanged"
+                    SizeChanged="OnCurrentVersionComboBoxSizeChanged"
                     >
-                    <ComboBox.ItemTemplate>
+                <ComboBox.ItemTemplateSelector>
+                    <helpers:BuildVersionComboBoxSelector>
+                    <helpers:BuildVersionComboBoxSelector.SelectedItemTemplate>
                         <DataTemplate DataType="{x:Type models:BuildStats}">
                             <TextBlock
-                                Text="{Binding Edit.CreatedAt, StringFormat={}{0:MM/dd HH:mm:ss}}"
                                 Margin="0,0,0,0"
                                 FontSize="{Binding ActualHeight,
                                     RelativeSource={RelativeSource AncestorType={x:Type ComboBox}},
                                     Converter={StaticResource SizeWithRatioConverter}, 
                                     ConverterParameter=0.4
                                     }"
-                                />
+                                >
+                                <TextBlock.Text>
+                                    <MultiBinding 
+                                        Converter="{StaticResource BuildVersionNameConverter}"
+                                        ConverterParameter="1"
+                                        >
+                                        <Binding Path="Edit" />
+                                        <Binding Path="Edit.Name"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+        
+                                <TextBlock.TextTrimming>
+                                    <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                                        <Binding>
+                                            <Binding.Source>
+                                                <TextTrimming>None</TextTrimming>
+                                            </Binding.Source>
+                                        </Binding>
+                                        <Binding>
+                                            <Binding.Source>
+                                                <TextTrimming>CharacterEllipsis</TextTrimming>
+                                            </Binding.Source>
+                                        </Binding>
+                                        <Binding 
+                                            Path="Edit.Name" 
+                                            Mode="OneWay"
+                                            Converter="{StaticResource IsNullOrWhiteSpaceConverter}"
+                                            />
+                                    </MultiBinding>
+                                </TextBlock.TextTrimming>
+                            </TextBlock>
                         </DataTemplate>
-                    </ComboBox.ItemTemplate>
+                    </helpers:BuildVersionComboBoxSelector.SelectedItemTemplate>
+
+                    <helpers:BuildVersionComboBoxSelector.ItemTemplate>
+                        <DataTemplate DataType="{x:Type models:BuildStats}">
+                            <TextBlock
+                                Margin="0,0,0,0"
+                                FontSize="{Binding ActualHeight,
+                                    RelativeSource={RelativeSource AncestorType={x:Type ComboBox}},
+                                    Converter={StaticResource SizeWithRatioConverter}, 
+                                    ConverterParameter=0.4
+                                    }"
+                                >
+                                <TextBlock.Text>
+                                    <MultiBinding 
+                                        Converter="{StaticResource BuildVersionNameConverter}"
+                                        ConverterParameter="0"
+                                        >
+                                        <Binding Path="Edit" />
+                                        <Binding Path="Edit.Name"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+        
+                                <TextBlock.TextTrimming>
+                                    <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                                        <Binding>
+                                            <Binding.Source>
+                                                <TextTrimming>None</TextTrimming>
+                                            </Binding.Source>
+                                        </Binding>
+                                        <Binding>
+                                            <Binding.Source>
+                                                <TextTrimming>CharacterEllipsis</TextTrimming>
+                                            </Binding.Source>
+                                        </Binding>
+                                        <Binding 
+                                            Path="Edit.Name" 
+                                            Mode="OneWay"
+                                            Converter="{StaticResource IsNullOrWhiteSpaceConverter}"
+                                            />
+                                    </MultiBinding>
+                                </TextBlock.TextTrimming>
+                            </TextBlock>
+                        </DataTemplate>
+                    </helpers:BuildVersionComboBoxSelector.ItemTemplate>
+                    </helpers:BuildVersionComboBoxSelector>
+                </ComboBox.ItemTemplateSelector>
+
                 </ComboBox>
             </StackPanel>
             

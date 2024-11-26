@@ -3,7 +3,9 @@ using LumiTracker.Models;
 using LumiTracker.ViewModels.Pages;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace LumiTracker.Helpers
 {
@@ -83,5 +85,110 @@ namespace LumiTracker.Helpers
         }
     }
 
-    
+    public class GetActiveDeckNameConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            string none = $"<{Lang.UnknownDeck}>";
+            if (values == null || values.Length != 3)
+                return none;
+            if (!(values[0] is ObservableCollection<DeckItem> deckItems))
+                return none;
+            if (!(values[1] is int index))
+                return none;
+            //if (!(values[2] is string __selectedDeckName)) // Only used for triggering
+            //    return none;
+            if (index < 0 || index >= deckItems.Count)
+                return none;
+
+            BuildStats stats = deckItems[index].Stats.SelectedBuildVersion;
+            return DeckUtils.GetActualDeckName(stats);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DeckNameFromBuildStatsConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(values[0] is BuildStats stats))
+            {
+                return $"<{Lang.UnknownDeck}>";
+            }
+            //if (!(values[1] is string __deckname)) // Only used for trigger
+            //{
+            //    return $"<{Lang.UnknownDeck}>";
+            //}
+            return DeckUtils.GetActualDeckName(stats);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class BuildVersionNameConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(values[0] is BuildEdit edit))
+            {
+                return $"<{Lang.UnknownDeck}>";
+            }
+            //if (!(values[1] is string __deckname)) // Only used for trigger
+            //{
+            //    return $"<{Lang.UnknownDeck}>";
+            //}
+            bool isSelected = false;
+            if (parameter is string isSelectedStr && isSelectedStr == "1")
+            {
+                isSelected = true;
+            }
+
+            string timeStr = edit.CreatedAt.ToString("MM/dd HH:mm:ss");
+            if (edit.Name != null)
+            {
+                return isSelected ? $"{edit.Name}" : $"{edit.Name}  @{timeStr}";
+            }
+            else
+            {
+                return timeStr;
+            }
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class BuildVersionComboBoxSelector : DataTemplateSelector
+    {
+        public DataTemplate ItemTemplate { get; set; } = new DataTemplate();
+        public DataTemplate SelectedItemTemplate { get; set; } = new DataTemplate();
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            var itemToCheck = container;
+
+            // Search up the visual tree, stopping at either a ComboBox or
+            // a ComboBoxItem (or null). This will determine which template to use
+            while (itemToCheck is not null
+                    and not ComboBox
+                    and not ComboBoxItem)
+            {
+                itemToCheck = VisualTreeHelper.GetParent(itemToCheck);
+            }
+
+            // If you stopped at a ComboBoxItem, you're in the dropdown
+            var inDropDown = itemToCheck is ComboBoxItem;
+            return inDropDown ? ItemTemplate : SelectedItemTemplate;
+        }
+    }
+
 }

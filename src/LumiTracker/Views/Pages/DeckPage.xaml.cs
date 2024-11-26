@@ -54,6 +54,11 @@ namespace LumiTracker.Views.Pages
             }
         }
 
+        private void OnCurrentVersionComboBoxSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            BuildVersionSelectionComboBox.Items.Refresh();
+        }
+
         private void OnSelectedCurrentVersionIndexChanged(DeckItem? SelectedDeckItem)
         {
             IsBuildVersionSelectedByCode = true;

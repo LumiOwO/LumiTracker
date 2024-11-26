@@ -83,13 +83,13 @@ namespace LumiTracker.ViewModels.Pages
             Info = info;
             Info.PropertyChanged += OnDeckInfoPropertyChanged;
 
-            var first = new BuildStats(Info.ShareCode, Info.CreatedAt);
+            var first = new BuildStats(Info.Edit);
             _allBuildStats.Add(first);
             if (info.EditVersions != null)
             {
                 foreach (BuildEdit edit in info.EditVersions)
                 {
-                    var stats = new BuildStats(edit.ShareCode, edit.CreatedAt);
+                    var stats = new BuildStats(edit);
                     _allBuildStats.Add(stats);
                 }
             }
@@ -434,7 +434,7 @@ namespace LumiTracker.ViewModels.Pages
                 textKey    : "AddNewDeck",
                 icon       : SymbolRegular.AddCircle24,
                 command    : AddNewDeckClickedCommand,
-                appearance : ControlAppearance.Secondary,
+                appearance : ControlAppearance.Info,
                 isEnabled  : true
             );
             Buttons[(int)EControlButtonType.DeleteDeck] = new ControlButton(
@@ -537,6 +537,14 @@ namespace LumiTracker.ViewModels.Pages
                 foreach (var jItem in (userDecksDesc["decks"] as JArray)!)
                 {
                     DeckInfo info = jItem.ToObject<DeckInfo>()!;
+                    info.Edit = jItem.ToObject<BuildEdit>()!;
+                    // set parent of all edits
+                    info.Edit.Info = info;
+                    foreach (var edit in (info.EditVersions ?? []))
+                    {
+                        edit.Info = info;
+                    }
+
                     info.PropertyChanged += OnDeckInfoPropertyChanged;
                     deckItems.Add(new DeckItem(info));
                 }
@@ -555,10 +563,13 @@ namespace LumiTracker.ViewModels.Pages
 
         public void SaveDeckInformations()
         {
-            List<DeckInfo> deckInfos = [];
+            List<JObject> deckInfos = [];
             foreach (var item in DeckItems)
             {
-                deckInfos.Add(item.Info);
+                JObject deckInfo = new JObject();
+                deckInfo.Merge(JObject.FromObject(item.Info.Edit));
+                deckInfo.Merge(JObject.FromObject(item.Info));
+                deckInfos.Add(deckInfo);
             }
 
             Configuration.SaveJObject(JObject.FromObject(new
@@ -592,19 +603,13 @@ namespace LumiTracker.ViewModels.Pages
 
         private void AddNewDeck(string sharecode, int[] cards)
         {
-            string deckName = "";
-            foreach (int c_id in cards[..3])
-            {
-                if (deckName != "") deckName += "+";
-                deckName += Configuration.GetCharacterName(c_id, is_short: true);
-            }
-
             var info = new DeckInfo()
             {
-                ShareCode    = sharecode,
-                Name         = deckName,
-                LastModified = DateTime.Now,
-                CreatedAt    = DateTime.Now,
+                LastModified  = DateTime.Now,
+                Edit = {
+                    ShareCode = sharecode,
+                    CreatedAt = DateTime.Now,
+                },
             };
             info.PropertyChanged += OnDeckInfoPropertyChanged;
             DeckItems.Add(new DeckItem(info));
@@ -638,7 +643,7 @@ namespace LumiTracker.ViewModels.Pages
 
             // Add new build version
             DisableAutoSaveWhenDeckInfoChanged = true;
-            BuildEdit edit = new BuildEdit() { ShareCode = sharecode, CreatedAt = DateTime.Now };
+            BuildEdit edit = new BuildEdit(item.Info) { ShareCode = sharecode, CreatedAt = DateTime.Now };
             if (item.Info.EditVersions != null)
             {
                 item.Info.EditVersions.Add(edit);
@@ -665,9 +670,11 @@ namespace LumiTracker.ViewModels.Pages
 
             ActiveDeckIndex = SelectedIndex;
             //SaveDeckInformations();
+
+            string deckName = DeckUtils.GetActualDeckName(SelectedDeckItem.Stats.SelectedBuildVersion);
             SnackbarService?.Show(
                 Lang.SetAsActiveSuccess_Title,
-                Lang.SetAsActiveSuccess_Message + SelectedDeckItem.Info.Name,
+                Lang.SetAsActiveSuccess_Message + deckName,
                 ControlAppearance.Success,
                 new SymbolIcon(SymbolRegular.CheckmarkCircle24),
                 TimeSpan.FromSeconds(2)
@@ -685,17 +692,13 @@ namespace LumiTracker.ViewModels.Pages
 
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
                 Lang.EditDeckName_Title,
-                SelectedDeckItem.Info.Name,
+                DeckUtils.GetActualDeckName(SelectedDeckItem.Stats.SelectedBuildVersion),
                 Lang.EditDeckName_Placeholder
             );
 
             if (result == ContentDialogResult.Primary)
             {
-                if (name == "")
-                {
-                    name = Lang.DefaultDeckName;
-                }
-                SelectedDeckItem.Info.Name = name;
+                SelectedDeckItem.Stats.SelectedBuildVersion.Edit.Name = name;
             }
         }
 
@@ -800,7 +803,8 @@ namespace LumiTracker.ViewModels.Pages
                 return;
             }
 
-            var result = await ContentDialogService.ShowDeleteConfirmDialogAsync(SelectedDeckItem.Info.Name);
+            string name = DeckUtils.GetActualDeckName(SelectedDeckItem.Stats.SelectedBuildVersion);
+            var result = await ContentDialogService.ShowDeleteConfirmDialogAsync(name);
 
             if (result == ContentDialogResult.Primary)
             {

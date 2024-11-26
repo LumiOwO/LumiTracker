@@ -388,5 +388,20 @@ namespace LumiTracker.Models
                 return new Guid(hash);
             }
         }
+
+        public static string GetActualDeckName(BuildStats stats)
+        {
+            string? name = stats.Edit.Name;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = "";
+                foreach (int c_id in stats.CharacterIds)
+                {
+                    if (name != "") name += "+";
+                    name += Configuration.GetCharacterName(c_id, is_short: true);
+                }
+            }
+            return name;
+        }
     }
 }
