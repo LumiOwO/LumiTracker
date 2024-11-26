@@ -625,6 +625,7 @@ namespace LumiTracker.Services
 
 
         private readonly string[] ghPrefixs = [
+            "", // original github url
             "https://github.moeyy.xyz/",
             "https://github.abskoop.workers.dev/",
             "https://gh-proxy.com/",
@@ -644,15 +645,13 @@ namespace LumiTracker.Services
             {
                 tasks[i] = DownloadSpeedTest(ghPrefixs[i] + url);
             }
-            var speeds = await Task.WhenAll(tasks);
+            var fastestTask = await Task.WhenAny(tasks);
 
-            for (int i = 0; i < ghPrefixs.Length; i++)
+            int index = Array.IndexOf(tasks, fastestTask);
+            if (index != -1)
             {
-                if (speeds[i] > max_speed)
-                {
-                    max_speed = speeds[i];
-                    bestPrefix = ghPrefixs[i];
-                }
+                max_speed  = await fastestTask;
+                bestPrefix = ghPrefixs[index];
             }
             Configuration.Logger.LogInformation($"[Update] Best download speed {UpdateUtils.FormatBytes(max_speed)}/s with url prefix: {bestPrefix}");
             return bestPrefix + packagesUrl;
