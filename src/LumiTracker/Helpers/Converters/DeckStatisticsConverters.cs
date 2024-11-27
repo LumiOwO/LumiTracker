@@ -136,7 +136,7 @@ namespace LumiTracker.Helpers
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(values[0] is BuildEdit edit))
+            if (!(values[0] is BuildStats stats))
             {
                 return $"<{Lang.UnknownDeck}>";
             }
@@ -150,14 +150,15 @@ namespace LumiTracker.Helpers
                 isSelected = true;
             }
 
-            string timeStr = edit.CreatedAt.ToString("MM/dd HH:mm:ss");
-            if (edit.Name != null)
+            string deckName = DeckUtils.GetActualDeckName(stats);
+            if (isSelected)
             {
-                return isSelected ? $"{edit.Name}" : $"{edit.Name}  @{timeStr}";
+                return deckName;
             }
             else
             {
-                return timeStr;
+                string timeStr = stats.Edit.CreatedAt.ToString("MM/dd HH:mm:ss");
+                return $"{deckName}  @{timeStr}";
             }
         }
 

@@ -427,6 +427,7 @@
                         <DataTemplate DataType="{x:Type models:BuildStats}">
                             <TextBlock
                                 Margin="0,0,0,0"
+                                TextTrimming="CharacterEllipsis"
                                 FontSize="{Binding ActualHeight,
                                     RelativeSource={RelativeSource AncestorType={x:Type ComboBox}},
                                     Converter={StaticResource SizeWithRatioConverter}, 
@@ -438,30 +439,10 @@
                                         Converter="{StaticResource BuildVersionNameConverter}"
                                         ConverterParameter="1"
                                         >
-                                        <Binding Path="Edit" />
+                                        <Binding Path="." />
                                         <Binding Path="Edit.Name"/>
                                     </MultiBinding>
                                 </TextBlock.Text>
-        
-                                <TextBlock.TextTrimming>
-                                    <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
-                                        <Binding>
-                                            <Binding.Source>
-                                                <TextTrimming>None</TextTrimming>
-                                            </Binding.Source>
-                                        </Binding>
-                                        <Binding>
-                                            <Binding.Source>
-                                                <TextTrimming>CharacterEllipsis</TextTrimming>
-                                            </Binding.Source>
-                                        </Binding>
-                                        <Binding 
-                                            Path="Edit.Name" 
-                                            Mode="OneWay"
-                                            Converter="{StaticResource IsNullOrWhiteSpaceConverter}"
-                                            />
-                                    </MultiBinding>
-                                </TextBlock.TextTrimming>
                             </TextBlock>
                         </DataTemplate>
                     </helpers:BuildVersionComboBoxSelector.SelectedItemTemplate>
@@ -470,6 +451,7 @@
                         <DataTemplate DataType="{x:Type models:BuildStats}">
                             <TextBlock
                                 Margin="0,0,0,0"
+                                TextTrimming="CharacterEllipsis"
                                 FontSize="{Binding ActualHeight,
                                     RelativeSource={RelativeSource AncestorType={x:Type ComboBox}},
                                     Converter={StaticResource SizeWithRatioConverter}, 
@@ -481,30 +463,10 @@
                                         Converter="{StaticResource BuildVersionNameConverter}"
                                         ConverterParameter="0"
                                         >
-                                        <Binding Path="Edit" />
+                                        <Binding Path="." />
                                         <Binding Path="Edit.Name"/>
                                     </MultiBinding>
                                 </TextBlock.Text>
-        
-                                <TextBlock.TextTrimming>
-                                    <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
-                                        <Binding>
-                                            <Binding.Source>
-                                                <TextTrimming>None</TextTrimming>
-                                            </Binding.Source>
-                                        </Binding>
-                                        <Binding>
-                                            <Binding.Source>
-                                                <TextTrimming>CharacterEllipsis</TextTrimming>
-                                            </Binding.Source>
-                                        </Binding>
-                                        <Binding 
-                                            Path="Edit.Name" 
-                                            Mode="OneWay"
-                                            Converter="{StaticResource IsNullOrWhiteSpaceConverter}"
-                                            />
-                                    </MultiBinding>
-                                </TextBlock.TextTrimming>
                             </TextBlock>
                         </DataTemplate>
                     </helpers:BuildVersionComboBoxSelector.ItemTemplate>

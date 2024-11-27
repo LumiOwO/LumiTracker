@@ -331,7 +331,7 @@
     <value>名を編集</value>
   </data>
   <data name="ReimportDeck" xml:space="preserve">
-    <value>再インポート</value>
+    <value>デッキを更新</value>
   </data>
   <data name="ShareDeck" xml:space="preserve">
     <value>シェア</value>
@@ -363,6 +363,9 @@
   <data name="ImportDeck_Title" xml:space="preserve">
     <value>シェアコードでデッキをインポートする</value>
   </data>
+  <data name="ReimportDeck_Title" xml:space="preserve">
+    <value>編集したデッキをインポートする</value>
+  </data>
   <data name="ImportDeck_Placeholder" xml:space="preserve">
     <value>シェアコードを入力してください</value>
   </data>
@@ -382,10 +385,16 @@
     <value>出撃中のデッキ:</value>
   </data>
   <data name="DeleteConfirm_Title" xml:space="preserve">
-    <value>このデッキを削除しますか？</value>
+    <value>削除しますか？</value>
   </data>
   <data name="DeleteConfirm_Message" xml:space="preserve">
     <value>デッキ名：</value>
+  </data>
+  <data name="DeleteConfirm_All" xml:space="preserve">
+    <value>全バージョン</value>
+  </data>
+  <data name="DeleteConfirm_Current" xml:space="preserve">
+    <value>現バージョン</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>無</value>

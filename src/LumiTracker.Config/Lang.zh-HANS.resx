@@ -331,7 +331,7 @@
     <value>编辑牌组名称</value>
   </data>
   <data name="ReimportDeck" xml:space="preserve">
-    <value>重新导入牌组</value>
+    <value>更新当前牌组</value>
   </data>
   <data name="ShareDeck" xml:space="preserve">
     <value>分享牌组</value>
@@ -363,6 +363,9 @@
   <data name="ImportDeck_Title" xml:space="preserve">
     <value>使用分享码导入牌组</value>
   </data>
+  <data name="ReimportDeck_Title" xml:space="preserve">
+    <value>导入修改后的牌组</value>
+  </data>
   <data name="ImportDeck_Placeholder" xml:space="preserve">
     <value>请输入分享码</value>
   </data>
@@ -382,10 +385,16 @@
     <value>当前出战牌组：</value>
   </data>
   <data name="DeleteConfirm_Title" xml:space="preserve">
-    <value>确定要删除这套牌组吗？</value>
+    <value>确定要删除吗？</value>
   </data>
   <data name="DeleteConfirm_Message" xml:space="preserve">
     <value>牌组名称：</value>
+  </data>
+  <data name="DeleteConfirm_All" xml:space="preserve">
+    <value>所有版本</value>
+  </data>
+  <data name="DeleteConfirm_Current" xml:space="preserve">
+    <value>仅当前版本</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>无</value>

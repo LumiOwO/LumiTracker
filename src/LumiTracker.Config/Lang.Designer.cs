@@ -369,6 +369,24 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All Versions.
+        /// </summary>
+        public static string DeleteConfirm_All {
+            get {
+                return ResourceManager.GetString("DeleteConfirm_All", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current Version.
+        /// </summary>
+        public static string DeleteConfirm_Current {
+            get {
+                return ResourceManager.GetString("DeleteConfirm_Current", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Deck Name:.
         /// </summary>
         public static string DeleteConfirm_Message {
@@ -378,7 +396,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete this Deck?.
+        ///   Looks up a localized string similar to Delete?.
         /// </summary>
         public static string DeleteConfirm_Title {
             get {
@@ -990,11 +1008,20 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reimport.
+        ///   Looks up a localized string similar to Update.
         /// </summary>
         public static string ReimportDeck {
             get {
                 return ResourceManager.GetString("ReimportDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import Modified Deck.
+        /// </summary>
+        public static string ReimportDeck_Title {
+            get {
+                return ResourceManager.GetString("ReimportDeck_Title", resourceCulture);
             }
         }
         

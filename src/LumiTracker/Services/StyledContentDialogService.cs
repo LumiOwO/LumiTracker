@@ -98,11 +98,14 @@ namespace LumiTracker.Services
             styledDialog.Title = Lang.DeleteConfirm_Title;
             var dialog = styledDialog.Dialog;
             dialog.Content = content;
-            dialog.PrimaryButtonText = Lang.OK;
-            dialog.CloseButtonText   = Lang.Cancel;
+            dialog.PrimaryButtonText = Lang.DeleteConfirm_All;
             dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Delete24);
-            dialog.CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24);
             dialog.PrimaryButtonAppearance = ControlAppearance.Danger;
+            dialog.SecondaryButtonText = Lang.DeleteConfirm_Current;
+            dialog.SecondaryButtonIcon = new SymbolIcon(SymbolRegular.Delete24);
+            dialog.SecondaryButtonAppearance = ControlAppearance.Caution;
+            dialog.CloseButtonText = Lang.Cancel;
+            dialog.CloseButtonIcon = new SymbolIcon(SymbolRegular.Dismiss24);
 
             ContentDialogResult result = await MainService.ShowAsync(dialog, default);
             return result;

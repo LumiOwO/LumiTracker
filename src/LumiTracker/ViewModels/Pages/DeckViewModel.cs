@@ -712,7 +712,7 @@ namespace LumiTracker.ViewModels.Pages
             }
 
             var (result, sharecode) = await ContentDialogService.ShowTextInputDialogAsync(
-                Lang.ImportDeck_Title,
+                Lang.ReimportDeck_Title,
                 "",
                 Lang.ImportDeck_Placeholder
             );
@@ -806,7 +806,11 @@ namespace LumiTracker.ViewModels.Pages
             string name = DeckUtils.GetActualDeckName(SelectedDeckItem.Stats.SelectedBuildVersion);
             var result = await ContentDialogService.ShowDeleteConfirmDialogAsync(name);
 
-            if (result == ContentDialogResult.Primary)
+            bool deleteAll = (result == ContentDialogResult.Primary)
+                || (result == ContentDialogResult.Secondary && SelectedDeckItem.Stats.AllBuildStats.Count <= 1);
+            bool deleteCurrent = (!deleteAll) && (result == ContentDialogResult.Secondary);
+
+            if (deleteAll)
             {
                 Configuration.Logger.LogDebug($"Before delete: SelectedIndex = {SelectedIndex}, ActiveDeckIndex = {ActiveDeckIndex}");
 
@@ -832,6 +836,30 @@ namespace LumiTracker.ViewModels.Pages
 
                 Configuration.Logger.LogDebug($"After delete: SelectedIndex = {SelectedIndex}, ActiveDeckIndex = {ActiveDeckIndex}");
 
+                SaveDeckInformations();
+            }
+            else if (deleteCurrent)
+            {
+                DisableAutoSaveWhenDeckInfoChanged = true;
+
+                int index = SelectedDeckItem.Info.CurrentVersionIndex ?? 0;
+                Configuration.Logger.LogDebug($"Before delete: CurrentVersionIndex = {index}, Totals = {SelectedDeckItem.Stats.AllBuildStats.Count}");
+                
+                if (index == 0)
+                {
+                    SelectedDeckItem.Info.Edit = SelectedDeckItem.Stats.AllBuildStats[1].Edit;
+                    SelectedDeckItem.Info.EditVersions?.RemoveAt(0);
+                    SelectedDeckItem.Stats.AllBuildStats.RemoveAt(0);
+                }
+                else
+                {
+                    SelectedDeckItem.Info.EditVersions?.RemoveAt(index - 1);
+                    SelectedDeckItem.Stats.AllBuildStats.RemoveAt(index);
+                }
+                SelectedDeckItem.Info.CurrentVersionIndex = Math.Min(index, SelectedDeckItem.Stats.AllBuildStats.Count - 1);
+
+                Configuration.Logger.LogDebug($"After delete: CurrentVersionIndex = {index}, Totals = {SelectedDeckItem.Stats.AllBuildStats.Count}");
+                DisableAutoSaveWhenDeckInfoChanged = false;
                 SaveDeckInformations();
             }
         }
