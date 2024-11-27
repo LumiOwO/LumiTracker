@@ -276,7 +276,7 @@ namespace LumiTracker.ViewModels.Pages
             // Create the meta file if not exist
             // Note: Maybe more informations in meta
             string metaPath = Path.Combine(dataDir, "meta.json");
-            if (!File.Exists(metaPath))
+            // if (!File.Exists(metaPath)) // Always update meta, so the sharecode will always be the latest
             {
                 try
                 {
@@ -668,7 +668,20 @@ namespace LumiTracker.ViewModels.Pages
             {
                 if (allStats[i].Guid == guid)
                 {
+                    DisableAutoSaveWhenDeckInfoChanged = true;
+
                     item.Info.CurrentVersionIndex = i;
+                    if (i == 0)
+                    {
+                        item.Info.Edit.ShareCode = sharecode;
+                    }
+                    else
+                    {
+                        item.Info.EditVersions![i - 1].ShareCode = sharecode;
+                    }
+                    
+                    DisableAutoSaveWhenDeckInfoChanged = false;
+                    SaveDeckInformations();
                     return;
                 }
             }
