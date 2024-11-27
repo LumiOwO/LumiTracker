@@ -339,6 +339,38 @@ namespace LumiTracker.ViewModels.Pages
                 UpdateCurrent(Info.IncludeAllBuildVersions, Info.CurrentVersionIndex);
             }
         }
+
+        public int FindMatchedBuildVersionIndex(int cid0, int cid1, int cid2)
+        {
+            string sortedKey = DeckUtils.CharacterIdsToKey(cid0, cid1, cid2, ignoreOrder: true);
+            string originKey = DeckUtils.CharacterIdsToKey(cid0, cid1, cid2, ignoreOrder: false);
+            return FindMatchedBuildVersionIndex(sortedKey, originKey);
+        }
+
+        public int FindMatchedBuildVersionIndex(string sortedKey, string originKey)
+        {
+            if (sortedKey == DeckUtils.UnknownCharactersKey || originKey == DeckUtils.UnknownCharactersKey) return -1;
+
+            // Check selected build first
+            string selected_sortedKey = DeckUtils.CharacterIdsToKey(SelectedBuildVersion.CharacterIds, ignoreOrder: true);
+            if (sortedKey != selected_sortedKey) return -1;
+            string selected_originKey = DeckUtils.CharacterIdsToKey(SelectedBuildVersion.CharacterIds, ignoreOrder: false);
+            if (originKey == selected_originKey) return Info.CurrentVersionIndex ?? 0;
+
+            // Check other builds, latest version first
+            for (int i = AllBuildStats.Count - 1; i >= 0; i--)
+            {
+                BuildStats stats = AllBuildStats[i];
+                if (stats == SelectedBuildVersion) continue;
+
+                if (originKey == DeckUtils.CharacterIdsToKey(stats.CharacterIds, ignoreOrder: false))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
     }
 
     public partial class DeckItem : ObservableObject

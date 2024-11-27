@@ -212,40 +212,54 @@ namespace LumiTracker.ViewModels.Windows
                 return;
             }
 
-            var sortedDeckInfos = DeckViewModel.DeckItems
-                .Select((item, index) => new 
-                { 
-                    Index = index, 
-                    CharacterIds = item.Stats.SelectedBuildVersion.CharacterIds.ToList(),
-                    LastModified = item.Info.LastModified,
-                })
-                .OrderByDescending(x => x.LastModified);
-
-            bool found = false;
-            string key = DeckUtils.CharacterIdsToKey(card_ids[0], card_ids[1], card_ids[2], ignoreOrder: false);
-            if (key != DeckUtils.UnknownCharactersKey)
-            {
-                foreach (var item in sortedDeckInfos)
-                {
-                    var curKey = DeckUtils.CharacterIdsToKey(item.CharacterIds, ignoreOrder: false);
-                    if (key == curKey)
-                    {
-                        Configuration.Logger.LogInformation($"Set deck[{item.Index}] as active deck.");
-                        DeckViewModel.ActiveDeckIndex = item.Index;
-
-                        var build = DeckViewModel.DeckItems[item.Index].Stats.SelectedBuildVersion;
-                        InitDeckOnGameStart(build.Edit.ShareCode, build.Cards[3..]);
-
-                        found = true;
-                        break;
-                    }
-                }
-            }
-
+            bool found = FindMatchedDeckBuildAndSetActive(card_ids);
             if (!found)
             {
                 Configuration.Logger.LogInformation($"Characters tuple ({card_ids[0]}, {card_ids[1]}, {card_ids[2]}) is not found in the deck list.");
             }
+        }
+
+        private bool FindMatchedDeckBuildAndSetActive(int[] cids)
+        {
+            var sortedDeckItemWrappers = DeckViewModel.DeckItems
+                .Select((item, index) => new
+                {
+                    Index = index,
+                    Item  = item,
+                    LastModified = item.Info.LastModified,
+                })
+                .OrderByDescending(x => x.LastModified);
+
+            string sortedKey = DeckUtils.CharacterIdsToKey(cids[0], cids[1], cids[2], ignoreOrder: true);
+            if (sortedKey == DeckUtils.UnknownCharactersKey)
+                return false;
+
+            string originKey = DeckUtils.CharacterIdsToKey(cids[0], cids[1], cids[2], ignoreOrder: false);
+            foreach (var data in sortedDeckItemWrappers)
+            {
+                var item = data.Item;
+                int matchedIndex = item.Stats.FindMatchedBuildVersionIndex(sortedKey, originKey);
+                if (matchedIndex != -1)
+                {
+                    Configuration.Logger.LogInformation($"Set deck[{data.Index}] as active deck.");
+                    // UI related
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        DeckViewModel.ActiveDeckIndex = data.Index;
+                        if (matchedIndex != (item.Info.CurrentVersionIndex ?? 0))
+                        {
+                            item.Info.CurrentVersionIndex = matchedIndex;
+                        }
+                    });
+
+                    var build = DeckViewModel.DeckItems[data.Index].Stats.AllBuildStats[matchedIndex];
+                    InitDeckOnGameStart(build.Edit.ShareCode, build.Cards[3..]);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void OnOpCharacters(int[] card_ids)

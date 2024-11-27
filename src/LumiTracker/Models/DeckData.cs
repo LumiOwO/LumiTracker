@@ -99,7 +99,7 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private List<int> _opCharacters = [-1, -1, -1];
 
-        public string Key => DeckUtils.CharacterIdsToKey(OpCharacters);
+        public string Key => DeckUtils.CharacterIdsToKey(OpCharacters, ignoreOrder: true);
 
         public MatchupStats(int cid0, int cid1, int cid2)
         {
