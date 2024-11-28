@@ -11,6 +11,8 @@
     <UserControl.Resources>
         <helpers:HideNegativeIntValueConverter x:Key="HideNegativeIntValueConverter" />
         <helpers:DoubleToVisibilityConverter x:Key="DoubleToVisibilityConverter" />
+        <helpers:BooleanToGridLengthConverter x:Key="BooleanToGridLengthConverter" />
+        <helpers:BooleanNotToVisibilityConverter x:Key="BooleanNotToVisibilityConverter" />
 
         <Storyboard x:Key="BlinkAnimation">
             <DoubleAnimation
@@ -37,8 +39,10 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="7*" />
+            <ColumnDefinition Width="{Binding HideCount,
+                Converter={StaticResource BooleanToGridLengthConverter}
+                }"/>
         </Grid.ColumnDefinitions>
         
         <!-- Highlight -->
@@ -100,8 +104,7 @@
         <!-- snapshot -->
         <Border 
             Grid.Column="1" 
-            Grid.ColumnSpan="2"
-            Margin="{Binding SnapshotMargin}"
+            Margin="0"
             Opacity="{Binding Value.Opacity, Mode=OneWay}"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
@@ -136,11 +139,14 @@
         <!-- count -->
         <TextBlock
             Grid.Column="2"
-            Visibility="{Binding CountVisibility}"
-            Margin="12,1,12,0"
+            Visibility="{Binding HideCount,
+                Converter={StaticResource BooleanNotToVisibilityConverter},
+                ConverterParameter=Collapsed
+                }"
+            Margin="0,2,2,0"
             Opacity="{Binding Value.Opacity, Mode=OneWay}"
             FontWeight="Bold"
-            HorizontalAlignment="Right"
+            HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Foreground="#f9ca24"
             FontSize="{Binding CountFontSize}"

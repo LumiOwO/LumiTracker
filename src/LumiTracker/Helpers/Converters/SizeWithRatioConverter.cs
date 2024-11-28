@@ -43,4 +43,22 @@ namespace LumiTracker.Helpers
             throw new NotImplementedException();
         }
     }
+
+    public class BooleanToGridLengthConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!(value is bool isAuto))
+            {
+                return GridLength.Auto;
+            }
+
+            return isAuto ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

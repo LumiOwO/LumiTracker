@@ -54,13 +54,13 @@ namespace LumiTracker.Controls
             set { SetValue(NameFontSizeProperty, value); }
         }
 
-        public static readonly DependencyProperty CountVisibilityProperty = DependencyProperty.Register(
-            "CountVisibility", typeof(Visibility), typeof(ActionCardViewListItem), new PropertyMetadata(Visibility.Visible));
+        public static readonly DependencyProperty HideCountProperty = DependencyProperty.Register(
+            "HideCount", typeof(bool), typeof(ActionCardViewListItem), new PropertyMetadata(false));
 
-        public Visibility CountVisibility
+        public bool HideCount
         {
-            get { return (Visibility)GetValue(CountVisibilityProperty); }
-            set { SetValue(CountVisibilityProperty, value); }
+            get { return (bool)GetValue(HideCountProperty); }
+            set { SetValue(HideCountProperty, value); }
         }
 
         public static readonly DependencyProperty CountFontSizeProperty = DependencyProperty.Register(
@@ -70,15 +70,6 @@ namespace LumiTracker.Controls
         {
             get { return (double)GetValue(CountFontSizeProperty); }
             set { SetValue(CountFontSizeProperty, value); }
-        }
-
-        public static readonly DependencyProperty SnapshotMarginProperty = DependencyProperty.Register(
-            "SnapshotMargin", typeof(Thickness), typeof(ActionCardViewListItem), new PropertyMetadata(new Thickness(0)));
-
-        public Thickness SnapshotMargin
-        {
-            get { return (Thickness)GetValue(SnapshotMarginProperty); }
-            set { SetValue(SnapshotMarginProperty, value); }
         }
 
         private Storyboard blinkAnimation;

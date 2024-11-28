@@ -53,8 +53,7 @@
                         Converter={StaticResource SizeWithRatioConverter}, 
                         ConverterParameter=0.018
                         }"
-                CountVisibility="Visible"
-                SnapshotMargin="0, 0, 32, 0"
+                HideCount="False"
                 />
         </DataTemplate>
 
