@@ -331,13 +331,13 @@
     <value>编辑牌组名称</value>
   </data>
   <data name="ReimportDeck" xml:space="preserve">
-    <value>更新当前牌组</value>
+    <value>修改当前构筑</value>
   </data>
   <data name="ShareDeck" xml:space="preserve">
     <value>分享牌组</value>
   </data>
   <data name="AddNewDeck" xml:space="preserve">
-    <value>添加牌组</value>
+    <value>新增牌组</value>
   </data>
   <data name="DeleteDeck" xml:space="preserve">
     <value>删除牌组</value>
@@ -388,13 +388,13 @@
     <value>确定要删除吗？</value>
   </data>
   <data name="DeleteConfirm_Message" xml:space="preserve">
-    <value>牌组名称：</value>
+    <value>当前牌组：</value>
   </data>
   <data name="DeleteConfirm_All" xml:space="preserve">
-    <value>所有版本</value>
+    <value>所有构筑版本</value>
   </data>
   <data name="DeleteConfirm_Current" xml:space="preserve">
-    <value>仅当前版本</value>
+    <value>仅当前构筑</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>无</value>

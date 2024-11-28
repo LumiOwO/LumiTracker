@@ -331,13 +331,13 @@
     <value>Edit Name</value>
   </data>
   <data name="ReimportDeck" xml:space="preserve">
-    <value>Update</value>
+    <value>Modify</value>
   </data>
   <data name="ShareDeck" xml:space="preserve">
     <value>Share</value>
   </data>
   <data name="AddNewDeck" xml:space="preserve">
-    <value>Import</value>
+    <value>New Deck</value>
   </data>
   <data name="DeleteDeck" xml:space="preserve">
     <value>Delete</value>
@@ -388,13 +388,13 @@
     <value>Delete?</value>
   </data>
   <data name="DeleteConfirm_Message" xml:space="preserve">
-    <value>Deck Name:</value>
+    <value>Current Deck：</value>
   </data>
   <data name="DeleteConfirm_All" xml:space="preserve">
-    <value>All Versions</value>
+    <value>All Builds</value>
   </data>
   <data name="DeleteConfirm_Current" xml:space="preserve">
-    <value>Current Version</value>
+    <value>Current Build</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>None</value>

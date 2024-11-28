@@ -40,6 +40,18 @@
         <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
         <SolidColorBrush x:Key="DeckNameBrush" Color="White" />
         <SolidColorBrush x:Key="DeckNameBloomBrush" Color="#ff82b1ff" />
+        
+        <Storyboard x:Key="ComboBoxThicknessBlink" AutoReverse="True" RepeatBehavior="1x">
+            <ThicknessAnimation
+                Storyboard.TargetProperty="BorderThickness"
+                From="0,0,0,0" To="4,4,4,4" Duration="0:0:0.75"/>
+        </Storyboard>
+
+        <Storyboard x:Key="ComboBoxBorderColorBlink" AutoReverse="True" RepeatBehavior="1x">
+            <ColorAnimation
+                Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                From="Black" To="Yellow" Duration="0:0:0.75"/>
+        </Storyboard>
 
         <DataTemplate x:Key="ActionCardViewTemplate" DataType="{x:Type models:ActionCardView}">
             <ctrls:ActionCardViewListItem
@@ -401,8 +413,12 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"/>
 
-                <ComboBox
+                <Grid
                     Margin="0,8,0,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    >
+                <ComboBox
                     x:Name="BuildVersionSelectionComboBox"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
@@ -426,7 +442,7 @@
                         <DataTemplate DataType="{x:Type models:BuildStats}">
                             <TextBlock
                                 Margin="0,0,0,0"
-                                TextTrimming="CharacterEllipsis"
+                                TextTrimming="None"
                                 FontSize="{Binding ActualHeight,
                                     RelativeSource={RelativeSource AncestorType={x:Type ComboBox}},
                                     Converter={StaticResource SizeWithRatioConverter}, 
@@ -471,8 +487,19 @@
                     </helpers:BuildVersionComboBoxSelector.ItemTemplate>
                     </helpers:BuildVersionComboBoxSelector>
                 </ComboBox.ItemTemplateSelector>
-
                 </ComboBox>
+                    
+                <!-- For Highlight -->
+                <Border
+                    x:Name="BuildVersionSelectionComboBoxBlink"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    BorderThickness="0"
+                    BorderBrush="Transparent"
+                    CornerRadius="5"
+                    IsHitTestVisible="False"
+                    />
+                </Grid>
             </StackPanel>
             
             <!-- Buttons -->

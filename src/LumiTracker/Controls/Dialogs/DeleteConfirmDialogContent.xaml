@@ -18,7 +18,7 @@
     <TextBlock
         DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:DeleteConfirmDialogContent}}"
         Margin="0, -20, 0, -20"
-        Width="450"
+        Width="420"
         Height="Auto"
         FontSize="17"
         VerticalAlignment="Center"
@@ -30,7 +30,7 @@
         <Run 
             x:Name="TextMain"
             FontWeight="Bold"
-            Foreground="#ff9800"
+            Foreground="#ffab00"
             d:Text="Main"/>
     </TextBlock>
 </UserControl>

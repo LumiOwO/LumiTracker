@@ -150,14 +150,14 @@ namespace LumiTracker.Helpers
                 isSelected = true;
             }
 
-            string deckName = DeckUtils.GetActualDeckName(stats);
+            string timeStr = stats.Edit.CreatedAt.ToString("MM/dd HH:mm:ss");
             if (isSelected)
             {
-                return deckName;
+                return timeStr;
             }
             else
             {
-                string timeStr = stats.Edit.CreatedAt.ToString("MM/dd HH:mm:ss");
+                string deckName = DeckUtils.GetActualDeckName(stats);
                 return $"{deckName}  @{timeStr}";
             }
         }

@@ -1,6 +1,7 @@
 ﻿using LumiTracker.ViewModels.Pages;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using Wpf.Ui.Controls;
 
 
@@ -14,6 +15,10 @@ namespace LumiTracker.Views.Pages
 
         private bool IsBuildVersionSelectedByCode { get; set; } = false;
 
+        private Storyboard ComboBoxThicknessBlink { get; }
+
+        private Storyboard ComboBoxBorderColorBlink { get; }
+
         public DeckPage(DeckViewModel viewModel)
         {
             Loaded += DeckPage_Loaded;
@@ -23,11 +28,17 @@ namespace LumiTracker.Views.Pages
 
             InitializeComponent();
             ViewModel.SelectedCurrentVersionIndexChanged += OnSelectedCurrentVersionIndexChanged;
+            ViewModel.BuildVersionListChanged += OnBuildVersionListChanged;
 
             Resources["TabViewItemHeaderBackground"] = new SolidColorBrush((Color)Application.Current.Resources["SubtleFillColorTertiary"]);
             Resources["TabViewItemHeaderBackgroundSelected"] = (SolidColorBrush)Resources["MainContentBackground"];
             Resources["TabViewSelectedItemBorderBrush"] = (SolidColorBrush)Resources["DeckPageBorderBrush"];
             Resources["TabViewForeground"] = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
+
+            ComboBoxThicknessBlink   = (Storyboard)FindResource("ComboBoxThicknessBlink");
+            ComboBoxBorderColorBlink = (Storyboard)FindResource("ComboBoxBorderColorBlink");
+            Storyboard.SetTarget(ComboBoxThicknessBlink,   BuildVersionSelectionComboBoxBlink);
+            Storyboard.SetTarget(ComboBoxBorderColorBlink, BuildVersionSelectionComboBoxBlink);
 
             Inited = true;
         }
@@ -94,6 +105,12 @@ namespace LumiTracker.Views.Pages
             if (ViewModel.IsChangingDeckItem) return;
 
             ViewModel.OnCurrentVersionIndexChanged(BuildVersionSelectionComboBox.SelectedIndex);
+        }
+
+        private void OnBuildVersionListChanged(DeckItem? SelectedDeckItem)
+        {
+            ComboBoxThicknessBlink.Begin();
+            ComboBoxBorderColorBlink.Begin();
         }
     }
 }

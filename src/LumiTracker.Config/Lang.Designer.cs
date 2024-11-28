@@ -70,7 +70,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Import.
+        ///   Looks up a localized string similar to New Deck.
         /// </summary>
         public static string AddNewDeck {
             get {
@@ -369,7 +369,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All Versions.
+        ///   Looks up a localized string similar to All Builds.
         /// </summary>
         public static string DeleteConfirm_All {
             get {
@@ -378,7 +378,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Current Version.
+        ///   Looks up a localized string similar to Current Build.
         /// </summary>
         public static string DeleteConfirm_Current {
             get {
@@ -387,7 +387,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deck Name:.
+        ///   Looks up a localized string similar to Current Deck：.
         /// </summary>
         public static string DeleteConfirm_Message {
             get {
@@ -1008,7 +1008,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update.
+        ///   Looks up a localized string similar to Modify.
         /// </summary>
         public static string ReimportDeck {
             get {

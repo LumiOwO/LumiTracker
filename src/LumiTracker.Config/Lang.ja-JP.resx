@@ -331,13 +331,13 @@
     <value>名を編集</value>
   </data>
   <data name="ReimportDeck" xml:space="preserve">
-    <value>デッキを更新</value>
+    <value>構築を調整</value>
   </data>
   <data name="ShareDeck" xml:space="preserve">
     <value>シェア</value>
   </data>
   <data name="AddNewDeck" xml:space="preserve">
-    <value>インポート</value>
+    <value>デッキを追加</value>
   </data>
   <data name="DeleteDeck" xml:space="preserve">
     <value>削除</value>
@@ -388,13 +388,13 @@
     <value>削除しますか？</value>
   </data>
   <data name="DeleteConfirm_Message" xml:space="preserve">
-    <value>デッキ名：</value>
+    <value>現在のデッキ：</value>
   </data>
   <data name="DeleteConfirm_All" xml:space="preserve">
-    <value>全バージョン</value>
+    <value>全部の構築</value>
   </data>
   <data name="DeleteConfirm_Current" xml:space="preserve">
-    <value>現バージョン</value>
+    <value>現在構築のみ</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>無</value>

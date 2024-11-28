@@ -401,6 +401,8 @@ namespace LumiTracker.ViewModels.Pages
 
     public delegate void OnSelectedCurrentVersionIndexChangedCallback(DeckItem? SelectedDeckItem);
 
+    public delegate void OnBuildVersionListChangedCallback(DeckItem? SelectedDeckItem);
+
     public partial class DeckViewModel : ObservableObject, INavigationAware
     {
         [ObservableProperty]
@@ -416,6 +418,9 @@ namespace LumiTracker.ViewModels.Pages
         private DeckItem? _selectedDeckItem = null;
 
         public event OnSelectedCurrentVersionIndexChangedCallback? SelectedCurrentVersionIndexChanged;
+
+        public event OnBuildVersionListChangedCallback? BuildVersionListChanged;
+
         public bool IsChangingDeckItem { get; private set; } = false;
 
         [ObservableProperty]
@@ -688,7 +693,12 @@ namespace LumiTracker.ViewModels.Pages
 
             // Add new build version
             DisableAutoSaveWhenDeckInfoChanged = true;
-            BuildEdit edit = new BuildEdit(item.Info) { ShareCode = sharecode, CreatedAt = DateTime.Now };
+            BuildEdit edit = new BuildEdit(item.Info) 
+            { 
+                ShareCode = sharecode, 
+                Name      = item.Stats.SelectedBuildVersion.Edit.Name,
+                CreatedAt = DateTime.Now,
+            };
             if (item.Info.EditVersions != null)
             {
                 item.Info.EditVersions.Add(edit);
@@ -702,6 +712,8 @@ namespace LumiTracker.ViewModels.Pages
 
             DisableAutoSaveWhenDeckInfoChanged = false;
             SaveDeckInformations();
+
+            BuildVersionListChanged?.Invoke(item);
         }
 
         [RelayCommand]
@@ -735,9 +747,14 @@ namespace LumiTracker.ViewModels.Pages
                 return;
             }
 
+            string? placeholder = SelectedDeckItem.Stats.SelectedBuildVersion.Edit.Name;
+            if (string.IsNullOrWhiteSpace(placeholder))
+            {
+                placeholder = "";
+            }
             var (result, name) = await ContentDialogService.ShowTextInputDialogAsync(
                 Lang.EditDeckName_Title,
-                DeckUtils.GetActualDeckName(SelectedDeckItem.Stats.SelectedBuildVersion),
+                placeholder,
                 Lang.EditDeckName_Placeholder
             );
 
@@ -906,6 +923,8 @@ namespace LumiTracker.ViewModels.Pages
                 Configuration.Logger.LogDebug($"After delete: CurrentVersionIndex = {index}, Totals = {SelectedDeckItem.Stats.AllBuildStats.Count}");
                 DisableAutoSaveWhenDeckInfoChanged = false;
                 SaveDeckInformations();
+
+                BuildVersionListChanged?.Invoke(SelectedDeckItem);
             }
         }
 
