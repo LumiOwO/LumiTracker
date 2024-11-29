@@ -56,7 +56,7 @@
         <ui:NavigationView
             x:Name="RootNavigation"
             Grid.Row="1"
-            Padding="30,30,30,0"
+            Padding="{Binding ViewModel.NavigationViewPadding}"
             FooterMenuItemsSource="{Binding ViewModel.FooterMenuItems, Mode=OneWay}"
             FrameMargin="10, 0, 15, 15"
             IsBackButtonVisible="Collapsed"
@@ -64,6 +64,7 @@
             MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
             OpenPaneLength="180"
             PaneDisplayMode="Left"
+            Navigated="OnNavigated"
             d:BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
             d:TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
             >

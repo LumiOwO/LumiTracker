@@ -3,8 +3,6 @@ using LumiTracker.Config;
 using LumiTracker.ViewModels.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Wpf.Ui.Controls;
-using LumiTracker.Controls;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
 
@@ -34,6 +32,15 @@ namespace LumiTracker.Views.Windows
             DataContext   = this;
 
             InitializeComponent();
+
+            // Toggle Button
+            Resources["ToggleButtonBackgroundChecked"]            = new SolidColorBrush(Color.FromArgb(0xff, 0x1c, 0xdd, 0xe9));
+            Resources["ToggleButtonForegroundCheckedPointerOver"] = new SolidColorBrush(Color.FromArgb(0xff, 0x3d, 0xf3, 0xff));
+            Resources["ToggleButtonBackgroundCheckedPressed"]     = new SolidColorBrush(Color.FromArgb(0xff, 0x5c, 0xf5, 0xff));
+            // Button
+            Resources["AccentButtonBackground"]                   = new SolidColorBrush(Color.FromArgb(0xff, 0x1c, 0xdd, 0xe9));
+            Resources["AccentButtonBackgroundPointerOver"]        = new SolidColorBrush(Color.FromArgb(0xff, 0x3d, 0xf3, 0xff));
+            Resources["AccentButtonBackgroundPressed"]            = new SolidColorBrush(Color.FromArgb(0xff, 0x5c, 0xf5, 0xff));
         }
 
         [DllImport("dwmapi.dll", PreserveSig = true)]
@@ -127,22 +134,6 @@ namespace LumiTracker.Views.Windows
         private void OnTabControlLoaded(object sender, RoutedEventArgs e)
         {
             DeckWindowTabControl.SelectedItem = MyDeckTab;
-        }
-
-        private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            foreach (TabItem tabItem in DeckWindowTabControl.Items)
-            {
-                var header = (tabItem.Header as DeckWindowTabHeader)!;
-                if (tabItem.IsSelected)
-                {
-                    header.Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
-                }
-                else
-                {
-                    header.Foreground = new SolidColorBrush(Color.FromArgb(200, 200, 200, 200));
-                }
-            }
         }
 
         private void OnChecked(object sender, RoutedEventArgs e)

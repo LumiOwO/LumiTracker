@@ -252,5 +252,17 @@ namespace LumiTracker.Views.Windows
             Closing -= MainWindow_Closing;
             Close();
         }
+
+        private void OnNavigated(NavigationView sender, NavigatedEventArgs args)
+        {
+            if (args.Page is DeckPage)
+            {
+                ViewModel.NavigationViewPadding = new Thickness(0);
+            }
+            else
+            {
+                ViewModel.NavigationViewPadding = new Thickness(30, 30, 30, 0);
+            }
+        }
     }
 }

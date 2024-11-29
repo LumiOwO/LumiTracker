@@ -54,7 +54,7 @@
         <ui:Button 
             Height="Auto"
             Margin="5,10,0,0"
-            Padding="9,4,4,6"
+            Padding="9,4,4,5"
             Appearance="Danger"
             Command="{Binding ShowDonateDialogCommand, Mode=OneWay}">
             <TextBlock 

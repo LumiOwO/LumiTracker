@@ -21,7 +21,7 @@
                 <Ellipse 
                     x:Name="BackCircle"
                     Grid.Row="0"
-                    Fill="#242b34" 
+                    Fill="{DynamicResource CardListBackground}"
                     Stroke="#b19974" 
                     StrokeThickness="3" 
                     VerticalAlignment="Stretch"

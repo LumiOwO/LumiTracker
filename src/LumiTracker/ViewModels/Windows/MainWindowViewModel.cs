@@ -43,6 +43,9 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private MenuItem? _quitTrayMenuItem;
 
+        [ObservableProperty]
+        private Thickness _navigationViewPadding = new Thickness(0);
+
         public MainWindowViewModel(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;

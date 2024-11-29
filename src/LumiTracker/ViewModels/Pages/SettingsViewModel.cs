@@ -197,7 +197,7 @@ namespace LumiTracker.ViewModels.Pages
                     if (CurrentTheme == ApplicationTheme.Light)
                         break;
 
-                    ApplicationThemeManager.Apply(ApplicationTheme.Light);
+                    ApplicationThemeService.ChangeThemeTo(ApplicationTheme.Light);
                     CurrentTheme = ApplicationTheme.Light;
                     Configuration.Set("theme", "Light");
 
@@ -207,7 +207,7 @@ namespace LumiTracker.ViewModels.Pages
                     if (CurrentTheme == ApplicationTheme.Dark)
                         break;
 
-                    ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                    ApplicationThemeService.ChangeThemeTo(ApplicationTheme.Dark);
                     CurrentTheme = ApplicationTheme.Dark;
                     Configuration.Set("theme", "Dark");
 

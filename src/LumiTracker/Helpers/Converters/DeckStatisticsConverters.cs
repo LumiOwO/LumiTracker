@@ -117,11 +117,11 @@ namespace LumiTracker.Helpers
         {
             if (!(values[0] is BuildStats stats))
             {
-                return $"<{Lang.UnknownDeck}>";
+                return $"";
             }
             //if (!(values[1] is string __deckname)) // Only used for trigger
             //{
-            //    return $"<{Lang.UnknownDeck}>";
+            //    return $"";
             //}
             return DeckUtils.GetActualDeckName(stats);
         }

@@ -30,10 +30,8 @@ namespace LumiTracker.Views.Pages
             ViewModel.SelectedCurrentVersionIndexChanged += OnSelectedCurrentVersionIndexChanged;
             ViewModel.BuildVersionListChanged += OnBuildVersionListChanged;
 
-            Resources["TabViewItemHeaderBackground"] = new SolidColorBrush((Color)Application.Current.Resources["SubtleFillColorTertiary"]);
-            Resources["TabViewItemHeaderBackgroundSelected"] = (SolidColorBrush)Resources["MainContentBackground"];
             Resources["TabViewSelectedItemBorderBrush"] = (SolidColorBrush)Resources["DeckPageBorderBrush"];
-            Resources["TabViewForeground"] = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
+            Resources["TabViewForeground"] = new SolidColorBrush(Color.FromArgb(150, 100, 100, 100)); // Not selected header
 
             ComboBoxThicknessBlink   = (Storyboard)FindResource("ComboBoxThicknessBlink");
             ComboBoxBorderColorBlink = (Storyboard)FindResource("ComboBoxBorderColorBlink");

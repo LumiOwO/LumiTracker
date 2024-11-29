@@ -33,11 +33,9 @@
         <SolidColorBrush x:Key="WinBrush" Color="#ffb900" />
         <SolidColorBrush x:Key="LoseBrush" Color="#0078d4" />
         <SolidColorBrush x:Key="GameCountsBrush" Color="#ff8c00" />
-        <SolidColorBrush x:Key="PlainTextBrush" Color="#dfe4ea" />
         <SolidColorBrush x:Key="DateTimeBrush" Color="#a19f9d" />
         <SolidColorBrush x:Key="GoodWinRateBrush" Color="#4cd137" />
         <SolidColorBrush x:Key="BadWinRateBrush" Color="#f5222d" />
-        <SolidColorBrush x:Key="MainContentBackground" Color="#282c34" />
         <SolidColorBrush x:Key="DeckPageBorderBrush" Color="#5aaaaaaa" />
 
         <Style TargetType="ui:ListViewItem" BasedOn="{StaticResource {x:Type ui:ListViewItem}}">
@@ -137,7 +135,7 @@
                     Grid.Row="2"
                     Grid.Column="1"
                     Text="{Binding AvgRounds, StringFormat={}{0:F1}}"
-                    Foreground="{StaticResource PlainTextBrush}"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                     HorizontalAlignment="Center"
                     FontSize="{Binding Path=TabControlHeight, 
                         RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
@@ -167,7 +165,7 @@
                     <ui:SymbolIcon 
                         Symbol="Clock24"
                         Margin="0,0,2,0"
-                        Foreground="{StaticResource PlainTextBrush}"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                         FontSize="{Binding Path=TabControlHeight, 
                             RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
                             Converter={StaticResource SizeWithRatioConverter},
@@ -175,7 +173,7 @@
                             }"
                         />
                     <TextBlock
-                        Foreground="{StaticResource PlainTextBrush}"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                         FontSize="{Binding Path=TabControlHeight, 
                             RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}},
                             Converter={StaticResource SizeWithRatioConverter},
@@ -241,7 +239,7 @@
                             RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                             }"
                         Placement="Bottom"
-                        Background="{StaticResource MainContentBackground}"
+                        Background="{DynamicResource CardListBackground}"
                         BorderBrush="{StaticResource DeckPageBorderBrush}"
                         Padding="15,2,15,10"
                         Margin="5,0,0,0"
@@ -292,7 +290,7 @@
         <DataTemplate x:Key="MatchupStatsViewTemplate" DataType="{x:Type models:MatchupStats}">
             <Border
                 BorderThickness="0,0,0,0.1"
-                BorderBrush="White"
+                BorderBrush="{DynamicResource DeckPageMatchupsBorderBrush}"
                 Margin="5,0,0,0"
                 Padding="0,0,5,2"
                 >
@@ -349,7 +347,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
-                    Foreground="{StaticResource PlainTextBrush}"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                     FontSize="{Binding Path=TabControlHeight, 
                         Converter={StaticResource SizeWithRatioConverter},
                         ConverterParameter=0.025,
@@ -365,7 +363,7 @@
                     <ui:SymbolIcon 
                         Symbol="Clock24"
                         Margin="0,0,1,0"
-                        Foreground="{StaticResource PlainTextBrush}"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                         FontSize="{Binding Path=TabControlHeight, 
                             Converter={StaticResource SizeWithRatioConverter},
                             ConverterParameter=0.025,
@@ -388,7 +386,7 @@
                         </ui:SymbolIcon.LayoutTransform>
                     </ui:SymbolIcon>
                     <TextBlock
-                        Foreground="{StaticResource PlainTextBrush}"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                         FontSize="{Binding Path=TabControlHeight, 
                             Converter={StaticResource SizeWithRatioConverter},
                             ConverterParameter=0.025,
@@ -405,7 +403,7 @@
                     VerticalAlignment="Center"
                     HorizontalAlignment="Right"
                     Text="VS"
-                    Foreground="White"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                     Margin="5,0,3,0"
                     FontWeight="Bold"
                     FontSize="{Binding Path=TabControlHeight, 
@@ -452,7 +450,7 @@
         <DataTemplate x:Key="DuelRecordViewTemplate" DataType="{x:Type models:DuelRecord}">
             <Border
                 BorderThickness="0,0,0,0.1"
-                BorderBrush="White"
+                BorderBrush="{DynamicResource DeckPageMatchupsBorderBrush}"
                 Margin="5,0,5,0"
                 Padding="8,0,0,8"
                 >
@@ -532,7 +530,7 @@
                             Symbol="Clock24"
                             Margin="0,0,2,0"
                             VerticalAlignment="Center"
-                            Foreground="{StaticResource PlainTextBrush}"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             FontSize="{Binding Path=TabControlHeight, 
                                 Converter={StaticResource SizeWithRatioConverter},
                                 ConverterParameter=0.026,
@@ -555,7 +553,7 @@
                             </ui:SymbolIcon.LayoutTransform>
                         </ui:SymbolIcon>
                         <TextBlock
-                            Foreground="{StaticResource PlainTextBrush}"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             FontWeight="Bold"
                             FontSize="{Binding Path=TabControlHeight, 
                                 Converter={StaticResource SizeWithRatioConverter},
@@ -591,7 +589,7 @@
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
                     Text="VS"
-                    Foreground="White"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                     Margin="0,0,0,0"
                     FontWeight="Bold"
                     FontSize="{Binding Path=TabControlHeight, 
@@ -655,7 +653,7 @@
             VerticalAlignment="Stretch"
             Margin="0,5,5,5"
             BorderThickness="0.1"
-            BorderBrush="White"
+            BorderBrush="{DynamicResource DeckPageMatchupsBorderBrush}"
             CornerRadius="5"
             >
 

@@ -382,10 +382,7 @@ namespace LumiTracker.ViewModels.Pages
         private DeckStatistics _stats;
 
         [ObservableProperty]
-        private FontWeight _weightInNameList = FontWeights.Light;
-
-        [ObservableProperty]
-        private Brush? _colorInNameList = (SolidColorBrush?)Application.Current?.Resources?["TextFillColorPrimaryBrush"];
+        private bool _isActive = false;
 
         public DeckItem(DeckInfo deckInfo)
         {
@@ -491,19 +488,16 @@ namespace LumiTracker.ViewModels.Pages
             Select(newValue);
         }
 
-        public static readonly SolidColorBrush HighlightColor = new SolidColorBrush(Color.FromArgb(0xff, 0xf9, 0xca, 0x24));
         partial void OnActiveDeckIndexChanged(int oldValue, int newValue)
         {
             Configuration.Logger.LogDebug($"[OnActiveDeckIndexChanged] {oldValue} -> {newValue}");
             if (oldValue >= 0 && oldValue < DeckItems.Count)
             {
-                DeckItems[oldValue].WeightInNameList = FontWeights.Light;
-                DeckItems[oldValue].ColorInNameList  = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
+                DeckItems[oldValue].IsActive = false;
             }
             if (newValue >= 0 && newValue < DeckItems.Count)
             {
-                DeckItems[newValue].WeightInNameList = FontWeights.Bold;
-                DeckItems[newValue].ColorInNameList  = HighlightColor;
+                DeckItems[newValue].IsActive = true;
                 DeckItems[newValue].LoadCurrent();
             }
         }

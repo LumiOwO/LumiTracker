@@ -80,7 +80,6 @@
                 Grid.Row="0"
                 Margin="0,8,0,0"
                 Loaded="OnTabControlLoaded" 
-                SelectionChanged="OnSelectionChanged"
                 x:Name="DeckWindowTabControl" 
                 >
 
