@@ -760,6 +760,7 @@ namespace LumiTracker.ViewModels.Pages
 
             if (result == ContentDialogResult.Primary)
             {
+                if (string.IsNullOrWhiteSpace(name)) name = null;
                 SelectedDeckItem.Stats.SelectedBuildVersion.Edit.Name = name;
             }
         }
