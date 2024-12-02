@@ -54,6 +54,11 @@ class EGamePhase(enum.Enum):
     Null   = 0
     Action = enum.auto()
 
+class ETurn(enum.Enum):
+    Null = 0
+    My   = enum.auto()
+    Op   = enum.auto()
+
 class EInputType(enum.Enum):
     NONE              = 0
     CAPTURE_TEST      = enum.auto()
@@ -101,7 +106,9 @@ class ERegionType(enum.Enum):
     DECK       = enum.auto()
     VS_ANCHOR  = enum.auto()
     SETTINGS   = enum.auto()
-    CARD_BACK  = enum.auto()  
+    CARD_BACK  = enum.auto()
+    TURN       = enum.auto()
+    HISTORY    = enum.auto()
 
 class ERatioType(enum.Enum):
     E16_9  = 0
@@ -149,9 +156,12 @@ class ECtrlType(enum.Enum):
 
     # Single ctrls that are not included in the ann file
     SETTINGS = enum.auto()
+    HISTORY  = enum.auto()
+    MY_TURN  = enum.auto()
+    OP_TURN  = enum.auto()
 
     CTRL_SINGLE_FIRST = SETTINGS
-    CTRL_SINGLE_LAST  = SETTINGS
+    CTRL_SINGLE_LAST  = OP_TURN
     NUM_CTRLS_SINGLE  = CTRL_SINGLE_LAST - CTRL_SINGLE_FIRST + 1
 
     @staticmethod

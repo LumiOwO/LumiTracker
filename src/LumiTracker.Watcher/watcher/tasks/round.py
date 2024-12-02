@@ -1,9 +1,10 @@
 from .base import TaskBase
 
-from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType
+from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType, ETurn
 from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import CropBox, ExtractFeature_Control, ExtractFeature_Digit_Binalized
+from ..feature import ExtractFeature_Control_Single, HashToFeature, FeatureDistance
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
@@ -17,11 +18,18 @@ class RoundTask(TaskBase):
         super().__init__(frame_manager)
         self.event_type = EGameEvent.ROUND
         self.crop_box   = None  # init when resize
+
+        idx = ECtrlType.MY_TURN.value - ECtrlType.CTRL_SINGLE_FIRST.value
+        self.my_turn_feature = HashToFeature(self.db["ctrls"][idx])
+        idx = ECtrlType.OP_TURN.value - ECtrlType.CTRL_SINGLE_FIRST.value
+        self.op_turn_feature = HashToFeature(self.db["ctrls"][idx])
+
         self.Reset()
 
     @override
     def Reset(self):
         self.filter = StreamFilter(null_val=-1, cooldown=30)
+        self.turn_filter = StreamFilter(null_val=ETurn.Null)
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
@@ -33,13 +41,49 @@ class RoundTask(TaskBase):
 
         self.crop_box = CropBox(left, top, left + width, top + height)
 
+        box    = REGIONS[ratio_type][ERegionType.TURN]
+        left   = round(client_width  * box[0])
+        top    = round(client_height * box[1])
+        width  = round(client_width  * box[2])
+        height = round(client_height * box[3])
+
+        self.turn_crop_box = CropBox(left, top, left + width, top + height)
+
     @override
     def Tick(self):
+        self.TickTurn()
+        self.TickRound()
+
+    def TickTurn(self):
+        buffer = self.frame_buffer[
+            self.turn_crop_box.top  : self.turn_crop_box.bottom, 
+            self.turn_crop_box.left : self.turn_crop_box.right
+        ]
+        feature = ExtractFeature_Control_Single(buffer)
+        # self.buffer = buffer  # debug
+
+        detected = ETurn.Null
+        dist = 100
+        if True:
+            dist = FeatureDistance(feature, self.my_turn_feature)
+            if dist <= cfg.strict_threshold:
+                detected = ETurn.My
+
+        if detected == ETurn.Null:
+            dist = FeatureDistance(feature, self.op_turn_feature)
+            if dist <= cfg.strict_threshold:
+                detected = ETurn.Op
+
+        detected = self.turn_filter.Filter(detected, dist)
+        if detected != ETurn.Null:
+            LogDebug(turn=f"{detected}", dist=dist)
+            self.fm.SetTurn(detected)
+
+    def TickRound(self):
         buffer = self.frame_buffer[
             self.crop_box.top  : self.crop_box.bottom, 
             self.crop_box.left : self.crop_box.right
         ]
-        self.buffer = buffer
 
         cur_round = self.DetectCurrentRound(buffer)
         # before = cur_round

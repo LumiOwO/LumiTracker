@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 
 from .config import cfg, LogDebug, LogInfo, LogWarning, LogError
-from .enums import EGameEvent, EClientType, ERegionType
+from .enums import EGameEvent, EClientType, ERegionType, ETurn
 from .database import Database, SaveImage
 from .regions import REGIONS, GetRatioType
 
@@ -39,6 +39,8 @@ class FrameManager:
         self.my_card_back    = np.zeros((0,))
         self.op_card_back    = np.zeros((0,))
         self.op_characters   = [-1, -1, -1]
+        self.turn            = ETurn.Null
+        self.first_turn      = ETurn.Null
 
         # logs
         self.prev_log_time   = time.perf_counter()
@@ -61,6 +63,16 @@ class FrameManager:
         self.my_card_back    = np.zeros((0,))
         self.op_card_back    = np.zeros((0,))
         self.op_characters   = [-1, -1, -1]
+        self.turn            = ETurn.Null
+        self.first_turn      = ETurn.Null
+
+    def SetTurn(self, turn):
+        if turn == ETurn.Null or turn == self.turn:
+            return
+
+        self.turn = turn
+        if self.first_turn == ETurn.Null:
+            self.first_turn = turn
 
     def Resize(self, client_width, client_height):
         if client_width == 0 or client_height == 0:

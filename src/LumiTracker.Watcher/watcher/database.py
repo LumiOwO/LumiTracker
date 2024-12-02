@@ -98,7 +98,7 @@ class Database:
             ctrl_type = ECtrlType(i)
             name = ctrl_type.name.lower()
             image = LoadImage(os.path.join(controls_dir, f"control_{name}.png"))
-            feature = ExtractFeature_Control_Single(image, ctrl_type)
+            feature = ExtractFeature_Control_Single(image)
             single_ctrls.append(f"{ImageHash(feature)}")
         print(f"Added {ECtrlType.NUM_CTRLS_SINGLE.value} ctrl hashs to database")
         self.data["ctrls"] = single_ctrls

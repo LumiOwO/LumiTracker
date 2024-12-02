@@ -1,3 +1,4 @@
+from ..database import SaveImage
 from ..enums import ERatioType
 from ..frame_manager import FrameManager
 from ..regions import GetRatioType
@@ -13,8 +14,8 @@ def main(test_round):
     frame_manager = FrameManager()
     task = GTasks.Round
 
-    image_path = f'temp/control_Round{test_round}.png'
-    # image_path = f'temp/Snipaste_2024-06-25_00-21-23.png'
+    # image_path = f'temp/control_Round{test_round}.png'
+    image_path = f'temp/Snipaste_2024-12-02_22-06-36.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -29,6 +30,7 @@ def main(test_round):
 
     plt.imshow(cv2.cvtColor(task.buffer, cv2.COLOR_BGR2RGB))
     plt.show()
+    # SaveImage(task.buffer, "temp/save/my.png")
 
 if __name__ == "__main__":
     test_round = int(sys.argv[1])

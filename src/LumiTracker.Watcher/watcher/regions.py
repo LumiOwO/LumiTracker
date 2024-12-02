@@ -40,6 +40,8 @@ _REGIONS = {
         ERegionType.VS_ANCHOR  : ( 0.1370, 0.3700, 0.0870, 0.2585, 0.0075 ), # left, top, width, height, margin
         ERegionType.SETTINGS   : ( 0.9610, 0.0240, 0.0225, 0.0400 ),
         ERegionType.CARD_BACK  : ( 0.0000, 0.6700, 0.0865, 0.1375 ),
+        ERegionType.TURN       : ( 0.0350, 0.4800, 0.0132, 0.0400 ),
+        ERegionType.HISTORY    : ( 0.9160, 0.0240, 0.0185, 0.0400 ),
     },
     # 1920 x 1200, 1680 x 1050
     ERatioType.E16_10: {

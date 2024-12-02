@@ -321,9 +321,9 @@ def ExtractFeature_Control(image):
 
     return ExtractFeature_Control_Grayed(gray_image)
 
-def ExtractFeature_Control_Single(image, ctrl_type):
-    if ctrl_type == ECtrlType.SETTINGS:
-        image = cv2.resize(image, (160, 160), interpolation=cv2.INTER_LANCZOS4)
+def ExtractFeature_Control_Single(image):
+    # resize
+    image = cv2.resize(image, (160, 160), interpolation=cv2.INTER_LANCZOS4)
 
     return ExtractFeature_Control(image)
 

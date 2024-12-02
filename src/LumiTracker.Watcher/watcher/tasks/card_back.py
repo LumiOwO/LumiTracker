@@ -14,22 +14,23 @@ import cv2
 class CardBackTask(TaskBase):
     def __init__(self, frame_manager):
         super().__init__(frame_manager)
+        idx = ECtrlType.HISTORY.value - ECtrlType.CTRL_SINGLE_FIRST.value
+        self.history_feature = HashToFeature(self.db["ctrls"][idx])
+
         self.Reset()
 
     @override
     def Reset(self):
         self.filter = StreamFilter(null_val=False)
-        idx = ECtrlType.SETTINGS.value - ECtrlType.CTRL_SINGLE_FIRST.value
-        self.settings_feature = HashToFeature(self.db["ctrls"][idx])
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
-        box    = REGIONS[ratio_type][ERegionType.SETTINGS]
+        box    = REGIONS[ratio_type][ERegionType.HISTORY]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
         height = round(client_height * box[3])
-        self.settings_box = CropBox(left, top, left + width, top + height)
+        self.history_box = CropBox(left, top, left + width, top + height)
 
         box    = REGIONS[ratio_type][ERegionType.CARD_BACK]
         box_left, box_top, box_width, box_height = box
@@ -47,13 +48,14 @@ class CardBackTask(TaskBase):
     @override
     def Tick(self):
         buffer = self.frame_buffer[
-            self.settings_box.top  : self.settings_box.bottom, 
-            self.settings_box.left : self.settings_box.right
+            self.history_box.top  : self.history_box.bottom, 
+            self.history_box.left : self.history_box.right
         ]
 
-        feature = ExtractFeature_Control_Single(buffer, ECtrlType.SETTINGS)
-        dist = FeatureDistance(feature, self.settings_feature)
+        feature = ExtractFeature_Control_Single(buffer)
+        dist = FeatureDistance(feature, self.history_feature)
         detected = (dist <= cfg.strict_threshold)
+        # LogDebug(turn=f"{detected}", dist=dist)
         detected = self.filter.Filter(detected, dist)
 
         if detected:
@@ -70,7 +72,7 @@ class CardBackTask(TaskBase):
             self.fm.op_card_back = cv2.cvtColor(op_card_back, cv2.COLOR_BGRA2GRAY)
 
             LogDebug(
-                info=f"Settings button detected and card backs have been stored.",
+                info=f"History button detected and card backs have been stored.",
                 feature=f"{ImageHash(feature)}", 
                 last_dist=dist,
                 )

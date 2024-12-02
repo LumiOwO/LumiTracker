@@ -13,7 +13,7 @@ def main():
     frame_manager = FrameManager()
     task = GTasks.CardBack
 
-    image_path = 'temp/Snipaste_2024-08-03_16-02-12.png'
+    image_path = 'temp/Snipaste_2024-12-02_22-06-36.png'
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     
@@ -26,7 +26,7 @@ def main():
     task.fm = frame_manager
     task.Tick()
 
-    boxes = [task.settings_box, task.my_card_back_box, task.op_card_back_box]
+    boxes = [task.history_box, task.my_card_back_box, task.op_card_back_box]
     for box in boxes:
         buffer = task.frame_buffer[
             box.top  : box.bottom, 
@@ -34,6 +34,7 @@ def main():
         ]
         plt.imshow(cv2.cvtColor(buffer, cv2.COLOR_BGR2RGB))
         plt.show()
+        # SaveImage(buffer, "temp/save/history.png")
 
 if __name__ == "__main__":
     main()
