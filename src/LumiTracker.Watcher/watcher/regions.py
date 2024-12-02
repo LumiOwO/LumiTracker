@@ -1,5 +1,5 @@
 from .enums import ERegionType, ERatioType, EGameEvent
-from .config import LogInfo
+from .config import LogInfo, LogWarning
 
 def GetRatioType(client_width, client_height):
     ratio = client_width / client_height
@@ -25,7 +25,7 @@ def GetRatioType(client_width, client_height):
     return ratio_type
 
 # left, top, width, height
-REGIONS = {
+_REGIONS = {
     # 1920 x 1080, 2560 x 1440
     ERatioType.E16_9: {
         ERegionType.GAME_START : ( 0.4470, 0.4400, 0.1045, 0.1110 ), # left, top, width, height
@@ -102,3 +102,24 @@ REGIONS = {
         ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
     },
 }
+
+class _RegionOfRatio:
+    def __init__(self, ratio_type):
+        self.ratio_type = ratio_type
+
+    def __getitem__(self, region_type):
+        regions = _REGIONS[self.ratio_type]
+        if region_type in regions:
+            return regions[region_type]
+        else:
+            LogWarning(
+                info=f"Region not defined in this ratio, falling back to 16:9 values",
+                ratio=self.ratio_type.name,
+                region=region_type.name
+                )
+            return _REGIONS[ERatioType.E16_9][region_type]
+
+class REGIONS:
+    @classmethod
+    def __class_getitem__(cls, ratio_type):
+        return _RegionOfRatio(ratio_type)
