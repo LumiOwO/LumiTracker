@@ -40,7 +40,7 @@ _REGIONS = {
         ERegionType.VS_ANCHOR  : ( 0.1370, 0.3700, 0.0870, 0.2585, 0.0075 ), # left, top, width, height, margin
         ERegionType.SETTINGS   : ( 0.9610, 0.0240, 0.0225, 0.0400 ),
         ERegionType.CARD_BACK  : ( 0.0000, 0.6700, 0.0865, 0.1375 ),
-        ERegionType.TURN       : ( 0.0350, 0.4800, 0.0132, 0.0400 ),
+        ERegionType.TURN       : ( 0.0350, 0.4800, 0.0133, 0.0400 ),
         ERegionType.HISTORY    : ( 0.9160, 0.0240, 0.0185, 0.0400 ),
     },
     # 1920 x 1200, 1680 x 1050
@@ -57,6 +57,8 @@ _REGIONS = {
         ERegionType.VS_ANCHOR  : ( 0.1375, 0.3830, 0.0865, 0.2335, 0.0078 ),
         ERegionType.SETTINGS   : ( 0.9610, 0.0215, 0.0225, 0.0365 ),
         ERegionType.CARD_BACK  : ( 0.0000, 0.6500, 0.0900, 0.1255 ),
+        ERegionType.TURN       : ( 0.0350, 0.4820, 0.0133, 0.0360 ),
+        ERegionType.HISTORY    : ( 0.9160, 0.0215, 0.0185, 0.0365 ),
     },
     # 2560 × 1080, 2048 x 864
     ERatioType.E64_27: {
@@ -72,6 +74,8 @@ _REGIONS = {
         ERegionType.VS_ANCHOR  : ( 0.2280, 0.3700, 0.0650, 0.2590, 0.0060 ),
         ERegionType.SETTINGS   : ( 0.8455, 0.0230, 0.0170, 0.0410 ),
         ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
+        ERegionType.TURN       : ( 0.1515, 0.4805, 0.0100, 0.0390 ),
+        ERegionType.HISTORY    : ( 0.8115, 0.0240, 0.0145, 0.0400 ),
     },
     # 3440 × 1440, 2150 x 900
     ERatioType.E43_18: {
@@ -87,6 +91,8 @@ _REGIONS = {
         ERegionType.VS_ANCHOR  : ( 0.2301, 0.3700, 0.0640, 0.2590, 0.0060 ),
         ERegionType.SETTINGS   : ( 0.8430, 0.0230, 0.0170, 0.0400 ),
         ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
+        ERegionType.TURN       : ( 0.1535, 0.4800, 0.0105, 0.0400 ),
+        ERegionType.HISTORY    : ( 0.8095, 0.0240, 0.0145, 0.0400 ),
     },
     # 3840 x 1600, 1920 x 800
     ERatioType.E12_5: {
@@ -102,6 +108,8 @@ _REGIONS = {
         ERegionType.VS_ANCHOR  : ( 0.2320, 0.3700, 0.0638, 0.2590, 0.0060 ),
         ERegionType.SETTINGS   : ( 0.8410, 0.0230, 0.0170, 0.0400 ),
         ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
+        ERegionType.TURN       : ( 0.1550, 0.4800, 0.0105, 0.0400 ),
+        ERegionType.HISTORY    : ( 0.8080, 0.0245, 0.0140, 0.0390 ),
     },
 }
 
