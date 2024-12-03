@@ -1,6 +1,6 @@
 from .base import TaskBase
 
-from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType
+from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType, ETurn
 from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import CropBox, ExtractFeature_Control
@@ -50,6 +50,7 @@ class GameOverTask(TaskBase):
 
             game_end_time = datetime.now()
             duration = (game_end_time - self.fm.game_start_time).total_seconds()
+            starts_first = (self.fm.first_turn == ETurn.My) if self.fm.first_turn != ETurn.Null else None
             LogInfo(
                 info=f"Game Over, last dist in window = {dist}",
                 type=f"{self.event_type.name}",
@@ -59,6 +60,8 @@ class GameOverTask(TaskBase):
                 rounds=self.fm.round,
                 endtime=game_end_time.strftime("%Y/%m/%d %H:%M:%S"),
                 op=self.fm.op_characters,
+                starting_hand=self.fm.starting_hand,
+                starts_first=starts_first,
                 )
 
     def DetectGameResult(self):

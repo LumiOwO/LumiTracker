@@ -1,7 +1,7 @@
 from .base import TaskBase
 from ..stream_filter import StreamFilter
 
-from ..enums import EAnnType, EGameEvent, ERegionType
+from ..enums import EAnnType, EGameEvent, ERegionType, ETurn
 from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS
 from ..feature import ActionCardHandler, CropBox, CardName
@@ -33,16 +33,24 @@ class CardPlayedTask(TaskBase):
         height = round(client_height * box[3])
         self.card_handler.OnResize(CropBox(left, top, left + width, top + height))
 
-    @override
-    def Tick(self):
+    def DetectCard(self):
+        if (self.event_type == EGameEvent.OP_PLAYED) and (self.fm.turn != ETurn.Op):
+            return -1, 100
+        if (self.event_type == EGameEvent.MY_PLAYED) and (self.fm.turn != ETurn.My):
+            return -1, 100
+
         card_id, dist, dists = self.card_handler.Update(self.frame_buffer, self.db)
         if cfg.DEBUG and False:
             # if (self.event_type == EGameEvent.MY_PLAYED) and True: #(card_id != -1):
                 # SaveImage(self.card_handler.region_buffer, os.path.join(cfg.debug_dir, "save", f"{self.event_type.name}{self.fm.frame_count}.png"))
             if (True) and (card_id != -1):
                 LogDebug(info=f'{dists=}, {self.event_type.name}: {CardName(card_id, self.db)}')
-        card_id = self.filter.Filter(card_id, dist=dist)
+        return card_id, dist
 
+    @override
+    def Tick(self):
+        card_id, dist = self.DetectCard()
+        card_id = self.filter.Filter(card_id, dist=dist)
         self.card_id_signal = card_id
 
         if card_id >= 0:

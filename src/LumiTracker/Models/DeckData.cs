@@ -174,6 +174,17 @@ namespace LumiTracker.Models
         [property: JsonIgnore]
         private List<int> _opCharacters = [-1, -1, -1];
 
+        // TODO: add the following two fields into statistics
+        [JsonProperty("starting_hand")]
+        [ObservableProperty]
+        [property: JsonIgnore]
+        private List<int> _startingHand = [];
+
+        [JsonProperty("starts_first")]
+        [ObservableProperty]
+        [property: JsonIgnore]
+        private bool? _startsFirst = null;
+
         public DuelRecord(int cid0, int cid1, int cid2)
         {
             _opCharacters = [cid0, cid1, cid2];

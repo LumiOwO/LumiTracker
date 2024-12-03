@@ -6,12 +6,13 @@ from ..feature import ActionCardHandler, CardName, Counter
 from ..stream_filter import StreamFilter
 
 class CardSelectTask(CenterCropTask):
-    def __init__(self, frame_manager, n_cards=1, prev_cards=None):
+    def __init__(self, frame_manager, n_cards=1, prev_cards=None, is_starting_hand=False):
         super().__init__(frame_manager)
         self.n_cards     = n_cards
         self.prev_counts = None
         self.cards       = []
         self.filters     = []
+        self.is_starting_hand = is_starting_hand
         
         prev_cards = [] if prev_cards is None else prev_cards
         self._Reset(n_cards, prev_cards)
@@ -75,6 +76,8 @@ class CardSelectTask(CenterCropTask):
                 type=EGameEvent.MY_DRAWN.name,
                 cards=drawn,
                 names=[CardName(card, self.db) for card in drawn])
+            if self.is_starting_hand:
+                self.fm.starting_hand = drawn
         if create:
             LogInfo(
                 type=EGameEvent.MY_CREATE_DECK.name,

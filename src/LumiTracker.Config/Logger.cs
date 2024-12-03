@@ -97,7 +97,7 @@ namespace LumiTracker.Config
                                 forceCompact ? false :
                                 ContainsDictOrArray(token);
                 var customWriter = new CustomJsonTextWriter(stringWriter, indented);
-                var serializer   = new JsonSerializer();
+                var serializer   = JsonSerializer.CreateDefault();
                 serializer.Serialize(customWriter, token);
                 res = stringWriter.ToString();
             }

@@ -38,7 +38,7 @@ class GTasks():
         cls.GameStart    = GameStartTask(frame_manager)
         cls.GameOver     = GameOverTask(frame_manager)
         cls.Round        = RoundTask(frame_manager)
-        cls.StartingHand = CardSelectTask(frame_manager, 5)
+        cls.StartingHand = CardSelectTask(frame_manager, 5, is_starting_hand=True)
         cls.MyPlayed     = CardPlayedTask(frame_manager, is_op=False)
         cls.OpPlayed     = CardPlayedTask(frame_manager, is_op=True)
         cls.CardFlow     = CardFlowTask(frame_manager)

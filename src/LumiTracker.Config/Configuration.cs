@@ -253,7 +253,7 @@ namespace LumiTracker.Config
                 using (var stringWriter = new StringWriter())
                 {
                     var customWriter = new CustomJsonTextWriter(stringWriter, indented: true);
-                    var serializer   = new JsonSerializer();
+                    var serializer   = JsonSerializer.CreateDefault();
                     serializer.Serialize(customWriter, jObject);
 
                     File.WriteAllText(path, stringWriter.ToString());

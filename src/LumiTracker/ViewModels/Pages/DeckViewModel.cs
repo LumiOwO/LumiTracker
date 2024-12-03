@@ -290,7 +290,7 @@ namespace LumiTracker.ViewModels.Pages
                     using (var writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen: true))
                     using (var jsonWriter = new CustomJsonTextWriter(writer, indented: true))
                     {
-                        var serializer = new JsonSerializer();
+                        var serializer = JsonSerializer.CreateDefault();
                         await Task.Run(() => serializer.Serialize(jsonWriter, meta));
                     }
                 }
@@ -323,7 +323,7 @@ namespace LumiTracker.ViewModels.Pages
                     {
                         await writer.WriteLineAsync(",");
                     }
-                    var serializer = new JsonSerializer();
+                    var serializer = JsonSerializer.CreateDefault();
                     serializer.Serialize(jsonWriter, record);
                     await writer.WriteLineAsync();
                     await writer.WriteAsync("]");

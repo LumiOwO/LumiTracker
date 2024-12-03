@@ -41,6 +41,7 @@ class FrameManager:
         self.op_characters   = [-1, -1, -1]
         self.turn            = ETurn.Null
         self.first_turn      = ETurn.Null
+        self.starting_hand   = []
 
         # logs
         self.prev_log_time   = time.perf_counter()
@@ -65,6 +66,7 @@ class FrameManager:
         self.op_characters   = [-1, -1, -1]
         self.turn            = ETurn.Null
         self.first_turn      = ETurn.Null
+        self.starting_hand   = []
 
     def SetTurn(self, turn):
         if turn == ETurn.Null or turn == self.turn:
