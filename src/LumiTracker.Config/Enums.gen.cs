@@ -343,6 +343,14 @@ namespace LumiTracker.Config
         ScionsOfTheCanopy,
         UltimateSurfingBuddy,
         GlitteringGemstones,
+        NightRealmsGiftCrestsAndTroughs,
+        DarkShatteringFlame,
+        DemonWarriorsFeatherMask,
+        Qucusaurus,
+        PeopleOfTheSprings,
+        PilgrimageOfTheReturnOfTheSacredFlame,
+        AbundantPhlogiston,
+        PuffPops,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -366,10 +374,10 @@ namespace LumiTracker.Config
         SmallBolsteringBubblebalm,
         
         NumActions,
-        NumSharables = 339,
+        NumSharables = 347,
         NumTokens = NumActions - NumSharables,
         NumExtraGoldens = 2,
-        NumArcaneLegends = 9,
+        NumArcaneLegends = 10,
     }
     
     public enum ECharacterCard : int
@@ -478,6 +486,8 @@ namespace LumiTracker.Config
         Rosaria,
         Sigewinne,
         GoldenWolflord,
+        Mualani,
+        Clorinde,
         
         NumCharacters,
     }

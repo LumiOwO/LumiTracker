@@ -1,3 +1,12 @@
+# \[[v1.2.14](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.14)\] - 2025.01.01
+### 新增内容
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了 5.3 版本的新卡牌
+
+### Bug修复
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 修复了观战模式下起手留牌记录错误的问题
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 修复了观战模式下，我方调和牌被误认为对方打出牌的问题
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复了浅色模式下的显示问题
+
 # \[[v1.2.13](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.13)\] - 2024.11.29
 ### 体验优化
 - ${\color{#db3fff}{\textbf{[史诗]}}}$ 现在，匹配出战卡组时，会在所有构筑版本中搜索，而不是只用选中的那套

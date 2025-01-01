@@ -342,6 +342,14 @@ class EActionCard(enum.Enum):
     ScionsOfTheCanopy = enum.auto()
     UltimateSurfingBuddy = enum.auto()
     GlitteringGemstones = enum.auto()
+    NightRealmsGiftCrestsAndTroughs = enum.auto()
+    DarkShatteringFlame = enum.auto()
+    DemonWarriorsFeatherMask = enum.auto()
+    Qucusaurus = enum.auto()
+    PeopleOfTheSprings = enum.auto()
+    PilgrimageOfTheReturnOfTheSacredFlame = enum.auto()
+    AbundantPhlogiston = enum.auto()
+    PuffPops = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -365,10 +373,10 @@ class EActionCard(enum.Enum):
     SmallBolsteringBubblebalm = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 339
+    NumSharables = 347
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
-    NumArcaneLegends = 9
+    NumArcaneLegends = 10
 
 class ECharacterCard(enum.Enum):
     Ganyu = 0
@@ -475,6 +483,8 @@ class ECharacterCard(enum.Enum):
     Rosaria = enum.auto()
     Sigewinne = enum.auto()
     GoldenWolflord = enum.auto()
+    Mualani = enum.auto()
+    Clorinde = enum.auto()
     
     NumCharacters = enum.auto()
 
