@@ -351,6 +351,11 @@ namespace LumiTracker.Config
         PilgrimageOfTheReturnOfTheSacredFlame,
         AbundantPhlogiston,
         PuffPops,
+        AllReprisalsAndArrearsMineToBear,
+        NightRealmsGiftRepaidInFull,
+        FlowerFeatherClan,
+        LittleTepetlisaurTreasureHunterAtLarge,
+        HotSpringOclock,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -374,7 +379,7 @@ namespace LumiTracker.Config
         SmallBolsteringBubblebalm,
         
         NumActions,
-        NumSharables = 347,
+        NumSharables = 352,
         NumTokens = NumActions - NumSharables,
         NumExtraGoldens = 2,
         NumArcaneLegends = 10,
@@ -488,6 +493,8 @@ namespace LumiTracker.Config
         GoldenWolflord,
         Mualani,
         Clorinde,
+        Arlecchino,
+        Kinich,
         
         NumCharacters,
     }
