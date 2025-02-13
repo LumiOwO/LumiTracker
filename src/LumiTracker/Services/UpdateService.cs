@@ -287,7 +287,7 @@ namespace LumiTracker.Services
 
             subClient = new HttpClient();
             subClient.DefaultRequestHeaders.Add("User-Agent", "CSharpApp");
-            subClient.Timeout = TimeSpan.FromSeconds(5);
+            subClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
         public void Dispose()
@@ -337,7 +337,9 @@ namespace LumiTracker.Services
             ctx.ReleaseMeta = releaseMeta;
 
             string latestVersion = releaseMeta.tag_name.TrimStart('v');
-            if (UpdateUtils.VersionCompare(Configuration.Ini["Version"], latestVersion) >= 0)
+            string currentVersion = Configuration.Ini["Version"];
+            //currentVersion = "0.0.0";
+            if (UpdateUtils.VersionCompare(currentVersion, latestVersion) >= 0)
             {
                 Configuration.Logger.LogInformation($"[Update] Version {latestVersion} is already latest.");
                 ctx.State = EUpdateState.AlreadyLatest;
@@ -623,25 +625,43 @@ namespace LumiTracker.Services
             }
         }
 
-
-        private readonly string[] ghPrefixs = [
-            "", // original github url
-            "https://github.moeyy.xyz/",
-            "https://github.abskoop.workers.dev/",
-            "https://gh-proxy.com/",
-            "https://mirror.ghproxy.com/",
-            "https://ghp.ci/",
-        ];
+        private readonly string ghproxyUrl = $"https://gitee.com/LumiOwO/LumiTracker-Beta/raw/master/ghproxy.txt";
 
         private async Task<string> GetBestDownloadUrl(bool isBeta)
         {
+            // Get ghproxy list
+            List<string> ghPrefixs = [
+                "", // original github url
+            ];
+            try
+            {
+                using (HttpResponseMessage response = await subClient.GetAsync(ghproxyUrl))
+                {
+                    response.EnsureSuccessStatusCode();
+                    string content = await response.Content.ReadAsStringAsync();
+                    string[] urlArray = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < urlArray.Length; i++)
+                    {
+                        string prefix = urlArray[i].Trim();
+                        if (!prefix.EndsWith('/')) prefix += '/';
+                        ghPrefixs.Add(prefix);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogWarning($"Failed to fetch ghproxy urls: {ex.Message}");
+            }
+            // For Debug
+            //ghPrefixs = ["https://github.moeyy.xyz/"];
+
             double max_speed = 0.0;
             string bestPrefix = ghPrefixs[0];
             string packagesUrl = isBeta ? betaPackagesUrl : releasePackagesUrl;
             string url = $"{packagesUrl}/DownloadTest";
 
-            var tasks = new Task<double>[ghPrefixs.Length];
-            for (int i = 0; i < ghPrefixs.Length; i++)
+            var tasks = new Task<double>[ghPrefixs.Count];
+            for (int i = 0; i < ghPrefixs.Count; i++)
             {
                 tasks[i] = DownloadSpeedTest(ghPrefixs[i] + url);
             }
@@ -650,8 +670,11 @@ namespace LumiTracker.Services
             int index = Array.IndexOf(tasks, fastestTask);
             if (index != -1)
             {
-                max_speed  = await fastestTask;
-                bestPrefix = ghPrefixs[index];
+                max_speed = await fastestTask;
+                if (max_speed > 0)
+                {
+                    bestPrefix = ghPrefixs[index];
+                }
             }
             Configuration.Logger.LogInformation($"[Update] Best download speed {UpdateUtils.FormatBytes(max_speed)}/s with url prefix: {bestPrefix}");
             return bestPrefix + packagesUrl;
@@ -661,19 +684,23 @@ namespace LumiTracker.Services
         {
             Configuration.Logger.LogDebug($"[Update] Download test: {url}");
 
+            bool success = false;
             long bytesRead = 0;
             var stopwatch = Stopwatch.StartNew();
+            CancellationTokenSource? cts = null;
+            HttpResponseMessage? response = null;
             try
             {
-                CancellationTokenSource cts = new CancellationTokenSource(subClient.Timeout);
+                cts = new CancellationTokenSource(subClient.Timeout);
                 CancellationToken token = cts.Token;
 
                 // Send a GET request
-                HttpResponseMessage response = await subClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
+                response = await subClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
                 if (response.IsSuccessStatusCode)
                 {
                     // Read the response content as a stream
                     using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    using (var md5 = MD5.Create())
                     {
                         // Get the length of the content
                         long contentLength = response.Content.Headers.ContentLength ?? -1;
@@ -681,14 +708,17 @@ namespace LumiTracker.Services
                         // Read the content in chunks
                         byte[] buffer = new byte[8192];
                         int bytes;
-                        while ((bytes = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        while ((bytes = await contentStream.ReadAsync(buffer, 0, buffer.Length, cts.Token)) > 0)
                         {
+                            // Update the MD5 hash with the current chunk
+                            md5.TransformBlock(buffer, 0, bytes, null, 0);
                             bytesRead += bytes;
-                            if (stopwatch.Elapsed.TotalSeconds > 2)
-                            {
-                                cts.Cancel();
-                            }
                         }
+                        // Finalize the MD5 hash computation
+                        md5.TransformFinalBlock(buffer, 0, 0);
+
+                        string hash = UpdateUtils.HashBytesToString(md5.Hash);
+                        success = (hash == "18b5491df4f3abef7dfc25f52f508d58");
                     }
                 }
                 else
@@ -699,16 +729,29 @@ namespace LumiTracker.Services
             }
             catch (OperationCanceledException)
             {
-                Configuration.Logger.LogDebug($"[Update] Download from {url} timed out.");
+                Configuration.Logger.LogDebug($"[Update] Time out when downloading from {url}");
             }
             catch (Exception e)
             {
                 Configuration.Logger.LogWarning($"[Update] Download failed from {url}: {e.Message}");
             }
-            stopwatch.Stop();
+            response?.Dispose();
+            cts?.Dispose();
 
-            double speed = bytesRead / stopwatch.Elapsed.TotalSeconds;
-            Configuration.Logger.LogDebug($"[Update] Download speed = {UpdateUtils.FormatBytes(speed)}/s from {url}");
+            stopwatch.Stop();
+            double totalSeconds = stopwatch.Elapsed.TotalSeconds;
+
+            double speed = 0;
+            if (!success)
+            {
+                double remainTime = (subClient.Timeout.TotalSeconds - totalSeconds) * 1000;
+                await Task.Delay((int)remainTime);
+            }
+            else
+            {
+                speed = totalSeconds > 0 ? bytesRead / totalSeconds : 0;
+            }
+            Configuration.Logger.LogDebug($"[Update] Elapsed {totalSeconds}s, Speed = {UpdateUtils.FormatBytes(speed)}/s from {url}");
             return speed;
         }
     }
@@ -857,15 +900,21 @@ namespace LumiTracker.Services
             using (FileStream fileStream = File.OpenRead(path))
             {
                 byte[] hashBytes = await md5.ComputeHashAsync(fileStream);
-
-                // Convert byte array to hex string
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
-                {
-                    sb.Append(hashBytes[i].ToString("x2"));
-                }
-                return sb.ToString();
+                return HashBytesToString(hashBytes);
             }
+        }
+
+        public static string HashBytesToString(byte[]? hashBytes)
+        {
+            if (hashBytes == null) return "";
+
+            // Convert byte array to hex string
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("x2"));
+            }
+            return sb.ToString();
         }
 
         public static async Task CopyDirectoryAsync(string sourceDir, string destDir)

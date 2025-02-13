@@ -173,7 +173,7 @@ namespace LumiTracker.Services
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogWarning($"Failed to fetch announcement: {ex.Message}");
+                Configuration.Logger.LogWarning($"Failed to fetch notices: {ex.Message}");
                 return null;
             }
 

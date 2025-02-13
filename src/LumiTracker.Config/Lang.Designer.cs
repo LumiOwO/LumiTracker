@@ -1353,7 +1353,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update failed, please retry; If it still fails, try running as admin.
+        ///   Looks up a localized string similar to Update failed, please retry; If still fails, try to update manually..
         /// </summary>
         public static string UpdatePrompt_Failed {
             get {

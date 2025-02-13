@@ -163,7 +163,7 @@
     <value>检测到新版本</value>
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
-    <value>更新失败，请重试；若仍未成功，请尝试以管理员身份运行</value>
+    <value>更新失败，请重试；若仍未成功，请尝试手动更新。</value>
   </data>
   <data name="UpdatePrompt_Manual" xml:space="preserve">
     <value>手动更新</value>

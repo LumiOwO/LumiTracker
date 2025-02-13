@@ -163,7 +163,7 @@
     <value>An update is available</value>
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
-    <value>Update failed, please retry; If it still fails, try running as admin</value>
+    <value>Update failed, please retry; If still fails, try to update manually.</value>
   </data>
   <data name="UpdatePrompt_Manual" xml:space="preserve">
     <value>Manual Update</value>

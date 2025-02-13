@@ -163,7 +163,7 @@
     <value>最新バージョンがあります</value>
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
-    <value>更新に失敗しました。もう一度お試しください。まだ失敗した場合は、管理者モードで実行してください</value>
+    <value>更新失敗，再試行ください。まだ失敗時は手動更新をお試しください。</value>
   </data>
   <data name="UpdatePrompt_Manual" xml:space="preserve">
     <value>手動更新</value>
