@@ -1,5 +1,6 @@
 from .enums import ERegionType, ERatioType, EGameEvent
 from .config import LogInfo, LogWarning
+import json
 
 def GetRatioType(client_width, client_height):
     ratio = client_width / client_height
@@ -24,94 +25,17 @@ def GetRatioType(client_width, client_height):
 
     return ratio_type
 
-# left, top, width, height
-_REGIONS = {
-    # 1920 x 1080, 2560 x 1440
-    ERatioType.E16_9: {
-        ERegionType.GAME_START : ( 0.4470, 0.4400, 0.1045, 0.1110 ), # left, top, width, height
-        ERegionType.MY_PLAYED  : ( 0.1225, 0.1755, 0.1400, 0.4270 ),
-        ERegionType.OP_PLAYED  : ( 0.7380, 0.1755, 0.1400, 0.4270 ),
-        ERegionType.GAME_OVER  : ( 0.4220, 0.4240, 0.1555, 0.1190 ),
-        ERegionType.PHASE      : ( 0.4000, 0.4800, 0.2000, 0.0400 ),
-        ERegionType.ROUND      : ( 0.4400, 0.5420, 0.1200, 0.0310 ),
-        ERegionType.CENTER     : ( 0.0700, 0.3380, 0.8600, 0.0500 ),
-        ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3350, 0.1070, 0.3280 ), # (margin to digit center, margin to card top, card width, card height)
-        ERegionType.DECK       : ( 0.0300, 0.5550, 0.2950, 0.2750 ),
-        ERegionType.VS_ANCHOR  : ( 0.1370, 0.3700, 0.0870, 0.2585, 0.0075 ), # left, top, width, height, margin
-        ERegionType.SETTINGS   : ( 0.9610, 0.0240, 0.0225, 0.0400 ),
-        ERegionType.CARD_BACK  : ( 0.0000, 0.6700, 0.0865, 0.1375 ),
-        ERegionType.TURN       : ( 0.0350, 0.4800, 0.0133, 0.0400 ),
-        ERegionType.HISTORY    : ( 0.9160, 0.0240, 0.0185, 0.0400 ),
-    },
-    # 1920 x 1200, 1680 x 1050
-    ERatioType.E16_10: {
-        ERegionType.GAME_START : ( 0.4470, 0.4470, 0.1045, 0.0995 ),
-        ERegionType.MY_PLAYED  : ( 0.1490, 0.2285, 0.1305, 0.3565 ),
-        ERegionType.OP_PLAYED  : ( 0.7215, 0.2285, 0.1305, 0.3565 ),
-        ERegionType.GAME_OVER  : ( 0.4220, 0.4240, 0.1555, 0.1190 ),
-        ERegionType.PHASE      : ( 0.4000, 0.4800, 0.2000, 0.0400 ),
-        ERegionType.ROUND      : ( 0.4400, 0.5370, 0.1200, 0.0280 ),
-        ERegionType.CENTER     : ( 0.0700, 0.3540, 0.8600, 0.0500 ),
-        ERegionType.FLOW_ANCHOR: ( 0.0078, 0.3550, 0.1035, 0.2850 ),
-        ERegionType.DECK       : ( 0.0330, 0.5500, 0.2920, 0.2500 ),
-        ERegionType.VS_ANCHOR  : ( 0.1375, 0.3830, 0.0865, 0.2335, 0.0078 ),
-        ERegionType.SETTINGS   : ( 0.9610, 0.0215, 0.0225, 0.0365 ),
-        ERegionType.CARD_BACK  : ( 0.0000, 0.6500, 0.0900, 0.1255 ),
-        ERegionType.TURN       : ( 0.0350, 0.4820, 0.0133, 0.0360 ),
-        ERegionType.HISTORY    : ( 0.9160, 0.0215, 0.0185, 0.0365 ),
-    },
-    # 2560 × 1080, 2048 x 864
-    ERatioType.E64_27: {
-        ERegionType.GAME_START : ( 0.4605, 0.4400, 0.0780, 0.1100 ),
-        ERegionType.MY_PLAYED  : ( 0.2170, 0.1755, 0.1050, 0.4270 ),
-        ERegionType.OP_PLAYED  : ( 0.6785, 0.1755, 0.1050, 0.4270 ),
-        ERegionType.GAME_OVER  : ( 0.4420, 0.4250, 0.1165, 0.1190 ),
-        ERegionType.PHASE      : ( 0.4000, 0.4790, 0.2000, 0.0400 ),
-        ERegionType.ROUND      : ( 0.4400, 0.5410, 0.1200, 0.0320 ),
-        ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
-        ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0800, 0.3280 ),
-        ERegionType.DECK       : ( 0.1470, 0.5550, 0.2230, 0.2750 ),
-        ERegionType.VS_ANCHOR  : ( 0.2280, 0.3700, 0.0650, 0.2590, 0.0060 ),
-        ERegionType.SETTINGS   : ( 0.8455, 0.0230, 0.0170, 0.0410 ),
-        ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
-        ERegionType.TURN       : ( 0.1515, 0.4805, 0.0100, 0.0390 ),
-        ERegionType.HISTORY    : ( 0.8115, 0.0240, 0.0145, 0.0400 ),
-    },
-    # 3440 × 1440, 2150 x 900
-    ERatioType.E43_18: {
-        ERegionType.GAME_START : ( 0.4605, 0.4400, 0.0780, 0.1100 ),
-        ERegionType.MY_PLAYED  : ( 0.2195, 0.1755, 0.1045, 0.4275 ),
-        ERegionType.OP_PLAYED  : ( 0.6776, 0.1755, 0.1045, 0.4275 ),
-        ERegionType.GAME_OVER  : ( 0.4420, 0.4240, 0.1165, 0.1190 ),
-        ERegionType.PHASE      : ( 0.4000, 0.4790, 0.2000, 0.0400 ),
-        ERegionType.ROUND      : ( 0.4400, 0.5422, 0.1200, 0.0325 ),
-        ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
-        ERegionType.FLOW_ANCHOR: ( 0.0050, 0.3350, 0.0780, 0.3280 ),
-        ERegionType.DECK       : ( 0.1495, 0.5550, 0.2205, 0.2750 ),
-        ERegionType.VS_ANCHOR  : ( 0.2301, 0.3700, 0.0640, 0.2590, 0.0060 ),
-        ERegionType.SETTINGS   : ( 0.8430, 0.0230, 0.0170, 0.0400 ),
-        ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
-        ERegionType.TURN       : ( 0.1535, 0.4800, 0.0105, 0.0400 ),
-        ERegionType.HISTORY    : ( 0.8095, 0.0240, 0.0145, 0.0400 ),
-    },
-    # 3840 x 1600, 1920 x 800
-    ERatioType.E12_5: {
-        ERegionType.GAME_START : ( 0.4605, 0.4400, 0.0780, 0.1100 ),
-        ERegionType.MY_PLAYED  : ( 0.2205, 0.1755, 0.1045, 0.4270 ),
-        ERegionType.OP_PLAYED  : ( 0.6765, 0.1755, 0.1045, 0.4270 ),
-        ERegionType.GAME_OVER  : ( 0.4420, 0.4240, 0.1165, 0.1190 ),
-        ERegionType.PHASE      : ( 0.4000, 0.4790, 0.2000, 0.0400 ),
-        ERegionType.ROUND      : ( 0.4400, 0.5400, 0.1200, 0.0345 ),
-        ERegionType.CENTER     : ( 0.1000, 0.3300, 0.8000, 0.0600 ),
-        ERegionType.FLOW_ANCHOR: ( 0.0055, 0.3350, 0.0790, 0.3280 ),
-        ERegionType.DECK       : ( 0.1510, 0.5550, 0.2190, 0.2750 ),
-        ERegionType.VS_ANCHOR  : ( 0.2320, 0.3700, 0.0638, 0.2590, 0.0060 ),
-        ERegionType.SETTINGS   : ( 0.8410, 0.0230, 0.0170, 0.0400 ),
-        ERegionType.CARD_BACK  : ( 0.1240, 0.6675, 0.0655, 0.1385 ),
-        ERegionType.TURN       : ( 0.1550, 0.4800, 0.0105, 0.0400 ),
-        ERegionType.HISTORY    : ( 0.8080, 0.0245, 0.0140, 0.0390 ),
-    },
-}
+_REGIONS = None
+with open("assets/regions.json", 'r', encoding='utf-8') as f:
+    loaded_data = json.load(f)
+    # Convert string keys to enum keys
+    _REGIONS = {
+        ERatioType[key]: {  # Convert outer key (ratio type)
+            ERegionType[inner_key]: inner_value  # Convert inner key (region type)
+            for inner_key, inner_value in value.items()
+        }
+        for key, value in loaded_data.items()
+    }
 
 class _RegionOfRatio:
     def __init__(self, ratio_type):

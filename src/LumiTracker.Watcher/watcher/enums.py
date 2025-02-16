@@ -95,27 +95,28 @@ class EGameEvent(enum.Enum):
     INITIAL_DECK      = enum.auto()
 
 class ERegionType(enum.Enum):
-    GAME_START = 0
-    MY_PLAYED  = enum.auto()
-    OP_PLAYED  = enum.auto()
-    GAME_OVER  = enum.auto()
-    PHASE      = enum.auto()
-    ROUND      = enum.auto()
-    CENTER     = enum.auto()
-    FLOW_ANCHOR= enum.auto()
-    DECK       = enum.auto()
-    VS_ANCHOR  = enum.auto()
-    SETTINGS   = enum.auto()
-    CARD_BACK  = enum.auto()
-    TURN       = enum.auto()
-    HISTORY    = enum.auto()
+    # default: (left, top, width, height)
+    GAME_START      = 0
+    MY_PLAYED       = enum.auto()
+    OP_PLAYED       = enum.auto()
+    GAME_OVER       = enum.auto()
+    PHASE           = enum.auto()
+    ROUND           = enum.auto()
+    CENTER          = enum.auto()
+    FLOW_ANCHOR     = enum.auto()  # (margin to digit center, margin to card top, card width, card height)
+    DECK            = enum.auto()
+    VS_ANCHOR       = enum.auto()  # (left, top, width, height, margin)
+    SETTINGS        = enum.auto()
+    CARD_BACK       = enum.auto()
+    TURN            = enum.auto()
+    HISTORY         = enum.auto()
 
 class ERatioType(enum.Enum):
-    E16_9  = 0
-    E16_10 = enum.auto()
-    E64_27 = enum.auto()
-    E43_18 = enum.auto()
-    E12_5  = enum.auto()
+    E16_9  = 0             # 1920 x 1080, 2560 x 1440
+    E16_10 = enum.auto()   # 1920 x 1200, 1680 x 1050
+    E64_27 = enum.auto()   # 2560 × 1080, 2048 x 864
+    E43_18 = enum.auto()   # 3440 × 1440, 2150 x 900
+    E12_5  = enum.auto()   # 3840 x 1600, 1920 x 800
 
 class ECtrlType(enum.Enum):
     # game start
