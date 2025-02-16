@@ -163,7 +163,7 @@
     <value>An update is available</value>
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
-    <value>Update failed, please retry; If still fails, try to update manually.</value>
+    <value>Update failed, please retry; If still fails, try to run as Admin.</value>
   </data>
   <data name="UpdatePrompt_Manual" xml:space="preserve">
     <value>Manual Update</value>
@@ -499,6 +499,21 @@
   </data>
   <data name="Notices" xml:space="preserve">
     <value>Notices</value>
+  </data>
+  <data name="RunAsAdmin" xml:space="preserve">
+    <value>Run as Administrator</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Restart_Prompt" xml:space="preserve">
+    <value>This setting will take effect the next time you open the app. Would you like to restart now?</value>
+  </data>
+  <data name="Restart_Title" xml:space="preserve">
+    <value>Restart App</value>
   </data>
   <data name="OB_SettingsText" xml:space="preserve">
     <value>Spectate</value>

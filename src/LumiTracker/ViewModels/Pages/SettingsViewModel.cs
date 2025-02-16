@@ -7,6 +7,7 @@ using System.Windows.Media;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 using Microsoft.Extensions.Logging;
+using System.Security.Principal;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -38,6 +39,8 @@ namespace LumiTracker.ViewModels.Pages
         private readonly ILocalizationService _localizationService;
 
         private readonly UpdateService _updateService;
+
+        private readonly StyledContentDialogService _contentDialogService;
 
         private GameWatcher _gameWatcher;
 
@@ -120,11 +123,12 @@ namespace LumiTracker.ViewModels.Pages
             OBConnectButtonEnabled = (newValue != Visibility.Visible);
         }
 
-        public SettingsViewModel(ILocalizationService localizationService, UpdateService updateService, GameWatcher gameWatcher)
+        public SettingsViewModel(ILocalizationService localizationService, UpdateService updateService, GameWatcher gameWatcher, StyledContentDialogService contentDialogService)
         {
             _localizationService = localizationService;
             _updateService = updateService;
             _gameWatcher = gameWatcher;
+            _contentDialogService = contentDialogService;
         }
 
         public void OnNavigatedTo()
@@ -243,6 +247,30 @@ namespace LumiTracker.ViewModels.Pages
         {
             Configuration.Set("subscribe_to_beta_updates", newValue);
             Configuration.RemoveTemporal("releaseMeta");
+        }
+
+        [ObservableProperty]
+        private bool _runAsAdmin = IsRunningAsAdmin();
+
+        partial void OnRunAsAdminChanged(bool oldValue, bool newValue)
+        {
+            Configuration.Set("run_as_admin", newValue);
+            if (!IsRunningAsAdmin() && newValue) 
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Task task = _contentDialogService.ShowRestartDialogAsync();
+                });
+            }
+        }
+
+        private static bool IsRunningAsAdmin()
+        {
+            using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+            {
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
         }
 
         partial void OnOBHostChanged(string? oldValue, string newValue)

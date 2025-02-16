@@ -450,3 +450,5 @@ FodyWeavers.xsd
 /innosetup
 .vscode
 /assets/images
+*.args.json
+launchSettings.json

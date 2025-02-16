@@ -385,5 +385,30 @@ namespace LumiTracker.Services
 
             await OnDialogClosed();
         }
+
+        public async Task ShowRestartDialogAsync()
+        {
+            var content = new PlainTextDialogContent();
+            content.TextBlock.Text = Lang.Restart_Prompt;
+            // Show dialog
+            var styledDialog = new StyledContentDialog();
+            styledDialog.Title = Lang.Restart_Title;
+            var dialog = styledDialog.Dialog;
+            dialog.Content = content;
+            dialog.PrimaryButtonText = Lang.Yes;
+            dialog.CloseButtonText   = Lang.No;
+            dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24);
+            dialog.CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24);
+            dialog.PrimaryButtonAppearance = ControlAppearance.Success;
+            dialog.IsSecondaryButtonEnabled = false;
+            dialog.DialogMargin = new Thickness(0, -20, 0, -5);
+
+            ContentDialogResult result = await MainService.ShowAsync(dialog, default);
+            if (result == ContentDialogResult.Primary)
+            {
+                Configuration.SetTemporal("restart", true);
+                Application.Current.Shutdown();
+            }
+        }
     }
 }

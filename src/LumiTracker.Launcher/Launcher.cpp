@@ -7,11 +7,79 @@
 #include <cstdlib>
 #include <sstream>
 #include <cassert>
-#include <Windows.h>
 
 #include "resource.h"
+#include "json.hpp"
+#include "cxxopts.hpp"
 
+#include <Windows.h>
+#include <ShlObj.h>
+#include <KnownFolders.h>
+
+using json = nlohmann::json;
 namespace fs = std::filesystem;
+
+namespace lumi
+{
+
+struct HandleGuard
+{
+    HANDLE handle;
+    HandleGuard(HANDLE h) noexcept : handle(h) {}
+    ~HandleGuard()
+    {
+        if (handle && handle != INVALID_HANDLE_VALUE)
+        {
+            CloseHandle(handle);
+        }
+    }
+    HandleGuard(const HandleGuard& other) noexcept = delete;
+    HandleGuard(HandleGuard&& other) noexcept = delete;
+    HandleGuard& operator=(const HandleGuard& other) noexcept = delete;
+    HandleGuard& operator=(HandleGuard&& other) noexcept = delete;
+};
+
+class OfStreamWrapper
+{
+private:
+    std::ofstream stream;
+
+public:
+    explicit operator bool() const noexcept 
+    { 
+        return bool(stream); 
+    }
+
+    bool is_open() const noexcept
+    {
+        return stream.is_open();
+    }
+
+    void open(const fs::path& path, std::ios_base::openmode mode)
+    {
+        stream.open(path, mode);
+    }
+
+    template <typename T>
+    OfStreamWrapper& operator<<(const T& value)
+    {
+        if (stream.is_open())
+        {
+            stream << value;
+        }
+        return *this;
+    }
+
+    using Manipulator = std::ostream& (*)(std::ostream&); // Function pointer type
+    OfStreamWrapper& operator<<(const Manipulator& value)
+    {
+        if (stream.is_open())
+        {
+            stream << value;
+        }
+        return *this;
+    }
+};
 
 static bool Utf8BufferToWString(const std::string& src, std::wstring& dst)
 {
@@ -44,53 +112,37 @@ static std::string ToUtf8Buffer(const std::wstring& wstr)
     return res;
 }
 
-static std::ofstream gLaunchLog;
-
-enum EOpenLink : uint8_t
-{
-    NO_OPEN_LINK = 0,
-    OPEN_LINK
-};
-
-enum EShouldExit : uint8_t
-{
-    NOT_EXIT = 0,
-    SHOULD_EXIT,
-};
+// Global variables
+static   OfStreamWrapper   gLaunchLog;
+static   fs::path          gRootDir;
+static   fs::path          gDocumentsDir;
+// Commandline arguments
+static   bool              gJustUpdated = false;
+static   DWORD             gDelayTime   = 0;
 
 static void _PostAlert(bool open_link, bool should_exit)
 {
     if (open_link)
     {
-        LPCWSTR url = L"https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#share-TPW9dOyEFoEmPOxa1ZPczYS5nNh";
+        LPCWSTR url = L"https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#share-E1aLdoGEmotBuvxPMiFcY9isnBe";
         ShellExecuteW(NULL, L"open", url, NULL, NULL, SW_SHOWNORMAL);
     }
     if (should_exit)
     {
-        if (gLaunchLog.is_open())
-        {
-            gLaunchLog.close();
-        }
         ExitProcess(1);
     }
 }
 
-static void AlertA(const std::string& errorMessage, bool open_link, bool should_exit)
+static void Alert(const std::string& errorMessage, bool open_link = true, bool should_exit = true)
 {
-    if (gLaunchLog.is_open())
-    {
-        gLaunchLog << errorMessage << std::endl;
-    }
+    gLaunchLog << errorMessage << std::endl;
     MessageBoxA(NULL, errorMessage.c_str(), "Error", MB_OK | MB_ICONERROR);
     _PostAlert(open_link, should_exit);
 }
 
-static void AlertW(const std::wstring& errorMessage, bool open_link, bool should_exit)
+static void Alert(const std::wstring& errorMessage, bool open_link = true, bool should_exit = true)
 {
-    if (gLaunchLog.is_open())
-    {
-        gLaunchLog << ToUtf8Buffer(errorMessage) << std::endl;
-    }
+    gLaunchLog << ToUtf8Buffer(errorMessage) << std::endl;
     MessageBoxW(NULL, errorMessage.c_str(), L"Error", MB_OK | MB_ICONERROR);
     _PostAlert(open_link, should_exit);
 }
@@ -115,7 +167,7 @@ static IniData ReadIniFile(const std::wstring& filePath)
     {
         std::wostringstream msg;
         msg << L"Error: Could not open file " << filePath << std::endl;
-        AlertW(msg.str(), NO_OPEN_LINK, SHOULD_EXIT);
+        Alert(msg.str());
     }
 
     // Read the file into a std::string
@@ -125,7 +177,7 @@ static IniData ReadIniFile(const std::wstring& filePath)
     {
         std::wostringstream msg;
         msg << L"Error: Conversion failed for file " << filePath << std::endl;
-        AlertW(msg.str(), NO_OPEN_LINK, SHOULD_EXIT);
+        Alert(msg.str());
     }
 
     auto content = std::wistringstream(wideString);
@@ -178,10 +230,12 @@ static std::wstring _CheckDotNetRuntimes()
 
     // Create a pipe for the output
     HANDLE hRead, hWrite;
-    if (!CreatePipe(&hRead, &hWrite, &sa, 0)) 
+    if (!CreatePipe(&hRead, &hWrite, &sa, 0))
     {
         return L"Error creating pipe.";
     }
+    auto hReadGuard = HandleGuard(hRead);
+    auto hWriteGuard = HandleGuard(hWrite);
 
     // Set up the process information and startup info
     PROCESS_INFORMATION pi;
@@ -208,13 +262,14 @@ static std::wstring _CheckDotNetRuntimes()
     );
     if (!success)
     {
-        CloseHandle(hWrite);
-        CloseHandle(hRead);
         return L"Failed to execute 'dotnet.exe --list-runtimes'. Check if the .NET SDK is installed properly.";
     }
+    auto hProcessGuard = HandleGuard(pi.hProcess);
+    auto hThreadGuard = HandleGuard(pi.hThread);
 
     // Close the write end of the pipe since we don't need it
     CloseHandle(hWrite);
+    hWriteGuard.handle = NULL;
 
     // Read output from the pipe.
     std::vector<char> buffer(4096);
@@ -224,11 +279,6 @@ static std::wstring _CheckDotNetRuntimes()
     {
         output.append(buffer.data(), bytesRead);
     }
-
-    // Close handles
-    CloseHandle(hRead);
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
 
     bool foundNETCore = false;
     bool foundWindowsDesktop = false;
@@ -296,23 +346,53 @@ static void CheckDotNetEnvironment()
                 L"Error message:\n"
                 ;
         }
-        AlertW(prompt + errorMessage, OPEN_LINK, NOT_EXIT);
+        Alert(prompt + errorMessage);
     }
 }
 
-void Launch(const std::wstring& rootDir, bool just_updated)
+static json LoadUserConfig()
 {
-    gLaunchLog << "Root dir: " << ToUtf8Buffer(rootDir) << std::endl;
-    if (just_updated)
+    json userConfig = json::object();
+
+    // Try to open user config
+    fs::path userConfigPath = gDocumentsDir / "config" / "config.json";
+    if (!fs::exists(userConfigPath))
     {
-        Sleep(1500);
+        return userConfig;
+    }
+
+    std::ifstream userConfigfile(userConfigPath);
+    if (!userConfigfile.is_open())
+    {
+        gLaunchLog << "Failed to open file: " << userConfigPath << std::endl;
+        return userConfig;
+    }
+
+    try 
+    {
+        userConfig = json::parse(userConfigfile);
+    }
+    catch (const std::exception& e) 
+    {
+        gLaunchLog << "Error when parsing json from " << userConfigPath << ": " << e.what() << std::endl;
+        userConfig = json::object();
+    }
+    return userConfig;
+}
+
+static void Launch()
+{
+    gLaunchLog << "Root dir: " << ToUtf8Buffer(gRootDir) << std::endl;
+    if (gDelayTime > 0)
+    {
+        Sleep(gDelayTime);
     }
 
     // Call the environment check
     CheckDotNetEnvironment();
 
     // Define the path to the .ini file
-    std::wstring iniFilePath = rootDir + L"LumiTracker.ini";
+    fs::path iniFilePath = gRootDir / L"LumiTracker.ini";
 
     // Read and parse the .ini file
     IniData iniData = ReadIniFile(iniFilePath);
@@ -321,76 +401,106 @@ void Launch(const std::wstring& rootDir, bool just_updated)
     auto appSectionIt = iniData.find(L"Application");
     if (appSectionIt == iniData.end()) 
     {
-        AlertA("Error: No 'Application' section found in the .ini file.", NO_OPEN_LINK, SHOULD_EXIT);
+        Alert("Error: No 'Application' section found in the .ini file.");
     }
 
     auto& applicationSection = appSectionIt->second;
     auto versionIt = applicationSection.find(L"Version");
     if (versionIt == applicationSection.end())
     {
-        AlertA("Error: No 'Version' specified in the 'Application' section.", NO_OPEN_LINK, SHOULD_EXIT);
+        Alert("Error: No 'Version' specified in the 'Application' section.");
     }
 
     std::wstring appVersion = versionIt->second;
 
     // Check if the executable exists
-    std::wstring workingDir = rootDir + L"LumiTrackerApp-" + appVersion;
-    std::wstring app = workingDir + L"\\LumiTrackerApp.exe";
+    fs::path workingDir = gRootDir / (L"LumiTrackerApp-" + appVersion);
+    fs::path app = workingDir / L"LumiTrackerApp.exe";
     if (!fs::exists(app))
     {
-        AlertW(L"Error: Specified executable not found: " + app, NO_OPEN_LINK, SHOULD_EXIT);
+        Alert(L"Error: Specified executable not found: " + app.wstring());
     }
 
-    std::wstring command = app;
-    if (just_updated)
+    // Get launch settings
+    json userConfig = LoadUserConfig();
+    std::wstring parameters = L"";
+    if (gJustUpdated)
     {
-        command += L" just_updated";
+        parameters += L"just_updated";
     }
-
     auto consoleIt = applicationSection.find(L"Console");
     bool showConsole = (consoleIt != applicationSection.end() && consoleIt->second == L"1");
+    bool runAsAdmin = userConfig.value("run_as_admin", false);
 
-    // Launch the executable
     // Define the startup info structure
     STARTUPINFOW si;
     PROCESS_INFORMATION pi;
     ZeroMemory(&si, sizeof(si));
     ZeroMemory(&pi, sizeof(pi));
-
     si.cb = sizeof(si);
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = showConsole ? SW_SHOW : SW_HIDE;
 
-    DWORD flags = showConsole ? CREATE_NEW_CONSOLE: 0;
-
     // Create the process
-    BOOL success = CreateProcessW(
-        NULL,                   // Application name (NULL to rely on lpCommandLine)
-        command.data(),         // Full command line (app path + arguments)
-        NULL,                   // Process security attributes
-        NULL,                   // Thread security attributes
-        FALSE,                  // Inherit handles
-        flags,                  // Creation flags
-        NULL,                   // Environment
-        workingDir.data(),      // Working directory
-        &si,                    // STARTUPINFO pointer
-        &pi                     // PROCESS_INFORMATION pointer
-    );
+    BOOL success = false;
+    if (runAsAdmin)
+    {
+        SHELLEXECUTEINFOW sei = { 0 };
+        sei.cbSize = sizeof(sei);
+        sei.fMask = SEE_MASK_NOCLOSEPROCESS;
+        sei.lpVerb = L"runas";
+        sei.lpFile = app.c_str();
+        sei.lpParameters = parameters.empty() ? nullptr : parameters.c_str();
+        sei.lpDirectory = workingDir.c_str();
+        sei.nShow = si.wShowWindow;
+
+        success = ShellExecuteExW(&sei);
+        if (success)
+        {
+            pi.hProcess = sei.hProcess;
+        }
+    }
+    else
+    {
+        std::wstring command = app.wstring() + L" " + parameters;
+        DWORD flags = showConsole ? CREATE_NEW_CONSOLE : 0;
+        success = CreateProcessW(
+            NULL,                   // Application name (NULL to rely on lpCommandLine)
+            command.data(),         // Full command line (app path + arguments)
+            NULL,                   // Process security attributes
+            NULL,                   // Thread security attributes
+            FALSE,                  // Inherit handles
+            flags,                  // Creation flags
+            NULL,                   // Environment
+            workingDir.c_str(),     // Working directory
+            &si,                    // STARTUPINFO pointer
+            &pi                     // PROCESS_INFORMATION pointer
+        );
+    }
+    auto hProcessGuard = HandleGuard(pi.hProcess);
+    auto hThreadGuard = HandleGuard(pi.hThread);
 
     if (!success) 
     {
-        std::ostringstream msg;
-        msg << "CreateProcess failed (" << GetLastError() << ")." << std::endl;
-        AlertA(msg.str(), NO_OPEN_LINK, SHOULD_EXIT);
+        DWORD errNo = GetLastError();
+        LPWSTR errorTextPtr = nullptr;
+        FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL, errNo, 0, (LPWSTR)&errorTextPtr, 0, NULL);
+        std::wstring errorText = errorTextPtr;
+        LocalFree(errorTextPtr);
+
+        std::wostringstream msg;
+        msg << L"CreateProcess failed (" << errNo << L"): " << errorText << std::endl;
+        Alert(msg.str());
     }
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
 
     gLaunchLog << "LumiTrackerApp-" << ToUtf8Buffer(appVersion) << " launched." << std::endl;
 }
 
-std::wstring GetRootDirectory()
+static fs::path GetRootDirectory()
 {
+    fs::path res = fs::current_path();
+
     wchar_t path[MAX_PATH];
     if (GetModuleFileNameW(NULL, path, MAX_PATH) > 0) 
     {
@@ -398,40 +508,117 @@ std::wstring GetRootDirectory()
         size_t pos = fullPath.find_last_of(L"\\/");
         if (pos != std::wstring::npos) 
         {
-            return fullPath.substr(0, pos) + L"\\";
+            res = fullPath.substr(0, pos) + L"\\";
         }
     }
-    // Return an empty wstring if failed, which means relative path
-    return L"";
+    
+    return fs::absolute(res);
 }
+
+static fs::path GetSystemDocumentsDirectory()
+{
+    fs::path res = fs::temp_directory_path();
+
+    PWSTR path = NULL;
+    HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &path);
+    if (SUCCEEDED(hr)) 
+    {
+        res = path;
+    }
+    CoTaskMemFree(path);
+
+    return fs::absolute(res);
+}
+
+} // namespace lumi
+
 
 // Main function
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+    using namespace lumi;
     try
     {
         HICON hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP_ICON));
 
-        std::wstring rootDir = GetRootDirectory();
-        std::wstring filename = rootDir + std::wstring(L"launch.log");
-        gLaunchLog.open(filename, std::ios::out | std::ios::trunc);
-        if (!gLaunchLog.is_open()) 
+        // Convert all arguments to UTF-8
+        int argc = 0;
+        std::vector<const char*> argv;
+        std::vector<std::string> argvStr;
+        LPWSTR* argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
+        if (argvW)
         {
-            std::wostringstream msg;
-            msg << L"Failed to open error log: " << filename << std::endl;
-            AlertW(msg.str(), NO_OPEN_LINK, SHOULD_EXIT);
+            for (int i = 0; i < argc; ++i) 
+            {
+                argvStr.emplace_back(ToUtf8Buffer(argvW[i]));
+                argv.emplace_back(argvStr.back().c_str());
+            }
+            LocalFree(argvW);
         }
 
-        Launch(rootDir, lpCmdLine == std::wstring(L"just_updated"));
-    }
-    catch (std::exception ex)
-    {
-        AlertA(std::string("Unexpected Error: ") + ex.what(), OPEN_LINK, SHOULD_EXIT);
-    }
+        cxxopts::Options options("LumiTracker", "LumiTracker app launcher.");
+        options.allow_unrecognised_options();  // Allow unknown args
+        options.add_options()
+            ("just_updated", "Whether the c# app has just updated", cxxopts::value<bool>()->default_value("false"))
+            ("delay", "Delay time in seconds before launching the app", cxxopts::value<double>()->default_value("0"))
+            ("h,help", "Show help")
+            ;
 
-    if (gLaunchLog.is_open()) 
+
+        // Init global variables
+        gRootDir = GetRootDirectory();
+        gDocumentsDir = GetSystemDocumentsDirectory() / L"LumiTracker";
+        fs::create_directories(gDocumentsDir);
+        fs::path logFilePath = gDocumentsDir / L"launch.log";
+        gLaunchLog.open(logFilePath, std::ios::out | std::ios::trunc);
+        if (!gLaunchLog.is_open()) 
+        {
+#ifdef _DEBUG
+            std::wostringstream msg;
+            msg << L"Failed to open error log: " << logFilePath << std::endl;
+            Alert(msg.str());
+#endif // _DEBUG
+        }
+
+        for (int i = 0; i < argc; i++)
+        {
+            gLaunchLog << argvStr[i];
+            if (i < argc - 1)
+            {
+                gLaunchLog << " ";
+            }
+            else
+            {
+                gLaunchLog << std::endl;
+            }
+        }
+
+        // Parse command line arguments
+        auto result = options.parse(argc, argv.data());
+        if (result.count("help"))
+        {
+            gLaunchLog << options.help() << std::endl;
+            return 0;
+        }
+        gJustUpdated = result["just_updated"].as<bool>();
+        gDelayTime = DWORD(result["delay"].as<double>() * 1000);
+        for (const auto& arg : result.unmatched()) 
+        {
+            if (arg == "just_updated") 
+            {
+                gJustUpdated = true;
+            }
+        }
+        if (gDelayTime == 0 && gJustUpdated)
+        {
+            gDelayTime = 1500;
+        }
+
+        Launch();
+    }
+    catch (const std::exception& ex)
     {
-        gLaunchLog.close();
+        Alert(std::string("Unexpected Error: ") + ex.what());
     }
 
     return 0;

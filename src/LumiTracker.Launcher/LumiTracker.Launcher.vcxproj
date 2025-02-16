@@ -149,6 +149,8 @@
     <None Include="Utils.bat" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cxxopts.hpp" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

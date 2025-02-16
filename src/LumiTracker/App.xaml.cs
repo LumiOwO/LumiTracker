@@ -148,13 +148,19 @@ namespace LumiTracker
             await _host.StopAsync();
             _host.Dispose();
 
-            if (Configuration.Get<string>("updated_to") is string version && !string.IsNullOrEmpty(version))
+            if (Configuration.Get<bool>("restart"))
             {
+                string arguments = "--delay=1.5";
+                if (Configuration.Get<string>("updated_to") is string version && !string.IsNullOrEmpty(version))
+                {
+                    arguments += " --just_updated";
+                }
+
                 string launcherPath = Path.Combine(Configuration.RootDir, "LumiTracker.exe");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = launcherPath,
-                    Arguments = "just_updated",
+                    Arguments = arguments,
                     UseShellExecute = false,  // Required to set CreateNoWindow to true
                     CreateNoWindow = true,   // Hides the console window
                 };

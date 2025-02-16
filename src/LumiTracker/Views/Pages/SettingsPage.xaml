@@ -89,6 +89,19 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <CheckBox
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                IsChecked="{Binding ViewModel.RunAsAdmin, Mode=TwoWay}"
+                Content="{svs:Localization RunAsAdmin}"
+                />
+        </Grid>
+
+        <Grid Margin="10,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>

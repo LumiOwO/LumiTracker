@@ -711,6 +711,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No Data.
         /// </summary>
         public static string NoData {
@@ -1026,11 +1035,38 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This setting will take effect the next time you open the app. Would you like to restart now?.
+        /// </summary>
+        public static string Restart_Prompt {
+            get {
+                return ResourceManager.GetString("Restart_Prompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restart App.
+        /// </summary>
+        public static string Restart_Title {
+            get {
+                return ResourceManager.GetString("Restart_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Round.
         /// </summary>
         public static string Round {
             get {
                 return ResourceManager.GetString("Round", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run as Administrator.
+        /// </summary>
+        public static string RunAsAdmin {
+            get {
+                return ResourceManager.GetString("RunAsAdmin", resourceCulture);
             }
         }
         
@@ -1353,7 +1389,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update failed, please retry; If still fails, try to update manually..
+        ///   Looks up a localized string similar to Update failed, please retry; If still fails, try to run as Admin..
         /// </summary>
         public static string UpdatePrompt_Failed {
             get {
@@ -1439,6 +1475,15 @@ namespace LumiTracker.Config {
         public static string Welcome_Title {
             get {
                 return ResourceManager.GetString("Welcome_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
     }

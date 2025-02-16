@@ -163,7 +163,7 @@
     <value>检测到新版本</value>
   </data>
   <data name="UpdatePrompt_Failed" xml:space="preserve">
-    <value>更新失败，请重试；若仍未成功，请尝试手动更新。</value>
+    <value>更新失败，请重试；若仍未成功，请尝试以管理员身份运行。</value>
   </data>
   <data name="UpdatePrompt_Manual" xml:space="preserve">
     <value>手动更新</value>
@@ -499,6 +499,21 @@
   </data>
   <data name="Notices" xml:space="preserve">
     <value>公告</value>
+  </data>
+  <data name="RunAsAdmin" xml:space="preserve">
+    <value>以管理员身份运行</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="Restart_Prompt" xml:space="preserve">
+    <value>该设置将在下次打开应用时生效，是否立即重启应用？</value>
+  </data>
+  <data name="Restart_Title" xml:space="preserve">
+    <value>重启应用</value>
   </data>
   <data name="OB_SettingsText" xml:space="preserve">
     <value>观战</value>

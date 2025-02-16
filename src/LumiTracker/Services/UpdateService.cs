@@ -243,6 +243,7 @@ namespace LumiTracker.Services
                 // Restart
                 string latestVersion = ctx.ReleaseMeta!.tag_name.TrimStart('v');
                 Configuration.SetTemporal("updated_to", latestVersion);
+                Configuration.SetTemporal("restart", true);
                 Application.Current.Shutdown();
                 return;
             }
@@ -744,8 +745,11 @@ namespace LumiTracker.Services
             double speed = 0;
             if (!success)
             {
-                double remainTime = (subClient.Timeout.TotalSeconds - totalSeconds) * 1000;
-                await Task.Delay((int)remainTime);
+                double remainTime = subClient.Timeout.TotalSeconds - totalSeconds;
+                if (remainTime > 0)
+                {
+                    await Task.Delay((int)(remainTime * 1000));
+                }
             }
             else
             {
