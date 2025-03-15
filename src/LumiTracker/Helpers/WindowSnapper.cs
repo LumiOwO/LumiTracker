@@ -193,6 +193,7 @@ namespace LumiTracker.Helpers
 
                 // Calculate the scale factor
                 float scale = (float)PhysicalHeight / LogicalHeight;
+                if (scale <= 0) scale = 1.0f; // protect
 
                 // Snap to game window
                 Rect clientRect = SnapToWindow(scale);

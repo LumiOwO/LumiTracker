@@ -126,6 +126,9 @@
   <data name="DeckWindowTitle" xml:space="preserve">
     <value>记牌界面</value>
   </data>
+  <data name="CanvasWindowTitle" xml:space="preserve">
+    <value>圣遗物计数界面</value>
+  </data>
   <data name="Start" xml:space="preserve">
     <value>启动</value>
   </data>

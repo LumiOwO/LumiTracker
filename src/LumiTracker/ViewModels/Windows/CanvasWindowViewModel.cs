@@ -24,6 +24,9 @@ namespace LumiTracker.ViewModels.Windows
         public CornerRadius? _cornerRadius = null;
         [ObservableProperty]
         public Thickness? _borderThickness = null;
+
+        public ERegionType RegionType { get; set; } = ERegionType.GAME_START;
+        public int CharacterIndex { get; set; } = 0;
     }
 
     public partial class CanvasWindowViewModel : ObservableObject
@@ -34,27 +37,28 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         private ObservableCollection<OverlayElement> _elements = new ();
 
-        [ObservableProperty]
-        private int _width = 0;
+        private int Width { get; set; } = 0;
 
-        [ObservableProperty]
-        private int _height = 0;
+        private int Height { get; set; } = 0;
 
-        [ObservableProperty]
-        private float _dpiScale = 1.0f;
+        private float DpiScale { get; set; } = 1.0f;
+
+        private ERatioType RatioType { get; set; } = ERatioType.E16_9;
 
         public CanvasWindowViewModel()
         {
-            var binding = LocalizationExtension.Create("DeckWindowTitle"); // TODO: add CanvasWindowTitle
+            var binding = LocalizationExtension.Create("CanvasWindowTitle");
             binding.Converter = new OverlayWindowTitleNameConverter();
             BindingOperations.SetBinding(CanvasWindowTitle, LocalizationTextItem.TextProperty, binding);
 
-            // TODO: remove test
-            AddElement(new OverlayElement("test")
-            {
-                Background = Brushes.Red,
-                Opacity = 0.3,
-            });
+            // Debug: display task region on client rect
+            //AddElement(new OverlayElement("debug")
+            //{
+            //    Background = Brushes.Magenta,
+            //    Opacity = 0.3,
+            //    RegionType = ERegionType.VS_ANCHOR,
+            //    CharacterIndex = 5,
+            //});
         }
 
         public void AddElement(OverlayElement element)
@@ -77,16 +81,60 @@ namespace LumiTracker.ViewModels.Windows
             }
         }
 
-        public void ResizeAllElements(int width, int height, float dpiScale)
+        public void ResizeAllElements(int client_width, int client_height, float dpiScale)
         {
-            Width = width; 
-            Height = height; 
+            if (!RegionUtils.Loaded) return;
+
+            Width    = client_width; 
+            Height   = client_height; 
             DpiScale = dpiScale;
 
-            // TODO: remove test
+            var ratioType = RegionUtils.GetRatioType(client_width, client_height);
+            RatioType = ratioType;
+
+            float dpiScaleInv = 1.0f / dpiScale;
             foreach (var element in Elements)
             {
-                element.Position = new Rect(0, 0, 0.5 * width / DpiScale, 0.5 * height / DpiScale);
+                var regionType = element.RegionType;
+                var box = RegionUtils.Get(ratioType, regionType);
+
+                if (regionType == ERegionType.FLOW_ANCHOR)
+                {
+                    // (margin to digit center, margin to card top, card width, card height)
+                    // This should be anchored by digit detection, so we cannot show the debug display here
+                    element.Position = new Rect(0, 0, 0, 0);
+                }
+                else if (regionType == ERegionType.VS_ANCHOR)
+                {
+                    // (left, top, width, height, margin)
+                    double left   = Math.Round(client_width  * box[0]) * dpiScaleInv;
+                    double top    = Math.Round(client_height * box[1]) * dpiScaleInv;
+                    double width  = Math.Round(client_width  * box[2]) * dpiScaleInv;
+                    double height = Math.Round(client_height * box[3]) * dpiScaleInv;
+                    double margin = Math.Round(client_width  * box[4]) * dpiScaleInv;
+
+                    double offset;
+                    if (element.CharacterIndex < 3)
+                    {
+                        offset = element.CharacterIndex * (width + margin);
+                    }
+                    else
+                    {
+                        double op_left = client_width * dpiScaleInv - (left + width + 2 * (width + margin));
+                        offset = op_left - left;
+                        offset += (element.CharacterIndex - 3) * (width + margin);
+                    }
+                    element.Position = new Rect(left + offset, top, width, height);
+                }
+                else
+                {
+                    // default: (left, top, width, height)
+                    double left   = Math.Round(client_width  * box[0]) * dpiScaleInv;
+                    double top    = Math.Round(client_height * box[1]) * dpiScaleInv;
+                    double width  = Math.Round(client_width  * box[2]) * dpiScaleInv;
+                    double height = Math.Round(client_height * box[3]) * dpiScaleInv;
+                    element.Position = new Rect(left, top, width, height);
+                }
             }
         }
     }

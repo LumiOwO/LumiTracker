@@ -130,6 +130,34 @@ namespace LumiTracker.Config
         INITIAL_DECK,
     }
 
+    // default: (left, top, width, height)
+    public enum ERegionType : int
+    {
+        GAME_START = 0,
+        MY_PLAYED,
+        OP_PLAYED,
+        GAME_OVER,
+        PHASE,
+        ROUND,
+        CENTER,
+        FLOW_ANCHOR,    // (margin to digit center, margin to card top, card width, card height)
+        DECK,
+        VS_ANCHOR,      // (left, top, width, height, margin)
+        SETTINGS,
+        CARD_BACK,
+        TURN,
+        HISTORY,
+    }
+
+    public enum ERatioType : int
+    {
+        E16_9 = 0,  // 1920 x 1080, 2560 x 1440
+        E16_10,     // 1920 x 1200, 1680 x 1050
+        E64_27,     // 2560 × 1080, 2048 x 864
+        E43_18,     // 3440 × 1440, 2150 x 900
+        E12_5,      // 3840 x 1600, 1920 x 800
+    }
+
     public static class EnumHelpers
     {
         public static string[] GetClientProcessList(EClientType clientType)

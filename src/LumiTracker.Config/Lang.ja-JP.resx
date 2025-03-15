@@ -126,6 +126,9 @@
   <data name="DeckWindowTitle" xml:space="preserve">
     <value>カードレコーダー画面</value>
   </data>
+  <data name="CanvasWindowTitle" xml:space="preserve">
+    <value>聖遺物画面</value>
+  </data>
   <data name="Start" xml:space="preserve">
     <value>起動</value>
   </data>

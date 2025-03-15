@@ -126,6 +126,9 @@
   <data name="DeckWindowTitle" xml:space="preserve">
     <value>Deck Window</value>
   </data>
+  <data name="CanvasWindowTitle" xml:space="preserve">
+    <value>Canvas Window</value>
+  </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>
   </data>

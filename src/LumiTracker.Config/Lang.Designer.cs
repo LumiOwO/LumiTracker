@@ -153,6 +153,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Canvas Window.
+        /// </summary>
+        public static string CanvasWindowTitle {
+            get {
+                return ResourceManager.GetString("CanvasWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Capture Type.
         /// </summary>
         public static string CaptureType {
