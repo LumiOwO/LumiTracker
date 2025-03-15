@@ -263,36 +263,29 @@ namespace LumiTracker.Helpers
             // Snap to target window
             if (_src_window != null)
             {
+                float dpiScaleInv = 1.0f / dpiScale;
+
                 var deck = _src_window;
                 if (_bOutside)
                 {
-                    deck.Width  = clientRect.Width * 0.18;
-                    deck.Height = clientRect.Height;
-                    deck.Left   = clientLeftTop.x + clientRect.Width;
-                    deck.Top    = clientLeftTop.y;
+                    deck.Width  = dpiScaleInv * clientRect.Width * 0.18;
+                    deck.Height = dpiScaleInv * clientRect.Height;
+                    deck.Left   = dpiScaleInv * (clientLeftTop.x + clientRect.Width);
+                    deck.Top    = dpiScaleInv * clientLeftTop.y;
                 }
                 else
                 {
-                    deck.Width  = clientRect.Width * 0.18;
-                    deck.Height = clientRect.Height;
-                    deck.Left   = clientLeftTop.x;
-                    deck.Top    = clientLeftTop.y;
+                    deck.Width  = dpiScaleInv * clientRect.Width * 0.18;
+                    deck.Height = dpiScaleInv * clientRect.Height;
+                    deck.Left   = dpiScaleInv * clientLeftTop.x;
+                    deck.Top    = dpiScaleInv * clientLeftTop.y;
                 }
-                deck.Width  /= dpiScale;
-                deck.Height /= dpiScale;
-                deck.Left   /= dpiScale;
-                deck.Top    /= dpiScale;
 
                 var canv = _src_window.CanvasWindow;
-                canv.Width   = clientRect.Width;
-                canv.Height  = clientRect.Height;
-                canv.Left    = clientLeftTop.x;
-                canv.Top     = clientLeftTop.y;
-
-                canv.Width  /= dpiScale;
-                canv.Height /= dpiScale;
-                canv.Left   /= dpiScale;
-                canv.Top    /= dpiScale;
+                canv.Width  = dpiScaleInv * clientRect.Width;
+                canv.Height = dpiScaleInv * clientRect.Height;
+                canv.Left   = dpiScaleInv * clientLeftTop.x;
+                canv.Top    = dpiScaleInv * clientLeftTop.y;
             }
 
             return clientRect;

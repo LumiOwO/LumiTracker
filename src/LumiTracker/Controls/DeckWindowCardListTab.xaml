@@ -74,17 +74,34 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ui:ListView
-            Grid.Row="0"
-            ScrollViewer.VerticalScrollBarVisibility="{Binding VerticalScrollBarVisibility}"
-            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-            MaxWidth="{Binding WindowWidth}"
-            ItemsSource="{Binding CardList.Data.CollectionView}"
-            ItemTemplate="{StaticResource ActionCardViewTemplate}"
-            SelectionChanged="DisableListViewSelection"
-            MouseEnter="OnMouseEnter"
-            MouseLeave="OnMouseLeave"
-        />
+        <StackPanel Grid.Row="0">
+            <ctrls:DeckWindowExpandableHeader
+                x:Name="ExpandableHeader"
+                Header="Header Test"
+                IsExpanded="True"
+                HeaderFontSize="{Binding WindowHeight, 
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}},
+                        Converter={StaticResource SizeWithRatioConverter}, 
+                        ConverterParameter=0.018
+                        }"
+                />
+            <ui:ListView
+                ScrollViewer.VerticalScrollBarVisibility="{Binding VerticalScrollBarVisibility}"
+                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                MaxWidth="{Binding WindowWidth}"
+                ItemsSource="{Binding CardList.Data.CollectionView}"
+                ItemTemplate="{StaticResource ActionCardViewTemplate}"
+                SelectionChanged="DisableListViewSelection"
+                MouseEnter="OnMouseEnter"
+                MouseLeave="OnMouseLeave"
+                Visibility="{Binding Path=IsExpanded,
+                    ElementName=ExpandableHeader,
+                    Mode=OneWay,
+                    Converter={StaticResource BooleanToVisibilityConverter},
+                    ConverterParameter=Collapsed
+                    }"
+                />
+        </StackPanel>
 
         <!-- Game Not Started -->
         <TextBlock
