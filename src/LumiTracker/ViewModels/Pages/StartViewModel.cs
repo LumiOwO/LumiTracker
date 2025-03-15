@@ -231,7 +231,7 @@ namespace LumiTracker.ViewModels.Pages
             _deckWindow.HideWindow();
         }
 
-        private void OnGenshinWindowResized(int width, int height, bool isMinimized)
+        private void OnGenshinWindowResized(int width, int height, bool isMinimized, float dpiScale)
         {
             IsGenshinWindowMinimized = isMinimized;
         }
@@ -292,8 +292,7 @@ namespace LumiTracker.ViewModels.Pages
         private void OnUnsupportedRatio()
         {
             EClientType clientType = _gameWatcher.ClientType;
-            // Ignore MessageBox popup when client is web browser
-            if (clientType != EClientType.CloudWeb && clientType != EClientType.WeMeet)
+            if (EnumHelpers.ShouldShowUnsupportedRatioWarning(clientType))
             {
                 System.Windows.MessageBox.Show(
                     $"{Lang.UnsupportedRatioWarning}\n{Lang.SupportedRatioInfo}",

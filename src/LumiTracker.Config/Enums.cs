@@ -140,7 +140,8 @@ namespace LumiTracker.Config
                 EClientType.Global   => ["GenshinImpact.exe"],
                 EClientType.CloudPC  => ["Genshin Impact Cloud Game.exe"],
                 EClientType.CloudWeb => ["chrome.exe", "firefox.exe", "msedge.exe"],
-                EClientType.Video    => ["PotPlayerMini64.exe"],
+                // Extra types, not displayed in the app
+                EClientType.Video    => ["PotPlayerMini64.exe", "Honeyview.exe"],
                 EClientType.WeMeet   => ["wemeetapp.exe"],
                 _ => ["YuanShen.exe"] // the default case
             };
@@ -149,6 +150,11 @@ namespace LumiTracker.Config
         public static bool BitBltUnavailable(EClientType clientType)
         {
             return (clientType == EClientType.CloudPC) || (clientType == EClientType.CloudWeb) || (clientType == EClientType.Video);
+        }
+
+        public static bool ShouldShowUnsupportedRatioWarning(EClientType clientType)
+        {
+            return (clientType == EClientType.YuanShen) || (clientType == EClientType.Global) || (clientType == EClientType.CloudPC);
         }
 
         public static string ToLanguageName(this ELanguage lang)

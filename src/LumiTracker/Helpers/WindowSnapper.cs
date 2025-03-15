@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 using LumiTracker.Config;
 using LumiTracker.Views.Windows;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.Helpers
 {
-    public delegate void OnGenshinWindowResizedCallback(int width, int height, bool isMinimized);
+    public delegate void OnGenshinWindowResizedCallback(int width, int height, bool isMinimized, float dpiScale);
 
     // https://stackoverflow.com/questions/32806280/attach-wpf-window-to-the-window-of-another-process
     public class WindowSnapper
@@ -113,13 +114,15 @@ namespace LumiTracker.Helpers
         private static extern bool IsIconic(IntPtr hWnd);
 
         private DispatcherTimer _timer;
-        private Rect            _lastBounds;
+        private Rect            _lastBounds;    // This is not client bounds and contains margin size
         private IntPtr          _lastForeground;
         private DeckWindow?     _src_window;
         private IntPtr          _src_hwnd;
+        private IntPtr          _canvas_hwnd;
         private IntPtr          _dst_hwnd;
         private bool            _bOutside;
         private bool            _isFirstTick;
+        private float           _dpiscale;
 
         public event OnGenshinWindowResizedCallback? GenshinWindowResized;
 
@@ -129,9 +132,11 @@ namespace LumiTracker.Helpers
             _lastForeground = 0;
             _src_window     = window;
             _src_hwnd       = window != null ? new WindowInteropHelper(window).Handle : IntPtr.Zero;
+            _canvas_hwnd    = window != null ? new WindowInteropHelper(window.CanvasWindow).Handle : IntPtr.Zero;
             _dst_hwnd       = hwnd;
             _bOutside       = bOutside;
             _isFirstTick    = true;
+            _dpiscale       = 1.0f;  
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
@@ -141,6 +146,10 @@ namespace LumiTracker.Helpers
 
         public void Attach()
         {
+            if (_src_window != null)
+            {
+                GenshinWindowResized += _src_window.OnGenshinWindowResized;
+            }
             _isFirstTick = true;
             _timer.Start();
         }
@@ -149,6 +158,10 @@ namespace LumiTracker.Helpers
         {
             _timer.Stop();
             _isFirstTick = false;
+            if (_src_window != null)
+            {
+                GenshinWindowResized -= _src_window.OnGenshinWindowResized;
+            }
         }
 
         public void SetbOutside(bool bOutside)
@@ -163,7 +176,7 @@ namespace LumiTracker.Helpers
 
         private void Tick()
         {
-            var bounds = GetWindowBounds(_dst_hwnd);
+            Rect bounds = GetDstWindowBounds();
             if (_isFirstTick || bounds != _lastBounds)
             {
                 // Get dpi scale
@@ -182,23 +195,24 @@ namespace LumiTracker.Helpers
                 float scale = (float)PhysicalHeight / LogicalHeight;
 
                 // Snap to game window
-                Rect clientRect = SnapToWindow(bounds, scale);
+                Rect clientRect = SnapToWindow(scale);
 
                 // Trigger GenshinWindowResized if needed
                 bool isMinimized = IsIconic(_dst_hwnd);
-                if (isMinimized || bounds.Height != _lastBounds.Height || bounds.Width != _lastBounds.Width)
+                if (isMinimized || bounds.Height != _lastBounds.Height || bounds.Width != _lastBounds.Width || scale != _dpiscale)
                 {
                     Configuration.Logger.LogInformation(
                         $"Game window resized to {clientRect.Width} x {clientRect.Height}, isMinimized: {isMinimized}, " +
                         $"clientRect: [{clientRect.Left}, {clientRect.Top}, {clientRect.Right}, {clientRect.Bottom}], " +
                         $"scale=({PhysicalHeight}/{LogicalHeight})={scale}"
                         );
-                    GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height, isMinimized);
+                    GenshinWindowResized?.Invoke(clientRect.Width, clientRect.Height, isMinimized, scale);
                 }
                 Configuration.Logger.LogDebug($"Game window moved to [{bounds.Left}, {bounds.Top}, {bounds.Right}, {bounds.Bottom}]");
 
                 // Update last bounds
                 _lastBounds = bounds;
+                _dpiscale = scale;
             }
             //Configuration.Logger.LogDebug($"bounds: {bounds.Width}, {bounds.Height}");
             //Configuration.Logger.LogDebug($"_lastBounds: {_lastBounds.Width}, {_lastBounds.Height}");
@@ -220,7 +234,7 @@ namespace LumiTracker.Helpers
                 }
                 else
                 {
-                    if (foregroundHwnd != _src_hwnd && foregroundHwnd != _dst_hwnd)
+                    if (foregroundHwnd != _src_hwnd && foregroundHwnd != _dst_hwnd && foregroundHwnd != _canvas_hwnd)
                     {
                         _src_window.HideWindow();
                     }
@@ -235,7 +249,7 @@ namespace LumiTracker.Helpers
             _isFirstTick = false;
         }
 
-        private Rect SnapToWindow(Rect bounds, float scale)
+        private Rect SnapToWindow(float dpiScale)
         {
             // Get client rect
             Rect clientRect = new Rect();
@@ -248,30 +262,76 @@ namespace LumiTracker.Helpers
             // Snap to target window
             if (_src_window != null)
             {
+                var deck = _src_window;
                 if (_bOutside)
                 {
-                    _src_window.Width  = clientRect.Width  / scale * 0.18;
-                    _src_window.Height = bounds.Height     / scale;
-                    _src_window.Left   = clientLeftTop.x   / scale + clientRect.Width  / scale;
-                    _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
+                    deck.Width  = clientRect.Width * 0.18;
+                    deck.Height = clientRect.Height;
+                    deck.Left   = clientLeftTop.x + clientRect.Width;
+                    deck.Top    = clientLeftTop.y;
                 }
                 else
                 {
-                    _src_window.Width  = clientRect.Width  / scale * 0.18;
-                    _src_window.Height = bounds.Height     / scale;
-                    _src_window.Left   = clientLeftTop.x   / scale;
-                    _src_window.Top    = clientLeftTop.y   / scale + clientRect.Height / scale - _src_window.Height;
+                    deck.Width  = clientRect.Width * 0.18;
+                    deck.Height = clientRect.Height;
+                    deck.Left   = clientLeftTop.x;
+                    deck.Top    = clientLeftTop.y;
                 }
+                deck.Width  /= dpiScale;
+                deck.Height /= dpiScale;
+                deck.Left   /= dpiScale;
+                deck.Top    /= dpiScale;
+
+                var canv = _src_window.CanvasWindow;
+                canv.Width   = clientRect.Width;
+                canv.Height  = clientRect.Height;
+                canv.Left    = clientLeftTop.x;
+                canv.Top     = clientLeftTop.y;
+
+                canv.Width  /= dpiScale;
+                canv.Height /= dpiScale;
+                canv.Left   /= dpiScale;
+                canv.Top    /= dpiScale;
             }
 
             return clientRect;
         }
 
-        private Rect GetWindowBounds(IntPtr handle)
+        private Rect GetDstWindowBounds()
         {
             Rect bounds = new Rect();
-            GetWindowRect(handle, ref bounds);
+            GetWindowRect(_dst_hwnd, ref bounds);
             return bounds;
+        }
+
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
+
+        [DllImport("user32.dll")]
+        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MARGINS
+        {
+            public int Left, Right, Top, Bottom;
+        }
+
+        // Set the window to be layered, so it can be captured by OBS with AllowsTransparency="True"
+        // Note: OBS must use Windows Capture to capture this window
+        static public void SetLayeredWindow(IntPtr hwnd)
+        {
+            HwndSource.FromHwnd(hwnd).CompositionTarget.BackgroundColor = Colors.Transparent;
+
+            MARGINS margins = new MARGINS() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
+            DwmExtendFrameIntoClientArea(hwnd, ref margins);
+
+            const int GWL_EXSTYLE = -20;
+            const int WS_EX_LAYERED = 0x80000;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
         }
     }
 }

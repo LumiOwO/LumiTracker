@@ -1,7 +1,6 @@
 ﻿using LumiTracker.Helpers;
 using LumiTracker.Config;
 using LumiTracker.ViewModels.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
@@ -23,12 +22,17 @@ namespace LumiTracker.Views.Windows
 
         public DeckWindowViewModel ViewModel { get; }
 
-        public DeckWindow(DeckWindowViewModel viewModel)
+        public CanvasWindow CanvasWindow { get; }
+
+        public DeckWindow(DeckWindowViewModel viewModel, ICanvasWindow canvasWindow)
         {
             Loaded += DeckWindow_Loaded;
 
-            ShowActivated = false;
             ViewModel     = viewModel;
+            CanvasWindow  = (canvasWindow as CanvasWindow)!;
+            CanvasWindow.DeckWindow = this;
+
+            ShowActivated = false;
             DataContext   = this;
 
             InitializeComponent();
@@ -61,17 +65,7 @@ namespace LumiTracker.Views.Windows
         private void DeckWindow_Loaded(object sender, RoutedEventArgs e)
         {
             IntPtr hwnd = new WindowInteropHelper(this).Handle;
-            HwndSource.FromHwnd(hwnd).CompositionTarget.BackgroundColor = Colors.Transparent;
-
-            MARGINS margins = new MARGINS() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
-            DwmExtendFrameIntoClientArea(hwnd, ref margins);
-
-            // Set the window to be layered, so it can be captured by OBS with AllowsTransparency="True"
-            // Note: OBS must use Windows Capture to capture this window
-            const int GWL_EXSTYLE = -20;
-            const int WS_EX_LAYERED = 0x80000;
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+            WindowSnapper.SetLayeredWindow(hwnd);
         }
 
         public void AttachTo(IntPtr hwnd)
@@ -101,8 +95,10 @@ namespace LumiTracker.Views.Windows
                 Show();
                 MainContent.Visibility = Visibility.Visible;
                 ViewModel.IsShowing = true;
+                CanvasWindow.ShowWindow();
             }
         }
+
         public void HideWindow()
         {
             if (ViewModel.IsShowing)
@@ -110,7 +106,13 @@ namespace LumiTracker.Views.Windows
                 //Hide();
                 MainContent.Visibility = Visibility.Hidden;
                 ViewModel.IsShowing = false;
+                CanvasWindow.HideWindow();
             }
+        }
+
+        public void OnGenshinWindowResized(int width, int height, bool isMinimized, float dpiScale)
+        {
+            CanvasWindow?.OnGenshinWindowResized(width, height, isMinimized, dpiScale);
         }
 
         public void SetbOutside(bool bOutside)

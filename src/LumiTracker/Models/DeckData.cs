@@ -352,12 +352,15 @@ namespace LumiTracker.Models
                     {
                         // Read and parse each JSON file
                         string fileContent = await File.ReadAllTextAsync(filePath);
-                        var curRecords = JsonConvert.DeserializeObject<List<DuelRecord>>(fileContent);
-                        if (curRecords == null)
+                        if (!string.IsNullOrWhiteSpace(fileContent))
                         {
-                            throw new Exception("Failed to parse json.");
+                            var curRecords = JsonConvert.DeserializeObject<List<DuelRecord>>(fileContent);
+                            if (curRecords == null)
+                            {
+                                throw new Exception("Failed to parse json.");
+                            }
+                            records.AddRange(curRecords);
                         }
-                        records.AddRange(curRecords);
                     }
                     catch (Exception ex)
                     {

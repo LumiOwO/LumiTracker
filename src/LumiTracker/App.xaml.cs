@@ -68,6 +68,10 @@ namespace LumiTracker
                 services.AddSingleton<IDeckWindow, DeckWindow>();
                 services.AddSingleton<DeckWindowViewModel>();
 
+                // Canvas window
+                services.AddSingleton<ICanvasWindow, CanvasWindow>();
+                services.AddSingleton<CanvasWindowViewModel>();
+
                 services.AddSingleton<StartPage>();
                 services.AddSingleton<StartViewModel>();
                 services.AddSingleton<DeckPage>();
