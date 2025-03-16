@@ -130,7 +130,7 @@ namespace LumiTracker.Services
                 body = body.TrimStart();
             }
             allWhiteSpace = string.IsNullOrWhiteSpace(body);
-            MarkdownParser.ParseMarkdown(content.RichTextBox.Document, body);
+            MarkdownParser.ParseMarkdown(content.MainContent.Document, body);
 
             // Show latest release info dialog
             var styledDialog = new StyledContentDialog();
@@ -177,6 +177,8 @@ namespace LumiTracker.Services
                 return null;
             }
 
+            // Debug
+            //body = @"teststring";
             if (string.IsNullOrWhiteSpace(body))
             {
                 return null;
@@ -196,7 +198,7 @@ namespace LumiTracker.Services
 
             var content = (dialog.Content as LatestReleaseDialogContent)!;
             content.ShowDonationPrompt = false;
-            content.RichTextBox.Margin = new Thickness(10, 0, 10, 0);
+            content.MainContent.Margin = new Thickness(10, 0, 10, 0);
 
             return styledDialog;
         }

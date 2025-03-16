@@ -1,6 +1,4 @@
 ﻿using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
 
 namespace LumiTracker.Controls
 {
@@ -21,14 +19,6 @@ namespace LumiTracker.Controls
         public LatestReleaseDialogContent()
         {
             InitializeComponent();
-        }
-
-        private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.OriginalSource is FlowDocument)
-            {
-                e.Handled = true;
-            }
         }
     }
 }

@@ -27,13 +27,7 @@
         </Style>
 
         <!-- Based on lepoco wpfui TreeViewItem.xaml -->
-        <Style x:Key="CustomExpandCollapseToggleButtonStyle" TargetType="{x:Type ToggleButton}">
-            <!--  Universal WPF UI focus  -->
-            <Setter Property="FocusVisualStyle" Value="{DynamicResource DefaultControlFocusVisualStyle}" />
-            <!--  Universal WPF UI focus  -->
-            <Setter Property="Focusable" Value="False" />
-            <Setter Property="OverridesDefaultStyle" Value="True" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Style x:Key="CustomExpandCollapseToggleButtonStyle" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource ExpandCollapseToggleButtonStyle}">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ToggleButton}">

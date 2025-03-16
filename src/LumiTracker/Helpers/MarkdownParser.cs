@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Media;
 using Swordfish.NET.Collections.Auxiliary;
 using LumiTracker.Config;
+using Wpf.Ui.Controls;
 
 public class MarkdownParser
 {
@@ -14,6 +15,11 @@ public class MarkdownParser
         = new Regex(@"(\*)([^*]+)(\*)", RegexOptions.Compiled);
     private static readonly Regex ColorRegex      
         = new Regex(@"\$\{\\color\{(?<color>#[0-9a-fA-F]{6})\}\{\\textbf\{(?<text>.*?)\}\}\}\$", RegexOptions.Compiled);
+    private static readonly Regex HyperlinkRegex
+        = new Regex(@"\[(?<text>[^]]+)\]\((?<url>[^)]+)\)", RegexOptions.Compiled);
+
+    private static readonly double TextFontSize   = 16;
+    private static readonly double HeaderFontSize = 18;
 
     public static void ParseMarkdown(FlowDocument document, string markdown)
     {
@@ -22,15 +28,30 @@ public class MarkdownParser
         document.Blocks.Clear();
         document.PagePadding = new Thickness(0);
         document.TextAlignment = (lang == ELanguage.en_US ? TextAlignment.Justify : TextAlignment.Left);
-        document.FontSize = 16;
+        document.FontSize = TextFontSize;
 
         // Remove all '\r' characters
         markdown  = markdown.Replace("\r", string.Empty);
         var lines = markdown.Split('\n');
 
+        bool newline = false;
         foreach (var line in lines)
         {
-            if (string.IsNullOrWhiteSpace(line)) continue;
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                newline = true;
+                continue;
+            }
+
+            if (newline)
+            {
+                document.Blocks.Add(new Paragraph
+                {
+                    Margin = new Thickness(0),
+                    Padding = new Thickness(0),
+                });
+                newline = false;
+            }
 
             Paragraph paragraph = new Paragraph();
             paragraph.Margin = new Thickness(0);
@@ -46,7 +67,7 @@ public class MarkdownParser
                 paragraph.Inlines.Add(new Run(headerText) 
                 { 
                     FontWeight = FontWeights.Bold,
-                    FontSize   = 18,
+                    FontSize   = HeaderFontSize,
                 });
 
                 // Add some space before header if not at the beginning of the document
@@ -90,6 +111,7 @@ public class MarkdownParser
         text = text.Replace("`", "**");
 
         var result = new Span();
+        result.BaselineAlignment = BaselineAlignment.TextBottom;
         int lastIndex = 0;
 
         // Define regular expressions for bold and italic formatting
@@ -97,6 +119,7 @@ public class MarkdownParser
         formattingMatches.AddRange(BoldRegex.Matches(text).Cast<Match>());
         formattingMatches.AddRange(ItalicRegex.Matches(text).Cast<Match>());
         formattingMatches.AddRange(ColorRegex.Matches(text).Cast<Match>());
+        formattingMatches.AddRange(HyperlinkRegex.Matches(text).Cast<Match>());
 
         // Sort matches by index to process them in order
         formattingMatches = formattingMatches.OrderBy(m => m.Index).ToList();
@@ -116,21 +139,38 @@ public class MarkdownParser
             }
 
             // Add the formatted text based on the type of match
-            if (BoldRegex.IsMatch(match.Value))
+            if (match.Groups["url"].Success) // Hyperlink
             {
-                result.Inlines.Add(new Run(match.Groups[2].Value) { FontWeight = FontWeights.Bold });
+                var hyperlink = new HyperlinkButton
+                {
+                    Content = new TextBlock 
+                    { 
+                        Text = match.Groups["text"].Value,
+                        FontSize = TextFontSize,
+                        FontWeight = FontWeights.Bold,
+                    },
+                    NavigateUri = match.Groups["url"].Value,
+                    Padding = new Thickness(3, 0, 3, 0),
+                    Margin = new Thickness(0),
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                };
+                result.Inlines.Add(hyperlink);
             }
-            else if (ItalicRegex.IsMatch(match.Value)) 
+            else if (match.Groups["color"].Success) // Colored text
             {
-                result.Inlines.Add(new Run(match.Groups[2].Value) { FontStyle = FontStyles.Italic });
-            }
-            else if (ColorRegex.IsMatch(match.Value))
-            {
-                result.Inlines.Add(new Run(match.Groups["text"].Value) 
+                result.Inlines.Add(new Run(match.Groups["text"].Value)
                 {
                     FontWeight = FontWeights.Bold,
                     Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(match.Groups["color"].Value)),
                 });
+            }
+            else if (match.Value.StartsWith("**")) // Bold
+            {
+                result.Inlines.Add(new Run(match.Groups[2].Value) { FontWeight = FontWeights.Bold });
+            }
+            else if (match.Value.StartsWith("*")) // Italic
+            {
+                result.Inlines.Add(new Run(match.Groups[2].Value) { FontStyle = FontStyles.Italic });
             }
 
             lastIndex = match.Index + match.Length;

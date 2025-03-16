@@ -13,7 +13,6 @@
     <ResourceDictionary>
         <ResourceDictionary.MergedDictionaries>
             <ui:ThemesDictionary Theme="Dark" />
-            <ui:ControlsDictionary />
         </ResourceDictionary.MergedDictionaries>
 
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />

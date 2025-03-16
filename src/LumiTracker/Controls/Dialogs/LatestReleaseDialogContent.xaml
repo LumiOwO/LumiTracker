@@ -14,6 +14,45 @@
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
         <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#909090"/>
+
+        <!-- Remove IsFocused trigger -->
+        <Style x:Key="CustomRichTextBoxStyle" 
+            TargetType="{x:Type RichTextBox}"
+            BasedOn="{StaticResource DefaultRichTextBoxStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RichTextBox}">
+                        <Border
+                            x:Name="MainBorder"
+                            Padding="0"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            Focusable="False">
+                            <ui:PassiveScrollViewer
+                                x:Name="PART_ContentHost"
+                                Margin="0,0,2,0"
+                                Padding="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
+                                VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsEnabled" Value="True" />
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                </MultiTrigger.Conditions>
+                                    <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" />
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid
@@ -45,16 +84,16 @@
         
         <RichTextBox
             Grid.Row="1"
-            x:Name="RichTextBox" 
+            x:Name="MainContent" 
             Margin="10, 15, 10, 0"
             Padding="10, 8, 20, 0"
             IsReadOnly="True"
+            IsDocumentEnabled="True"
             VerticalContentAlignment="Top"
             VerticalAlignment="Stretch"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Disabled"
-            PreviewMouseDown="OnPreviewMouseDown"
-            Focusable="False"
+            Style="{StaticResource CustomRichTextBoxStyle}"
             />
     </Grid>
 
