@@ -9,6 +9,7 @@
     xmlns:vm="clr-namespace:LumiTracker.ViewModels.Windows"
     xmlns:helpers="clr-namespace:LumiTracker.Helpers"
     xmlns:svs="clr-namespace:LumiTracker.Services"
+    xmlns:sysWindows="clr-namespace:System.Windows;assembly=PresentationFramework"
     xmlns:ctrls="clr-namespace:LumiTracker.Controls"
     mc:Ignorable="d"
     Title="{Binding Path=ViewModel.DeckWindowTitle.Text}"
@@ -35,9 +36,12 @@
         <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <helpers:BooleanNotToVisibilityConverter x:Key="BooleanNotToVisibilityConverter" />
         <helpers:MultiBooleanAndToVisibilityConverter x:Key="MultiBooleanAndToVisibilityConverter" />
+        <helpers:TrueFalseCondSwitchConverter x:Key="TrueFalseCondSwitchConverter" />
 
-        <SolidColorBrush x:Key="TabHeaderBackground"
-            Color="#6aaaaaaa" />
+        <SolidColorBrush x:Key="TabHeaderBackground" Color="#6aaaaaaa" />
+        <SolidColorBrush x:Key="TogglePanelBackgroundChecked" Color="#ff1cdde9" />
+        <SolidColorBrush x:Key="TogglePanelBackgroundCheckedPointerOver" Color="#ff3df3ff" />
+        <SolidColorBrush x:Key="TogglePanelBackgroundCheckedPressed" Color="#ff5cf5ff" />
 
     </Window.Resources>
 
@@ -71,7 +75,7 @@
                 <MultiBinding Converter="{StaticResource MultiBooleanAndToVisibilityConverter}"
                               ConverterParameter="Collapsed"
                               >
-                    <Binding Path="ViewModel.IsChecked" />
+                    <Binding Path="IsChecked" ElementName="Expander" />
                     <Binding Path="ViewModel.IsShowing" />
                 </MultiBinding>
             </Grid.Visibility>
@@ -186,102 +190,103 @@
         </Grid>
 
         <!-- Toggle -->
-        <Grid
-            x:Name="toggle" 
+        <Border
             Grid.Row="1"
+            x:Name="TogglePanel"
             Height="{Binding Path=Height, Converter={StaticResource SizeWithRatioConverter}, ConverterParameter=0.04}"
-            HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
+            IsHitTestVisible="True"
+            Background="{StaticResource TogglePanelBackgroundChecked}"
+            CornerRadius="5"
+            MouseEnter="OnMouseEnter"
+            MouseLeave="OnMouseLeave"
+            PreviewMouseDown="OnPreviewMouseDown"
+            PreviewMouseUp="OnPreviewMouseUp"
             >
+        <Border.HorizontalAlignment>
+            <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                <Binding>
+                    <Binding.Source>
+                        <sysWindows:HorizontalAlignment>Stretch</sysWindows:HorizontalAlignment>
+                    </Binding.Source>
+                </Binding>
+                <Binding>
+                    <Binding.Source>
+                        <sysWindows:HorizontalAlignment>Left</sysWindows:HorizontalAlignment>
+                    </Binding.Source>
+                </Binding>
+                <Binding Path="IsChecked" ElementName="Expander" />
+            </MultiBinding>
+        </Border.HorizontalAlignment>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             
-        <ToggleButton 
-            Grid.Row="0"
-            Visibility="{Binding ViewModel.IsChecked,
-                Converter={StaticResource BooleanToVisibilityConverter},
-                ConverterParameter=Hidden,
-                Mode=OneWay
-                }"
-            IsChecked="{Binding ViewModel.IsChecked, Mode=TwoWay}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            FontWeight="Bold" 
-            Unchecked="OnUnchecked"
-            Margin="-1,-1,-1,-1"
-            >
+            <ToggleButton 
+                x:Name="Expander"
+                Grid.Column="0"
+                IsChecked="True"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                FontWeight="Bold"
+                Foreground="Black"
+                Margin="4,0,0,0"
+                FontSize="{Binding Height, 
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.016
+                    }"
+                Style="{StaticResource CustomExpandCollapseToggleButtonStyle}"
+                RenderTransformOrigin="0.5, 0.5">
+                <ToggleButton.RenderTransform>
+                    <ScaleTransform ScaleY="-1" />
+                </ToggleButton.RenderTransform>
+            </ToggleButton>
+
+            <!-- Expanded -->
             <TextBlock 
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontWeight="Bold"
                 Foreground="Black"
                 Text="{svs:Localization AppName}" 
                 FontSize="{Binding Height, 
                     Converter={StaticResource SizeWithRatioConverter}, 
                     ConverterParameter=0.016
                     }"
+                Visibility="{Binding IsChecked,
+                    ElementName=Expander,
+                    Converter={StaticResource BooleanToVisibilityConverter},
+                    ConverterParameter=Collapsed,
+                    Mode=OneWay
+                    }"
                 />
-        </ToggleButton>
-        <ui:SymbolIcon 
-            Grid.Row="0"
-            Visibility="{Binding ViewModel.IsChecked,
-                Converter={StaticResource BooleanToVisibilityConverter},
-                ConverterParameter=Hidden,
-                Mode=OneWay
-                }"
-            Foreground="#333333"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            FontWeight="Bold"
-            FontSize="{Binding Height, 
-                Converter={StaticResource SizeWithRatioConverter}, 
-                ConverterParameter=0.015
-                }"
-            Margin="4,0,0,0" 
-            IsHitTestVisible="False"
-            Symbol="ChevronLeft48" />
 
-        <ui:Button 
-            Grid.Row="0"
-            Visibility="{Binding ViewModel.IsChecked,
-                Converter={StaticResource BooleanNotToVisibilityConverter},
-                ConverterParameter=Hidden,
-                Mode=OneWay
-                }"
-            Padding="0"
-            Appearance="Primary"
-            Click="OnChecked"
-            VerticalAlignment="Stretch"
-            HorizontalAlignment="Left"
-            >
-
-            <StackPanel
-                Orientation="Horizontal"
-                Margin="3,0,5,0"
+            <!-- Collapsed -->
+            <ui:SymbolIcon 
+                Grid.Column="1"
+                Margin="2,3,6,0"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                >
-                <ui:SymbolIcon 
-                    Foreground="#333333"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    FontSize="{Binding Height, 
-                        Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.015
-                        }"
-                    Margin="0,0,0,0" 
-                    Symbol="ChevronRight48" />
-
-                <ui:SymbolIcon 
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Foreground="Black"
-                    FontSize="{Binding Height, 
-                        Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.025
-                        }"
-                    Margin="2,3,0,0" 
-                    Symbol="PlayingCards20" />
-
-            </StackPanel>
-        </ui:Button>
+                Foreground="Black"
+                Visibility="{Binding IsChecked,
+                    ElementName=Expander,
+                    Converter={StaticResource BooleanNotToVisibilityConverter},
+                    ConverterParameter=Collapsed,
+                    Mode=OneWay
+                    }"
+                FontSize="{Binding Height, 
+                    Converter={StaticResource SizeWithRatioConverter}, 
+                    ConverterParameter=0.025
+                    }"
+                Symbol="PlayingCards20" />
 
         </Grid>
+        </Border>
 
     </Grid>
 </Window>

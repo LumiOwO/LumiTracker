@@ -23,9 +23,6 @@ namespace LumiTracker.ViewModels.Windows
         private bool _isShowing = false;
 
         [ObservableProperty]
-        private bool _isChecked = true;
-
-        [ObservableProperty]
         private LocalizationTextItem _deckWindowTitle = new ();
 
         // data

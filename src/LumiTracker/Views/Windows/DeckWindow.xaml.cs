@@ -4,6 +4,7 @@ using LumiTracker.ViewModels.Windows;
 using System.Windows.Media;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
+using System.Windows.Input;
 
 namespace LumiTracker.Views.Windows
 {
@@ -36,15 +37,6 @@ namespace LumiTracker.Views.Windows
             DataContext   = this;
 
             InitializeComponent();
-
-            // Toggle Button
-            Resources["ToggleButtonBackgroundChecked"]            = new SolidColorBrush(Color.FromArgb(0xff, 0x1c, 0xdd, 0xe9));
-            Resources["ToggleButtonForegroundCheckedPointerOver"] = new SolidColorBrush(Color.FromArgb(0xff, 0x3d, 0xf3, 0xff));
-            Resources["ToggleButtonBackgroundCheckedPressed"]     = new SolidColorBrush(Color.FromArgb(0xff, 0x5c, 0xf5, 0xff));
-            // Button
-            Resources["AccentButtonBackground"]                   = new SolidColorBrush(Color.FromArgb(0xff, 0x1c, 0xdd, 0xe9));
-            Resources["AccentButtonBackgroundPointerOver"]        = new SolidColorBrush(Color.FromArgb(0xff, 0x3d, 0xf3, 0xff));
-            Resources["AccentButtonBackgroundPressed"]            = new SolidColorBrush(Color.FromArgb(0xff, 0x5c, 0xf5, 0xff));
         }
 
         [DllImport("dwmapi.dll", PreserveSig = true)]
@@ -120,14 +112,14 @@ namespace LumiTracker.Views.Windows
             _snapper?.SetbOutside(bOutside);
             if (bOutside)
             {
-                ViewModel.IsChecked = true;
-                toggle.Visibility = Visibility.Collapsed;
+                Expander.IsChecked = true;
+                TogglePanel.Visibility = Visibility.Collapsed;
                 ViewModel.MainContentHeightRatio = 1.0;
                 Topmost = false;
             }
             else
             {
-                toggle.Visibility = Visibility.Visible;
+                TogglePanel.Visibility = Visibility.Visible;
                 ViewModel.MainContentHeightRatio = 0.45;
                 Topmost = true;
             }
@@ -138,14 +130,28 @@ namespace LumiTracker.Views.Windows
             DeckWindowTabControl.SelectedItem = MyDeckTab;
         }
 
-        private void OnChecked(object sender, RoutedEventArgs e)
+        private void OnMouseEnter(object sender, MouseEventArgs e)
         {
-            ViewModel.IsChecked = true;
+            TogglePanel.Background = (Brush)Resources["TogglePanelBackgroundCheckedPointerOver"];
         }
 
-        private void OnUnchecked(object sender, RoutedEventArgs e)
+        private void OnMouseLeave(object sender, MouseEventArgs e)
         {
-            ViewModel.IsChecked = false;
+            TogglePanel.Background = (Brush)Resources["TogglePanelBackgroundChecked"];
+        }
+
+        private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            TogglePanel.Background = (Brush)Resources["TogglePanelBackgroundCheckedPressed"];
+            if (e.Source != Expander)
+            {
+                Expander.IsChecked = !Expander.IsChecked;
+            }
+        }
+
+        private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            TogglePanel.Background = (Brush)Resources["TogglePanelBackgroundCheckedPointerOver"];
         }
     }
 }
