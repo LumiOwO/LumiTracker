@@ -452,7 +452,7 @@
                 BorderThickness="0,0,0,0.1"
                 BorderBrush="{DynamicResource DeckPageMatchupsBorderBrush}"
                 Margin="5,0,5,0"
-                Padding="8,0,0,8"
+                Padding="10,0,0,2"
                 >
             <Border.Visibility>
                 <MultiBinding 
@@ -468,60 +468,64 @@
                 IsHitTestVisible="True"
                 Height="{Binding Path=TabControlHeight, 
                     Converter={StaticResource SizeWithRatioConverter},
-                    ConverterParameter=0.16,
+                    ConverterParameter=0.14,
                     RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                     }"
-                Margin="0,0,2,0"
+                Margin="0,0,0,0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.3*"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
+                
                 <!-- Win/Lose info -->
-                <Grid
+                <TextBlock 
                     Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    FontWeight="Bold"
+                    FontSize="{Binding Path=TabControlHeight, 
+                        Converter={StaticResource SizeWithRatioConverter},
+                        ConverterParameter=0.053,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
+                    Margin="0,0,0,0"
+                >
+                    <TextBlock.Foreground>
+                        <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                            <Binding Source="{StaticResource WinBrush}" />
+                            <Binding Source="{StaticResource LoseBrush}"  />
+                            <Binding Path="IsWin" />
+                        </MultiBinding>
+                    </TextBlock.Foreground>
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
+                            <svs:Localization Key="Victory" />
+                            <svs:Localization Key="Defeat"  />
+                            <Binding Path="IsWin" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+
+                <!-- EndTime & Duration -->
+                <Grid
+                    Grid.Column="1"
+                    Margin="0,2,0,0"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
+                    VerticalAlignment="Center"
                     >
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="2.5*"/>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-
-                    <TextBlock 
-                        Grid.Row="0"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        FontWeight="Bold"
-                        FontSize="{Binding Path=TabControlHeight, 
-                            Converter={StaticResource SizeWithRatioConverter},
-                            ConverterParameter=0.05,
-                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
-                            }"
-                        Margin="0,0,0,0"
-                    >
-                        <TextBlock.Foreground>
-                            <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
-                                <Binding Source="{StaticResource WinBrush}" />
-                                <Binding Source="{StaticResource LoseBrush}"  />
-                                <Binding Path="IsWin" />
-                            </MultiBinding>
-                        </TextBlock.Foreground>
-                        <TextBlock.Text>
-                            <MultiBinding Converter="{StaticResource TrueFalseCondSwitchConverter}">
-                                <svs:Localization Key="Victory" />
-                                <svs:Localization Key="Defeat"  />
-                                <Binding Path="IsWin" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
+                    
                     <StackPanel 
-                        Grid.Row="1"
+                        Grid.Row="0"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center"
                         Orientation="Horizontal"
@@ -563,11 +567,23 @@
                             >
                             <Run Text="{Binding DurationInMinutes, StringFormat={}{0:F1}, Mode=OneWay}" />
                             <Run Text="{svs:Localization Stats_Minute}" />
-                            <Run Text=","/>
-                            <Run Text="{svs:Localization Round}"/>
-                            <Run Text="{Binding Rounds}"/>
                         </TextBlock>
                     </StackPanel>
+                    <TextBlock
+                        Grid.Row="1"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Margin="0,2"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        FontSize="{Binding Path=TabControlHeight, 
+                            Converter={StaticResource SizeWithRatioConverter},
+                            ConverterParameter=0.026,
+                            RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                            }"
+                        >
+                        <Run Text="{svs:Localization Round}"/>
+                        <Run Text="{Binding Rounds}"/>
+                    </TextBlock>
                     <TextBlock 
                         Grid.Row="2"
                         VerticalAlignment="Center"
@@ -575,7 +591,7 @@
                         Foreground="{StaticResource DateTimeBrush}"
                         FontSize="{Binding Path=TabControlHeight, 
                             Converter={StaticResource SizeWithRatioConverter},
-                            ConverterParameter=0.022,
+                            ConverterParameter=0.024,
                             RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
                             }"
                         Text="{Binding EndTime, 
@@ -583,32 +599,30 @@
                         />
                 </Grid>
 
-                <!-- VS text -->
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Center"
-                    Text="VS"
-                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                    Margin="0,0,0,0"
-                    FontWeight="Bold"
-                    FontSize="{Binding Path=TabControlHeight, 
-                        Converter={StaticResource SizeWithRatioConverter},
-                        ConverterParameter=0.06,
-                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
-                        }"
-                    />
-
                 <!-- Op Avatars-->
                 <ctrls:AvatarsView
                     Grid.Column="2"
-                    Margin="0,5"
-                    ImageOuterMargin="2"
+                    Margin="2,6,0,6"
+                    ImageOuterMargin="1"
                     ImageInnerMargin="3"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Stretch"
                     CharacterIds="{Binding OpCharacters}"
                     />
+                
+                <!-- Delete Button -->
+                <ui:Button
+                    Grid.Column="3"
+                    Margin="-5,2,-2,0"
+                    FontSize="13"
+                    Padding="2"
+                    Appearance="Secondary"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Right">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Dismiss24"/>
+                    </ui:Button.Icon>
+                </ui:Button>
             </Grid>
             </Border>
         </DataTemplate>

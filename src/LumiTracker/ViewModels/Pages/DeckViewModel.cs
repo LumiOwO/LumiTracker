@@ -102,7 +102,7 @@ namespace LumiTracker.ViewModels.Pages
             bool IsIncludeAllBuildVersions = IncludeAllBuildVersions ?? false;
             int index = Math.Clamp(CurrentVersionIndex ?? 0, 0, AllBuildStats.Count - 1);
             Configuration.Logger.LogDebug(
-                $"[UpdateCurrent] IsTotal = {IsIncludeAllBuildVersions}, Index = {index}, Guid = {SelectedBuildVersion.Guid}");
+                $"[UpdateCurrent] IsTotal = {IsIncludeAllBuildVersions}, BuildIndex = {index}, Guid = {SelectedBuildVersion.Guid}");
             if (!IsIncludeAllBuildVersions)
             {
                 Current = AllBuildStats[index];
@@ -190,7 +190,7 @@ namespace LumiTracker.ViewModels.Pages
 
             try
             {
-                Configuration.Logger.LogDebug($"[AsyncLoadAt({index})] Begin to load BuildStats...");
+                Configuration.Logger.LogDebug($"[AsyncLoadAt({index})] Begin to load BuildStats {stats.Guid.ToString()}...");
                 await stats.LoadDataAsync();
 
                 loadLock.Enter(ref lockTaken);
