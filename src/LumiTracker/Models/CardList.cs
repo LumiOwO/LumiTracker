@@ -73,7 +73,7 @@ namespace LumiTracker.Models
 
     public partial class CardList : ObservableObject
     {
-        public enum SortType
+        public enum ESortType
         {
             Default,
             TimestampDescending
@@ -102,12 +102,16 @@ namespace LumiTracker.Models
 
         public bool InGame { get; }
 
+        public ESortType SortType { get; }
+
+        public bool KeepZero { get; }
+
         public int OperationCount { get; private set; } = 0;
 
-        public CardList(bool inGame, SortType sortType = SortType.Default)
+        public CardList(bool inGame = true, ESortType sortType = ESortType.Default, bool keepZero = false)
         {
             IComparer<int> comparer;
-            if (sortType == SortType.TimestampDescending)
+            if (sortType == ESortType.TimestampDescending)
             {
                 comparer = Comparer<int>.Create((a, b) =>
                 {
@@ -124,12 +128,14 @@ namespace LumiTracker.Models
                 comparer = Comparer<int>.Create((a, b) => DeckUtils.ActionCardCompare(a, b));
             }
 
-            InGame = inGame;
+            InGame   = inGame;
+            SortType = sortType;
+            KeepZero = keepZero;
             Data = new ConcurrentObservableSortedDictionary<int, ActionCardView>(comparer);
             Data.CollectionChanged += OnDataCollectionChanged;
         }
 
-        public CardList(string shareCode, bool inGame, SortType sortType = SortType.Default) : this(inGame, sortType)
+        public CardList(string shareCode, bool inGame = true, ESortType sortType = ESortType.Default, bool keepZero = false) : this(inGame, sortType, keepZero)
         {
             int[]? cards = DeckUtils.DecodeShareCode(shareCode);
             if (cards == null)
@@ -140,7 +146,7 @@ namespace LumiTracker.Models
             Add(cards[3..]);
         }
 
-        public CardList(int[] card_ids, bool inGame, SortType sortType = SortType.Default) : this(inGame, sortType)
+        public CardList(int[] card_ids, bool inGame = true, ESortType sortType = ESortType.Default, bool keepZero = false) : this(inGame, sortType, keepZero)
         {
             Add(card_ids);
         }
@@ -150,9 +156,9 @@ namespace LumiTracker.Models
             Add([card_id]);
         }
 
-        public void Remove(int card_id, bool keep_zero)
+        public void Remove(int card_id)
         {
-            Remove([card_id], keep_zero);
+            Remove([card_id]);
         }
 
         public void Add(int[] card_ids)
@@ -211,7 +217,7 @@ namespace LumiTracker.Models
             }
         }
 
-        public void Remove(int[] card_ids, bool keep_zero)
+        public void Remove(int[] card_ids)
         {
             if (card_ids.Length == 0) return;
 
@@ -231,7 +237,7 @@ namespace LumiTracker.Models
                     else
                     {
                         cardView.Count -= 1;
-                        if (cardView.Count == 0 && !keep_zero)
+                        if (cardView.Count == 0 && !KeepZero)
                         {
                             pairsToUpdate.Remove(card_id);
                         }
@@ -247,7 +253,7 @@ namespace LumiTracker.Models
                     else
                     {
                         cardView.Count -= 1;
-                        if (cardView.Count == 0 && !keep_zero)
+                        if (cardView.Count == 0 && !KeepZero)
                         {
                             keysToRemove.Add(card_id);
                         }

@@ -93,19 +93,19 @@ namespace LumiTracker.ViewModels.Windows
 
         private void Reset(bool gameStart)
         {
-            MyActionCardsPlayed = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
-            OpActionCardsPlayed = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
-            TrackedCards = new CardList(inGame: true, sortType: CardList.SortType.TimestampDescending);
+            MyActionCardsPlayed = new CardList(sortType: CardList.ESortType.TimestampDescending);
+            OpActionCardsPlayed = new CardList(sortType: CardList.ESortType.TimestampDescending);
+            TrackedCards = new CardList(sortType: CardList.ESortType.TimestampDescending);
             Round = 0;
             GameStarted = gameStart;
             if (gameStart)
             {
-                MyDeck = new CardList(Enumerable.Repeat(-1, 30).ToArray(), inGame: true);
+                MyDeck = new CardList(Enumerable.Repeat(-1, 30).ToArray());
                 DeckViewModel.ActiveDeckIndex = -1;
             }
             else
             {
-                MyDeck = new CardList(inGame: true);
+                MyDeck = new CardList();
             }
         }
 
@@ -178,11 +178,11 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnMyCardsDrawn(int[] card_ids)
         {
-            MyDeck.Remove(card_ids, keep_zero: true);
+            MyDeck.Remove(card_ids);
             var tracked = card_ids.Where(x => CardsToTrack.Contains((EActionCard)x)).ToArray();
             if (tracked != null)
             {
-                TrackedCards.Remove(tracked, keep_zero: false);
+                TrackedCards.Remove(tracked);
             }
         }
 
