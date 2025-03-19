@@ -4,23 +4,24 @@ using LumiTracker.Services;
 using Microsoft.Extensions.Logging;
 using Swordfish.NET.Collections;
 using System.Windows.Data;
+using System.Collections.Specialized;
 
 namespace LumiTracker.Models
 {
     public partial class ActionCardView : ObservableObject
     {
         [ObservableProperty]
-        private  int     _cost;
+        private  int        _cardId;
         [ObservableProperty]
-        private  string  _costTypeUri;
+        private  ECostType  _costType;
+        [ObservableProperty]
+        private  int        _cost;
+        [ObservableProperty]
+        private  int        _count = 0;
+        [ObservableProperty]
+        private  double     _opacity = 1.0;
         [ObservableProperty]
         private  LocalizationTextItem  _cardName = new ();
-        [ObservableProperty]
-        private  string  _snapshotUri;
-        [ObservableProperty]
-        private  int     _count = 0;
-        [ObservableProperty]
-        private  double  _opacity;
 
         private CardList? Parent;
         private int OperationIndex = 1;
@@ -39,9 +40,9 @@ namespace LumiTracker.Models
                 costType  = jCost[1]!.ToObject<ECostType>();
             }
 
+            CardId       = card_id;
+            CostType     = costType;
             Cost         = cost;
-            CostTypeUri  = $"pack://siteoforigin:,,,/assets/images/costs/{costType.ToString()}.png";
-            SnapshotUri  = $"pack://siteoforigin:,,,/assets/images/snapshots/{card_id}.jpg";
             Count        = count;
             Opacity      = 1.0;
             Application.Current?.Dispatcher.Invoke(() =>
@@ -81,6 +82,22 @@ namespace LumiTracker.Models
         [ObservableProperty]
         public ConcurrentObservableSortedDictionary<int, ActionCardView> _data;
 
+        public IList<KeyValuePair<int, ActionCardView>> View
+        {
+            get
+            {
+                return Data.CollectionView;
+            }
+        }
+
+        private void OnDataCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(View));
+        }
+
+        [ObservableProperty]
+        public int _count = 0;
+
         public Dictionary<int, DateTime> Timestamps { get; private set; } = new ();
 
         public bool InGame { get; }
@@ -107,8 +124,9 @@ namespace LumiTracker.Models
                 comparer = Comparer<int>.Create((a, b) => DeckUtils.ActionCardCompare(a, b));
             }
 
-            Data = new ConcurrentObservableSortedDictionary<int, ActionCardView>(comparer);
             InGame = inGame;
+            Data = new ConcurrentObservableSortedDictionary<int, ActionCardView>(comparer);
+            Data.CollectionChanged += OnDataCollectionChanged;
         }
 
         public CardList(string shareCode, bool inGame, SortType sortType = SortType.Default) : this(inGame, sortType)
@@ -161,6 +179,7 @@ namespace LumiTracker.Models
                     pairsToUpdate.Add(card_id, new ActionCardView(this, card_id, InGame));
                 }
             }
+            Count += card_ids.Length;
             OperationCount++;
 
             var Update = () =>
@@ -190,7 +209,6 @@ namespace LumiTracker.Models
                     Update();
                 });
             }
-            
         }
 
         public void Remove(int[] card_ids, bool keep_zero)
@@ -252,9 +270,14 @@ namespace LumiTracker.Models
                 if (invalidCount > unknownCardCount)
                 {
                     Configuration.Logger.LogWarning($"[CardList.Remove] Number of invalid cards ({invalidCount}) > number of unknown cards ({unknownCardCount})");
-                    invalidCount = unknownCardCount;
+                    invalidCount -= unknownCardCount;
+                    unknownCardCount = 0;
                 }
-                unknownCardCount -= invalidCount;
+                else
+                {
+                    unknownCardCount -= invalidCount;
+                    invalidCount = 0;
+                }
                 unknownCardView.Count = unknownCardCount;
 
                 keysToRemove.Add(-1);
@@ -264,8 +287,9 @@ namespace LumiTracker.Models
                     pairsToUpdate.Add(-1, unknownCardView);
                 }
             }
-
+            Count -= card_ids.Length - invalidCount;
             OperationCount++;
+
             var Update = () =>
             {
                 Data.RemoveRange(keysToRemove);

@@ -54,7 +54,10 @@
                 VerticalAlignment="Center"
                 Foreground="White"
                 FontSize="{Binding HeaderFontSize, Mode=OneWay}"
-                Text="{Binding Header, Mode=OneWay}" />
+                >
+                <Run Text="{Binding Header, Mode=OneWay}"/>
+                <Run Text="{Binding Count, Mode=OneWay, StringFormat=({0})}"/>
+            </TextBlock>
         </Grid>
 
     </Border>

@@ -33,11 +33,6 @@ namespace LumiTracker.Controls
             set { SetValue(HeaderProperty, value); }
         }
 
-        public DeckWindowExpandableHeader()
-        {
-            InitializeComponent();
-        }
-
         public static readonly DependencyProperty HeaderFontSizeProperty = DependencyProperty.Register(
             "HeaderFontSize", typeof(double), typeof(DeckWindowExpandableHeader), new PropertyMetadata(1.0));
 
@@ -45,6 +40,20 @@ namespace LumiTracker.Controls
         {
             get { return (double)GetValue(HeaderFontSizeProperty); }
             set { SetValue(HeaderFontSizeProperty, value); }
+        }
+
+        public static readonly DependencyProperty CountProperty = DependencyProperty.Register(
+            "Count", typeof(int), typeof(DeckWindowExpandableHeader), new PropertyMetadata(0));
+
+        public int Count
+        {
+            get { return (int)GetValue(CountProperty); }
+            set { SetValue(CountProperty, value); }
+        }
+
+        public DeckWindowExpandableHeader()
+        {
+            InitializeComponent();
         }
 
         private void OnMouseEnter(object sender, MouseEventArgs e)

@@ -78,6 +78,7 @@
             <ctrls:DeckWindowExpandableHeader
                 x:Name="ExpandableHeader"
                 Header="Header Test"
+                Count="{Binding CardList.Count}"
                 IsExpanded="True"
                 HeaderFontSize="{Binding WindowHeight, 
                         RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}},
@@ -89,7 +90,7 @@
                 ScrollViewer.VerticalScrollBarVisibility="{Binding VerticalScrollBarVisibility}"
                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                 MaxWidth="{Binding WindowWidth}"
-                ItemsSource="{Binding CardList.Data.CollectionView}"
+                ItemsSource="{Binding CardList.View}"
                 ItemTemplate="{StaticResource ActionCardViewTemplate}"
                 SelectionChanged="DisableListViewSelection"
                 MouseEnter="OnMouseEnter"

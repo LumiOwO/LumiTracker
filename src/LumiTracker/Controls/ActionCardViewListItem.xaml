@@ -13,6 +13,9 @@
         <helpers:DoubleToVisibilityConverter x:Key="DoubleToVisibilityConverter" />
         <helpers:BooleanToGridLengthConverter x:Key="BooleanToGridLengthConverter" />
         <helpers:BooleanNotToVisibilityConverter x:Key="BooleanNotToVisibilityConverter" />
+        <helpers:ActionCardIdToSnapshotUriConverter x:Key="ActionCardIdToSnapshotUriConverter" />
+        <helpers:ActionCardIdToSnapshotVisibilityConverter x:Key="ActionCardIdToSnapshotVisibilityConverter" />
+        <helpers:CostTypeToDiceUriConverter x:Key="CostTypeToDiceUriConverter" />
 
         <Storyboard x:Key="BlinkAnimation">
             <DoubleAnimation
@@ -38,8 +41,8 @@
             <RowDefinition Height="{Binding ItemHeight}" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="7*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="7.0*" />
             <ColumnDefinition Width="{Binding HideCount,
                 Converter={StaticResource BooleanToGridLengthConverter}
                 }"/>
@@ -64,7 +67,8 @@
         <!-- dice image -->
         <Image 
             Grid.Column="0"
-            Source="{Binding Value.CostTypeUri, Mode=OneWay}" 
+            Source="{Binding Value.CostType, Mode=OneWay, 
+                    Converter={StaticResource CostTypeToDiceUriConverter}}" 
             Opacity="{Binding Value.Opacity, Mode=OneWay}"
             Margin="0,0,0,0"
             Stretch="UniformToFill"
@@ -100,7 +104,6 @@
             
         </TextBlock>
 
-
         <!-- snapshot -->
         <Border 
             Grid.Column="1" 
@@ -116,7 +119,12 @@
                 </LinearGradientBrush>
             </Border.OpacityMask>
             <Image 
-                Source="{Binding Value.SnapshotUri, Mode=OneWay}" 
+                Source="{Binding Value.CardId, Mode=OneWay,
+                    Converter={StaticResource ActionCardIdToSnapshotUriConverter} 
+                    }" 
+                Visibility="{Binding Value.CardId, Mode=OneWay, 
+                    Converter={StaticResource ActionCardIdToSnapshotVisibilityConverter} 
+                    }"
                 Stretch="Uniform"
                 RenderOptions.BitmapScalingMode="HighQuality"
                 VerticalAlignment="Stretch"
@@ -137,19 +145,25 @@
             FontSize="{Binding NameFontSize}"
             Text="{Binding Value.CardName.Text, Mode=OneWay}" />
         <!-- count -->
-        <TextBlock
+        <Border
             Grid.Column="2"
+            Background="#0FFFFFFF"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
             Visibility="{Binding HideCount,
                 Converter={StaticResource BooleanNotToVisibilityConverter},
                 ConverterParameter=Collapsed
                 }"
-            Margin="0,2,2,0"
-            Opacity="{Binding Value.Opacity, Mode=OneWay}"
-            FontWeight="Bold"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Foreground="#f9ca24"
-            FontSize="{Binding CountFontSize}"
-            Text="{Binding Value.Count, Mode=OneWay}" />
+            >
+            <TextBlock
+                Margin="0,2,2,0"
+                Opacity="{Binding Value.Opacity, Mode=OneWay}"
+                FontWeight="Bold"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Foreground="#f9ca24"
+                FontSize="{Binding CountFontSize}"
+                Text="{Binding Value.Count, Mode=OneWay}" />
+        </Border>
     </Grid>
 </UserControl>
