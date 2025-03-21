@@ -51,9 +51,35 @@ namespace LumiTracker.Controls
             set { SetValue(CountProperty, value); }
         }
 
+        public static readonly RoutedEvent IsExpandedChangedEvent =
+            EventManager.RegisterRoutedEvent(
+                nameof(IsExpandedChanged),
+                RoutingStrategy.Bubble,
+                typeof(RoutedPropertyChangedEventHandler<bool>),
+                typeof(DeckWindowExpandableHeader)
+            );
+
+        // Expose the event for subscription
+        public event RoutedPropertyChangedEventHandler<bool> IsExpandedChanged
+        {
+            add => AddHandler(IsExpandedChangedEvent, value);
+            remove => RemoveHandler(IsExpandedChangedEvent, value);
+        }
+
         public DeckWindowExpandableHeader()
         {
             InitializeComponent();
+        }
+
+        private void OnIsExpandedChanged(object sender, RoutedEventArgs e)
+        {
+            bool isChecked = Expander.IsChecked ?? false;
+            var args = new RoutedPropertyChangedEventArgs<bool>(
+                !isChecked, // Old value (toggle inverse for demo)
+                isChecked,  // New value
+                IsExpandedChangedEvent
+            );
+            RaiseEvent(args);
         }
 
         private void OnMouseEnter(object sender, MouseEventArgs e)
@@ -63,7 +89,7 @@ namespace LumiTracker.Controls
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
-            MainBorder.Background = Brushes.Transparent;
+            MainBorder.Background = (Brush)Resources["HeaderBackground"];
         }
 
         private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)

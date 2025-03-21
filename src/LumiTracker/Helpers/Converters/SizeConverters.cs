@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using LumiTracker.Controls;
+using LumiTracker.Models;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace LumiTracker.Helpers
@@ -57,6 +55,56 @@ namespace LumiTracker.Helpers
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ExpandableCardListMaxHeightConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length != 4)
+            {
+                return 0.0;
+            }
+            if (!(values[0] is ItemsControl itemsControl))
+            {
+                return 0.0;
+            }
+            if (!(values[1] is double headerHeight))
+            {
+                return 0.0;
+            }
+            if (!(values[2] is int)) // NumberToTouch
+            {
+                return 0.0;
+            }
+            if (!(values[3] is double)) // ItemsControl.ActualHeight
+            {
+                return 0.0;
+            }
+
+            var dataItems = itemsControl.ItemsSource as IEnumerable<CardList>;
+            if (dataItems == null)
+            {
+                return 0.0;
+            }
+
+            int count = 0;
+            int numExpanded = 0;
+            foreach (var item in dataItems)
+            {
+                count++;
+                numExpanded += item.IsExpanded ? 1 : 0;
+            }
+
+            double maxHeight = Math.Max(itemsControl.ActualHeight - count * headerHeight, 0.0);
+            maxHeight /= Math.Max(numExpanded, 1);
+            return maxHeight;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

@@ -1,6 +1,5 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.Models;
-using System.Windows.Controls;
 using LumiTracker.ViewModels.Pages;
 using LumiTracker.Services;
 using System.Windows.Data;
@@ -8,6 +7,7 @@ using LumiTracker.Helpers;
 using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using System.Collections.ObjectModel;
 
 #pragma warning disable CS8618
 
@@ -26,15 +26,26 @@ namespace LumiTracker.ViewModels.Windows
         private LocalizationTextItem _deckWindowTitle = new ();
 
         // data
-        [ObservableProperty]
-        private CardList _myActionCardsPlayed;
+        enum EMy : int
+        {
+            Played = 0,
+            InDeck,
 
+            NumLists
+        }
         [ObservableProperty]
-        private CardList _opActionCardsPlayed;
+        private ObservableCollection<CardList> _myCards;
 
+        enum EOp : int
+        {
+            Played = 0,
+
+            NumLists
+        }
         [ObservableProperty]
-        private CardList _myDeck;
+        private ObservableCollection<CardList> _opCards;
 
+        // TODO: add to MyCards collection
         [ObservableProperty]
         private CardList _trackedCards;
 
@@ -50,13 +61,6 @@ namespace LumiTracker.ViewModels.Windows
         // controls
         [ObservableProperty]
         private bool _gameStarted = false;
-
-        [ObservableProperty]
-        private bool _gameNotStarted = true;
-        partial void OnGameStartedChanged(bool oldValue, bool newValue)
-        {
-            GameNotStarted = !GameStarted;
-        }
 
         [ObservableProperty]
         private int _round = 0;
@@ -88,51 +92,68 @@ namespace LumiTracker.ViewModels.Windows
             _hook.OpCharacters       += OnOpCharacters;
             _hook.WindowWatcherExit  += OnWindowWatcherExit;
 
+            var my = new CardList[(int)EMy.NumLists];
+            my[(int)EMy.Played] = new CardList(sortType: CardList.ESortType.TimestampDescending).SetName("SubTab_Played");
+            my[(int)EMy.InDeck] = new CardList().SetName("SubTab_InDeck");
+            _myCards = new (my);
+
+            var op = new CardList[(int)EOp.NumLists];
+            op[(int)EOp.Played] = new CardList(sortType: CardList.ESortType.TimestampDescending).SetName("SubTab_Played");
+            _opCards = new (op);
+
+            _trackedCards = new CardList(sortType: CardList.ESortType.TimestampDescending);
+
             Reset(gameStart: false);
         }
 
         private void Reset(bool gameStart)
         {
-            MyActionCardsPlayed = new CardList(sortType: CardList.ESortType.TimestampDescending);
-            OpActionCardsPlayed = new CardList(sortType: CardList.ESortType.TimestampDescending);
-            TrackedCards = new CardList(sortType: CardList.ESortType.TimestampDescending);
-            Round = 0;
-            GameStarted = gameStart;
+            MyCards[(int)EMy.Played]
+                .Reset()
+                .SetIsExpanded(true)
+                ;
             if (gameStart)
             {
-                MyDeck = new CardList(Enumerable.Repeat(-1, 30).ToArray());
+                MyCards[(int)EMy.InDeck]
+                    .Reset(Enumerable.Repeat(-1, 30).ToArray())
+                    .SetIsExpanded(true)
+                    ;
                 DeckViewModel.ActiveDeckIndex = -1;
             }
             else
             {
-                MyDeck = new CardList();
+                MyCards[(int)EMy.InDeck]
+                    .Reset()
+                    .SetIsExpanded(true)
+                    ;
             }
+
+            OpCards[(int)EOp.Played]
+                .Reset()
+                .SetIsExpanded(true)
+                ;
+
+            TrackedCards.Reset();
+
+            Round = 0;
+            GameStarted = gameStart;
         }
 
-        public void InitDeckOnGameStart(string sharecode, int[] action_cards)
+        public void InitDeckOnGameStart(int[] action_cards)
         {
+            var MyDeck = MyCards[(int)EMy.InDeck];
             if (!MyDeck.InGame || !MyDeck.Data.Keys.All(x => x == -1))
             {
                 return;
             }
 
             // Update the initial deck
-            MyDeck = new CardList(action_cards, inGame: true);
-
-            // Try to message to server
-            if (_hook is GameWatcher gameWatcher)
-            {
-                Task.Run(() => gameWatcher.SendMessageToServer(new GameEventMessage 
-                { 
-                    Event = EGameEvent.INITIAL_DECK,
-                    Data  = new () { ["sharecode"] = JToken.FromObject(sharecode) },
-                }));
-            }
+            MyDeck.Reset(action_cards);
         }
 
         private void UpdatePlayedActionCard(int card_id, bool is_op)
         {
-            CardList ActionCardsPlayed = is_op ? OpActionCardsPlayed : MyActionCardsPlayed;
+            CardList ActionCardsPlayed = is_op ? OpCards[(int)EOp.Played] : MyCards[(int)EMy.Played];
             ActionCardsPlayed.Add(card_id);
         }
 
@@ -178,7 +199,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnMyCardsDrawn(int[] card_ids)
         {
-            MyDeck.Remove(card_ids);
+            MyCards[(int)EMy.InDeck].Remove(card_ids);
             var tracked = card_ids.Where(x => CardsToTrack.Contains((EActionCard)x)).ToArray();
             if (tracked != null)
             {
@@ -188,7 +209,7 @@ namespace LumiTracker.ViewModels.Windows
 
         private void OnMyCardsCreateDeck(int[] card_ids)
         {
-            MyDeck.Add(card_ids);
+            MyCards[(int)EMy.InDeck].Add(card_ids);
             var tracked = card_ids.Where(x => CardsToTrack.Contains((EActionCard)x)).ToArray();
             if (tracked != null)
             {
@@ -209,15 +230,28 @@ namespace LumiTracker.ViewModels.Windows
                 return;
             }
 
-            bool found = FindMatchedDeckBuildAndSetActive(card_ids);
+            bool found = FindMatchedDeckBuildAndSetActive(card_ids, out string sharecode);
             if (!found)
             {
                 Configuration.Logger.LogInformation($"Characters tuple ({card_ids[0]}, {card_ids[1]}, {card_ids[2]}) is not found in the deck list.");
             }
+            else
+            {
+                // Try to message to server
+                if (_hook is GameWatcher gameWatcher)
+                {
+                    Task.Run(() => gameWatcher.SendMessageToServer(new GameEventMessage
+                    {
+                        Event = EGameEvent.INITIAL_DECK,
+                        Data = new() { ["sharecode"] = JToken.FromObject(sharecode) },
+                    }));
+                }
+            }
         }
 
-        private bool FindMatchedDeckBuildAndSetActive(int[] cids)
+        private bool FindMatchedDeckBuildAndSetActive(int[] cids, out string sharecode)
         {
+            sharecode = "";
             var sortedDeckItemWrappers = DeckViewModel.DeckItems
                 .Select((item, index) => new
                 {
@@ -250,7 +284,8 @@ namespace LumiTracker.ViewModels.Windows
                     });
 
                     var build = DeckViewModel.DeckItems[data.Index].Stats.AllBuildStats[matchedIndex];
-                    InitDeckOnGameStart(build.Edit.ShareCode, build.Cards[3..]);
+                    InitDeckOnGameStart(build.Cards[3..]);
+                    sharecode = build.Edit.ShareCode;
 
                     return true;
                 }

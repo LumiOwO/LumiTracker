@@ -264,11 +264,26 @@
   <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
     <value>画面解像度 : </value>
   </data>
+  <data name="MyDeck" xml:space="preserve">
+    <value>山札</value>
+  </data>
   <data name="MyPlayedCards" xml:space="preserve">
     <value>自分使用</value>
   </data>
   <data name="OpPlayedCards" xml:space="preserve">
     <value>相手使用</value>
+  </data>
+  <data name="Tab_MyCards" xml:space="preserve">
+    <value>自分の牌</value>
+  </data>
+  <data name="Tab_OpCards" xml:space="preserve">
+    <value>相手の牌</value>
+  </data>
+  <data name="SubTab_Played" xml:space="preserve">
+    <value>使用済み</value>
+  </data>
+  <data name="SubTab_InDeck" xml:space="preserve">
+    <value>山札残り</value>
   </data>
   <data name="Instruction" xml:space="preserve">
     <value>使い方</value>
@@ -317,9 +332,6 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>キャンセル</value>
-  </data>
-  <data name="MyDeck" xml:space="preserve">
-    <value>山札</value>
   </data>
   <data name="DeckPageTitle" xml:space="preserve">
     <value>デッキ</value>

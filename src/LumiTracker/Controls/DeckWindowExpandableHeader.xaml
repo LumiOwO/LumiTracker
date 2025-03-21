@@ -17,6 +17,8 @@
 
         <helpers:SizeWithRatioConverter x:Key="SizeWithRatioConverter" />
 
+        <SolidColorBrush x:Key="HeaderBackground" Color="#2b2b29" />
+
     </ResourceDictionary>
     </UserControl.Resources>
 
@@ -25,14 +27,16 @@
         DataContext="{Binding RelativeSource={RelativeSource AncestorType=ctrls:DeckWindowExpandableHeader}}"
         x:Name="MainBorder"
         Padding="0,2,0,3"
-        CornerRadius="4"
+        CornerRadius="6"
+        BorderThickness="0.2"
+        BorderBrush="LightGray"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         IsHitTestVisible="True"
         MouseEnter="OnMouseEnter"
         MouseLeave="OnMouseLeave"
         PreviewMouseDown="OnPreviewMouseDown"
-        Background="Transparent">
+        Background="{StaticResource HeaderBackground}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -43,6 +47,8 @@
                 Grid.Column="0"
                 ClickMode="Press"
                 Foreground="White"
+                Checked="OnIsExpandedChanged"
+                Unchecked="OnIsExpandedChanged"
                 Margin="{Binding HeaderMargin, Mode=OneWay}"
                 FontSize="{Binding HeaderFontSize, Mode=OneWay}"
                 IsChecked="{Binding IsExpanded, Mode=TwoWay}"

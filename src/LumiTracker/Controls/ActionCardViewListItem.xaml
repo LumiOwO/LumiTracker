@@ -156,7 +156,7 @@
                 }"
             >
             <TextBlock
-                Margin="0,2,2,0"
+                Margin="0,1,3,0"
                 Opacity="{Binding Value.Opacity, Mode=OneWay}"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"

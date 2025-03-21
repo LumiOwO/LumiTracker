@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Swordfish.NET.Collections;
 using System.Windows.Data;
 using System.Collections.Specialized;
+using System.Windows.Controls;
 
 namespace LumiTracker.Models
 {
@@ -23,8 +24,10 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private  LocalizationTextItem  _cardName = new ();
 
+        // For blink animation
         private CardList? Parent;
-        private int OperationIndex = 1;
+        private int OperationIndex { get; set; } = 1;
+        private DateTime NotifiedTime { get; set; } = DateTime.Now;
 
         public ActionCardView(CardList? parent, int card_id, bool inGame, int count = 1)
         {
@@ -62,12 +65,18 @@ namespace LumiTracker.Models
             if (Parent != null) 
             {
                 OperationIndex = Parent.OperationCount + 1;
+                NotifiedTime = DateTime.Now;
             }
         }
 
         public bool ShouldNotify()
         {
-            return OperationIndex == Parent?.OperationCount;
+            return (OperationIndex == Parent?.OperationCount) && (DateTime.Now - NotifiedTime).TotalSeconds <= 1;
+        }
+
+        public void MarkAsNotified()
+        {
+            NotifiedTime = DateTime.Now;
         }
     }
 
@@ -80,7 +89,8 @@ namespace LumiTracker.Models
         }
 
         [ObservableProperty]
-        public ConcurrentObservableSortedDictionary<int, ActionCardView> _data;
+        public ConcurrentObservableSortedDictionary<int, ActionCardView> _data = [];
+        public Dictionary<int, DateTime> Timestamps { get; private set; } = [];
 
         public IList<KeyValuePair<int, ActionCardView>> View
         {
@@ -90,15 +100,10 @@ namespace LumiTracker.Models
             }
         }
 
-        private void OnDataCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void OnDataCollectionChanged(object? sender, NotifyCollectionChangedEventArgs? e)
         {
             OnPropertyChanged(nameof(View));
         }
-
-        [ObservableProperty]
-        public int _count = 0;
-
-        public Dictionary<int, DateTime> Timestamps { get; private set; } = new ();
 
         public bool InGame { get; }
 
@@ -108,12 +113,26 @@ namespace LumiTracker.Models
 
         public int OperationCount { get; private set; } = 0;
 
+        private Comparer<int> Comparer { get; }
+
+        [ObservableProperty]
+        public int _count = 0;
+
+        // For UI
+        [ObservableProperty]
+        private LocalizationTextItem _name = new ();
+
+        [ObservableProperty]
+        private ScrollBarVisibility _scrollBarVisibility = ScrollBarVisibility.Hidden;
+
+        [ObservableProperty]
+        private bool _isExpanded = false;
+
         public CardList(bool inGame = true, ESortType sortType = ESortType.Default, bool keepZero = false)
         {
-            IComparer<int> comparer;
             if (sortType == ESortType.TimestampDescending)
             {
-                comparer = Comparer<int>.Create((a, b) =>
+                Comparer = Comparer<int>.Create((a, b) =>
                 {
                     DateTime a_timestamp = Timestamps[a];
                     DateTime b_timestamp = Timestamps[b];
@@ -125,45 +144,63 @@ namespace LumiTracker.Models
             else
             {
                 // Default
-                comparer = Comparer<int>.Create((a, b) => DeckUtils.ActionCardCompare(a, b));
+                Comparer = Comparer<int>.Create((a, b) => DeckUtils.ActionCardCompare(a, b));
             }
-
             InGame   = inGame;
             SortType = sortType;
             KeepZero = keepZero;
-            Data = new ConcurrentObservableSortedDictionary<int, ActionCardView>(comparer);
-            Data.CollectionChanged += OnDataCollectionChanged;
+
+            Reset();
         }
 
-        public CardList(string shareCode, bool inGame = true, ESortType sortType = ESortType.Default, bool keepZero = false) : this(inGame, sortType, keepZero)
+        public CardList SetName(string name, bool isBindingKey = true)
         {
-            int[]? cards = DeckUtils.DecodeShareCode(shareCode);
-            if (cards == null)
+            if (isBindingKey)
             {
-                Configuration.Logger.LogWarning($"Invalid share code: {shareCode}");
-                return;
+                var binding = LocalizationExtension.Create(name);
+                BindingOperations.SetBinding(Name, LocalizationTextItem.TextProperty, binding);
             }
-            Add(cards[3..]);
+            else
+            {
+                BindingOperations.ClearBinding(Name, LocalizationTextItem.TextProperty);
+                Name.Text = "";
+            }
+            return this;
         }
 
-        public CardList(int[] card_ids, bool inGame = true, ESortType sortType = ESortType.Default, bool keepZero = false) : this(inGame, sortType, keepZero)
+        public CardList SetIsExpanded(bool value)
         {
-            Add(card_ids);
+            IsExpanded = value;
+            return this;
         }
 
-        public void Add(int card_id)
+        public CardList Reset(int[]? card_ids = null)
         {
-            Add([card_id]);
+            Timestamps = [];
+            Data = new ConcurrentObservableSortedDictionary<int, ActionCardView>(Comparer);
+            Data.CollectionChanged += OnDataCollectionChanged;
+            Count = 0;
+            if (card_ids == null || card_ids.Length == 0)
+            {
+                // Notify ui to refresh
+                OnDataCollectionChanged(null, null);
+            }
+            return Add(card_ids); //.Add(Enumerable.Range(0, 30).ToArray()); // Debug
         }
 
-        public void Remove(int card_id)
+        public CardList Add(int card_id)
         {
-            Remove([card_id]);
+            return Add([card_id]);
         }
 
-        public void Add(int[] card_ids)
+        public CardList Remove(int card_id)
         {
-            if (card_ids.Length == 0) return;
+            return Remove([card_id]);
+        }
+
+        public CardList Add(int[]? card_ids)
+        {
+            if (card_ids == null || card_ids.Length == 0) return this;
 
             var pairsToUpdate = new Dictionary<int, ActionCardView>();
             var keysToRemove  = new HashSet<int>();
@@ -215,11 +252,12 @@ namespace LumiTracker.Models
                     Update();
                 });
             }
+            return this;
         }
 
-        public void Remove(int[] card_ids)
+        public CardList Remove(int[]? card_ids)
         {
-            if (card_ids.Length == 0) return;
+            if (card_ids == null || card_ids.Length == 0) return this;
 
             var pairsToUpdate = new Dictionary<int, ActionCardView>();
             var keysToRemove  = new HashSet<int>();
@@ -323,6 +361,7 @@ namespace LumiTracker.Models
                     Update();
                 });
             }
+            return this;
         }
     }
 }

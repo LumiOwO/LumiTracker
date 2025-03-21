@@ -250,6 +250,7 @@ namespace LumiTracker.Helpers
             _isFirstTick = false;
         }
 
+        private static readonly double WidthRatio = Configuration.Get<double>("deck_window_width_ratio");
         private Rect SnapToWindow(float dpiScale)
         {
             // Get client rect
@@ -268,14 +269,14 @@ namespace LumiTracker.Helpers
                 var deck = _src_window;
                 if (_bOutside)
                 {
-                    deck.Width  = dpiScaleInv * clientRect.Width * 0.18;
+                    deck.Width  = dpiScaleInv * clientRect.Width * WidthRatio;
                     deck.Height = dpiScaleInv * clientRect.Height;
                     deck.Left   = dpiScaleInv * (clientLeftTop.x + clientRect.Width);
                     deck.Top    = dpiScaleInv * clientLeftTop.y;
                 }
                 else
                 {
-                    deck.Width  = dpiScaleInv * clientRect.Width * 0.18;
+                    deck.Width  = dpiScaleInv * clientRect.Width * WidthRatio;
                     deck.Height = dpiScaleInv * clientRect.Height;
                     deck.Left   = dpiScaleInv * clientLeftTop.x;
                     deck.Top    = dpiScaleInv * clientLeftTop.y;

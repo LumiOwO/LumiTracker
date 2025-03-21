@@ -264,11 +264,26 @@
   <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
     <value>画面分辨率 : </value>
   </data>
+  <data name="MyDeck" xml:space="preserve">
+    <value>我的牌库</value>
+  </data>
   <data name="MyPlayedCards" xml:space="preserve">
     <value>我方出牌</value>
   </data>
   <data name="OpPlayedCards" xml:space="preserve">
     <value>对方出牌</value>
+  </data>
+  <data name="Tab_MyCards" xml:space="preserve">
+    <value>我方数据</value>
+  </data>
+  <data name="Tab_OpCards" xml:space="preserve">
+    <value>对手数据</value>
+  </data>
+  <data name="SubTab_Played" xml:space="preserve">
+    <value>已打出</value>
+  </data>
+  <data name="SubTab_InDeck" xml:space="preserve">
+    <value>牌库剩余</value>
   </data>
   <data name="Instruction" xml:space="preserve">
     <value>使用说明</value>
@@ -317,9 +332,6 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>取消</value>
-  </data>
-  <data name="MyDeck" xml:space="preserve">
-    <value>我的牌库</value>
   </data>
   <data name="DeckPageTitle" xml:space="preserve">
     <value>牌组</value>

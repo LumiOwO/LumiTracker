@@ -90,7 +90,7 @@
                 Mode=OneWay
                 }"
             ViewModel="{Binding Path=ViewModel.My_DeckWindowViewModel}"
-            CardList="{Binding Path=ViewModel.My_DeckWindowViewModel.MyDeck}"
+            CardLists="{Binding Path=ViewModel.My_DeckWindowViewModel.MyCards}"
             WindowHeight="{Binding ActualHeight,
                 RelativeSource={RelativeSource AncestorType={x:Type Border}},
                 Converter={StaticResource SizeWithRatioConverter}, 
@@ -160,7 +160,7 @@
                     Mode=OneWay
                     }"
                 ViewModel="{Binding Path=ViewModel.Op_DeckWindowViewModel}"
-                CardList="{Binding Path=ViewModel.Op_DeckWindowViewModel.MyDeck}"
+                CardLists="{Binding Path=ViewModel.Op_DeckWindowViewModel.MyCards}"
                 WindowHeight="{Binding ActualHeight,
                     RelativeSource={RelativeSource AncestorType={x:Type Border}},
                     Converter={StaticResource SizeWithRatioConverter}, 

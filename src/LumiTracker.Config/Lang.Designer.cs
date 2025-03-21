@@ -1233,6 +1233,24 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to In Deck.
+        /// </summary>
+        public static string SubTab_InDeck {
+            get {
+                return ResourceManager.GetString("SubTab_InDeck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Played.
+        /// </summary>
+        public static string SubTab_Played {
+            get {
+                return ResourceManager.GetString("SubTab_Played", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to https://www.summoners.top/en.
         /// </summary>
         public static string SummonersTop_URL {
@@ -1250,6 +1268,24 @@ namespace LumiTracker.Config {
         public static string SupportedRatioInfo {
             get {
                 return ResourceManager.GetString("SupportedRatioInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to My Cards.
+        /// </summary>
+        public static string Tab_MyCards {
+            get {
+                return ResourceManager.GetString("Tab_MyCards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Opponent.
+        /// </summary>
+        public static string Tab_OpCards {
+            get {
+                return ResourceManager.GetString("Tab_OpCards", resourceCulture);
             }
         }
         

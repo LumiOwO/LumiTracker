@@ -84,10 +84,12 @@ namespace LumiTracker.Controls
 
         private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            // For unknown reason, OnValueChanged will be called multiple time from null -> value
             if (e.NewValue is ActionCardView newValue && newValue.ShouldNotify())
             {
                 var control = (ActionCardViewListItem)d;
                 control.blinkAnimation.Begin();
+                newValue.MarkAsNotified();
             }
         }
     }

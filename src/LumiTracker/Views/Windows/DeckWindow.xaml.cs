@@ -120,7 +120,7 @@ namespace LumiTracker.Views.Windows
             else
             {
                 TogglePanel.Visibility = Visibility.Visible;
-                ViewModel.MainContentHeightRatio = 0.45;
+                ViewModel.MainContentHeightRatio = Configuration.Get<double>("deck_window_height_ratio");
                 Topmost = true;
             }
         }

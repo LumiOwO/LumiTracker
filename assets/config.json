@@ -46,6 +46,8 @@
   "check_updates_on_startup": true,
   "subscribe_to_beta_updates": false,
   "update_retries": 3,
+  "deck_window_width_ratio": 0.18,
+  "deck_window_height_ratio": 0.47,
   "ob_host": "",
   "ob_port": 25251
 }

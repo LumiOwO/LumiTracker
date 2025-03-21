@@ -1,7 +1,7 @@
 ﻿using LumiTracker.ViewModels.Windows;
 using LumiTracker.Models;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Collections.ObjectModel;
 
 namespace LumiTracker.Controls
 {
@@ -19,13 +19,13 @@ namespace LumiTracker.Controls
             set { SetValue(ViewModelProperty, value); }
         }
 
-        public static readonly DependencyProperty CardListProperty = DependencyProperty.Register(
-            "CardList", typeof(CardList), typeof(DeckWindowCardListTab), new PropertyMetadata(null));
+        public static readonly DependencyProperty CardListsProperty = DependencyProperty.Register(
+            "CardLists", typeof(ObservableCollection<CardList>), typeof(DeckWindowCardListTab), new PropertyMetadata(new ObservableCollection<CardList>()));
 
-        public CardList CardList
+        public ObservableCollection<CardList> CardLists
         {
-            get { return (GetValue(CardListProperty) as CardList)!; }
-            set { SetValue(CardListProperty, value); }
+            get { return (GetValue(CardListsProperty) as ObservableCollection<CardList>)!; }
+            set { SetValue(CardListsProperty, value); }
         }
 
         public static readonly DependencyProperty WindowHeightProperty = DependencyProperty.Register(
@@ -55,6 +55,15 @@ namespace LumiTracker.Controls
             set { SetValue(VerticalScrollBarVisibilityProperty, value); }
         }
 
+        public static readonly DependencyProperty NumberToTouchProperty = DependencyProperty.Register(
+            "NumberToTouch", typeof(int), typeof(DeckWindowCardListTab), new PropertyMetadata(0));
+
+        public int NumberToTouch
+        {
+            get { return (int)GetValue(NumberToTouchProperty); }
+            set { SetValue(NumberToTouchProperty, value); }
+        }
+
         public DeckWindowCardListTab()
         {
             InitializeComponent();
@@ -68,14 +77,21 @@ namespace LumiTracker.Controls
             }
         }
 
-        private void OnMouseEnter(object sender, MouseEventArgs e)
+        [RelayCommand]
+        private void OnMouseEnter(CardList list)
         {
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            list.ScrollBarVisibility = ScrollBarVisibility.Auto;
         }
 
-        private void OnMouseLeave(object sender, MouseEventArgs e)
+        [RelayCommand]
+        private void OnMouseLeave(CardList list)
         {
-            VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            list.ScrollBarVisibility = ScrollBarVisibility.Hidden;
+        }
+
+        public void OnIsExpandedChanged(object sender, RoutedPropertyChangedEventArgs<bool> e)
+        {
+            NumberToTouch = (NumberToTouch + 1) & 0xf;
         }
     }
 }

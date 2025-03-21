@@ -264,11 +264,26 @@
   <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
     <value>Client Resolution : </value>
   </data>
+  <data name="MyDeck" xml:space="preserve">
+    <value>My Deck</value>
+  </data>
   <data name="MyPlayedCards" xml:space="preserve">
     <value>My Played</value>
   </data>
   <data name="OpPlayedCards" xml:space="preserve">
     <value>Op Played</value>
+  </data>
+  <data name="Tab_MyCards" xml:space="preserve">
+    <value>My Cards</value>
+  </data>
+  <data name="Tab_OpCards" xml:space="preserve">
+    <value>Opponent</value>
+  </data>
+  <data name="SubTab_Played" xml:space="preserve">
+    <value>Played</value>
+  </data>
+  <data name="SubTab_InDeck" xml:space="preserve">
+    <value>In Deck</value>
   </data>
   <data name="Instruction" xml:space="preserve">
     <value>Instruction</value>
@@ -317,9 +332,6 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
-  </data>
-  <data name="MyDeck" xml:space="preserve">
-    <value>My Deck</value>
   </data>
   <data name="DeckPageTitle" xml:space="preserve">
     <value>Deck</value>

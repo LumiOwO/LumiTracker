@@ -52,7 +52,7 @@ namespace LumiTracker.OB
                 }
                 else
                 {
-                    DeckWindowViewModel.InitDeckOnGameStart(sharecode, cards[3..]);
+                    DeckWindowViewModel.InitDeckOnGameStart(cards[3..]);
                 }
             }
             else
