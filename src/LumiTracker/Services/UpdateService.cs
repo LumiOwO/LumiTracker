@@ -27,24 +27,39 @@ namespace LumiTracker.Services
     public class AttachMeta
     {
         // gitee & github
-        public string name { get; set; } = ""; // [Notice] use .txt placeholder on gitee
-        // not valid from gitee
-        public long size { get; set; } = 0;
-        // Not in the response body
-        public bool need_update { get; set; } = false;
-        public string package { get; set; } = "";
-        public string md5 { get; set; } = "";      // package id
+        public string       name        { get; set; } = "";     // [Notice] use .txt placeholder on gitee
 
-        public string checksum { get; set; } = ""; // For download check, not package id
-        public string zip_path { get; set; } = "";
+        [JsonProperty("browser_download_url")]
+        public string       url         { get; set; } = "";
+
+        // not valid from gitee
+        public long         size        { get; set; } = 0;
+
+        // Not in the response body
+        // JsonIgnore properties will not be cached by Configuration.SetTemporal("releaseMeta", releaseMeta);
+        [property: JsonIgnore]
+        public bool         need_update { get; set; } = false;
+        [property: JsonIgnore]
+        public string       package     { get; set; } = "";
+        [property: JsonIgnore]
+        public string       md5         { get; set; } = "";     // package id
+        [property: JsonIgnore]
+        public string       checksum    { get; set; } = "";     // For download check, not package id
+        [property: JsonIgnore]
+        public string       zip_path    { get; set; } = "";
     }
 
     public class ReleaseMeta
     {
-        public string id { get; set; } = "";
-        public string tag_name { get; set; } = "";
-        public string body { get; set; } = "";
-        public AttachMeta[] assets { get; set; } = [];
+        public string       id          { get; set; } = "";
+        [JsonProperty("tag_name")]
+        public string       tag         { get; set; } = "";
+        public string       body        { get; set; } = "";
+        public AttachMeta[] assets      { get; set; } = [];
+
+        // Not in the response body
+        public AppVersion   version     { get; set; } = new AppVersion();
+        public string       patch_log   { get; set; } = "";
     }
 
     public enum EUpdateState
@@ -241,7 +256,8 @@ namespace LumiTracker.Services
             else if (ctx.State == EUpdateState.ReadyToRestart)
             {
                 // Restart
-                string latestVersion = ctx.ReleaseMeta!.tag_name.TrimStart('v');
+                Debug.Assert(ctx.ReleaseMeta != null);
+                string latestVersion = ctx.ReleaseMeta.version.InfoName;
                 Configuration.SetTemporal("updated_to", latestVersion);
                 Configuration.SetTemporal("restart", true);
                 Application.Current.Shutdown();
@@ -297,37 +313,88 @@ namespace LumiTracker.Services
             subClient?.Dispose();
         }
 
+        private async Task<ReleaseMeta?> FetchMetaFromUrl(string url)
+        {
+            var response = await subClient.GetStringAsync(url);
+            ReleaseMeta? meta = JsonConvert.DeserializeObject<ReleaseMeta>(response);
+            if (meta == null)
+            {
+                Configuration.Logger.LogError("[Update] Invalid release meta from http response.");
+                return null;
+            }
+
+            // Find patch number
+            int patch = 0;
+            string? patchLogUrl = null;
+            foreach (var attachMeta in meta.assets)
+            {
+                string name = attachMeta.name;
+                if (!name.StartsWith("Patch") || !name.EndsWith(".md"))
+                    continue;
+
+                if (int.TryParse(name[5..^3], out int patchNumber) && patchNumber > patch)
+                {
+                    patch = patchNumber;
+                    patchLogUrl = attachMeta.url;
+                }
+            }
+
+            if (patchLogUrl != null)
+            {
+                try
+                {
+                    HttpResponseMessage fileResponse = await subClient.GetAsync(patchLogUrl);
+                    fileResponse.EnsureSuccessStatusCode();
+                    meta.patch_log = await fileResponse.Content.ReadAsStringAsync();
+                }
+                catch (Exception ex)
+                {
+                    Configuration.Logger.LogError($"Failed to fetch patch log Patch{patch}.md: {ex.Message}");
+                }
+
+                if (string.IsNullOrWhiteSpace(meta.patch_log))
+                {
+                    meta.patch_log = Lang.UpdatePrompt_DefaultPatchLog;
+                }
+            }
+
+            if (!AppVersion.TryParse(meta.tag, out AppVersion version, patch))
+            {
+                Configuration.Logger.LogError($"[Update] Failed to parse version number {meta.tag} from release meta.");
+                return null;
+            }
+
+            meta.version = version;
+            return meta;
+        }
+
         private async Task<bool> GetLatestVersionMeta(UpdateContext ctx)
         {
             // Get the latest release info from gitee
             Configuration.Logger.LogDebug($"============= [Update] Update stage : {ctx.State.ToString()} =============");
             ctx.State = EUpdateState.GetReleaseMeta;
 
-            var releaseMeta = Configuration.Get<ReleaseMeta>("releaseMeta");
+            ReleaseMeta? releaseMeta = Configuration.Get<ReleaseMeta>("releaseMeta");
             if (releaseMeta == null)
             {
-                var response = await subClient.GetStringAsync(releaseMetaUrl);
-                releaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(response);
+                releaseMeta = await FetchMetaFromUrl(releaseMetaUrl);
                 if (releaseMeta == null)
                 {
-                    Configuration.Logger.LogWarning("[Update] Invalid release meta from http response.");
+                    Configuration.Logger.LogError("[Update] Failed to fetch latest release meta.");
                     return false;
                 }
 
                 // Check beta version
                 if (Configuration.Get<bool>("subscribe_to_beta_updates"))
                 {
-                    var betaResponse = await subClient.GetStringAsync(betaMetaUrl);
-                    var betaReleaseMeta = JsonConvert.DeserializeObject<ReleaseMeta>(betaResponse);
+                    ReleaseMeta? betaReleaseMeta = await FetchMetaFromUrl(betaMetaUrl);
                     if (betaReleaseMeta == null)
                     {
-                        Configuration.Logger.LogWarning("[Update] Invalid beta meta from http response.");
+                        Configuration.Logger.LogError("[Update] Failed to fetch latest beta release meta.");
                         return false;
                     }
-
-                    if (UpdateUtils.VersionCompare(
-                        releaseMeta.tag_name.TrimStart('v'), 
-                        betaReleaseMeta.tag_name.TrimStart('v')) < 0)
+                    
+                    if (releaseMeta.version < betaReleaseMeta.version)
                     {
                         releaseMeta = betaReleaseMeta;
                     }
@@ -337,12 +404,11 @@ namespace LumiTracker.Services
             }
             ctx.ReleaseMeta = releaseMeta;
 
-            string latestVersion = releaseMeta.tag_name.TrimStart('v');
-            string currentVersion = Configuration.Ini["Version"];
-            //currentVersion = "0.0.0";
-            if (UpdateUtils.VersionCompare(currentVersion, latestVersion) >= 0)
+            AppVersion currentVersion = Configuration.AppVersion;
+            //currentVersion = new AppVersion(); // Debug
+            if (currentVersion >= releaseMeta.version)
             {
-                Configuration.Logger.LogInformation($"[Update] Version {latestVersion} is already latest.");
+                Configuration.Logger.LogInformation($"[Update] Version {currentVersion} is already latest.");
                 ctx.State = EUpdateState.AlreadyLatest;
                 return true;
             }
@@ -353,7 +419,7 @@ namespace LumiTracker.Services
                 {
                     Directory.CreateDirectory(Configuration.ChangeLogDir);
                 }
-                await File.WriteAllTextAsync(Path.Combine(Configuration.ChangeLogDir, $"{latestVersion}.md"), releaseMeta.body);
+                await File.WriteAllTextAsync(Path.Combine(Configuration.ChangeLogDir, $"{releaseMeta.version.InfoName}.md"), releaseMeta.body);
             }
             catch (Exception ex)
             {
@@ -393,13 +459,13 @@ namespace LumiTracker.Services
             {
                 Directory.CreateDirectory(Configuration.CacheDir);
             }
-            string latestVersion = ctx.ReleaseMeta!.tag_name.TrimStart('v');
-            bool isBeta = latestVersion.Contains("beta");
-            string bestUrl = await GetBestDownloadUrl(isBeta);
+            Debug.Assert(ctx.ReleaseMeta != null);
+            AppVersion latestVersion = ctx.ReleaseMeta.version;
+            string bestUrl = await GetBestDownloadUrl(latestVersion.IsBeta);
 
             long totalBytes = 0;
             List<AttachMeta> downloadMetas = [];
-            foreach (var attachMeta in ctx.ReleaseMeta!.assets)
+            foreach (var attachMeta in ctx.ReleaseMeta.assets)
             {
                 string[] fields = attachMeta.name.Split('-');
                 if (fields[0] != "Package")
@@ -509,7 +575,7 @@ namespace LumiTracker.Services
             ctx.Indeterminate  = true;
             ctx.ProgressText   = Lang.UpdatePrompt_Unpacking;
 
-            string dstDir = Path.Combine(Configuration.RootDir, "LumiTrackerApp-" + latestVersion);
+            string dstDir = Path.Combine(Configuration.RootDir, $"LumiTrackerApp-{latestVersion.InfoName}");
             foreach (var meta in downloadMetas)
             {
                 string upzip_path = meta.package switch
@@ -578,7 +644,7 @@ namespace LumiTracker.Services
             using (StreamWriter writer = new StreamWriter(Configuration.IniFilePath))
             {
                 writer.WriteLine("[Application]");
-                writer.WriteLine($"Version = {latestVersion}");
+                writer.WriteLine($"Version = {latestVersion.InfoName}");
                 writer.WriteLine($"Console = 0");
                 for (EPackageType type = 0; type < EPackageType.NumPackages; type++)
                 {
@@ -796,106 +862,6 @@ namespace LumiTracker.Services
 
             // Format as "MM:SS" with leading zeros
             return $"{minutes:D2}:{secondsPart:D2}";
-        }
-
-        public static int VersionCompare(string v1, string v2)
-        {
-            // Split the version numbers into the main part and suffix
-            string[] mainParts1 = v1.Split('-');
-            string[] mainParts2 = v2.Split('-');
-
-            // Compare the numeric parts of the version strings
-            string[] parts1 = mainParts1[0].Split('.');
-            string[] parts2 = mainParts2[0].Split('.');
-
-            // Ensure both arrays have the same length
-            int maxLength = Math.Max(parts1.Length, parts2.Length);
-
-            // Compare each part of the version number
-            for (int i = 0; i < maxLength; i++)
-            {
-                // Get the current part or 0 if the part is missing
-                int num1 = i < parts1.Length ? int.Parse(parts1[i]) : 0;
-                int num2 = i < parts2.Length ? int.Parse(parts2[i]) : 0;
-
-                // Compare the current part
-                int comparison = num1.CompareTo(num2);
-                if (comparison != 0)
-                {
-                    return comparison;
-                }
-            }
-
-            // If numeric parts are equal, compare the suffixes (e.g., "-beta1" or "-beta2")
-            if (mainParts1.Length > 1 || mainParts2.Length > 1)
-            {
-                // Handle cases where one version has a suffix and the other doesn't
-                if (mainParts1.Length > 1 && mainParts2.Length == 1)
-                    return -1; // A version with a suffix is considered earlier
-                if (mainParts1.Length == 1 && mainParts2.Length > 1)
-                    return 1; // A version without a suffix is considered later
-
-                // Both versions have suffixes; compare them
-                string suffix1 = mainParts1.Length > 1 ? mainParts1[1] : "";
-                string suffix2 = mainParts2.Length > 1 ? mainParts2[1] : "";
-
-                // Compare the suffixes
-                int suffixComparison = CompareSuffixWithNumeric(suffix1, suffix2);
-                if (suffixComparison != 0)
-                {
-                    return suffixComparison;
-                }
-            }
-
-            // Versions are equal if all parts and suffixes are equal
-            return 0;
-        }
-
-        private static int CompareSuffixWithNumeric(string suffix1, string suffix2)
-        {
-            // Define the order of suffixes
-            string[] suffixOrder = { "alpha", "beta" };
-
-            // Extract base suffix and numeric part (e.g., "beta1" -> "beta" and "1")
-            string baseSuffix1 = ExtractBaseSuffix(suffix1, out int numericPart1);
-            string baseSuffix2 = ExtractBaseSuffix(suffix2, out int numericPart2);
-
-            int index1 = Array.IndexOf(suffixOrder, baseSuffix1.ToLower());
-            int index2 = Array.IndexOf(suffixOrder, baseSuffix2.ToLower());
-
-            // Compare base suffixes first
-            if (index1 != index2)
-            {
-                return index1.CompareTo(index2);
-            }
-
-            // If base suffixes are the same, compare numeric parts
-            return numericPart1.CompareTo(numericPart2);
-        }
-
-        private static string ExtractBaseSuffix(string suffix, out int numericPart)
-        {
-            // Find the first digit in the suffix to separate the base suffix and numeric part
-            int digitIndex = -1;
-            for (int i = 0; i < suffix.Length; i++)
-            {
-                if (char.IsDigit(suffix[i]))
-                {
-                    digitIndex = i;
-                    break;
-                }
-            }
-
-            if (digitIndex == -1)
-            {
-                numericPart = 0; // No numeric part found
-                return suffix;
-            }
-            else
-            {
-                numericPart = int.Parse(suffix.Substring(digitIndex));
-                return suffix.Substring(0, digitIndex);
-            }
         }
 
         public static async Task<string> FileMD5Sum(string path)

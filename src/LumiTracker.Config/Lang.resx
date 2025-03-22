@@ -443,6 +443,9 @@
   <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
     <value>Release History (Preview)</value>
   </data>
+  <data name="UpdatePrompt_DefaultPatchLog" xml:space="preserve">
+    <value>Fixed some known issues.</value>
+  </data>
   <data name="Donate" xml:space="preserve">
     <value>Donate</value>
   </data>

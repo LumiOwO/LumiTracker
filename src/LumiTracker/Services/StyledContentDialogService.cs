@@ -1,6 +1,7 @@
 using LumiTracker.Config;
 using LumiTracker.Controls;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Windows.Controls;
@@ -173,7 +174,7 @@ namespace LumiTracker.Services
             }
             catch (Exception ex)
             {
-                Configuration.Logger.LogWarning($"Failed to fetch notices: {ex.Message}");
+                Configuration.Logger.LogError($"Failed to fetch notices: {ex.Message}");
                 return null;
             }
 
@@ -205,9 +206,17 @@ namespace LumiTracker.Services
 
         public async Task<Task<ContentDialogResult>?> ShowUpdateDialogAsync(UpdateContext ctx)
         {
+            Debug.Assert(ctx.ReleaseMeta != null);
             // Init latest release info dialog content
-            UpdateDialog = GetReleaseLogDialog(
-                $"{Lang.LatestRelease_Title} : {ctx.ReleaseMeta!.tag_name}", ctx.ReleaseMeta!.body, false);
+            AppVersion version = ctx.ReleaseMeta.version;
+            string title = version.HasPatch
+                ? $"{Lang.LatestRelease_Title} : {version.FullName}"
+                : $"{Lang.LatestRelease_Title} : {version.InfoName}";
+            string body = version.HasPatch
+                ? ctx.ReleaseMeta.patch_log
+                : ctx.ReleaseMeta.body;
+
+            UpdateDialog = GetReleaseLogDialog(title, body, false);
             ContentDialogResult result = await MainService.ShowAsync(UpdateDialog.Dialog, default);
             if (result == ContentDialogResult.None)
             {
@@ -333,7 +342,7 @@ namespace LumiTracker.Services
                 StyledContentDialog? styledDialog = null;
                 try
                 {
-                    string version = Configuration.GetAssemblyVersion();
+                    string version = Configuration.AppVersion.InfoName;
                     string changeLogPath = Path.Combine(Configuration.ChangeLogDir, $"{version}.md");
                     if (File.Exists(changeLogPath))
                     {

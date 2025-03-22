@@ -443,6 +443,9 @@
   <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
     <value>更新记录（预览版）</value>
   </data>
+  <data name="UpdatePrompt_DefaultPatchLog" xml:space="preserve">
+    <value>修复了一些已知问题。</value>
+  </data>
   <data name="Donate" xml:space="preserve">
     <value>捐赠打赏</value>
   </data>

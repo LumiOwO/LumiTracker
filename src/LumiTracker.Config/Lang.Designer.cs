@@ -1425,6 +1425,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fixed some known issues..
+        /// </summary>
+        public static string UpdatePrompt_DefaultPatchLog {
+            get {
+                return ResourceManager.GetString("UpdatePrompt_DefaultPatchLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Downloading....
         /// </summary>
         public static string UpdatePrompt_Downloading {

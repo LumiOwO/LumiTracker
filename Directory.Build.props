@@ -2,6 +2,7 @@
   <PropertyGroup>
     <VersionNumber>1.3.0</VersionNumber>
     <BetaNumber></BetaNumber>
+    <PatchNumber>0</PatchNumber>
 
     <AssemblyVersion>$(VersionNumber)</AssemblyVersion>
     <FileVersion>$(VersionNumber)</FileVersion>
@@ -13,6 +14,11 @@
     <Platforms>AnyCPU;x64</Platforms>
     <BaseIntermediateOutputPath>$(SolutionDir)bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="BetaNumber" Value="$(BetaNumber)" Condition="'$(BetaNumber)' != ''" />
+    <AssemblyMetadata Include="PatchNumber" Value="$(PatchNumber)" />
+  </ItemGroup>
 
   <!-- Debug configuration for x64 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

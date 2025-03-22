@@ -1,6 +1,4 @@
 ﻿using LumiTracker.Config;
-using LumiTracker.ViewModels.Pages;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -11,7 +9,7 @@ namespace LumiTracker.Helpers
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string title = (value as string)!;
-            return $"{Lang.AppName} {Configuration.GetAssemblyVersion()} - {title}";
+            return $"{Lang.AppName} {Configuration.AppVersion.InfoName} - {title}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

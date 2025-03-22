@@ -443,6 +443,9 @@
   <data name="UpdatePrompt_ChangeLogBeta" xml:space="preserve">
     <value>リリース履歴（プレビュー）</value>
   </data>
+  <data name="UpdatePrompt_DefaultPatchLog" xml:space="preserve">
+    <value>いくつかの既知の問題を修正しました。</value>
+  </data>
   <data name="Donate" xml:space="preserve">
     <value>寄付</value>
   </data>

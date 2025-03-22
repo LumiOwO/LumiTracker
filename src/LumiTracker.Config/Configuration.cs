@@ -29,6 +29,8 @@ namespace LumiTracker.Config
 
         public static readonly string AppName = Assembly.GetEntryAssembly()!.GetName().Name!;
 
+        public static readonly AppVersion AppVersion = GetAppVersion();
+
         // Directories
         public static readonly string AppDir = Path.GetFullPath(Path.GetDirectoryName(
             Assembly.GetEntryAssembly()!.Location
@@ -136,7 +138,7 @@ namespace LumiTracker.Config
                     ;
             });
             _logger = loggerFactory.CreateLogger<Configuration>();
-            _logger.LogInformation($"App Version: {AppName}-{GetAssemblyVersion()}");
+            _logger.LogInformation($"App Version: {AppName}-{AppVersion}");
 
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
@@ -187,34 +189,29 @@ namespace LumiTracker.Config
             return sections;
         }
 
-        public static string GetAssemblyVersion()
+        private static AppVersion GetAppVersion()
         {
-            var assembly = Assembly.GetEntryAssembly()!;
-            // Retrieve the assembly's informational version (includes suffixes like -beta1)
-            string? informationalVersion = assembly
-                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-            string suffix = "";
-            if (informationalVersion != null)
-            {
-                // Find the index of the first non-numeric character after the numeric version
-                int suffixIndex = informationalVersion.IndexOf('-');
-                if (suffixIndex >= 0)
-                {
-                    // Return the suffix part (e.g., "-beta1")
-                    suffix = informationalVersion.Substring(suffixIndex);
-
-                    // Find the index of the '+' character
-                    int plusIndex = suffix.IndexOf('+');
-                    // If '+' is found, truncate the string up to the '+' character
-                    if (plusIndex >= 0)
-                    {
-                        suffix = suffix.Substring(0, plusIndex);
-                    }
-                }
-            }
+            var assembly = Assembly.GetEntryAssembly();
+            Debug.Assert(assembly != null);
 
             Version? version = assembly.GetName().Version;
-            return version != null ? $"{version.Major}.{version.Minor}.{version.Build}{suffix}" : "";
+            int major = version?.Major ?? 0;
+            int minor = version?.Minor ?? 0;
+            int build = version?.Build ?? 0;
+
+            var attributes = assembly.GetCustomAttributes<AssemblyMetadataAttribute>();
+            var betaAttr = attributes.FirstOrDefault(a => a.Key == "BetaNumber");
+            if (!int.TryParse(betaAttr?.Value, out int beta))
+            {
+                beta = 0;
+            }
+            var patchAttr = attributes.FirstOrDefault(a => a.Key == "PatchNumber");
+            if (!int.TryParse(patchAttr?.Value, out int patch))
+            {
+                patch = 0;
+            }
+
+            return new AppVersion(major, minor, build, beta, patch);
         }
 
         public static JObject LoadJObject(string path)
