@@ -17,6 +17,10 @@ from .enums import ECtrlType, EAnnType, EActionCardType, EElementType, ECostType
 from .feature import CropBox, ActionCardHandler, CharacterCardHandler, FeatureDistance, GetHashSize, ImageHash
 from .feature import ExtractFeature_Control, ExtractFeature_Digit, ExtractFeature_Control_Single
 
+def Alert(info):
+    print("***** Fatal Error: " + info)
+    exit(1)
+
 def LoadImage(path):
     return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
 
@@ -59,6 +63,15 @@ def StringToVariableName(s):
     # Join the words together to form the variable name
     return "".join(words)
 
+class DatabaseUpdateContext:
+    def __init__(self):
+        self.save_image_assets      = False
+        self.num_sharable_actions   = 0
+        self.num_extra_goldens      = 0
+        self.num_arcane_legends     = 0
+        self.num_artifacts          = 0
+        self.num_characters         = 0
+
 class Database:
     def __init__(self):
         self.data       = {}
@@ -75,7 +88,7 @@ class Database:
     def __setitem__(self, key, value):
         self.data[key] = value
     
-    def _UpdateControls(self):
+    def _UpdateControls(self, ctx: DatabaseUpdateContext):
         LogDebug(ctrl_types=[(e.name, e.value) for e in ECtrlType], indent=2)
 
         n_controls = ECtrlType.NUM_CTRLS_ANN.value
@@ -122,7 +135,7 @@ class Database:
             SaveImage(main_content, os.path.join(cfg.debug_dir, f"GameOverTest_MainContent.png"))
 
 
-    def _UpdateActionCards(self, save_image_assets):
+    def _UpdateActionCards(self, ctx: DatabaseUpdateContext):
         # sharables
         with open(os.path.join(cfg.cards_dir, "generated", "actions.csv"), 
                     mode='r', newline='', encoding='utf-8') as csv_file:
@@ -176,12 +189,11 @@ class Database:
             image_path = os.path.join(action_cards_dir, image_file)
             image = LoadImage(image_path)
             if image is None:
-                LogError(info=f"Failed to load image: {image_path}")
-                exit(1)
+                Alert(info=f"Failed to load image: {image_path}")
         
             snapshot_path = os.path.join(
                 cfg.assets_dir, "images", "snapshots", f"{card_id}.jpg")
-            if save_image_assets:
+            if ctx.save_image_assets:
                 # create snapshot
                 top    = int(row["snapshot_top"])
                 left   = 12
@@ -221,6 +233,8 @@ class Database:
             }
             if action["type"] == EActionCardType.ArcaneLegend.value:
                 arcane_legends.append((card_id, image))
+            elif action["type"] == EActionCardType.Artifact.value:
+                ctx.num_artifacts += 1
 
             ahashs[card_id]   = ahash
             dhashs[card_id]   = dhash
@@ -251,8 +265,7 @@ class Database:
             extra_path = os.path.join(action_cards_dir, "extras", extra_image_name)
             image = LoadImage(extra_path)
             if image is None:
-                LogError(info=f"Failed to load image: {extra_path}")
-                exit(1)
+                Alert(info=f"Failed to load image: {extra_path}")
         
             handler.frame_buffer = image
             ahash, dhash = handler.ExtractCardFeatures()
@@ -347,10 +360,12 @@ class Database:
                     name_d=name_d, card_ids_d=card_ids_d[:3], dists_d=dists_d[:3],
                     dt=dt, 
                     )
-        
-        return num_sharable, num_extra_goldens, num_arcane_legends
 
-    def _UpdateCharacters(self, save_image_assets):
+        ctx.num_sharable_actions = num_sharable
+        ctx.num_extra_goldens = num_extra_goldens
+        ctx.num_arcane_legends = num_arcane_legends
+
+    def _UpdateCharacters(self, ctx: DatabaseUpdateContext):
         with open(os.path.join(cfg.cards_dir, "generated", "characters.csv"), 
                     mode='r', newline='', encoding='utf-8') as csv_file:
             reader = csv.DictReader(csv_file)
@@ -371,8 +386,7 @@ class Database:
             image_path = os.path.join(characters_dir, f"character_{card_id}_{row['zh-HANS']}.png")
             image = LoadImage(image_path)
             if image is None:
-                LogError(info=f"Failed to load image: {image_path}")
-                exit(1)
+                Alert(info=f"Failed to load image: {image_path}")
 
             handler.frame_buffer = image
             ahash, dhash = handler.ExtractCardFeatures()
@@ -398,7 +412,7 @@ class Database:
             talent_id = int(row["talent_id"])
             talent_to_character[talent_id] = int(row["id"])
 
-            if save_image_assets:
+            if ctx.save_image_assets:
                 src_file = os.path.join(
                     cfg.cards_dir, "avatars", f'avatar_{row["id"]}_{row["zh-HANS"]}.png'
                     )
@@ -410,6 +424,7 @@ class Database:
         print(f"Loaded {num_characters} images from {characters_dir}")
         self.data["characters"] = characters
         self.data["talent_to_character"] = talent_to_character
+        ctx.num_characters = num_characters
 
         if cfg.DEBUG:
             # ahash
@@ -423,9 +438,7 @@ class Database:
         ann_dhash = self.CreateAndSaveAnn(dhashs, EAnnType.CHARACTERS_D)
         self.anns[EAnnType.CHARACTERS_D.value] = ann_dhash
 
-    def _UpdateGeneratedEnums(self, actions_counts_pack):
-        num_sharable_actions, num_extra_goldens, num_arcane_legends = actions_counts_pack
-
+    def _UpdateGeneratedEnums(self, ctx: DatabaseUpdateContext):
         eActions = [StringToVariableName(action["en-US"]) for action in self.data["actions"]]
         eCharacters = [StringToVariableName(character["en-US"]) for character in self.data["characters"]]
 
@@ -453,10 +466,10 @@ class Database:
         # controls
         WriteLine(f"")
         WriteLine(f"NumActions,")
-        WriteLine(f"NumSharables = {num_sharable_actions},")
+        WriteLine(f"NumSharables = {ctx.num_sharable_actions},")
         WriteLine(f"NumTokens = NumActions - NumSharables,")
-        WriteLine(f"NumExtraGoldens = {num_extra_goldens},")
-        WriteLine(f"NumArcaneLegends = {num_arcane_legends},")
+        WriteLine(f"NumExtraGoldens = {ctx.num_extra_goldens},")
+        WriteLine(f"NumArcaneLegends = {ctx.num_arcane_legends},")
         indent -= 1
         WriteLine("}")
         WriteLine("")
@@ -495,10 +508,10 @@ class Database:
         # controls
         WriteLine(f"")
         WriteLine(f"NumActions = enum.auto()")
-        WriteLine(f"NumSharables = {num_sharable_actions}")
+        WriteLine(f"NumSharables = {ctx.num_sharable_actions}")
         WriteLine(f"NumTokens = NumActions - NumSharables")
-        WriteLine(f"NumExtraGoldens = {num_extra_goldens}")
-        WriteLine(f"NumArcaneLegends = {num_arcane_legends}")
+        WriteLine(f"NumExtraGoldens = {ctx.num_extra_goldens}")
+        WriteLine(f"NumArcaneLegends = {ctx.num_arcane_legends}")
         indent -= 1
         WriteLine("")
 
@@ -516,15 +529,22 @@ class Database:
 
         file.close()
 
-    def _UpdateExtraInfos(self):
+    def _UpdateExtraInfos(self, ctx: DatabaseUpdateContext):
         # share code
         with open(os.path.join(cfg.cards_dir, "generated", "share_code.csv"), 
                     mode='r', newline='', encoding='utf-8') as share_code_file:
             share_code_reader = csv.DictReader(share_code_file)
             share_code_data = [row for row in share_code_reader]
+        if len(share_code_data) != ctx.num_sharable_actions + ctx.num_characters:
+            Alert(info=
+                f"Share id number check failed: share_code.csv({len(share_code_data)}) != "
+                f"num_sharable_actions({ctx.num_sharable_actions}) + num_characters({ctx.num_characters})")
+
         share_to_internal = [0] + [None] * len(share_code_data)
-        for row in share_code_data:
+        for i, row in enumerate(share_code_data):
             share_id = int(row["share_id"])
+            if share_id != i + 1:
+                Alert(info=f"Share id consecutiveness check failed at share_id = {share_id}")
             internal_id = int(row["internal_id"])
             is_character = (int(row["is_character"]) == 1)
             if is_character:
@@ -539,6 +559,9 @@ class Database:
                     mode='r', newline='', encoding='utf-8') as artifacts_file:
             artifacts_reader = csv.DictReader(artifacts_file)
             artifacts_data = [row for row in artifacts_reader]
+        if len(artifacts_data) != ctx.num_artifacts:
+            Alert(info=f"Artifacts number check failed: artifacts.csv({len(artifacts_data)}) != actions.csv({ctx.num_artifacts})")
+
         artifacts_order = {}
         for i, row in enumerate(artifacts_data):
             internal_id = int(row["internal_id"])
@@ -558,7 +581,7 @@ class Database:
         if cfg.DEBUG:
             CheckHashDistances("digits", digit_hashs, name_func=lambda i: "")
 
-        if save_image_assets:
+        if ctx.save_image_assets:
             # cost images
             for name in ECostType.__members__:
                 src_file = os.path.join(
@@ -573,12 +596,12 @@ class Database:
             shutil.copy(os.path.join(cfg.cards_dir, 'empty.png'), 
                         os.path.join(cfg.assets_dir, "images", 'empty.png'))
 
-    def _Update(self, save_image_assets):
-        self._UpdateControls()
-        actions_counts_pack = self._UpdateActionCards(save_image_assets)
-        self._UpdateCharacters(save_image_assets)
-        self._UpdateGeneratedEnums(actions_counts_pack)
-        self._UpdateExtraInfos()
+    def _Update(self, ctx: DatabaseUpdateContext):
+        self._UpdateControls(ctx)
+        self._UpdateActionCards(ctx)
+        self._UpdateCharacters(ctx)
+        self._UpdateExtraInfos(ctx)
+        self._UpdateGeneratedEnums(ctx)
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:
             json.dump(self.data, f, indent=None, ensure_ascii=False)
@@ -623,8 +646,9 @@ class Database:
 
 if __name__ == '__main__':
     import sys
-    save_image_assets = (len(sys.argv) > 1 and sys.argv[1] == "image")
+    ctx = DatabaseUpdateContext()
+    ctx.save_image_assets = (len(sys.argv) > 1 and sys.argv[1] == "image")
 
     db = Database()
-    db._Update(save_image_assets)
+    db._Update(ctx)
     print("Database Updated.")

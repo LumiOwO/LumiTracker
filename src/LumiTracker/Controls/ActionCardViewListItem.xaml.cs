@@ -89,7 +89,6 @@ namespace LumiTracker.Controls
             {
                 var control = (ActionCardViewListItem)d;
                 control.blinkAnimation.Begin();
-                newValue.MarkAsNotified();
             }
         }
     }

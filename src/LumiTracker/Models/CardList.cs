@@ -73,11 +73,6 @@ namespace LumiTracker.Models
         {
             return (OperationIndex == Parent?.OperationCount) && (DateTime.Now - NotifiedTime).TotalSeconds <= 1;
         }
-
-        public void MarkAsNotified()
-        {
-            NotifiedTime = DateTime.Now;
-        }
     }
 
     public partial class CardList : ObservableObject
