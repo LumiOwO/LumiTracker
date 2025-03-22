@@ -329,7 +329,7 @@ namespace LumiTracker.Services
             foreach (var attachMeta in meta.assets)
             {
                 string name = attachMeta.name;
-                if (!name.StartsWith("Patch") || !name.EndsWith(".md"))
+                if (!name.StartsWith("Patch", StringComparison.OrdinalIgnoreCase) || !name.EndsWith(".md"))
                     continue;
 
                 if (int.TryParse(name[5..^3], out int patchNumber) && patchNumber > patch)
@@ -468,7 +468,7 @@ namespace LumiTracker.Services
             foreach (var attachMeta in ctx.ReleaseMeta.assets)
             {
                 string[] fields = attachMeta.name.Split('-');
-                if (fields[0] != "Package")
+                if (!string.Equals(fields[0], "Package", StringComparison.OrdinalIgnoreCase))
                 {
                     // not a package
                     continue;
@@ -488,7 +488,8 @@ namespace LumiTracker.Services
                 string md5      = fields[2];
                 long   size     = long.Parse(fields[3]);
                 string checksum = fields[4];
-                if (package == "Patch" || md5 != Configuration.Ini[package])
+                if ( string.Equals(package, "Patch", StringComparison.OrdinalIgnoreCase) ||
+                    !string.Equals(md5, Configuration.Ini[package], StringComparison.OrdinalIgnoreCase))
                 {
                     attachMeta.name = $"Package-{package}-{md5}.zip";
                     attachMeta.size = size;
@@ -595,7 +596,7 @@ namespace LumiTracker.Services
             }
             for (EPackageType type = 0; type < EPackageType.NumPackages; type++)
             {
-                if (md5Hashs[(int)type] != Configuration.Ini[type.ToString()])
+                if (!string.Equals(md5Hashs[(int)type], Configuration.Ini[type.ToString()], StringComparison.OrdinalIgnoreCase))
                 {
                     // Already unzipped
                     continue;
@@ -785,7 +786,7 @@ namespace LumiTracker.Services
                         md5.TransformFinalBlock(buffer, 0, 0);
 
                         string hash = UpdateUtils.HashBytesToString(md5.Hash);
-                        success = (hash == "18b5491df4f3abef7dfc25f52f508d58");
+                        success = string.Equals(hash, "18b5491df4f3abef7dfc25f52f508d58", StringComparison.OrdinalIgnoreCase);
                     }
                 }
                 else
