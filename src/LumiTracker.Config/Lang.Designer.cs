@@ -405,6 +405,15 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This duel record will be irrecoverable after deletion. Do you want to continue?.
+        /// </summary>
+        public static string DeleteConfirm_RecordMessage {
+            get {
+                return ResourceManager.GetString("DeleteConfirm_RecordMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete?.
         /// </summary>
         public static string DeleteConfirm_Title {

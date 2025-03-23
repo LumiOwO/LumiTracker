@@ -617,6 +617,10 @@
                     FontSize="13"
                     Padding="2"
                     Appearance="Secondary"
+                    Command="{Binding DeleteRecordButtonClickedCommand,
+                        RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckPageDuelHistoryTab}}
+                        }"
+                    CommandParameter="{Binding .}"
                     VerticalAlignment="Top"
                     HorizontalAlignment="Right">
                     <ui:Button.Icon>

@@ -405,6 +405,9 @@
   <data name="DeleteConfirm_Message" xml:space="preserve">
     <value>Current Deck：</value>
   </data>
+  <data name="DeleteConfirm_RecordMessage" xml:space="preserve">
+    <value>This duel record will be irrecoverable after deletion. Do you want to continue?</value>
+  </data>
   <data name="DeleteConfirm_All" xml:space="preserve">
     <value>All Builds</value>
   </data>

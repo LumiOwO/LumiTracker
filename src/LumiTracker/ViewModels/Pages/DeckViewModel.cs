@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using System.Text;
+using System.Diagnostics;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -64,7 +65,7 @@ namespace LumiTracker.ViewModels.Pages
         private DeckInfo Info { get; }
 
         [ObservableProperty]
-        private BuildStats _total = new ();
+        private BuildStats _total;
 
         // This is ensured to have at least 1 BuildStats
         [ObservableProperty]
@@ -83,17 +84,17 @@ namespace LumiTracker.ViewModels.Pages
             Info = info;
             Info.PropertyChanged += OnDeckInfoPropertyChanged;
 
-            var first = new BuildStats(Info.Edit);
+            var first = BuildStats.Create(Info.Edit);
             _allBuildStats.Add(first);
             if (info.EditVersions != null)
             {
                 foreach (BuildEdit edit in info.EditVersions)
                 {
-                    var stats = new BuildStats(edit);
+                    var stats = BuildStats.Create(edit);
                     _allBuildStats.Add(stats);
                 }
             }
-
+            _total   = BuildStats.Create(null);
             _current = _allBuildStats[0];
         }
 
@@ -118,20 +119,13 @@ namespace LumiTracker.ViewModels.Pages
 
         public async Task AsyncLoadTotal()
         {
-            bool lockTaken = false;
-            var loadLock = Total.LoadStateLock;
-            try
+            bool earlyReturn = SpinLockGuard.Scope(ref Total.LoadStateLock, () =>
             {
-                loadLock.Enter(ref lockTaken);
-                if (Total.LoadState >= ELoadState.Loading) return;
-
+                if (Total.LoadState >= ELoadState.Loading) return true;
                 Total.LoadState = ELoadState.Loading;
-            }
-            finally
-            {
-                if (lockTaken) loadLock.Exit();
-                lockTaken = false;
-            }
+                return false;
+            });
+            if (earlyReturn) return;
 
             try
             {
@@ -150,65 +144,52 @@ namespace LumiTracker.ViewModels.Pages
                 }
                 Total.SetRecords(records);
 
-                loadLock.Enter(ref lockTaken);
-                Total.LoadState = ELoadState.Loaded;
+                SpinLockGuard.Scope(ref Total.LoadStateLock, () =>
+                {
+                    Total.LoadState = ELoadState.Loaded;
+                });
 
                 Configuration.Logger.LogDebug($"[AsyncLoadTotal] Total loaded.");
             }
             catch (Exception ex)
             {
                 Configuration.Logger.LogError($"[AsyncLoadTotal] Failed to load Total. {ex.Message}");
-                if (!lockTaken)
+                SpinLockGuard.Scope(ref Total.LoadStateLock, () =>
                 {
-                    loadLock.Enter(ref lockTaken);
-                }
-                Total.LoadState = ELoadState.NotLoaded;
-            }
-            finally
-            {
-                if (lockTaken) loadLock.Exit();
+                    Total.LoadState = ELoadState.NotLoaded;
+                });
             }
         }
 
         public async Task AsyncLoadAt(int index)
         {
             BuildStats stats = AllBuildStats[index];
-            bool lockTaken = false;
-            var loadLock = stats.LoadStateLock;
-            try
+            bool earlyReturn = SpinLockGuard.Scope(ref stats.LoadStateLock, () =>
             {
-                loadLock.Enter(ref lockTaken);
-                if (stats.LoadState >= ELoadState.Loading) return;
-
+                if (stats.LoadState >= ELoadState.Loading) return true;
                 stats.LoadState = ELoadState.Loading;
-            }
-            finally
-            {
-                if (lockTaken) loadLock.Exit();
-                lockTaken = false;
-            }
+                return false;
+            });
+            if (earlyReturn) return;
 
             try
             {
                 Configuration.Logger.LogDebug($"[AsyncLoadAt({index})] Begin to load BuildStats {stats.Guid.ToString()}...");
                 await stats.LoadDataAsync();
 
-                loadLock.Enter(ref lockTaken);
-                stats.LoadState = ELoadState.Loaded;
+                SpinLockGuard.Scope(ref stats.LoadStateLock, () =>
+                {
+                    stats.LoadState = ELoadState.Loaded;
+                });
                 Configuration.Logger.LogDebug($"[AsyncLoadAt({index})] BuildStats loaded.");
             }
             catch (Exception ex)
             {
                 Configuration.Logger.LogError($"[AsyncLoadAt({index})] Failed to load BuildStat. {ex.Message}");
-                if (!lockTaken)
+                SpinLockGuard.Scope(ref stats.LoadStateLock, () =>
                 {
-                    loadLock.Enter(ref lockTaken);
-                }
-                stats.LoadState = ELoadState.NotLoaded;
-            }
-            finally
-            {
-                if (lockTaken) loadLock.Exit();
+                    stats.LoadState = ELoadState.NotLoaded;
+                });
             }
         }
 
@@ -217,21 +198,14 @@ namespace LumiTracker.ViewModels.Pages
             BuildStats stats = SelectedBuildVersion;
 
             // Add record to current
-            bool lockTaken = false;
-            var loadLock = stats.LoadStateLock;
-            try
+            bool loaded = SpinLockGuard.Scope(ref stats.LoadStateLock, () =>
             {
-                loadLock.Enter(ref lockTaken);
-                if (stats.LoadState != ELoadState.Loaded)
-                {
-                    Configuration.Logger.LogError("[AddRecord] Try to add a record, but the build is not loaded!");
-                    return;
-                }
-            }
-            finally
+                return stats.LoadState == ELoadState.Loaded;
+            });
+            if (!loaded)
             {
-                if (lockTaken) loadLock.Exit();
-                lockTaken = false;
+                Configuration.Logger.LogError("[AddRecord] Try to add a record, but the build is not loaded!");
+                return;
             }
 
             record.Expired = (record.EndTime <= stats.Edit.CreatedAt);
@@ -247,18 +221,10 @@ namespace LumiTracker.ViewModels.Pages
 
 
             // Add record to total if Total loaded
-            loadLock = Total.LoadStateLock;
-            bool totalLoaded = false;
-            try
+            bool totalLoaded = SpinLockGuard.Scope(ref Total.LoadStateLock, () =>
             {
-                loadLock.Enter(ref lockTaken);
-                totalLoaded = (Total.LoadState == ELoadState.Loaded);
-            }
-            finally
-            {
-                if (lockTaken) loadLock.Exit();
-                lockTaken = false;
-            }
+                return Total.LoadState == ELoadState.Loaded;
+            });
 
             if (totalLoaded)
             {
@@ -266,7 +232,45 @@ namespace LumiTracker.ViewModels.Pages
             }
         }
 
-        private async Task SaveRecordToDisk(DuelRecord record, BuildStats stats)
+        public async Task RemoveRecord(DuelRecord record)
+        {
+            BuildStats stats = SelectedBuildVersion;
+
+            // Remove record from current
+            bool loaded = SpinLockGuard.Scope(ref stats.LoadStateLock, () =>
+            {
+                return stats.LoadState == ELoadState.Loaded;
+            });
+            if (!loaded)
+            {
+                Configuration.Logger.LogError("[RemoveRecord] Try to remove a record, but the build is not loaded!");
+                return;
+            }
+
+            stats.RemoveRecord(record);
+            try
+            {
+                await RemoveRecordFromDisk(record, stats);
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"[RemoveRecord] Failed to remove record from disk: {ex.Message}");
+            }
+
+
+            // Remove record from total if Total loaded
+            bool totalLoaded = SpinLockGuard.Scope(ref Total.LoadStateLock, () =>
+            {
+                return Total.LoadState == ELoadState.Loaded;
+            });
+
+            if (totalLoaded)
+            {
+                Total.RemoveRecord(record);
+            }
+        }
+
+        private async Task SaveRecordToDisk(DuelRecord target, BuildStats stats)
         {
             string dataDir = Path.Combine(Configuration.DeckBuildsDir, stats.Guid.ToString());
             if (!Directory.Exists(dataDir))
@@ -324,12 +328,68 @@ namespace LumiTracker.ViewModels.Pages
                         await writer.WriteLineAsync(",");
                     }
                     var serializer = JsonSerializer.CreateDefault();
-                    serializer.Serialize(jsonWriter, record);
+                    serializer.Serialize(jsonWriter, target);
                     await writer.WriteLineAsync();
                     await writer.WriteAsync("]");
                 }
             }
-            Configuration.Logger.LogDebug("Record saved to disk.");
+            Configuration.Logger.LogDebug("[SaveRecordToDisk] Record saved to disk.");
+        }
+
+        private async Task RemoveRecordFromDisk(DuelRecord target, BuildStats stats)
+        {
+            string dataDir = Path.Combine(Configuration.DeckBuildsDir, stats.Guid.ToString());
+            string filename = $"{target.EndTime:yyyyMM}.json";
+            string jsonPath = Path.Combine(dataDir, filename);
+            if (!File.Exists(jsonPath))
+            {
+                Configuration.Logger.LogError($"[RemoveRecordFromDisk] Failed to find {stats.Guid}/{filename}");
+                return;
+            }
+
+            List<DuelRecord>? records = null;
+            try
+            {
+                // Read and parse the json file
+                string fileContent = await File.ReadAllTextAsync(jsonPath);
+                records = JsonConvert.DeserializeObject<List<DuelRecord>>(fileContent);
+            }
+            catch (Exception ex)
+            {
+                Configuration.Logger.LogError($"[RemoveRecordFromDisk] Error when parsing json: {ex.Message}");
+            }
+            if (records == null)
+            {
+                Configuration.Logger.LogError($"[RemoveRecordFromDisk] Failed to load {stats.Guid}/{filename}");
+                return;
+            }
+
+            int index = records.FindIndex(x => x.EndTime == target.EndTime);
+            if (index == -1)
+            {
+                Configuration.Logger.LogError($"[RemoveRecordFromDisk] Failed to find the target record in {stats.Guid}/{filename}");
+                return;
+            }
+            records.RemoveAt(index);
+
+            // Overwrite the json file
+            using (var stream = new FileStream(jsonPath, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen: true))
+            using (var jsonWriter = new CustomJsonTextWriter(writer, indented: true))
+            {
+                var serializer = JsonSerializer.CreateDefault();
+
+                bool first = true;
+                foreach (var record in records)
+                {
+                    await writer.WriteLineAsync(first ? "[" : ",");
+                    first = false;
+                    serializer.Serialize(jsonWriter, record);
+                    await writer.WriteLineAsync();
+                }
+                if (!first) await writer.WriteAsync("]");
+            }
+            Configuration.Logger.LogDebug("[RemoveRecordFromDisk] Record saved to disk.");
         }
 
         private void OnDeckInfoPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -701,7 +761,7 @@ namespace LumiTracker.ViewModels.Pages
             {
                 item.Info.EditVersions = [edit];
             }
-            item.Stats.AllBuildStats.Add(new BuildStats(edit));
+            item.Stats.AllBuildStats.Add(BuildStats.Create(edit));
             item.Info.CurrentVersionIndex = item.Stats.AllBuildStats.Count - 1;
 
             DisableAutoSaveWhenDeckInfoChanged = false;

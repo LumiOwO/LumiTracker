@@ -397,24 +397,32 @@ namespace LumiTracker.Services
             await OnDialogClosed();
         }
 
-        public async Task ShowRestartDialogAsync()
+        public async Task<ContentDialogResult> ShowPlainTextDialogAsync(
+            string title, string text, ControlAppearance confirmAppearance, SymbolRegular confirmIcon)
         {
             var content = new PlainTextDialogContent();
-            content.TextBlock.Text = Lang.Restart_Prompt;
+            content.TextBlock.Text = text;
             // Show dialog
             var styledDialog = new StyledContentDialog();
-            styledDialog.Title = Lang.Restart_Title;
+            styledDialog.Title = title;
             var dialog = styledDialog.Dialog;
             dialog.Content = content;
             dialog.PrimaryButtonText = Lang.Yes;
             dialog.CloseButtonText   = Lang.No;
-            dialog.PrimaryButtonIcon = new SymbolIcon(SymbolRegular.Checkmark24);
+            dialog.PrimaryButtonAppearance = confirmAppearance;
+            dialog.PrimaryButtonIcon = new SymbolIcon(confirmIcon);
             dialog.CloseButtonIcon   = new SymbolIcon(SymbolRegular.Dismiss24);
-            dialog.PrimaryButtonAppearance = ControlAppearance.Success;
             dialog.IsSecondaryButtonEnabled = false;
             dialog.DialogMargin = new Thickness(0, -20, 0, -5);
 
             ContentDialogResult result = await MainService.ShowAsync(dialog, default);
+            return result;
+        }
+
+        public async Task ShowRestartDialogAsync()
+        {
+            ContentDialogResult result = await ShowPlainTextDialogAsync(
+                Lang.Restart_Title, Lang.Restart_Prompt, ControlAppearance.Success, SymbolRegular.Checkmark24);
             if (result == ContentDialogResult.Primary)
             {
                 Configuration.SetTemporal("restart", true);

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Swordfish.NET.Collections;
 using System.IO;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace LumiTracker.Models
 {
@@ -135,14 +136,47 @@ namespace LumiTracker.Models
         public void AddStats(MatchupStats other)
         {
             // For reference: Brute-force way
-            //AvgRounds = ((AvgRounds * Totals) + (other.AvgRounds * other.Totals)) / (Totals + other.Totals);
-            double wAll     = 1.0 * Totals       / (Totals + other.Totals);
-            double wExpired = 1.0 * other.Totals / (Totals + other.Totals);
-            AvgRounds   = AvgRounds   * wAll + other.AvgRounds   * wExpired;
-            AvgDuration = AvgDuration * wAll + other.AvgDuration * wExpired;
+            // AvgRounds = ((AvgRounds * Totals) + (other.AvgRounds * other.Totals)) / (Totals + other.Totals);
+            int totals      = Totals;
+            int otherTotals = other.Totals;
+            if (totals + otherTotals > 0)
+            {
+                double wAll     = 1.0 * totals      / (totals + otherTotals);
+                double wOther   = 1.0 * otherTotals / (totals + otherTotals);
+                AvgRounds   = AvgRounds   * wAll + other.AvgRounds   * wOther;
+                AvgDuration = AvgDuration * wAll + other.AvgDuration * wOther;
+            }
+            else
+            {
+                AvgRounds   = 0;
+                AvgDuration = 0;
+            }
 
             Wins   += other.Wins;
-            Totals += other.Totals;
+            Totals += otherTotals;
+        }
+
+        public void RemoveStats(MatchupStats other)
+        {
+            // For reference: Brute-force way
+            // AvgRounds = ((AvgRounds * Totals) - (other.AvgRounds * other.Totals)) / (Totals - other.Totals);
+            int totals      = Totals;
+            int otherTotals = other.Totals;
+            if (totals - otherTotals > 0)
+            {
+                double wAll     = 1.0 * totals      / (totals - otherTotals);
+                double wOther   = 1.0 * otherTotals / (totals - otherTotals);
+                AvgRounds   = Math.Max(AvgRounds   * wAll - other.AvgRounds   * wOther, 0);
+                AvgDuration = Math.Max(AvgDuration * wAll - other.AvgDuration * wOther, 0);
+            }
+            else
+            {
+                AvgRounds   = 0;
+                AvgDuration = 0;
+            }
+
+            Wins   = Math.Max(Wins   - other.Wins , 0);
+            Totals = Math.Max(totals - otherTotals, 0);
         }
     }
 
@@ -228,7 +262,8 @@ namespace LumiTracker.Models
     {
         [ObservableProperty]
         public ELoadState _loadState = ELoadState.NotLoaded;
-        public SpinLock LoadStateLock { get; } = new SpinLock();
+        private SpinLock _loadStateLock = new SpinLock();
+        public ref SpinLock LoadStateLock { get => ref _loadStateLock; }
         public bool IsLoading => (LoadState == ELoadState.Loading);
         public bool IsLoaded => (LoadState == ELoadState.Loaded);
 
@@ -288,30 +323,65 @@ namespace LumiTracker.Models
         [ObservableProperty]
         private MatchupStats _summaryAfterImport = new(-1, -1, -1);
 
-        public BuildStats(BuildEdit edit)
+        private BuildStats(BuildEdit edit, Guid guid, int[] cards)
         {
             Edit = edit;
-
-            int[]? cards = DeckUtils.DecodeShareCode(Edit.ShareCode);
-            Guid = DeckUtils.DeckBuildGuid(cards);
-            if (cards == null)
-            {
-                Configuration.Logger.LogWarning($"[BuildStats] Invalid share code: {Edit.ShareCode}");
-                cards = Enumerable.Repeat(-1, 33).ToArray();
-            }
-            else
-            {
-                // Sort the cards into default order
-                Array.Sort(cards, 3, 30,
-                    Comparer<int>.Create((x, y) => DeckUtils.ActionCardCompare(x, y)));
-            }
+            Guid = guid;
             Cards = cards;
             CharacterIds = new List<int>(cards[..3]);
         }
 
-        public BuildStats()
+        private BuildStats()
         {
             Edit = new BuildEdit(null) { ShareCode = "", CreatedAt = DateTime.MinValue };
+        }
+
+        // Build stats with the same guid should be use the same reference
+        private static Dictionary<Guid, BuildStats> GBuildStats = [];
+        private static SpinLock GBuildStatsLock = new SpinLock();
+
+        public static BuildStats Create(BuildEdit? edit)
+        {
+            using var guard = new SpinLockGuard(ref GBuildStatsLock);
+
+            Guid guid = Guid.Empty;
+            if (edit == null)
+            {
+                // Create a random guid for empty BuildStats, such as initialized Total stats
+                do
+                {
+                    guid = Guid.NewGuid();
+                } while (GBuildStats.ContainsKey(guid));
+                BuildStats empty = new BuildStats();
+                GBuildStats.Add(guid, empty);
+                return empty;
+            }
+
+            int[]? cards = DeckUtils.DecodeShareCode(edit.ShareCode);
+            if (cards == null)
+            {
+                Configuration.Logger.LogWarning($"[BuildStats::Create] Invalid share code: {edit.ShareCode}");
+                cards = Enumerable.Repeat(-1, 33).ToArray();
+                guid = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff");
+            }
+            else
+            {
+                guid = DeckUtils.DeckBuildGuid(cards);
+                // Sort the cards into default order
+                Array.Sort(cards, 3, 30,
+                    Comparer<int>.Create((x, y) => DeckUtils.ActionCardCompare(x, y)));
+            }
+            Debug.Assert(guid != Guid.Empty);
+
+            if (GBuildStats.TryGetValue(guid, out BuildStats? stats))
+            {
+                Debug.Assert(stats != null);
+                return stats;
+            }
+
+            stats = new BuildStats(edit, guid, cards);
+            GBuildStats.Add(guid, stats);
+            return stats;
         }
 
         public async Task LoadDataAsync()
@@ -382,6 +452,16 @@ namespace LumiTracker.Models
             DuelRecords.Insert(0, record);
         }
 
+        public void RemoveRecord(DuelRecord record)
+        {
+            if (!DuelRecords.Remove(record))
+            {
+                Configuration.Logger.LogError($"[RemoveRecord] Failed to find the target record.");
+                return;
+            }
+            RemoveRecordFromStats(record, AllMatchupStats, MatchupStatsAfterImport);
+        }
+
         public void SetRecords(List<DuelRecord> records)
         {
             ConcurrentObservableSortedSet<MatchupStats> allStats   = new (MatchupStatsComparer);
@@ -431,6 +511,42 @@ namespace LumiTracker.Models
                 after.AddStats(stats);
                 afterStats.Add(after);
                 SummaryAfterImport.AddStats(stats);
+            }
+        }
+
+        private void RemoveRecordFromStats(DuelRecord record,
+            ConcurrentObservableSortedSet<MatchupStats> allStats, ConcurrentObservableSortedSet<MatchupStats> afterStats)
+        {
+            MatchupStats stats = record.GetStats();
+            string key = stats.Key;
+
+            MatchupStats? all = allStats.FirstOrDefault(m => m.Key == key);
+            if (all == null)
+            {
+                Configuration.Logger.LogError($"[RemoveRecordFromStats] Failed to find the target record.");
+                return;
+            }
+
+            // Need to remove from OrderedSet, or the order will not update
+            allStats.Remove(all);
+            all.RemoveStats(stats);
+            allStats.Add(all);
+            Summary.RemoveStats(stats);
+
+            if (!record.Expired)
+            {
+                MatchupStats? after = afterStats.FirstOrDefault(m => m.Key == key);
+                if (after == null)
+                {
+                    // Not found in afterStats
+                    return;
+                }
+
+                // Need to remove from OrderedSet, or the order will not update
+                afterStats.Remove(after);
+                after.RemoveStats(stats);
+                afterStats.Add(after);
+                SummaryAfterImport.RemoveStats(stats);
             }
         }
     }

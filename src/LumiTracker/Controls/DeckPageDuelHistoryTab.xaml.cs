@@ -1,5 +1,10 @@
-﻿using LumiTracker.Models;
+﻿using LumiTracker.Config;
+using LumiTracker.Models;
+using LumiTracker.Services;
+using LumiTracker.ViewModels.Pages;
+using System.Diagnostics;
 using System.Windows.Controls;
+using Wpf.Ui.Controls;
 
 namespace LumiTracker.Controls
 {
@@ -77,10 +82,26 @@ namespace LumiTracker.Controls
         }
         private void DisableListViewSelection(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is ListView listView)
+            if (sender is Wpf.Ui.Controls.ListView listView)
             {
                 listView.SelectedIndex = -1;
             }
+        }
+
+        [RelayCommand]
+        private async Task OnDeleteRecordButtonClicked(DuelRecord record)
+        {
+            var dialogService = App.GetService<StyledContentDialogService>();
+            Debug.Assert(dialogService != null);
+            ContentDialogResult result = await dialogService.ShowPlainTextDialogAsync(
+                Lang.DeleteConfirm_Title, Lang.DeleteConfirm_RecordMessage, ControlAppearance.Danger, SymbolRegular.Delete24);
+            if (result == ContentDialogResult.Primary)
+            {
+                var viewModel = App.GetService<DeckViewModel>();
+                Debug.Assert(viewModel != null && viewModel.SelectedDeckItem != null);
+                await viewModel.SelectedDeckItem.Stats.RemoveRecord(record);
+            }
+
         }
     }
 }

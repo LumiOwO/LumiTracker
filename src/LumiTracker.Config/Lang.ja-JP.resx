@@ -405,6 +405,9 @@
   <data name="DeleteConfirm_Message" xml:space="preserve">
     <value>現在のデッキ：</value>
   </data>
+  <data name="DeleteConfirm_RecordMessage" xml:space="preserve">
+    <value>この対戦記録は削除後に復元できません。続行しますか？</value>
+  </data>
   <data name="DeleteConfirm_All" xml:space="preserve">
     <value>全部の構築</value>
   </data>
