@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Windows.Media;
 using System.Windows.Data;
 using LumiTracker.Services;
+using System.Diagnostics;
 
 namespace LumiTracker.ViewModels.Pages
 {
@@ -291,8 +292,9 @@ namespace LumiTracker.ViewModels.Pages
 
         private void OnUnsupportedRatio()
         {
-            EClientType clientType = _gameWatcher.ClientType;
-            if (EnumHelpers.ShouldShowUnsupportedRatioWarning(clientType))
+            EClientType? clientType = _gameWatcher.ClientType;
+            Debug.Assert(clientType != null);
+            if (EnumHelpers.ShouldShowUnsupportedRatioWarning(clientType.Value))
             {
                 System.Windows.MessageBox.Show(
                     $"{Lang.UnsupportedRatioWarning}\n{Lang.SupportedRatioInfo}",

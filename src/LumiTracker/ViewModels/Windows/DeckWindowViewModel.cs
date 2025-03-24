@@ -90,7 +90,7 @@ namespace LumiTracker.ViewModels.Windows
 
             _hook.MyCharacters       += OnMyCharacters;
             _hook.OpCharacters       += OnOpCharacters;
-            _hook.WindowWatcherExit  += OnWindowWatcherExit;
+            _hook.WindowWatcherStart += OnWindowWatcherStart;
 
             var my = new CardList[(int)EMy.NumLists];
             my[(int)EMy.Played] = new CardList(sortType: CardList.ESortType.TimestampDescending).SetName("SubTab_Played");
@@ -303,7 +303,7 @@ namespace LumiTracker.ViewModels.Windows
             }
         }
 
-        private void OnWindowWatcherExit()
+        private void OnWindowWatcherStart(IntPtr hwnd)
         {
             Reset(gameStart: false);
         }

@@ -1,8 +1,7 @@
 ﻿using LumiTracker.Config;
 using LumiTracker.OB.Services;
 using LumiTracker.Watcher;
-using Microsoft.Extensions.Logging;
-using System.IO;
+using System.Diagnostics;
 
 namespace LumiTracker.Models
 {
@@ -20,34 +19,15 @@ namespace LumiTracker.Models
     {
         private Task? MainLoopTask = null;
 
-        private SpinLockedValue<CaptureInfo> info = new (default);
-
-        private SpinLockedValue<ProcessWatcher> processWatcher = new (null);
-
-        private SpinLockedValue<Task> stopProcessWatcherTask = new (null);
-
-        private readonly string ProcessWatcherInitFilePath;
-
-        private readonly bool TestCaptureOnResize;
-
         private OBClientService? client = null;
+
+        // Critical section
+        private SpinLock mLock = new SpinLock();
+        private CaptureInfo? info = null;
+        private ProcessWatcher? processWatcher = null;
 
         public GameWatcher()
         {
-            ProcessWatcherInitFilePath = Path.Combine(Configuration.DocumentsDir, "init.json");
-            TestCaptureOnResize = false;
-
-            GameEventMessage += async message =>
-            {
-                await SendMessageToServer(message);
-            };
-        }
-
-        public GameWatcher(string processWatcherInitFilePath, bool testCaptureOnResize)
-        {
-            ProcessWatcherInitFilePath = processWatcherInitFilePath;
-            TestCaptureOnResize = testCaptureOnResize;
-
             GameEventMessage += async message =>
             {
                 await SendMessageToServer(message);
@@ -56,13 +36,14 @@ namespace LumiTracker.Models
 
         public void Start(EClientType clientType, ECaptureType captureType)
         {
-            info.Value = new CaptureInfo 
-            { 
-                ClientType = clientType, 
-                CaptureType = captureType,
-                InitFilePath = ProcessWatcherInitFilePath,
-                TestCaptureOnResize = TestCaptureOnResize,
-            };
+            using (new SpinLockGuard(ref mLock))
+            {
+                info = new CaptureInfo 
+                { 
+                    ClientType = clientType, 
+                    CaptureType = captureType,
+                };
+            }
             MainLoopTask = MainLoop();
         }
 
@@ -77,27 +58,33 @@ namespace LumiTracker.Models
 
         public void ChangeGameClient(EClientType clientType, ECaptureType captureType)
         {
-            info.Value = new CaptureInfo
+            using (new SpinLockGuard(ref mLock))
             {
-                ClientType = clientType,
-                CaptureType = captureType,
-                InitFilePath = ProcessWatcherInitFilePath,
-                TestCaptureOnResize = TestCaptureOnResize,
-            };
+                info = new CaptureInfo
+                {
+                    ClientType = clientType,
+                    CaptureType = captureType,
+                };
+            }
             StopCurrentProcessWatcher();
         }
 
-        public EClientType ClientType
+        public EClientType? ClientType
         {
-            get { return info.Value.ClientType; }
+            get
+            {
+                using var guard = new SpinLockGuard(ref mLock);
+                return info?.ClientType;
+            }
         }
 
         public async Task DumpToBackend(object message_obj)
         {
-            if (processWatcher.Value == null)
-                return;
-
-            await processWatcher.Value.DumpToBackend(message_obj);
+            var watcher = SpinLockGuard.Scope(ref mLock, () => processWatcher);
+            if (watcher != null)
+            {
+                await watcher.DumpToBackend(message_obj);
+            }
         }
 
         public async Task<bool> ConnectToServer(string host, int port)
@@ -128,33 +115,41 @@ namespace LumiTracker.Models
             int interval = Configuration.Get<int>("proc_watch_interval") * 1000;
             while (true)
             {
-                while (processWatcher.Value != null)
+                ProcessWatcher? watcher = null;
+                while (true)
                 {
+                    watcher = SpinLockGuard.Scope(ref mLock, () => processWatcher);
+                    if (watcher == null) break;
+
                     await Task.Delay(interval);
                 }
 
-                ProcessWatcher watcher = new ();
-                HookTo(watcher);
-                processWatcher.Value = watcher;
+                watcher = new ProcessWatcher();
+                this.HookTo(watcher);
 
-                watcher.Start(info.Value!);
+                var curInfo = SpinLockGuard.Scope(ref mLock, () =>
+                {
+                    Debug.Assert(info != null);
+                    processWatcher = watcher;
+                    return info;
+                });
+                watcher.Start(curInfo);
             }
         }
 
         private void StopCurrentProcessWatcher()
         {
-            if (stopProcessWatcherTask.Value == null)
+            ProcessWatcher? watcher = null;
+            using (new SpinLockGuard(ref mLock))
             {
-                stopProcessWatcherTask.Value = Task.Run(async () =>
-                {
-                    ProcessWatcher? watcher = processWatcher.Value;
-                    if (watcher != null)
-                    {
-                        await watcher.DisposeAsync();
-                        processWatcher.Value = null;
-                    }
-                    stopProcessWatcherTask.Value = null;
-                });
+                watcher = processWatcher;
+                processWatcher = null;
+            }
+
+            if (watcher != null)
+            {
+                this.UnhookFrom(watcher);
+                var task = watcher.DisposeAsync();
             }
         }
     }

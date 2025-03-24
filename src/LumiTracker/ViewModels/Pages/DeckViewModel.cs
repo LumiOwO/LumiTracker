@@ -1,19 +1,19 @@
-﻿using Wpf.Ui.Controls;
-using LumiTracker.Config;
-using Microsoft.Extensions.Logging;
+﻿using LumiTracker.Config;
 using LumiTracker.Models;
-using System.Collections.ObjectModel;
-using System.Windows.Media;
-using System.IO;
-using System.Windows.Input;
 using LumiTracker.Services;
-using System.Windows.Data;
-using Wpf.Ui;
-using Newtonsoft.Json.Linq;
-using System.ComponentModel;
-using Newtonsoft.Json;
+using LumiTracker.Watcher;
+using System.IO;
 using System.Text;
 using System.Diagnostics;
+using System.Windows.Input;
+using System.Windows.Data;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
+using Wpf.Ui;
+using Wpf.Ui.Controls;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace LumiTracker.ViewModels.Pages
 {

@@ -12,7 +12,10 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
+    <!-- c# obj path -->
     <BaseIntermediateOutputPath>$(SolutionDir)bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <!-- cpp obj path -->
+    <IntDir>$(SolutionDir)bin\obj\$(MSBuildProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
 
   <ItemGroup>

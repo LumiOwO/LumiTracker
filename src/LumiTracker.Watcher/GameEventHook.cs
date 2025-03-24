@@ -186,6 +186,28 @@ namespace LumiTracker.Watcher
             other.GameEventMessage   += InvokeGameEventMessage;
         }
 
+        public void UnhookFrom(GameEventHook other)
+        {
+            other.GenshinWindowFound -= InvokeGenshinWindowFound;
+            other.WindowWatcherStart -= InvokeWindowWatcherStart;
+            other.WindowWatcherExit  -= InvokeWindowWatcherExit;
+            other.GameStarted        -= InvokeGameStarted;
+            other.MyActionCardPlayed -= InvokeMyActionCardPlayed;
+            other.OpActionCardPlayed -= InvokeOpActionCardPlayed;
+            other.GameOver           -= InvokeGameOver;
+            other.RoundDetected      -= InvokeRoundDetected;
+            other.MyCardsDrawn       -= InvokeMyCardsDrawn;
+            other.MyCardsCreateDeck  -= InvokeMyCardsCreateDeck;
+            other.OpCardsCreateDeck  -= InvokeOpCardsCreateDeck;
+            other.UnsupportedRatio   -= InvokeUnsupportedRatio;
+            other.CaptureTestDone    -= InvokeCaptureTestDone;
+            other.LogFPS             -= InvokeLogFPS;
+            other.MyCharacters       -= InvokeMyCharacters;
+            other.OpCharacters       -= InvokeOpCharacters;
+            other.ExceptionHandler   -= InvokeException;
+            other.GameEventMessage   -= InvokeGameEventMessage;
+        }
+
         public void ParseGameEventMessage(GameEventMessage message)
         {
             EGameEvent type = message.Event;

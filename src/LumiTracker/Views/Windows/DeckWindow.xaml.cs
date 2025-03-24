@@ -62,6 +62,10 @@ namespace LumiTracker.Views.Windows
 
         public void AttachTo(IntPtr hwnd)
         {
+            if (_snapper != null)
+            {
+                Detach();
+            }
             _snapper = new WindowSnapper(this, hwnd, Configuration.Get<bool>("show_ui_outside"));
             _snapper.Attach();
         }

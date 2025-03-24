@@ -17,6 +17,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LumiTracker.Launcher", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LumiTracker.OB", "src\LumiTracker.OB\LumiTracker.OB.csproj", "{AFF021E9-0102-4F09-8E14-9A44023C1EFD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{E763EBD6-F5C6-4BCE-B763-44A60D7AF588}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{FA8F1B66-9F58-402A-A0B8-2CD6A5926240}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,6 +94,13 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DE5AD6A4-002A-4587-8955-A810D9C77078} = {E763EBD6-F5C6-4BCE-B763-44A60D7AF588}
+		{E93AD527-2F0C-4B0B-B84A-5E9B5A84E305} = {FA8F1B66-9F58-402A-A0B8-2CD6A5926240}
+		{4B0496BC-EDD4-41BE-B53D-CC25024658CE} = {FA8F1B66-9F58-402A-A0B8-2CD6A5926240}
+		{FC67F660-601D-41E7-9893-6148169450C2} = {E763EBD6-F5C6-4BCE-B763-44A60D7AF588}
+		{AFF021E9-0102-4F09-8E14-9A44023C1EFD} = {E763EBD6-F5C6-4BCE-B763-44A60D7AF588}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AC90D4D0-003E-4BD7-BBFF-53EB67704946}

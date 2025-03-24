@@ -1,4 +1,5 @@
 ﻿using LumiTracker.Config;
+using LumiTracker.Watcher;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;

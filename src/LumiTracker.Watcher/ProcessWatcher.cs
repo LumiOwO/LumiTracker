@@ -2,29 +2,20 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Extensions.Logging;
-
 using LumiTracker.Config;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using Windows.Foundation.Metadata;
-using System.Net.Sockets;
-using System.Net;
 
 
 namespace LumiTracker.Watcher
 {
-    public class WindowInfo
+    public class CaptureInfo
     {
+        public EClientType ClientType { get; set; } = EClientType.YuanShen;
+        public ECaptureType CaptureType { get; set; } = ECaptureType.BitBlt;
+
+        // Should be assigned by FindProcessWindow()
         public IntPtr hwnd { get; set; }  = IntPtr.Zero;
         public string title { get; set; } = "";
-    }
-
-    public struct CaptureInfo
-    {
-        public EClientType ClientType { get; set; }
-        public ECaptureType CaptureType { get; set; }
-        public string InitFilePath { get; set; }
-        public bool TestCaptureOnResize { get; set; }
     }
 
     public class ProcessWatcher : GameEventHook, IAsyncDisposable
@@ -63,9 +54,11 @@ namespace LumiTracker.Watcher
             LogFPS += OnLogFPS;
         }
 
-        public WindowInfo FindProcessWindow(string processName)
+        public void FindProcessWindow(CaptureInfo info, string processName)
         {
-            var res = new WindowInfo();
+            // Reset window info
+            info.hwnd  = IntPtr.Zero;
+            info.title = "";
 
             //////////////////////////
             // Find process id by name
@@ -77,7 +70,7 @@ namespace LumiTracker.Watcher
             if (pids.Count == 0)
             {
                 Configuration.Logger.LogDebug($"No process found with name: {processName}");
-                return res;
+                return;
             }
             //Configuration.Logger.LogDebug($"Found {pids.Count} processes with name: {processName}");
 
@@ -87,7 +80,7 @@ namespace LumiTracker.Watcher
             if (hwnds.Count == 0 || hwnds[0] == 0)
             {
                 Configuration.Logger.LogDebug($"No window found for process '{processName}' (PIDs: [{string.Join(',', pids)}])");
-                return res;
+                return;
             }
             // GetProcessByName() ensures that the first process has the largest window
             var hwnd = hwnds[0];
@@ -98,14 +91,11 @@ namespace LumiTracker.Watcher
 
             //////////////////////////
             // Get window info by hwnd
-            var info = GetMainWindowInfo(hwnd);
+            GetMainWindowInfo(info, hwnd);
             Configuration.Logger.LogDebug("[Processwatcher] OnGenshinWindowFound");
             InvokeGenshinWindowFound();
 
             Configuration.Logger.LogInformation($"Window title for process '{processName}' (hwnd: {hwnd}): {info.title}");
-            
-            res = info;
-            return res;
         }
 
         private List<IntPtr> GetWindowHandlesByPids(HashSet<uint> processIds)
@@ -147,17 +137,13 @@ namespace LumiTracker.Watcher
             return windowHandles;
         }
 
-        private WindowInfo GetMainWindowInfo(IntPtr hwnd)
+        private void GetMainWindowInfo(CaptureInfo info, IntPtr hwnd)
         {
-            var info = new WindowInfo();
-
             if (IsWindow(hwnd))
             {
                 info.hwnd  = hwnd;
                 info.title = GetWindowText(hwnd);
             }
-
-            return info;
         }
 
         private static string GetWindowText(IntPtr hWnd)
@@ -168,14 +154,33 @@ namespace LumiTracker.Watcher
         }
 
         private static readonly float LOG_INTERVAL = Configuration.Get<float>("LOG_INTERVAL");
-        private SpinLockedValue<bool> ShouldCancel = new (false);
+
+        private SpinLock cancelLock = new SpinLock();
+        private bool _ShouldCancel = false;
+        private bool ShouldCancel 
+        { 
+            get 
+            {
+                using var guard = new SpinLockGuard(ref cancelLock);
+                return _ShouldCancel; 
+            } 
+            set 
+            {
+                using var guard = new SpinLockGuard(ref cancelLock);
+                _ShouldCancel = value;
+            } 
+        }
+
         private Task? _processWatcherTask;
+
         private Task? _windowWatcherTask;
-        public Socket? BackendSocket { get; private set; } = null;
+
+        private IBackend? backend = null;
 
         public async ValueTask DisposeAsync()
         {
-            ShouldCancel.Value = true;
+            ShouldCancel = true;
+
             if (_windowWatcherTask != null)
             {
                 await _windowWatcherTask;
@@ -186,26 +191,26 @@ namespace LumiTracker.Watcher
             }
         }
 
-        public void Start(CaptureInfo captureInfo)
+        public void Start(CaptureInfo info)
         {
-            _processWatcherTask = StartProcessWatcher(captureInfo);
+            _processWatcherTask = StartProcessWatcher(info);
         }
 
-        public async Task StartProcessWatcher(CaptureInfo captureInfo)
+        public async Task StartProcessWatcher(CaptureInfo info)
         {
-            string[] processList = EnumHelpers.GetClientProcessList(captureInfo.ClientType);
+            string[] processList = EnumHelpers.GetClientProcessList(info.ClientType);
             Configuration.Logger.LogInformation($"Begin to find process: [{string.Join(", ", processList)}]");
             try
             {
                 int interval = Configuration.Get<int>("proc_watch_interval") * 1000;
-                while (!ShouldCancel.Value)
+                while (!ShouldCancel)
                 {
                     foreach (string processName in processList)
                     {
-                        var info = FindProcessWindow(processName);
+                        FindProcessWindow(info, processName);
                         if (info.hwnd != IntPtr.Zero)
                         {
-                            _windowWatcherTask = StartWindowWatcher(info, captureInfo, interval);
+                            _windowWatcherTask = RunBackend(info, interval);
                             await _windowWatcherTask;
                             break;
                         }
@@ -220,138 +225,57 @@ namespace LumiTracker.Watcher
             }
         }
 
-        public async Task StartWindowWatcher(WindowInfo info, CaptureInfo captureInfo, int interval)
+        public async Task RunBackend(CaptureInfo info, int interval)
         {
-            Configuration.Logger.LogInformation($"Begin to start window watcher");
+            Configuration.Logger.LogInformation($"Begin to start window watcher, hwnd = {info.hwnd}");
 
-            //////////////////////////
-            // Prepare start info
-            string clientType = captureInfo.ClientType.ToString();
-            string captureType = EnumHelpers.BitBltUnavailable(captureInfo.ClientType) ?
-                ECaptureType.WindowsCapture.ToString() :
-                captureInfo.CaptureType.ToString();
+            // Start backend
+            bool success = true;
+            backend = BackendFactory.Create(EBackend.Python);
+            success = backend.Init(info);
+            if (!success) return;
+            success = await backend.StartAsync();
+            if (!success) return;
+            backend.MessageReceived += BackendMessageHandler;
 
-            bool canHideBorder = ApiInformation.IsPropertyPresent(
-                "Windows.Graphics.Capture.GraphicsCaptureSession", "IsBorderRequired");
-
-            // Grab available port
-            var tempSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            tempSocket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-            int port = ((IPEndPoint)tempSocket!.LocalEndPoint!).Port;
-            tempSocket.Close();
-
-            // Save init parameters to json file
-            bool saved = Configuration.SaveJObject(JObject.FromObject(new
-            {
-                hwnd            = info.hwnd.ToInt64(),
-                client_type     = clientType,
-                capture_type    = captureType,
-                can_hide_border = canHideBorder ? 1 : 0,
-                port            = port,
-                log_dir         = Configuration.LogDir,
-                test_on_resize  = captureInfo.TestCaptureOnResize ? 1 : 0,
-            }), captureInfo.InitFilePath);
-            if (!saved)
-            {
-                Configuration.Logger.LogError("Failed to save ProcessWatcher init file.");
-                return;
-            }
-
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = Path.Combine(Configuration.AppDir, "python", "python.exe"),
-                Arguments = $"-E -m watcher.window_watcher \"{captureInfo.InitFilePath}\"",
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                WorkingDirectory = Configuration.AppDir,
-            };
-
-            //////////////////////////
-            // Create backend process
-            var process = new Process();
-            process.StartInfo = startInfo;
-            process.ErrorDataReceived += WindowWatcherEventHandler;
-
-            if (!process.Start())
-            {
-                Configuration.Logger.LogError("Failed to start subprocess.");
-                return;
-            }
-            ChildProcessTracker.AddProcess(process);
-            process.BeginErrorReadLine();
-
-            var KillProcess = () => 
-            {
-                BackendSocket?.Dispose();
-                BackendSocket = null;
-                process.Kill();
-            };
-
-            //////////////////////////
-            // Connect backend socket
-            try
-            {
-                BackendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                await BackendSocket.ConnectAsync(new IPEndPoint(IPAddress.Loopback, port));
-            }
-            catch (Exception ex)
-            {
-                Configuration.Logger.LogError($"Failed to connect to backend socket.\n{ex.ToString()}");
-                KillProcess();
-                return;
-            }
-            Configuration.Logger.LogInformation($"Connected to backend socket on port {port}.");
-
-            //////////////////////////
             // Main loop
             Configuration.Logger.LogDebug("[Processwatcher] OnWindowWatcherStart");
             InvokeWindowWatcherStart(info.hwnd);
-            while (!process.HasExited)
+
+            while (!backend.HasExited())
             {
-                if (ShouldCancel.Value)
+                if (ShouldCancel)
                 {
-                    KillProcess();
+                    backend.Kill();
+                    break;
                 }
                 await Task.Delay(interval);
             }
 
-            Configuration.Logger.LogInformation($"Subprocess terminated with exit code: {process.ExitCode}");
+            Configuration.Logger.LogInformation($"Backend terminated, hwnd = {info.hwnd}");
             Configuration.Logger.LogDebug("[Processwatcher] OnWindowWatcherExit");
             InvokeWindowWatcherExit();
         }
 
         public async Task DumpToBackend(object message_obj)
         {
-            string message_str = "";
-            try
+            Debug.Assert(message_obj != null && backend != null);
+            if (backend.HasExited()) return;
+            await backend.Send(message_obj);
+        }
+
+        private void BackendMessageHandler(JObject? message, Exception? exception)
+        {
+            if (exception != null)
             {
-                message_str = LogHelper.JsonToConsoleStr(JObject.FromObject(message_obj), forceCompact: true);
-            }
-            catch (Exception ex)
-            {
-                Configuration.Logger.LogError($"[DumpToBackend] Failed to parse message object. \n{ex.ToString()}");
+                Configuration.Logger.LogError($"[ProcessWatcher] {exception.ToString()}");
+                InvokeException(exception);
                 return;
             }
 
-            var socket = BackendSocket;
-            if (socket != null)
-            {
-                byte[] data = Encoding.UTF8.GetBytes(message_str + "\n");
-                await Task.Factory.FromAsync(
-                    (callback, state) => socket.BeginSend(data, 0, data.Length, SocketFlags.None, callback, state),
-                    socket.EndSend,
-                    null);
-            }
-        }
-
-        private void WindowWatcherEventHandler(object sender, DataReceivedEventArgs e)
-        {
+            Debug.Assert(message != null);
             try
             {
-                if (e.Data == null) return;
-
-                JObject message = JObject.Parse(e.Data);
                 string  message_level = message["level"]!.ToString();
                 var     message_data  = message["data"]!;
 
@@ -378,11 +302,6 @@ namespace LumiTracker.Watcher
                 {
                     Configuration.Logger.LogError(message_str);
                 }
-            }
-            catch (JsonReaderException ex)
-            {
-                Configuration.Logger.LogError($"[python] {e.Data}");
-                InvokeException(ex);
             }
             catch (Exception ex)
             {

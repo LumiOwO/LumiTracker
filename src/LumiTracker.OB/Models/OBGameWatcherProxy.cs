@@ -18,7 +18,7 @@ namespace LumiTracker.OB
         public  DeckWindowViewModel DeckWindowViewModel { get; }
         private string              WorkingDir;
 
-        private ClientInfo ClientInfo;
+        private ClientInfo          ClientInfo;
 
         public OBGameWatcherProxy(ScopeState scope, ClientInfo clientInfo)
         {
@@ -37,7 +37,6 @@ namespace LumiTracker.OB
             Hook.MyCardsDrawn       += OnMyCardsDrawn;
             Hook.MyCardsCreateDeck  += OnMyCardsCreateDeck;
             Hook.WindowWatcherStart += OnWindowWatcherStart;
-            Hook.WindowWatcherExit  += OnWindowWatcherExit;
         }
 
         public void ParseGameEventTask(GameEventMessage message)
@@ -141,11 +140,6 @@ namespace LumiTracker.OB
         }
 
         private void OnWindowWatcherStart(IntPtr hwnd)
-        {
-            ResetOBData();
-        }
-
-        private void OnWindowWatcherExit()
         {
             ResetOBData();
         }
