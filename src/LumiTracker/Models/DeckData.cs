@@ -342,21 +342,13 @@ namespace LumiTracker.Models
 
         public static BuildStats Create(BuildEdit? edit)
         {
-            using var guard = new SpinLockGuard(ref GBuildStatsLock);
-
-            Guid guid = Guid.Empty;
             if (edit == null)
             {
-                // Create a random guid for empty BuildStats, such as initialized Total stats
-                do
-                {
-                    guid = Guid.NewGuid();
-                } while (GBuildStats.ContainsKey(guid));
-                BuildStats empty = new BuildStats();
-                GBuildStats.Add(guid, empty);
-                return empty;
+                // Empty BuildStats should not occupy guid
+                return new BuildStats();
             }
 
+            Guid guid = Guid.Empty;
             int[]? cards = DeckUtils.DecodeShareCode(edit.ShareCode);
             if (cards == null)
             {
@@ -373,6 +365,7 @@ namespace LumiTracker.Models
             }
             Debug.Assert(guid != Guid.Empty);
 
+            using var guard = new SpinLockGuard(ref GBuildStatsLock);
             if (GBuildStats.TryGetValue(guid, out BuildStats? stats))
             {
                 Debug.Assert(stats != null);
