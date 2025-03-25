@@ -11,6 +11,8 @@ namespace LumiTracker.ViewModels.Pages
 {
     public partial class StartViewModel : ObservableObject
     {
+        private bool Inited { get; set; } = false;
+
         private DeckWindow _deckWindow;
 
         private GameWatcher _gameWatcher;
@@ -28,7 +30,7 @@ namespace LumiTracker.ViewModels.Pages
 
         [ObservableProperty]
         private LocalizationTextItem _gameWatcherStateText = new ();
-        
+
         [ObservableProperty]
         private Brush _gameWatcherStateBrush = Brushes.DarkGray;
 
@@ -67,6 +69,9 @@ namespace LumiTracker.ViewModels.Pages
 
         [ObservableProperty]
         private bool _showUIOutside = false;
+
+        [ObservableProperty]
+        private double _deckWindowHeightRatio = 1.0;
 
         partial void OnSelectedClientIndexChanged(int oldValue, int newValue)
         {
@@ -194,9 +199,9 @@ namespace LumiTracker.ViewModels.Pages
             // Game Watcher State
             GameWatcherState = EGameWatcherState.NoWindowFound;
 
-            // Show UI outside
             ShowUIOutside = Configuration.Get<bool>("show_ui_outside");
-            _deckWindow.SetbOutside(ShowUIOutside);
+            DeckWindowHeightRatio = Configuration.Get<double>("deck_window_height_ratio");
+            _deckWindow.SetLocation(ShowUIOutside, DeckWindowHeightRatio);
 
             // Start game watcher
             _gameWatcher.GenshinWindowFound += OnGenshinWindowFound;
@@ -207,6 +212,8 @@ namespace LumiTracker.ViewModels.Pages
             _gameWatcher.UnsupportedRatio   += OnUnsupportedRatio;
 
             _gameWatcher.Start(ClientType, CaptureType);
+
+            Inited = true;
         }
 
         private void OnGenshinWindowFound()
@@ -246,7 +253,7 @@ namespace LumiTracker.ViewModels.Pages
 
             GameWatcherState = EGameWatcherState.NoWindowFound;
 
-            Configuration.Set("client_type",  SelectedClientType.ToString(), auto_save: false);
+            Configuration.Set("client_type", SelectedClientType.ToString(), auto_save: false);
             if (!EnumHelpers.BitBltUnavailable(SelectedClientType))
             {
                 Configuration.Set("capture_type", SelectedCaptureType.ToString(), auto_save: false);
@@ -257,12 +264,23 @@ namespace LumiTracker.ViewModels.Pages
         }
 
         [RelayCommand]
-        public void OnShowUIOutsideCheckBoxToggled()
+        public void OnChangeUIOutside(string newValue)
         {
-            ShowUIOutside = !ShowUIOutside;
-            _deckWindow.SetbOutside(ShowUIOutside);
+            ShowUIOutside = (newValue == "1");
+        }
 
-            Configuration.Set("show_ui_outside", ShowUIOutside);
+        partial void OnShowUIOutsideChanged(bool oldValue, bool newValue)
+        {
+            if (!Inited) return;
+            Configuration.Set("show_ui_outside", newValue);
+            _deckWindow.SetLocation(ShowUIOutside, DeckWindowHeightRatio);
+        }
+
+        partial void OnDeckWindowHeightRatioChanged(double oldValue, double newValue)
+        {
+            if (!Inited) return;
+            Configuration.Set("deck_window_height_ratio", newValue);
+            _deckWindow.SetLocation(ShowUIOutside, DeckWindowHeightRatio);
         }
 
         [RelayCommand]

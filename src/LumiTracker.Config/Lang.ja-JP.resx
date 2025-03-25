@@ -264,6 +264,21 @@
   <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
     <value>画面解像度 : </value>
   </data>
+  <data name="DeckWindow_Location" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="DeckWindow_Inner" xml:space="preserve">
+    <value>内側</value>
+  </data>
+  <data name="DeckWindow_Outer" xml:space="preserve">
+    <value>外側</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>幅</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>高さ</value>
+  </data>
   <data name="MyDeck" xml:space="preserve">
     <value>山札</value>
   </data>

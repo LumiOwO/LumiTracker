@@ -14,7 +14,7 @@ namespace LumiTracker.Views.Windows
         void HideWindow();
         void AttachTo(IntPtr hwnd);
         void Detach();
-        void SetbOutside(bool bOutside);
+        void SetLocation(bool bOutside, double ratio);
     }
 
     public partial class DeckWindow : IDeckWindow
@@ -111,7 +111,7 @@ namespace LumiTracker.Views.Windows
             CanvasWindow?.OnGenshinWindowResized(width, height, isMinimized, dpiScale);
         }
 
-        public void SetbOutside(bool bOutside)
+        public void SetLocation(bool bOutside, double ratio)
         {
             _snapper?.SetbOutside(bOutside);
             if (bOutside)
@@ -124,7 +124,7 @@ namespace LumiTracker.Views.Windows
             else
             {
                 TogglePanel.Visibility = Visibility.Visible;
-                ViewModel.MainContentHeightRatio = Configuration.Get<double>("deck_window_height_ratio");
+                ViewModel.MainContentHeightRatio = ratio;
                 Topmost = true;
             }
         }

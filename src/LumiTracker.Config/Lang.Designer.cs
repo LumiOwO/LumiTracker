@@ -351,6 +351,33 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Inner.
+        /// </summary>
+        public static string DeckWindow_Inner {
+            get {
+                return ResourceManager.GetString("DeckWindow_Inner", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location.
+        /// </summary>
+        public static string DeckWindow_Location {
+            get {
+                return ResourceManager.GetString("DeckWindow_Location", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Outer.
+        /// </summary>
+        public static string DeckWindow_Outer {
+            get {
+                return ResourceManager.GetString("DeckWindow_Outer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Deck Window.
         /// </summary>
         public static string DeckWindowTitle {
@@ -590,6 +617,15 @@ namespace LumiTracker.Config {
         public static string GithubLink {
             get {
                 return ResourceManager.GetString("GithubLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Height.
+        /// </summary>
+        public static string Height {
+            get {
+                return ResourceManager.GetString("Height", resourceCulture);
             }
         }
         
@@ -1538,6 +1574,15 @@ namespace LumiTracker.Config {
         public static string Welcome_Title {
             get {
                 return ResourceManager.GetString("Welcome_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Width.
+        /// </summary>
+        public static string Width {
+            get {
+                return ResourceManager.GetString("Width", resourceCulture);
             }
         }
         

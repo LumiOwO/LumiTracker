@@ -264,6 +264,21 @@
   <data name="CaptureType_FrameSizePrompt" xml:space="preserve">
     <value>Client Resolution : </value>
   </data>
+  <data name="DeckWindow_Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="DeckWindow_Inner" xml:space="preserve">
+    <value>Inner</value>
+  </data>
+  <data name="DeckWindow_Outer" xml:space="preserve">
+    <value>Outer</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Height</value>
+  </data>
   <data name="MyDeck" xml:space="preserve">
     <value>My Deck</value>
   </data>
