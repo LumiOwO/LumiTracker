@@ -355,6 +355,12 @@ class EActionCard(enum.Enum):
     FlowerFeatherClan = enum.auto()
     LittleTepetlisaurTreasureHunterAtLarge = enum.auto()
     HotSpringOclock = enum.auto()
+    NightRealmsGiftHeartOfUnity = enum.auto()
+    MarcotteSillage = enum.auto()
+    Waverider = enum.auto()
+    MastersOfTheNightWind = enum.auto()
+    InTheNameOfTheExtreme = enum.auto()
+    MystiqueSoup = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -378,7 +384,7 @@ class EActionCard(enum.Enum):
     SmallBolsteringBubblebalm = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 352
+    NumSharables = 358
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 10
@@ -492,6 +498,8 @@ class ECharacterCard(enum.Enum):
     Clorinde = enum.auto()
     Arlecchino = enum.auto()
     Kinich = enum.auto()
+    Kachina = enum.auto()
+    Emilie = enum.auto()
     
     NumCharacters = enum.auto()
 

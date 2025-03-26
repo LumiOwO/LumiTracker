@@ -323,7 +323,7 @@
     </StackPanel>
 
     <!-- Options -->
-    <StackPanel Grid.Row="0" VerticalAlignment="Bottom" Margin="0,0,0,20">
+    <StackPanel Grid.Row="0" VerticalAlignment="Bottom" Margin="0,0,0,25">
         <TextBlock 
             Margin="0,0,0,2" 
             Text="{svs:Localization Instruction}" 
@@ -349,17 +349,29 @@
             VerticalAlignment="Center"
             TextWrapping="Wrap"
             Grid.Column="0" />
-        <TextBlock 
+        <StackPanel 
             Margin="17,10,0,2" 
-            Text="{svs:Localization Instruction3, StringFormat=•  {0}}" 
-            FontSize="15"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            TextWrapping="Wrap"
-            Grid.Column="0" />
+            Orientation="Horizontal"
+            Grid.Column="0">
+            <TextBlock 
+                Text="{svs:Localization Instruction3, StringFormat=•  {0}}"
+                FontSize="15"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                TextWrapping="Wrap"
+                />
+            <ui:HyperlinkButton
+                Padding="0,0,0,0"
+                FontWeight="Bold"
+                Content="{svs:Localization Link}"
+                NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#share-Qj7Pd1kp0oxMIuxSC6xche6hnOf"
+                ToolTip="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe#share-Qj7Pd1kp0oxMIuxSC6xche6hnOf" 
+                />
+        </StackPanel>
 
         <ui:HyperlinkButton
-            Margin="-1, 30, 0, 0"
+            Margin="-1, 25, 0, 0"
+            FontWeight="Bold"
             Padding="5"
             Content="{svs:Localization Donate}"
             Command="{Binding ShowDonateDialogCommand, Mode=OneWay}"
@@ -367,6 +379,7 @@
 
         <ui:HyperlinkButton
             Margin="-1, 5, 0, 0"
+            FontWeight="Bold"
             Padding="5"
             Content="{svs:Localization DocumentationLink}"
             NavigateUri="https://uex8no0g44.feishu.cn/docx/SBXZdiKNvoXeSrxgfpccuIvVnAe"

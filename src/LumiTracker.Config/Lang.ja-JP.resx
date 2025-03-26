@@ -304,13 +304,13 @@
     <value>使い方</value>
   </data>
   <data name="Instruction1" xml:space="preserve">
-    <value>試合が検知できない場合は別のキャプチャー方法に切り替えてください；</value>
+    <value>画面が取得できないの場合は、キャプチャ方法を変更してください；</value>
   </data>
   <data name="Instruction2" xml:space="preserve">
-    <value>ゲーム画面を最小化しないでください。最小化しているときはゲーム画面を検知できません；</value>
+    <value>フルスクリーン時は、原神のオプション → 画面 → 表示モードで「ボーダーレス」に変更してください；</value>
   </data>
   <data name="Instruction3" xml:space="preserve">
-    <value>原神の表示モードをフルスクリーンにしている場合は、原神の設定→画面→表示モードでボーダーレスに変更してください。</value>
+    <value>認識失敗が発生する場合があります、詳細は</value>
   </data>
   <data name="SupportedRatioInfo" xml:space="preserve">
     <value>現在サポートされているウィンドウ比率：
@@ -487,6 +487,9 @@
   </data>
   <data name="BuildVersion" xml:space="preserve">
     <value>構築バージョン</value>
+  </data>
+  <data name="Link" xml:space="preserve">
+    <value>リンク</value>
   </data>
   <data name="FriendLink" xml:space="preserve">
     <value>友達リンク</value>

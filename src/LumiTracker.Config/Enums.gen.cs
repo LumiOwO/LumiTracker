@@ -356,6 +356,12 @@ namespace LumiTracker.Config
         FlowerFeatherClan,
         LittleTepetlisaurTreasureHunterAtLarge,
         HotSpringOclock,
+        NightRealmsGiftHeartOfUnity,
+        MarcotteSillage,
+        Waverider,
+        MastersOfTheNightWind,
+        InTheNameOfTheExtreme,
+        MystiqueSoup,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -379,7 +385,7 @@ namespace LumiTracker.Config
         SmallBolsteringBubblebalm,
         
         NumActions,
-        NumSharables = 352,
+        NumSharables = 358,
         NumTokens = NumActions - NumSharables,
         NumExtraGoldens = 2,
         NumArcaneLegends = 10,
@@ -495,6 +501,8 @@ namespace LumiTracker.Config
         Clorinde,
         Arlecchino,
         Kinich,
+        Kachina,
+        Emilie,
         
         NumCharacters,
     }

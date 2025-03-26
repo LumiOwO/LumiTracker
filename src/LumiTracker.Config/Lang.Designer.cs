@@ -657,7 +657,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If duel not detected, consider trying a different capture method;.
+        ///   Looks up a localized string similar to If the screen cannot be captured, try switching the capture type first;.
         /// </summary>
         public static string Instruction1 {
             get {
@@ -666,7 +666,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do not minimize the game window! Capture is not available when minimized;.
+        ///   Looks up a localized string similar to If fullscreen, change &quot;Fullscreen&quot; to &quot;Borderless&quot; in Genshin&apos;s Settings → Graphics → Display Mode;.
         /// </summary>
         public static string Instruction2 {
             get {
@@ -675,7 +675,7 @@ namespace LumiTracker.Config {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If fullscreen, change &quot;Fullscreen&quot; to &quot;Borderless&quot; in Genshin&apos;s Settings -&gt; Graphics -&gt; Display Mode..
+        ///   Looks up a localized string similar to Some cases may cause recognition failures, see .
         /// </summary>
         public static string Instruction3 {
             get {
@@ -716,6 +716,15 @@ namespace LumiTracker.Config {
         public static string LatestRelease_Title {
             get {
                 return ResourceManager.GetString("LatestRelease_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Link.
+        /// </summary>
+        public static string Link {
+            get {
+                return ResourceManager.GetString("Link", resourceCulture);
             }
         }
         

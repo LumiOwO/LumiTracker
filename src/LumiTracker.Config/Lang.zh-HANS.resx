@@ -304,13 +304,13 @@
     <value>使用说明</value>
   </data>
   <data name="Instruction1" xml:space="preserve">
-    <value>如果检测不到对局开始，请尝试更换截帧方法；</value>
+    <value>如果无法捕获到画面，请先尝试更换截帧方法；</value>
   </data>
   <data name="Instruction2" xml:space="preserve">
-    <value>请不要将游戏窗口最小化！最小化时无法捕获窗口内容；</value>
+    <value>全屏模式下，需要在游戏内的设置 → 图像 → 显示模式中，将「独占全屏」改为「无边框」；</value>
   </data>
   <data name="Instruction3" xml:space="preserve">
-    <value>全屏模式下，需要在游戏内的设置 -&gt; 图像 -&gt; 显示模式中，将「独占全屏」改为「无边框」。</value>
+    <value>部分情况会导致卡牌识别失败，详见</value>
   </data>
   <data name="SupportedRatioInfo" xml:space="preserve">
     <value>目前支持的窗口比例：
@@ -487,6 +487,9 @@
   </data>
   <data name="BuildVersion" xml:space="preserve">
     <value>构筑版本</value>
+  </data>
+  <data name="Link" xml:space="preserve">
+    <value>链接</value>
   </data>
   <data name="FriendLink" xml:space="preserve">
     <value>友情链接</value>

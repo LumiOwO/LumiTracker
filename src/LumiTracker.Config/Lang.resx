@@ -304,13 +304,13 @@
     <value>Instruction</value>
   </data>
   <data name="Instruction1" xml:space="preserve">
-    <value>If duel not detected, consider trying a different capture method;</value>
+    <value>If the screen cannot be captured, try switching the capture type first;</value>
   </data>
   <data name="Instruction2" xml:space="preserve">
-    <value>Do not minimize the game window! Capture is not available when minimized;</value>
+    <value>If fullscreen, change "Fullscreen" to "Borderless" in Genshin's Settings → Graphics → Display Mode;</value>
   </data>
   <data name="Instruction3" xml:space="preserve">
-    <value>If fullscreen, change "Fullscreen" to "Borderless" in Genshin's Settings -&gt; Graphics -&gt; Display Mode.</value>
+    <value>Some cases may cause recognition failures, see </value>
   </data>
   <data name="SupportedRatioInfo" xml:space="preserve">
     <value>Supported aspect ratios:
@@ -487,6 +487,9 @@
   </data>
   <data name="BuildVersion" xml:space="preserve">
     <value>Build Version</value>
+  </data>
+  <data name="Link" xml:space="preserve">
+    <value>Link</value>
   </data>
   <data name="FriendLink" xml:space="preserve">
     <value>Friend Link</value>
