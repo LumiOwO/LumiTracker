@@ -48,7 +48,7 @@
 
 - Deck Record Window
 
-![image-20240607051247421](images/Snipaste_2025-03-26_23-21-53.png)
+![image-20240607051247421](images/Snipaste_2025-03-27_21-39-55.png)
 
 ## References
 

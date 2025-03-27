@@ -64,7 +64,7 @@ namespace LumiTracker.Helpers
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values.Length != 4)
+            if (values == null || values.Length != 6)
             {
                 return 0.0;
             }
@@ -72,15 +72,23 @@ namespace LumiTracker.Helpers
             {
                 return 0.0;
             }
-            if (!(values[1] is double headerHeight))
+            if (!(values[1] is int index))
             {
                 return 0.0;
             }
-            if (!(values[2] is int)) // NumberToTouch
+            if (!(values[2] is double headerHeight))
             {
                 return 0.0;
             }
-            if (!(values[3] is double)) // ItemsControl.ActualHeight
+            if (!(values[3] is double cardItemHeight))
+            {
+                return 0.0;
+            }
+            if (!(values[4] is int)) // NumberToTouch
+            {
+                return 0.0;
+            }
+            if (!(values[5] is double)) // ItemsControl.ActualHeight
             {
                 return 0.0;
             }
@@ -91,17 +99,46 @@ namespace LumiTracker.Helpers
                 return 0.0;
             }
 
-            int count = 0;
+            int count = itemsControl.AlternationCount;
+            double remainHeight = Math.Max(itemsControl.ActualHeight - count * headerHeight, 0.0);
+
             int numExpanded = 0;
+            int lastExpanded = -1;
+            int[] numElems = new int[count];
+
+            int i = 0;
             foreach (var item in dataItems)
             {
-                count++;
-                numExpanded += item.IsExpanded ? 1 : 0;
+                if (item.IsExpanded)
+                {
+                    numExpanded++;
+                    lastExpanded = i;
+                    numElems[i] = item.Data.Count; // Number of elements in list
+                }
+                else
+                {
+                    // If current collapsed, set maxHeight to 0
+                    if (index == i) return 0.0;
+                }
+                i++;
+            }
+            if (numExpanded == 1) return remainHeight;
+
+            // Compute minimum maxHeight
+            double minimumMaxHeight = remainHeight / Math.Max(numExpanded, 1);
+            if (index != lastExpanded)
+            {
+                return minimumMaxHeight;
             }
 
-            double maxHeight = Math.Max(itemsControl.ActualHeight - count * headerHeight, 0.0);
-            maxHeight /= Math.Max(numExpanded, 1);
-            return maxHeight;
+            // Compute last expanded item
+            double lastHeight = remainHeight;
+            for (int j = 0; j < lastExpanded; j++)
+            {
+                double height = Math.Clamp(numElems[j] * cardItemHeight, 0, minimumMaxHeight);
+                lastHeight -= height;
+            }
+            return Math.Clamp(lastHeight, minimumMaxHeight, remainHeight);
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

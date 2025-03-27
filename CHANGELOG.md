@@ -1,3 +1,20 @@
+# \[[v1.3.0](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.3.0)\] - 2025.03.27
+### 新增功能
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 记牌窗口 UI 样式优化
+  - 采用双栏布局区分敌我双方
+  - 已打出/牌库剩余卡牌归类至可折叠面板
+  - 新增各面板卡牌数量统计显示
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 现在，记牌窗口显示在游戏窗口内侧时，可自定义调整高度
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 允许删除单条对局记录
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加「以管理员身份运行」选项
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了 5.5 版本的新卡牌
+
+### 问题修复
+- ${\color{#db3fff}{\textbf{[史诗]}}}$ 修复了自动更新有概率一直失败的问题
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复版本公告 Markdown 格式解析异常
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 修复若干 UI 显示问题
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 代码重构与优化
+
 # \[[v1.2.15](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.2.15)\] - 2025.02.12
 ### 新增内容
 - ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了 5.4 版本的新卡牌

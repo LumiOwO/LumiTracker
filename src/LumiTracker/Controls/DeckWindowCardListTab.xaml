@@ -7,6 +7,7 @@
             xmlns:models="clr-namespace:LumiTracker.Models"
             xmlns:helpers="clr-namespace:LumiTracker.Helpers"
             xmlns:svs="clr-namespace:LumiTracker.Services"
+            xmlns:sys="clr-namespace:System;assembly=mscorlib"
             xmlns:ctrls="clr-namespace:LumiTracker.Controls"
             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -25,6 +26,7 @@
         <helpers:HidePositiveIntValueConverter x:Key="HidePositiveIntValueConverter" />
         <helpers:ExpandableCardListMaxHeightConverter x:Key="ExpandableCardListMaxHeightConverter" />
 
+        <sys:String x:Key="ItemHeightRatio">0.034</sys:String>
 
         <SolidColorBrush 
             x:Key="MainContentBackground"
@@ -39,7 +41,7 @@
                 ItemHeight="{Binding WindowHeight, 
                         RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}},
                         Converter={StaticResource SizeWithRatioConverter}, 
-                        ConverterParameter=0.034
+                        ConverterParameter={StaticResource ItemHeightRatio}
                         }"
                 CostFontSize="{Binding WindowHeight, 
                         RelativeSource={RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}},
@@ -83,6 +85,7 @@
                 ConverterParameter=Hidden
                 }"
             ItemsSource="{Binding CardLists}"
+            AlternationCount="{Binding CardLists.Count}"
             >
             <ItemsControl.ItemTemplate>
             <DataTemplate>
@@ -115,12 +118,26 @@
                         >
                         <ui:ListView.MaxHeight>
                             <MultiBinding Converter="{StaticResource ExpandableCardListMaxHeightConverter}">
+                                <!-- ItemsControl -->
                                 <Binding 
                                     Path="." 
                                     RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                <!-- Item Index -->
+                                <Binding 
+                                    Path="(ItemsControl.AlternationIndex)" 
+                                    RelativeSource="{RelativeSource AncestorType=ContentPresenter}" />
+                                <!-- Header Height -->
                                 <Binding 
                                     Path="ActualHeight" 
                                     ElementName="ExpandableHeader" />
+                                <!-- Card Item Height -->
+                                <Binding
+                                    Path="WindowHeight"
+                                    RelativeSource="{RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}}"
+                                    Converter="{StaticResource SizeWithRatioConverter}"
+                                    ConverterParameter="{StaticResource ItemHeightRatio}"
+                                    />
+                                <!-- Triggers -->
                                 <Binding 
                                     Path="NumberToTouch"   
                                     RelativeSource="{RelativeSource AncestorType={x:Type ctrls:DeckWindowCardListTab}}" />
