@@ -11,7 +11,7 @@ namespace LumiTracker.Watcher
     {
         [JsonProperty("type")]
         [JsonConverter(typeof(StringEnumConverter))]
-        public EGameEvent Event { get; set; } = EGameEvent.NONE;
+        public EGameEvent Event { get; set; } = EGameEvent.Invalid;
 
         [JsonExtensionData] // Captures additional properties into this dictionary
         public Dictionary<string, JToken> Data { get; set; } = [];
@@ -211,58 +211,58 @@ namespace LumiTracker.Watcher
         public void ParseGameEventMessage(GameEventMessage message)
         {
             EGameEvent type = message.Event;
-            if (type >= EGameEvent.GAME_EVENT_FIRST && type <= EGameEvent.GAME_EVENT_LAST)
+            if (type >= EGameEvent.GameEventFirst && type <= EGameEvent.GameEventLast)
             {
                 InvokeGameEventMessage(message);
             }
 
-            if (type == EGameEvent.GAME_START)
+            if (type == EGameEvent.GameStart)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnGameStarted");
                 InvokeGameStarted();
             }
-            else if (type == EGameEvent.MY_PLAYED)
+            else if (type == EGameEvent.MyPlayed)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnMyActionCard");
                 int card_id = message.Data["card_id"].ToObject<int>();
                 InvokeMyActionCardPlayed(card_id);
             }
-            else if (type == EGameEvent.OP_PLAYED)
+            else if (type == EGameEvent.OpPlayed)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnOpActionCard");
                 int card_id = message.Data["card_id"].ToObject<int>();
                 InvokeOpActionCardPlayed(card_id);
             }
-            else if (type == EGameEvent.GAME_OVER)
+            else if (type == EGameEvent.GameOver)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnGameOver");
                 InvokeGameOver(message.Data);
             }
-            else if (type == EGameEvent.ROUND)
+            else if (type == EGameEvent.Round)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnRoundDetected");
                 int round = message.Data["round"].ToObject<int>();
                 InvokeRoundDetected(round);
             }
-            else if (type == EGameEvent.MY_DRAWN)
+            else if (type == EGameEvent.MyDrawn)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnMyCardsDrawn");
                 int[] cards = message.Data["cards"].ToObject<int[]>()!;
                 InvokeMyCardsDrawn(cards);
             }
-            else if (type == EGameEvent.MY_CREATE_DECK)
+            else if (type == EGameEvent.MyCreateDeck)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnMyCardsCreateDeck");
                 int[] cards = message.Data["cards"].ToObject<int[]>()!;
                 InvokeMyCardsCreateDeck(cards);
             }
-            else if (type == EGameEvent.OP_CREATE_DECK)
+            else if (type == EGameEvent.OpCreateDeck)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnOpCardsCreateDeck");
                 int[] cards = message.Data["cards"].ToObject<int[]>()!;
                 InvokeOpCardsCreateDeck(cards);
             }
-            else if (type == EGameEvent.UNSUPPORTED_RATIO)
+            else if (type == EGameEvent.UnsupportedRatio)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnUnsupportedRatio");
                 int client_width = message.Data["client_width"].ToObject<int>();
@@ -272,7 +272,7 @@ namespace LumiTracker.Watcher
                     $"[ProcessWatcher] Current resolution is {client_width} x {client_height} with ratio = {ratio}, which is not supported now.");
                 InvokeUnsupportedRatio();
             }
-            else if (type == EGameEvent.CAPTURE_TEST)
+            else if (type == EGameEvent.CaptureTest)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnCaptureTestDone");
                 string filename = message.Data["filename"].ToObject<string>()!;
@@ -280,25 +280,25 @@ namespace LumiTracker.Watcher
                 int height = message.Data["height"].ToObject<int>();
                 InvokeCaptureTestDone(filename, width, height);
             }
-            else if (type == EGameEvent.LOG_FPS)
+            else if (type == EGameEvent.LogFps)
             {
                 //Configuration.Logger.LogDebug("[GameEventHook] OnLogFPS");
                 float fps = message.Data["fps"].ToObject<float>()!;
                 InvokeLogFPS(fps);
             }
-            else if (type == EGameEvent.MY_CHARACTERS)
+            else if (type == EGameEvent.MyCharacters)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnMyCharacters");
                 int[] character_ids = message.Data["cards"].ToObject<int[]>()!;
                 InvokeMyCharacters(character_ids);
             }
-            else if (type == EGameEvent.OP_CHARACTERS)
+            else if (type == EGameEvent.OpCharacters)
             {
                 Configuration.Logger.LogDebug("[GameEventHook] OnOpCharacters");
                 int[] character_ids = message.Data["cards"].ToObject<int[]>()!;
                 InvokeOpCharacters(character_ids);
             }
-            else if (type != EGameEvent.NONE)
+            else if (type != EGameEvent.Invalid)
             {
                 string game_event_name = type.ToString();
                 Configuration.Logger.LogWarning($"[GameEventHook] Enum {game_event_name} defined but not handled: {game_event_name}\n{message.Data}");

@@ -15,7 +15,7 @@ import os
 class CardPlayedTask(TaskBase):
     def __init__(self, frame_manager, is_op):
         super().__init__(frame_manager)
-        self.event_type   = EGameEvent.OP_PLAYED if is_op else EGameEvent.MY_PLAYED
+        self.event_type   = EGameEvent.OpPlayed if is_op else EGameEvent.MyPlayed
         self.card_handler = ActionCardHandler(self.event_type)
         self.Reset()
     
@@ -25,7 +25,7 @@ class CardPlayedTask(TaskBase):
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
-        region_type = ERegionType.OP_PLAYED if self.event_type == EGameEvent.OP_PLAYED else ERegionType.MY_PLAYED
+        region_type = ERegionType.OpPlayed if self.event_type == EGameEvent.OpPlayed else ERegionType.MyPlayed
         box = REGIONS[ratio_type][region_type]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
@@ -34,14 +34,14 @@ class CardPlayedTask(TaskBase):
         self.card_handler.OnResize(CropBox(left, top, left + width, top + height))
 
     def DetectCard(self):
-        if (self.event_type == EGameEvent.OP_PLAYED) and (self.fm.turn != ETurn.Op):
+        if (self.event_type == EGameEvent.OpPlayed) and (self.fm.turn != ETurn.Op):
             return -1, 100
-        if (self.event_type == EGameEvent.MY_PLAYED) and (self.fm.turn != ETurn.My):
+        if (self.event_type == EGameEvent.MyPlayed) and (self.fm.turn != ETurn.My):
             return -1, 100
 
         card_id, dist, dists = self.card_handler.Update(self.frame_buffer, self.db)
         if cfg.DEBUG and False:
-            # if (self.event_type == EGameEvent.MY_PLAYED) and True: #(card_id != -1):
+            # if (self.event_type == EGameEvent.MyPlayed) and True: #(card_id != -1):
                 # SaveImage(self.card_handler.region_buffer, os.path.join(cfg.debug_dir, "save", f"{self.event_type.name}{self.fm.frame_count}.png"))
             if (True) and (card_id != -1):
                 LogDebug(info=f'{dists=}, {self.event_type.name}: {CardName(card_id, self.db)}')

@@ -92,61 +92,68 @@ namespace LumiTracker.Config
 
     public enum EInputType : int
     {
-        NONE = 0,
+        CaptureTest = 0,
 
-        CAPTURE_TEST,
+        NumInputTypes,
+        Invalid = NumInputTypes
     }
 
     public enum EGameEvent : int
     {
-        NONE = 0,
+        // events for duel
+        GameStart = 0,
+        MyPlayed,
+        OpPlayed,
+        GameOver,
+        Round,
+        MyDrawn,
+        OpDrawn,        // placeholder, not used yet
+        MyDiscard,
+        OpDiscard,
+        MyCreateDeck,
+        OpCreateDeck,
+        MyCreateHand,   // eg. furina
+        OpCreateHand,
 
-        // Events for duel
-        GAME_START,
-        MY_PLAYED,
-        OP_PLAYED,
-        GAME_OVER,
-        ROUND,
-        MY_DRAWN,
-        OP_DRAWN,       // placeholder, not used yet
-        MY_DISCARD,
-        OP_DISCARD,
-        MY_CREATE_DECK,
-        OP_CREATE_DECK,
-        MY_CREATE_HAND, // eg. Furina
-        OP_CREATE_HAND,
+        GameEventFirst = GameStart,
+        GameEventLast  = OpCreateHand,
 
-        GAME_EVENT_FIRST = GAME_START,
-        GAME_EVENT_LAST  = OP_CREATE_HAND,
+        // events for client
+        UnsupportedRatio,
+        CaptureTest,
+        LogFps,
+        MyCharacters,
+        OpCharacters,
 
-        // Events for client
-        UNSUPPORTED_RATIO,
-        CAPTURE_TEST,
-        LOG_FPS,
-        MY_CHARACTERS,
-        OP_CHARACTERS,
+        // events for server
+        InitialDeck,
 
-        // Events for server
-        INITIAL_DECK,
+        NumGameEvents,
+        Invalid = NumGameEvents
     }
 
     // default: (left, top, width, height)
     public enum ERegionType : int
     {
-        GAME_START = 0,
-        MY_PLAYED,
-        OP_PLAYED,
-        GAME_OVER,
-        PHASE,
-        ROUND,
-        CENTER,
-        FLOW_ANCHOR,    // (margin to digit center, margin to card top, card width, card height)
-        DECK,
-        VS_ANCHOR,      // (left, top, width, height, margin)
-        SETTINGS,
-        CARD_BACK,
-        TURN,
-        HISTORY,
+        GameStart = 0,
+        MyPlayed,
+        OpPlayed,
+        GameOver,
+        Phase,
+        Round,
+        Center,
+        FlowAnchor,    // (margin to digit center, margin to card top, card width, card height)
+        Deck,
+        Settings,
+        CardBack,
+        Turn,
+        History,
+        CharVS,
+        CharInGame,
+        CharCorner,
+        CharOffset,    // (VS margin, in-game margin, active character height offset, equipment margin)
+
+        NumRegionTypes
     }
 
     public enum ERatioType : int
@@ -156,6 +163,8 @@ namespace LumiTracker.Config
         E64_27,     // 2560 × 1080, 2048 x 864
         E43_18,     // 3440 × 1440, 2150 x 900
         E12_5,      // 3840 x 1600, 1920 x 800
+
+        NumRatioTypes
     }
 
     public static class EnumHelpers

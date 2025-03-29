@@ -242,7 +242,7 @@ namespace LumiTracker.ViewModels.Windows
                 {
                     Task.Run(() => gameWatcher.SendMessageToServer(new GameEventMessage
                     {
-                        Event = EGameEvent.INITIAL_DECK,
+                        Event = EGameEvent.InitialDeck,
                         Data = new() { ["sharecode"] = JToken.FromObject(sharecode) },
                     }));
                 }

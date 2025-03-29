@@ -25,7 +25,7 @@ namespace LumiTracker.ViewModels.Windows
         [ObservableProperty]
         public Thickness? _borderThickness = null;
 
-        public ERegionType RegionType { get; set; } = ERegionType.GAME_START;
+        public ERegionType RegionType { get; set; } = ERegionType.GameStart;
         public int CharacterIndex { get; set; } = 0;
     }
 
@@ -56,7 +56,7 @@ namespace LumiTracker.ViewModels.Windows
             //{
             //    Background = Brushes.Magenta,
             //    Opacity = 0.3,
-            //    RegionType = ERegionType.VS_ANCHOR,
+            //    RegionType = ERegionType.CharVS,
             //    CharacterIndex = 5,
             //});
         }
@@ -97,21 +97,16 @@ namespace LumiTracker.ViewModels.Windows
             {
                 var regionType = element.RegionType;
                 var box = RegionUtils.Get(ratioType, regionType);
+                // default: (left, top, width, height)
+                double left   = Math.Round(client_width  * box[0]) * dpiScaleInv;
+                double top    = Math.Round(client_height * box[1]) * dpiScaleInv;
+                double width  = Math.Round(client_width  * box[2]) * dpiScaleInv;
+                double height = Math.Round(client_height * box[3]) * dpiScaleInv;
 
-                if (regionType == ERegionType.FLOW_ANCHOR)
+                if (regionType == ERegionType.CharVS)
                 {
-                    // (margin to digit center, margin to card top, card width, card height)
-                    // This should be anchored by digit detection, so we cannot show the debug display here
-                    element.Position = new Rect(0, 0, 0, 0);
-                }
-                else if (regionType == ERegionType.VS_ANCHOR)
-                {
-                    // (left, top, width, height, margin)
-                    double left   = Math.Round(client_width  * box[0]) * dpiScaleInv;
-                    double top    = Math.Round(client_height * box[1]) * dpiScaleInv;
-                    double width  = Math.Round(client_width  * box[2]) * dpiScaleInv;
-                    double height = Math.Round(client_height * box[3]) * dpiScaleInv;
-                    double margin = Math.Round(client_width  * box[4]) * dpiScaleInv;
+                    box = RegionUtils.Get(ratioType, ERegionType.CharOffset);
+                    double margin = Math.Round(client_width * box[0]) * dpiScaleInv;
 
                     double offset;
                     if (element.CharacterIndex < 3)
@@ -128,11 +123,8 @@ namespace LumiTracker.ViewModels.Windows
                 }
                 else
                 {
-                    // default: (left, top, width, height)
-                    double left   = Math.Round(client_width  * box[0]) * dpiScaleInv;
-                    double top    = Math.Round(client_height * box[1]) * dpiScaleInv;
-                    double width  = Math.Round(client_width  * box[2]) * dpiScaleInv;
-                    double height = Math.Round(client_height * box[3]) * dpiScaleInv;
+                    // Some regions are anchored by other detections (e.g., FlowAnchor and CharOffset)
+                    // Displaying these regions on screen may produce unexpected visual results
                     element.Position = new Rect(left, top, width, height);
                 }
             }

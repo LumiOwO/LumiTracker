@@ -41,7 +41,7 @@ namespace LumiTracker.OB
 
         public void ParseGameEventTask(GameEventMessage message)
         {
-            if (message.Event == EGameEvent.INITIAL_DECK)
+            if (message.Event == EGameEvent.InitialDeck)
             {
                 string sharecode = message.Data["sharecode"].ToString();
                 int[]? cards = DeckUtils.DecodeShareCode(sharecode);

@@ -14,7 +14,7 @@ import os
 class GameStartTask(TaskBase):
     def __init__(self, frame_manager):
         super().__init__(frame_manager)
-        self.event_type = EGameEvent.GAME_START
+        self.event_type = EGameEvent.GameStart
         self.crop_box   = None  # init when resize
         self.handlers = [CharacterCardHandler() for _ in range(6)]
         self.Reset()
@@ -31,7 +31,7 @@ class GameStartTask(TaskBase):
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
-        box    = REGIONS[ratio_type][ERegionType.GAME_START]
+        box    = REGIONS[ratio_type][ERegionType.GameStart]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
@@ -39,12 +39,14 @@ class GameStartTask(TaskBase):
 
         self.crop_box = CropBox(left, top, left + width, top + height)
 
-        box    = REGIONS[ratio_type][ERegionType.VS_ANCHOR]
+        box    = REGIONS[ratio_type][ERegionType.CharVS]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
         height = round(client_height * box[3])
-        margin = round(client_width  * box[4])
+
+        box    = REGIONS[ratio_type][ERegionType.CharOffset]
+        margin = round(client_width  * box[0])
 
         for i in range(6):
             self.handlers[i].OnResize(CropBox(0, 0, width, height))
@@ -119,7 +121,7 @@ class GameStartTask(TaskBase):
         my_sum = sum(my_ctx)
         if my_ctx[1] > 0 and my_sum == 3:
             LogInfo(
-                type=EGameEvent.MY_CHARACTERS.name,
+                type=EGameEvent.MyCharacters.name,
                 cards=self.cards[:3],
                 names=[ChracterName(card_id, self.db) for card_id in self.cards[:3]],
                 )
@@ -127,7 +129,7 @@ class GameStartTask(TaskBase):
         op_sum = sum(op_ctx)
         if my_sum == 3 and op_ctx[1] > 0 and op_sum == 3:
             LogInfo(
-                type=EGameEvent.OP_CHARACTERS.name,
+                type=EGameEvent.OpCharacters.name,
                 cards=self.cards,
                 names=[ChracterName(card_id, self.db) for card_id in self.cards[3:]],
                 )

@@ -73,14 +73,14 @@ class CardSelectTask(CenterCropTask):
 
         if drawn:
             LogInfo(
-                type=EGameEvent.MY_DRAWN.name,
+                type=EGameEvent.MyDrawn.name,
                 cards=drawn,
                 names=[CardName(card, self.db) for card in drawn])
             if self.is_starting_hand:
                 self.fm.starting_hand = drawn
         if create:
             LogInfo(
-                type=EGameEvent.MY_CREATE_DECK.name,
+                type=EGameEvent.MyCreateDeck.name,
                 cards=create,
                 names=[CardName(card, self.db) for card in create])
 

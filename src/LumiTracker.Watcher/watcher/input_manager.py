@@ -77,7 +77,7 @@ class InputManager:
         LogInfo(message_data)
 
         input_type = message_data["input_type"]
-        if input_type == EInputType.CAPTURE_TEST.name:
+        if input_type == EInputType.CaptureTest.name:
             self.frame_manager.need_capture = True
         else:
             LogError(info="[InputManager.Tick] Unknown input type.")

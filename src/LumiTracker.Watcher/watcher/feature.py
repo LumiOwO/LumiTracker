@@ -602,7 +602,7 @@ class CardHandler(ABC):
 
 
 class ActionCardHandler(CardHandler):
-    def __init__(self, game_event=EGameEvent.NONE):
+    def __init__(self, game_event=EGameEvent.Invalid):
         super().__init__()
         self.event = game_event
 
@@ -626,11 +626,11 @@ class ActionCardHandler(CardHandler):
 
         # Check whether the game event is matched
         if EActionCard.IsExtraMyArcaneLegend(card_id):
-            target_event = EGameEvent.MY_PLAYED
+            target_event = EGameEvent.MyPlayed
         elif EActionCard.IsExtraOpArcaneLegend(card_id):
-            target_event = EGameEvent.OP_PLAYED
+            target_event = EGameEvent.OpPlayed
         else:
-            target_event = EGameEvent.NONE
+            target_event = EGameEvent.Invalid
         if self.event != target_event:
             return -1
 

@@ -17,7 +17,7 @@ def GetRatioType(client_width, client_height):
         ratio_type = ERatioType.E12_5
     else:
         LogInfo(
-            type=EGameEvent.UNSUPPORTED_RATIO.name, 
+            type=EGameEvent.UnsupportedRatio.name, 
             client_width=client_width, 
             client_height=client_height,
             )

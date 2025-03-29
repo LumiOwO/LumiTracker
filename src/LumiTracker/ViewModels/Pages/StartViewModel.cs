@@ -291,7 +291,7 @@ namespace LumiTracker.ViewModels.Pages
 
             await _gameWatcher.DumpToBackend(new
             {
-                input_type = EInputType.CAPTURE_TEST.ToString(),
+                input_type = EInputType.CaptureTest.ToString(),
             });
         }
 

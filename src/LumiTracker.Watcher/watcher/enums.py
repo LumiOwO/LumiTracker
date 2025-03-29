@@ -60,63 +60,73 @@ class ETurn(enum.Enum):
     Op   = enum.auto()
 
 class EInputType(enum.Enum):
-    NONE              = 0
-    CAPTURE_TEST      = enum.auto()
+    CaptureTest       = 0
+
+    NumInputTypes     = enum.auto()
+    Invalid           = NumInputTypes
 
 class EGameEvent(enum.Enum):
-    NONE              = 0
-
     # Events for duel
-    GAME_START        = enum.auto()
-    MY_PLAYED         = enum.auto()
-    OP_PLAYED         = enum.auto()
-    GAME_OVER         = enum.auto()
-    ROUND             = enum.auto()
-    MY_DRAWN          = enum.auto()
-    OP_DRAWN          = enum.auto() # placeholder, not used yet
-    MY_DISCARD        = enum.auto()
-    OP_DISCARD        = enum.auto()
-    MY_CREATE_DECK    = enum.auto()
-    OP_CREATE_DECK    = enum.auto()
-    MY_CREATE_HAND    = enum.auto() # eg. Furina
-    OP_CREATE_HAND    = enum.auto()
+    GameStart         = 0
+    MyPlayed          = enum.auto()
+    OpPlayed          = enum.auto()
+    GameOver          = enum.auto()
+    Round             = enum.auto()
+    MyDrawn           = enum.auto()
+    OpDrawn           = enum.auto() # placeholder, not used yet
+    MyDiscard         = enum.auto()
+    OpDiscard         = enum.auto()
+    MyCreateDeck      = enum.auto()
+    OpCreateDeck      = enum.auto()
+    MyCreateHand      = enum.auto() # eg. Furina
+    OpCreateHand      = enum.auto()
 
-    GAME_EVENT_FIRST  = GAME_START
-    GAME_EVENT_LAST   = OP_CREATE_HAND
+    GameEventFirst    = GameStart
+    GameEventLast     = OpCreateHand
 
-    # Events for client
-    UNSUPPORTED_RATIO = enum.auto()
-    CAPTURE_TEST      = enum.auto()
-    LOG_FPS           = enum.auto()
-    MY_CHARACTERS     = enum.auto()
-    OP_CHARACTERS     = enum.auto()
+    # events for client
+    UnsupportedRatio  = enum.auto()
+    CaptureTest       = enum.auto()
+    LogFps            = enum.auto()
+    MyCharacters      = enum.auto()
+    OpCharacters      = enum.auto()
 
-    # Events for server
-    INITIAL_DECK      = enum.auto()
+    # events for server
+    InitialDeck       = enum.auto()
+
+    NumGameEvents     = enum.auto()
+    Invalid           = NumGameEvents
 
 class ERegionType(enum.Enum):
     # default: (left, top, width, height)
-    GAME_START      = 0
-    MY_PLAYED       = enum.auto()
-    OP_PLAYED       = enum.auto()
-    GAME_OVER       = enum.auto()
-    PHASE           = enum.auto()
-    ROUND           = enum.auto()
-    CENTER          = enum.auto()
-    FLOW_ANCHOR     = enum.auto()  # (margin to digit center, margin to card top, card width, card height)
-    DECK            = enum.auto()
-    VS_ANCHOR       = enum.auto()  # (left, top, width, height, margin)
-    SETTINGS        = enum.auto()
-    CARD_BACK       = enum.auto()
-    TURN            = enum.auto()
-    HISTORY         = enum.auto()
+    GameStart       = 0
+    MyPlayed        = enum.auto()
+    OpPlayed        = enum.auto()
+    GameOver        = enum.auto()
+    Phase           = enum.auto()
+    Round           = enum.auto()
+    Center          = enum.auto()
+    FlowAnchor      = enum.auto()  # (margin to digit center, margin to card top, card width, card height)
+    Deck            = enum.auto()
+    Settings        = enum.auto()
+    CardBack        = enum.auto()
+    Turn            = enum.auto()
+    History         = enum.auto()
+    CharVS          = enum.auto()
+    CharInGame      = enum.auto()
+    CharCorner      = enum.auto()
+    CharOffset      = enum.auto()  # (VS margin, in-game margin, active character height offset, equipment margin)
+
+    NumRegionTypes  = enum.auto()
 
 class ERatioType(enum.Enum):
-    E16_9  = 0             # 1920 x 1080, 2560 x 1440
-    E16_10 = enum.auto()   # 1920 x 1200, 1680 x 1050
-    E64_27 = enum.auto()   # 2560 × 1080, 2048 x 864
-    E43_18 = enum.auto()   # 3440 × 1440, 2150 x 900
-    E12_5  = enum.auto()   # 3840 x 1600, 1920 x 800
+    E16_9           = 0            # 1920 x 1080, 2560 x 1440
+    E16_10          = enum.auto()  # 1920 x 1200, 1680 x 1050
+    E64_27          = enum.auto()  # 2560 × 1080, 2048 x 864
+    E43_18          = enum.auto()  # 3440 × 1440, 2150 x 900
+    E12_5           = enum.auto()  # 3840 x 1600, 1920 x 800
+
+    NumRatioTypes   = enum.auto()
 
 class ECtrlType(enum.Enum):
     # game start

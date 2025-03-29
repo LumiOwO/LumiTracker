@@ -23,7 +23,7 @@ class GamePhaseTask(TaskBase):
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
-        box    = REGIONS[ratio_type][ERegionType.PHASE]
+        box    = REGIONS[ratio_type][ERegionType.Phase]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])

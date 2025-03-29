@@ -1,17 +1,79 @@
 ﻿using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
-
+using System.Diagnostics;
 
 namespace LumiTracker.Config
 {
+    public struct Vec4f
+    {
+        public float x;
+        public float y;
+        public float z;
+        public float w;
+
+        public Vec4f()
+        {
+            x = 0;
+            y = 0;
+            z = 0;
+            w = 0;
+        }
+
+        public Vec4f(float x, float y, float z, float w)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = w;
+        }
+
+        public Vec4f(float[] values)
+        {
+            x = values.Length > 0 ? values[0] : 0;
+            y = values.Length > 1 ? values[1] : 0;
+            z = values.Length > 2 ? values[2] : 0;
+            w = values.Length > 3 ? values[3] : 0;
+        }
+
+        public float this[int index]
+        {
+            get
+            {
+                return index switch
+                {
+                    0 => x,
+                    1 => y,
+                    2 => z,
+                    3 => w,
+                    _ => throw new IndexOutOfRangeException($"Index {index} out of range [0-3]"),
+                };
+            }
+            set
+            {
+                switch (index)
+                {
+                    case 0: x = value; break;
+                    case 1: y = value; break;
+                    case 2: z = value; break;
+                    case 3: w = value; break;
+                    default: throw new IndexOutOfRangeException($"Index {index} out of range [0-3]");
+                }
+            }
+        }
+    }
+
     public static class RegionUtils
     {
-        private static readonly Dictionary<ERatioType, Dictionary<ERegionType, JToken>> _Regions;
+        private static readonly Vec4f[,] _Regions;
         public static bool Loaded { get; set; } = false;
 
         static RegionUtils()
         {
-            _Regions = new Dictionary<ERatioType, Dictionary<ERegionType, JToken>>();
+            _Regions = new Vec4f[
+                (int)ERatioType.NumRatioTypes,
+                (int)ERegionType.NumRegionTypes
+            ];
+
             var json = Configuration.LoadJObject(Path.Combine(Configuration.AssetsDir, "regions.json"));
             if (json == null)
             {
@@ -21,19 +83,21 @@ namespace LumiTracker.Config
 
             try
             {
-                foreach (var ratioEntry in json)
+                for (ERatioType ratio = 0; ratio < ERatioType.NumRatioTypes; ratio++)
                 {
-                    var ratioType = (ERatioType)Enum.Parse(typeof(ERatioType), ratioEntry.Key);
-                    var innerDict = new Dictionary<ERegionType, JToken>();
+                    if (!json.TryGetValue(ratio.ToString(), out JToken? innerToken)) continue;
+                    JObject? innerJson = innerToken as JObject;
+                    if (innerJson == null) continue;
 
-                    foreach (var regionEntry in (JObject)ratioEntry.Value!)
+                    for (ERegionType region = 0; region < ERegionType.NumRegionTypes; region++)
                     {
-                        var regionType = (ERegionType)Enum.Parse(typeof(ERegionType), regionEntry.Key);
-                        innerDict[regionType] = regionEntry.Value!;
-                    }
+                        if (!innerJson.TryGetValue(region.ToString(), out JToken? valuesToken)) continue;
 
-                    _Regions[ratioType] = innerDict;
+                        float[] values = valuesToken.ToObject<float[]>() ?? [];
+                        _Regions[(int)ratio, (int)region] = new Vec4f(values);
+                    }
                 }
+
                 Loaded = true;
             }
             catch (Exception ex)
@@ -62,27 +126,10 @@ namespace LumiTracker.Config
             return ERatioType.E16_9; // Default
         }
 
-        public static List<double> Get(ERatioType ratioType, ERegionType regionType)
+        public static Vec4f Get(ERatioType ratioType, ERegionType regionType)
         {
-            JToken? token = null;
-            if (!_Regions.TryGetValue(ratioType, out var regions))
-            {
-                Configuration.Logger.LogDebug(
-                    $"Ratio = {ratioType.ToString()}, Region = {regionType.ToString()} is not found in regions data, falling back to 16:9.");
-                token = _Regions[ERatioType.E16_9][regionType];
-            }
-            else if (regions.TryGetValue(regionType, out var value))
-            {
-                token = value;
-            }
-            else
-            {
-                Configuration.Logger.LogDebug(
-                    $"Region = {regionType.ToString()} is not defined when Ratio = {ratioType.ToString()}, falling back to 16:9 values");
-                token = _Regions[ERatioType.E16_9][regionType];
-            }
-
-            return token.ToObject<List<double>>()!;
+            Debug.Assert(ratioType < ERatioType.NumRatioTypes && regionType < ERegionType.NumRegionTypes);
+            return _Regions[(int)ratioType, (int)regionType];
         }
     }
 }

@@ -16,7 +16,7 @@ import cv2
 class RoundTask(TaskBase):
     def __init__(self, frame_manager):
         super().__init__(frame_manager)
-        self.event_type = EGameEvent.ROUND
+        self.event_type = EGameEvent.Round
         self.crop_box   = None  # init when resize
 
         idx = ECtrlType.MY_TURN.value - ECtrlType.CTRL_SINGLE_FIRST.value
@@ -33,7 +33,7 @@ class RoundTask(TaskBase):
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
-        box    = REGIONS[ratio_type][ERegionType.ROUND]
+        box    = REGIONS[ratio_type][ERegionType.Round]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
@@ -41,7 +41,7 @@ class RoundTask(TaskBase):
 
         self.crop_box = CropBox(left, top, left + width, top + height)
 
-        box    = REGIONS[ratio_type][ERegionType.TURN]
+        box    = REGIONS[ratio_type][ERegionType.Turn]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])

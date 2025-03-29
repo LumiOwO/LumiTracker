@@ -22,7 +22,7 @@ class EGameResult(enum.Enum):
 class GameOverTask(TaskBase):
     def __init__(self, frame_manager):
         super().__init__(frame_manager)
-        self.event_type = EGameEvent.GAME_OVER
+        self.event_type = EGameEvent.GameOver
         self.crop_box   = None  # init when resize
         self.Reset()
 
@@ -32,7 +32,7 @@ class GameOverTask(TaskBase):
     
     @override
     def OnResize(self, client_width, client_height, ratio_type):
-        box    = REGIONS[ratio_type][ERegionType.GAME_OVER]
+        box    = REGIONS[ratio_type][ERegionType.GameOver]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])

@@ -88,7 +88,7 @@ class FrameManager:
 
         # Resize card backs
         if self.my_card_back.size > 0 and self.op_card_back.size > 0:
-            box    = REGIONS[ratio_type][ERegionType.CARD_BACK]
+            box    = REGIONS[ratio_type][ERegionType.CardBack]
             width  = round(client_width  * box[2])
             height = round(client_height * box[3])
             self.my_card_back = cv2.resize(self.my_card_back, (width, height), interpolation=cv2.INTER_LANCZOS4)
@@ -107,7 +107,7 @@ class FrameManager:
 
         SaveImage(image, path, remove_alpha=True)
         LogInfo(
-            type=f"{EGameEvent.CAPTURE_TEST.name}",
+            type=f"{EGameEvent.CaptureTest.name}",
             filename=filename,
             width=image.shape[1],
             height=image.shape[0],
@@ -168,7 +168,7 @@ class FrameManager:
         if cur_time - self.prev_log_time >= self.fps_interval:
             fps = self.frame_count / (cur_time - self.prev_log_time)
             LogInfo(
-                type=f"{EGameEvent.LOG_FPS.name}",
+                type=f"{EGameEvent.LogFps.name}",
                 fps=f"{fps}"
                 )
 

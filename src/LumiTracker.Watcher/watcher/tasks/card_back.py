@@ -25,14 +25,14 @@ class CardBackTask(TaskBase):
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
-        box    = REGIONS[ratio_type][ERegionType.HISTORY]
+        box    = REGIONS[ratio_type][ERegionType.History]
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
         height = round(client_height * box[3])
         self.history_box = CropBox(left, top, left + width, top + height)
 
-        box    = REGIONS[ratio_type][ERegionType.CARD_BACK]
+        box    = REGIONS[ratio_type][ERegionType.CardBack]
         box_left, box_top, box_width, box_height = box
         left   = round(client_width  * box_left)
         width  = round(client_width  * box_width)

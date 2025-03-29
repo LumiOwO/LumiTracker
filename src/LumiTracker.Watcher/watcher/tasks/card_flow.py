@@ -34,14 +34,14 @@ class CenterCropTask(TaskBase):
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
-        box    = REGIONS[ratio_type][ERegionType.CENTER]        # left, top, width, height
+        box    = REGIONS[ratio_type][ERegionType.Center]        # left, top, width, height
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
         height = round(client_height * box[3])
         self.center_crop = CropBox(left, top, left + width, top + height)
 
-        box    = REGIONS[ratio_type][ERegionType.FLOW_ANCHOR] 
+        box    = REGIONS[ratio_type][ERegionType.FlowAnchor] 
         left   = round(client_width  * box[0])
         top    = round(client_height * box[1])
         width  = round(client_width  * box[2])
@@ -271,7 +271,7 @@ class CardFlowTask(CenterCropTask):
     def OnResize(self, client_width, client_height, ratio_type):
         super().OnResize(client_width, client_height, ratio_type)
 
-        box    = REGIONS[ratio_type][ERegionType.DECK] 
+        box    = REGIONS[ratio_type][ERegionType.Deck] 
         box_left, box_top, box_width, box_height = box
         left   = round(client_width  * box_left)
         width  = round(client_width  * box_width)
@@ -438,7 +438,7 @@ class CardFlowTask(CenterCropTask):
         # LogDebug(signal_time=t_end)
 
         # Early return if my deck operation detected
-        event_type = EGameEvent.NONE
+        event_type = EGameEvent.Invalid
         idx = 0
         while idx < len(self.my_deck_queue):
             # Get my deck timestamps and remove outdated ones.
@@ -451,15 +451,15 @@ class CardFlowTask(CenterCropTask):
 
             if timestamp > info.t_end + self.WAIT_TIME:
                 break
-            if event_type != EGameEvent.NONE:
+            if event_type != EGameEvent.Invalid:
                 continue
             if timestamp >= info.t_begin and timestamp <= info.t_end:
                 continue
             if timestamp < info.t_begin - self.WAIT_TIME:
                 continue
-            event_type = EGameEvent.MY_DRAWN if timestamp < info.t_begin else EGameEvent.MY_CREATE_DECK
+            event_type = EGameEvent.MyDrawn if timestamp < info.t_begin else EGameEvent.MyCreateDeck
 
-        if event_type != EGameEvent.NONE:
+        if event_type != EGameEvent.Invalid:
             self._DumpEventType(event_type, info)
             return True
 
@@ -478,17 +478,17 @@ class CardFlowTask(CenterCropTask):
 
             if timestamp > info.t_end + self.WAIT_TIME:
                 break
-            if event_type != EGameEvent.NONE:
+            if event_type != EGameEvent.Invalid:
                 continue
             if timestamp < info.t_end:
                 continue
-            event_type = EGameEvent.OP_CREATE_DECK
+            event_type = EGameEvent.OpCreateDeck
 
         self._DumpEventType(event_type, info)
         return True
 
     def _DumpEventType(self, event_type, info):
-        if event_type != EGameEvent.NONE:
+        if event_type != EGameEvent.Invalid:
             cards = info.cards
             if not info.valid:
                 LogError(info=f"{event_type.name}: Some cards are not detected.")
