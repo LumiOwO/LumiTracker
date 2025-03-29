@@ -220,33 +220,12 @@ namespace LumiTracker.Helpers
             //Configuration.Logger.LogDebug($"_src_window.Height: {_src_window.Height}");
 
             var foregroundHwnd = GetForegroundWindow();
-
-            if (_src_window != null) 
+            if (_lastForeground != foregroundHwnd)
             {
-                if (_bOutside)
-                {
-                    _src_window.ShowWindow();
-                    if (foregroundHwnd != _lastForeground && foregroundHwnd == _dst_hwnd)
-                    {
-                        // Set to topmost once
-                        _src_window.Topmost = true;
-                        _src_window.Topmost = false;
-                    }
-                }
-                else
-                {
-                    if (foregroundHwnd != _src_hwnd && foregroundHwnd != _dst_hwnd && foregroundHwnd != _canvas_hwnd)
-                    {
-                        _src_window.HideWindow();
-                    }
-                    else
-                    {
-                        _src_window.ShowWindow();
-                    }
-                }
+                OnForegroundChanged(_lastForeground, foregroundHwnd);
+                _lastForeground = foregroundHwnd;
             }
 
-            _lastForeground = foregroundHwnd;
             _isFirstTick = false;
         }
 
@@ -290,6 +269,42 @@ namespace LumiTracker.Helpers
             }
 
             return clientRect;
+        }
+
+        private void OnForegroundChanged(IntPtr oldHwnd, IntPtr newHwnd)
+        {
+            if (_src_window == null) return;
+
+            // Deck window
+            if (_bOutside)
+            {
+                _src_window.ShowWindow();
+                _src_window.CanvasWindow.ShowWindow();
+                if (newHwnd == _dst_hwnd)
+                {
+                    // Trigger Topmost OnChanged event to bring the window to topmost
+                    bool topmost = _src_window.Topmost;
+                    _src_window.Topmost = !topmost;
+                    _src_window.Topmost = topmost;
+
+                    topmost = _src_window.CanvasWindow.Topmost;
+                    _src_window.CanvasWindow.Topmost = !topmost;
+                    _src_window.CanvasWindow.Topmost = topmost;
+                }
+            }
+            else
+            {
+                if (newHwnd != _src_hwnd && newHwnd != _dst_hwnd && newHwnd != _canvas_hwnd)
+                {
+                    _src_window.HideWindow();
+                    _src_window.CanvasWindow.HideWindow();
+                }
+                else
+                {
+                    _src_window.ShowWindow();
+                    _src_window.CanvasWindow.ShowWindow();
+                }
+            }
         }
 
         private Rect GetDstWindowBounds()

@@ -91,7 +91,6 @@ namespace LumiTracker.Views.Windows
                 Show();
                 MainContent.Visibility = Visibility.Visible;
                 ViewModel.IsShowing = true;
-                CanvasWindow.ShowWindow();
             }
         }
 
@@ -102,7 +101,6 @@ namespace LumiTracker.Views.Windows
                 //Hide();
                 MainContent.Visibility = Visibility.Hidden;
                 ViewModel.IsShowing = false;
-                CanvasWindow.HideWindow();
             }
         }
 
