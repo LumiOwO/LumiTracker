@@ -6,10 +6,15 @@ namespace LumiTracker.Config
 {
     public struct Vec4f
     {
-        public float x;
-        public float y;
-        public float z;
-        public float w;
+        public float x { get; set; } = 0;
+        public float y { get; set; } = 0;
+        public float z { get; set; } = 0;
+        public float w { get; set; } = 0;
+
+        public float r { get => x; set => x = value; }
+        public float g { get => y; set => y = value; }
+        public float b { get => z; set => z = value; }
+        public float a { get => w; set => w = value; }
 
         public Vec4f()
         {
@@ -27,8 +32,9 @@ namespace LumiTracker.Config
             this.w = w;
         }
 
-        public Vec4f(float[] values)
+        public Vec4f(float[]? values)
         {
+            values ??= [];
             x = values.Length > 0 ? values[0] : 0;
             y = values.Length > 1 ? values[1] : 0;
             z = values.Length > 2 ? values[2] : 0;
