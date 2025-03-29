@@ -27,6 +27,7 @@ namespace LumiTracker.ViewModels.Windows
 
         public ERegionType RegionType { get; set; } = ERegionType.GameStart;
         public int CharacterIndex { get; set; } = 0;
+        public bool IsActiveCharacter { get; set; } = false;
     }
 
     public partial class CanvasWindowViewModel : ObservableObject
@@ -55,9 +56,9 @@ namespace LumiTracker.ViewModels.Windows
             //AddElement(new OverlayElement("debug")
             //{
             //    Background = Brushes.Magenta,
-            //    Opacity = 0.3,
-            //    RegionType = ERegionType.CharVS,
-            //    CharacterIndex = 5,
+            //    Opacity = 0.2,
+            //    RegionType = ERegionType.CharCorner,
+            //    CharacterIndex = 2
             //});
         }
 
@@ -95,39 +96,98 @@ namespace LumiTracker.ViewModels.Windows
             float dpiScaleInv = 1.0f / dpiScale;
             foreach (var element in Elements)
             {
-                var regionType = element.RegionType;
-                var box = RegionUtils.Get(ratioType, regionType);
-                // default: (left, top, width, height)
-                double left   = Math.Round(client_width  * box[0]) * dpiScaleInv;
-                double top    = Math.Round(client_height * box[1]) * dpiScaleInv;
-                double width  = Math.Round(client_width  * box[2]) * dpiScaleInv;
-                double height = Math.Round(client_height * box[3]) * dpiScaleInv;
-
-                if (regionType == ERegionType.CharVS)
-                {
-                    box = RegionUtils.Get(ratioType, ERegionType.CharOffset);
-                    double margin = Math.Round(client_width * box[0]) * dpiScaleInv;
-
-                    double offset;
-                    if (element.CharacterIndex < 3)
-                    {
-                        offset = element.CharacterIndex * (width + margin);
-                    }
-                    else
-                    {
-                        double op_left = client_width * dpiScaleInv - (left + width + 2 * (width + margin));
-                        offset = op_left - left;
-                        offset += (element.CharacterIndex - 3) * (width + margin);
-                    }
-                    element.Position = new Rect(left + offset, top, width, height);
-                }
-                else
-                {
-                    // Some regions are anchored by other detections (e.g., FlowAnchor and CharOffset)
-                    // Displaying these regions on screen may produce unexpected visual results
-                    element.Position = new Rect(left, top, width, height);
-                }
+                element.Position = ComputeRegionRect(element);
             }
+        }
+
+        private Rect ComputeRegionRect(OverlayElement element)
+        {
+            return element.RegionType switch
+            {
+                ERegionType.CharVS     => ComputeRegionRectCharVS(element),
+                ERegionType.CharInGame => ComputeRegionRectCharInGame(element),
+                ERegionType.CharCorner => ComputeRegionRectCharCorner(element),
+                // Some regions are anchored by other detections (e.g., FlowAnchor, CharCorner, CharOffset)
+                // Displaying these regions on screen may produce unexpected visual results
+                _ => ComputeRegionRectDefault(element),
+            };
+        }
+
+        private Rect ComputeRegionRectCharVS(OverlayElement element)
+        {
+            var box = RegionUtils.Get(RatioType, ERegionType.CharVS);
+            float dpiScaleInv = 1.0f / DpiScale;
+            double left   = Math.Round(Width  * box.x) * dpiScaleInv;
+            double top    = Math.Round(Height * box.y) * dpiScaleInv;
+            double width  = Math.Round(Width  * box.z) * dpiScaleInv;
+            double height = Math.Round(Height * box.w) * dpiScaleInv;
+            box = RegionUtils.Get(RatioType, ERegionType.CharOffset);
+            double margin = Math.Round(Width  * box.x) * dpiScaleInv;
+
+            double offset;
+            if (element.CharacterIndex < 3)
+            {
+                offset = element.CharacterIndex * (width + margin);
+            }
+            else
+            {
+                double op_left = Width * dpiScaleInv - (left + width + 2 * (width + margin));
+                offset = op_left - left;
+                offset += (element.CharacterIndex - 3) * (width + margin);
+            }
+
+            return new Rect(left + offset, top, width, height);
+        }
+
+        private Rect ComputeRegionRectCharInGame(OverlayElement element)
+        {
+            var box = RegionUtils.Get(RatioType, ERegionType.CharInGame);
+            float dpiScaleInv = 1.0f / DpiScale;
+            double left   = Math.Round(Width  * box.x) * dpiScaleInv;
+            double top    = Math.Round(Height * box.y) * dpiScaleInv;
+            double width  = Math.Round(Width  * box.z) * dpiScaleInv;
+            double height = Math.Round(Height * box.w) * dpiScaleInv;
+            box = RegionUtils.Get(RatioType, ERegionType.CharOffset);
+            double margin = Math.Round(Width  * box.y) * dpiScaleInv;
+            double deltaY = Math.Round(Height * box.z) * dpiScaleInv;
+
+            double offsetX = (element.CharacterIndex % 3) * (width + margin);
+            double offsetY = 0;
+            if (element.CharacterIndex >= 3)
+            {
+                double op_top = Height * dpiScaleInv - (top + height);
+                offsetY = op_top - top;
+            }
+            if (element.IsActiveCharacter)
+            {
+                offsetY += deltaY * (element.CharacterIndex < 3 ? -1 : 1);
+            }
+
+            return new Rect(left + offsetX, top + offsetY, width, height);
+        }
+
+        private Rect ComputeRegionRectCharCorner(OverlayElement element)
+        {
+            Rect rect = ComputeRegionRectCharInGame(element);
+            var box = RegionUtils.Get(RatioType, ERegionType.CharCorner);
+            double left   = Math.Round(rect.Width  * box.x);
+            double top    = Math.Round(rect.Height * box.y);
+            double width  = Math.Round(rect.Width  * box.z);
+            double height = Math.Round(rect.Height * box.w);
+            return new Rect(rect.Left + left, rect.Top + top, width, height);
+        }
+
+        private Rect ComputeRegionRectDefault(OverlayElement element)
+        {
+            // default: (left, top, width, height)
+            var box = RegionUtils.Get(RatioType, element.RegionType);
+            float dpiScaleInv = 1.0f / DpiScale;
+            double left   = Math.Round(Width  * box.x) * dpiScaleInv;
+            double top    = Math.Round(Height * box.y) * dpiScaleInv;
+            double width  = Math.Round(Width  * box.z) * dpiScaleInv;
+            double height = Math.Round(Height * box.w) * dpiScaleInv;
+
+            return new Rect(left, top, width, height);
         }
     }
 }

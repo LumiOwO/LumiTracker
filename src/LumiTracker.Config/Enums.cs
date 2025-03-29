@@ -132,7 +132,7 @@ namespace LumiTracker.Config
         Invalid = NumGameEvents
     }
 
-    // default: (left, top, width, height)
+    /// <summary> default: (left, top, width, height) </summary>
     public enum ERegionType : int
     {
         GameStart = 0,
@@ -142,7 +142,8 @@ namespace LumiTracker.Config
         Phase,
         Round,
         Center,
-        FlowAnchor,    // (margin to digit center, margin to card top, card width, card height)
+        /// <summary> (margin to digit center, margin to card top, card width, card height) </summary>
+        FlowAnchor,
         Deck,
         Settings,
         CardBack,
@@ -150,8 +151,10 @@ namespace LumiTracker.Config
         History,
         CharVS,
         CharInGame,
+        /// <summary> Relative to character card box. </summary>
         CharCorner,
-        CharOffset,    // (VS margin, in-game margin, active character height offset, equipment margin)
+        /// <summary> (VS margin, in-game margin, active character height offset, equipment margin) </summary>
+        CharOffset,    
 
         NumRegionTypes
     }
