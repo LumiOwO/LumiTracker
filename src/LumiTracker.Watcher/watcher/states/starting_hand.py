@@ -1,5 +1,6 @@
 from .base import GameState, EGameState, GTasks
 from ..config import cfg, override
+from ..enums import ERegionType
 import numpy as np
 
 class GameStateStartingHand(GameState):
@@ -12,13 +13,16 @@ class GameStateStartingHand(GameState):
 
     @override
     def CollectTasks(self):
-        return [
+        tasks = [
             GTasks.GameStart, 
             GTasks.GameOver, 
             GTasks.StartingHand,
             GTasks.Round,
             GTasks.CardBack,
             ]
+        if not GTasks.GameStart.filter.PrevSignalHasLeft():
+            tasks.append(GTasks.AllCharacters)
+        return tasks
 
     @override
     def Next(self):
@@ -33,6 +37,7 @@ class GameStateStartingHand(GameState):
     @override
     def OnEnter(self, from_state):
         GTasks.Reset()
+        GTasks.AllCharacters.SetRegionType(ERegionType.CharVS)
         self.fm.StartNewGame()
 
     @override

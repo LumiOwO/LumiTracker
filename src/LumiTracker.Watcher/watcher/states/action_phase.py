@@ -1,6 +1,6 @@
 from .base import GameState, EGameState, GTasks
 from ..config import cfg, override
-from ..enums import EActionCard
+from ..enums import EActionCard, ERegionType
 
 class GameStateActionPhase(GameState):
     def __init__(self, frame_manager):
@@ -18,7 +18,8 @@ class GameStateActionPhase(GameState):
             GTasks.MyPlayed, 
             GTasks.OpPlayed, 
             GTasks.Round, 
-            GTasks.CardFlow
+            GTasks.CardFlow,
+            GTasks.AllCharacters,
             ]
 
     @override
@@ -30,3 +31,7 @@ class GameStateActionPhase(GameState):
         else:
             state = self.GetState()
         return state
+
+    @override
+    def OnEnter(self, from_state):
+        GTasks.AllCharacters.SetRegionType(ERegionType.CharInGame)

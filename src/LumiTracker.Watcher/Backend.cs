@@ -130,7 +130,6 @@ namespace LumiTracker.Watcher
                 catch (JsonReaderException ex)
                 {
                     Configuration.Logger.LogError($"[python] {e.Data}");
-                    MessageReceived?.Invoke(null, ex);
                 }
                 catch (Exception ex)
                 {
