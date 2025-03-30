@@ -90,6 +90,7 @@ class EGameEvent(enum.Enum):
     LogFps            = enum.auto()
     MyCharacters      = enum.auto()
     OpCharacters      = enum.auto()
+    ActiveIndices     = enum.auto()
 
     # events for server
     InitialDeck       = enum.auto()

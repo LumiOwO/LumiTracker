@@ -124,6 +124,7 @@ namespace LumiTracker.Config
         LogFps,
         MyCharacters,
         OpCharacters,
+        ActiveIndices,
 
         // events for server
         InitialDeck,
@@ -142,7 +143,9 @@ namespace LumiTracker.Config
         Phase,
         Round,
         Center,
-        /// <summary> (margin to digit center, margin to card top, card width, card height) </summary>
+        /// <summary> 
+        /// (margin to digit center, margin to card top, card width, card height)
+        /// </summary>
         FlowAnchor,
         Deck,
         Settings,
@@ -151,9 +154,25 @@ namespace LumiTracker.Config
         History,
         CharVS,
         CharInGame,
-        /// <summary> Relative to character card box. </summary>
+        /// <summary>
+        /// <para>
+        /// (VS scaleX, VS scaleY, corner width, corner height) <br/>
+        /// Position is relative to the character card box's right-top corner.
+        /// </para>
+        /// <para>
+        /// Note: Card dimensions in the VS screen differ from in-game dimensions.<br/>
+        /// The crop box must be scaled accordingly to maintain consistency.<br/>
+        /// Example scaling for 16:9 aspect ratio:<br/>
+        /// <code>
+        ///   VS box width  = InGame width  * 1.1 * 1.0    
+        ///   VS box height = InGame height * 1.1 * 1.0330
+        /// </code>
+        /// </para>
+        /// </summary>
         CharCorner,
-        /// <summary> (VS margin, in-game margin, active character height offset, equipment margin) </summary>
+        /// <summary>
+        /// (VS margin, in-game margin, active character height offset, equipment margin)
+        /// </summary>
         CharOffset,    
 
         NumRegionTypes

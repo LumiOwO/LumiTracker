@@ -49,6 +49,8 @@ namespace LumiTracker.Watcher
 
     public delegate void OnOpCharactersCallback(int[] character_ids);
 
+    public delegate void OnActiveIndicesCallback(int my_index, int op_index);
+
     public delegate void ExceptionHandlerCallback(Exception ex);
 
     public delegate void OnGameEventMessageCallback(GameEventMessage message);
@@ -71,6 +73,7 @@ namespace LumiTracker.Watcher
         public event OnLogFPSCallback?             LogFPS;
         public event OnMyCharactersCallback?       MyCharacters;
         public event OnOpCharactersCallback?       OpCharacters;
+        public event OnActiveIndicesCallback?      ActiveIndices;
         public event ExceptionHandlerCallback?     ExceptionHandler;
         public event OnGameEventMessageCallback?   GameEventMessage;
 
@@ -154,6 +157,11 @@ namespace LumiTracker.Watcher
             OpCharacters?.Invoke(character_ids);
         }
 
+        protected void InvokeActiveIndices(int my_index, int op_index)
+        {
+            ActiveIndices?.Invoke(my_index, op_index);
+        }
+
         protected void InvokeException(Exception e)
         {
             ExceptionHandler?.Invoke(e);
@@ -182,6 +190,7 @@ namespace LumiTracker.Watcher
             other.LogFPS             += InvokeLogFPS;
             other.MyCharacters       += InvokeMyCharacters;
             other.OpCharacters       += InvokeOpCharacters;
+            other.ActiveIndices      += InvokeActiveIndices;
             other.ExceptionHandler   += InvokeException;
             other.GameEventMessage   += InvokeGameEventMessage;
         }
@@ -204,6 +213,7 @@ namespace LumiTracker.Watcher
             other.LogFPS             -= InvokeLogFPS;
             other.MyCharacters       -= InvokeMyCharacters;
             other.OpCharacters       -= InvokeOpCharacters;
+            other.ActiveIndices      -= InvokeActiveIndices;
             other.ExceptionHandler   -= InvokeException;
             other.GameEventMessage   -= InvokeGameEventMessage;
         }
@@ -298,10 +308,18 @@ namespace LumiTracker.Watcher
                 int[] character_ids = message.Data["cards"].ToObject<int[]>()!;
                 InvokeOpCharacters(character_ids);
             }
+            else if (type == EGameEvent.ActiveIndices)
+            {
+                Configuration.Logger.LogDebug("[GameEventHook] OnActiveIndices");
+                int my_index = message.Data["my"].ToObject<int>()!;
+                int op_index = message.Data["op"].ToObject<int>()!;
+                InvokeActiveIndices(my_index, op_index);
+            }
             else if (type != EGameEvent.Invalid)
             {
                 string game_event_name = type.ToString();
-                Configuration.Logger.LogWarning($"[GameEventHook] Enum {game_event_name} defined but not handled: {game_event_name}\n{message.Data}");
+                string message_str = JsonConvert.SerializeObject(message.Data);
+                Configuration.Logger.LogWarning($"[GameEventHook] Enum {game_event_name} defined but not handled: {message_str}");
             }
         }
     }

@@ -127,7 +127,7 @@ namespace LumiTracker.Watcher
                     JObject message = JObject.Parse(e.Data);
                     MessageReceived?.Invoke(message, null);
                 }
-                catch (JsonReaderException ex)
+                catch (JsonReaderException)
                 {
                     Configuration.Logger.LogError($"[python] {e.Data}");
                 }

@@ -5,6 +5,7 @@ using LumiTracker.Services;
 using System.Windows.Data;
 using LumiTracker.Helpers;
 using System.Windows.Media;
+using LumiTracker.Watcher;
 
 namespace LumiTracker.ViewModels.Windows
 {
@@ -46,20 +47,40 @@ namespace LumiTracker.ViewModels.Windows
 
         private ERatioType RatioType { get; set; } = ERatioType.E16_9;
 
-        public CanvasWindowViewModel()
+        private GameEventHook _hook;
+
+        public CanvasWindowViewModel(GameEventHook hook)
         {
             var binding = LocalizationExtension.Create("CanvasWindowTitle");
             binding.Converter = new OverlayWindowTitleNameConverter();
             BindingOperations.SetBinding(CanvasWindowTitle, LocalizationTextItem.TextProperty, binding);
 
+            _hook = hook;
+            _hook.ActiveIndices += OnActiveIndices;
+
             // Debug: display task region on client rect
-            //AddElement(new OverlayElement("debug")
-            //{
-            //    Background = Brushes.Magenta,
-            //    Opacity = 0.2,
-            //    RegionType = ERegionType.CharCorner,
-            //    CharacterIndex = 2
-            //});
+            for (int i = 0; i < 6; i++)
+            {
+                AddElement(new OverlayElement($"char{i}")
+                {
+                    Background = Brushes.Magenta,
+                    Opacity = 0.2,
+                    RegionType = ERegionType.CharInGame,
+                    CharacterIndex = i
+                });
+            }
+        }
+
+        private void OnActiveIndices(int my_index, int op_index)
+        {
+            // Debug
+            for (int i = 0; i < 6; i++)
+            {
+                var element = GetElement($"char{i}");
+                if (element == null) continue;
+                element.IsActiveCharacter = i < 3 ? (my_index == i) : (op_index == i);
+                element.Position = ComputeRegionRect(element);
+            }
         }
 
         public void AddElement(OverlayElement element)
@@ -80,6 +101,11 @@ namespace LumiTracker.ViewModels.Windows
                     Elements.Remove(element);
                 });
             }
+        }
+
+        public OverlayElement? GetElement(string name)
+        {
+            return Elements.FirstOrDefault(e => e.ElementName == name);
         }
 
         public void ResizeAllElements(int client_width, int client_height, float dpiScale)
@@ -170,11 +196,9 @@ namespace LumiTracker.ViewModels.Windows
         {
             Rect rect = ComputeRegionRectCharInGame(element);
             var box = RegionUtils.Get(RatioType, ERegionType.CharCorner);
-            double left   = Math.Round(rect.Width  * box.x);
-            double top    = Math.Round(rect.Height * box.y);
             double width  = Math.Round(rect.Width  * box.z);
             double height = Math.Round(rect.Height * box.w);
-            return new Rect(rect.Left + left, rect.Top + top, width, height);
+            return new Rect(rect.Right - width, rect.Top, width, height);
         }
 
         private Rect ComputeRegionRectDefault(OverlayElement element)

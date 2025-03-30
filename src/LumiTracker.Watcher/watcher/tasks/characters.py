@@ -5,7 +5,7 @@ from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType
 from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS, GetRatioType
 from ..feature import CropBox, CharacterCardHandler, ChracterName
-from ..feature import FeatureDistance, ExtractFeature_Control_Single
+from ..feature import FeatureDistance, ExtractFeature_Control
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
@@ -17,13 +17,13 @@ import enum
 class SingleCharacterTask(TaskBase):
     def __init__(self, frame_manager, parent : AllCharactersTask, index):
         super().__init__(frame_manager)
-        self.parent   = parent
-        self.index    = index
-        self.handler  = CharacterCardHandler()
+        self.parent        = parent
+        self.index         = index
+        self.handler       = CharacterCardHandler()
         # init when parent resize
         self.crop_box      = None   
         self.corner_box    = None
-        self.active_deltaY = 0 # init when parent resize
+        self.active_deltaY = 0
         self.Reset()
 
     @override
@@ -32,8 +32,6 @@ class SingleCharacterTask(TaskBase):
         self.card_id = -1
         self.filter  = StreamFilter(null_val=-1)
         self.corner_feature = np.array([])
-        # InGame
-        self.isActiveCharacter = False
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
@@ -58,11 +56,12 @@ class SingleCharacterTask(TaskBase):
                 self.corner_box.top  : self.corner_box.bottom, 
                 self.corner_box.left : self.corner_box.right
             ]
-            self.corner_feature = ExtractFeature_Control_Single(corner)
+            self.corner_feature = ExtractFeature_Control(corner)
             # SaveImage(corner, os.path.join(cfg.debug_dir, "save", f"Corner{self.index}_VS.png"))
             # SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"Char{self.index}_VS.png"))
 
     def TickInGame(self):
+        self.active_dist = 1000
         if len(self.corner_feature) == 0:
             # TODO: LogError
             return
@@ -71,18 +70,19 @@ class SingleCharacterTask(TaskBase):
             self.corner_box.top  : self.corner_box.bottom, 
             self.corner_box.left : self.corner_box.right
         ]
-        feature = ExtractFeature_Control_Single(corner)
+        feature = ExtractFeature_Control(corner)
         dist = FeatureDistance(feature, self.corner_feature)
-        detected = (dist <= cfg.strict_threshold)
-        if detected:
-            LogDebug(index=self.index, isActive=f"{detected}", dist=dist)
+        if dist <= cfg.threshold:
+            pass
+            # LogDebug(index=self.index, dist=dist)
             # SaveImage(corner, os.path.join(cfg.debug_dir, "save", f"Corner{self.index}_InGame.png"))
 
-            buffer = self.frame_buffer[
-                self.crop_box.top + self.active_deltaY  : self.crop_box.bottom + self.active_deltaY, 
-                self.crop_box.left : self.crop_box.right
-            ]
+            # buffer = self.frame_buffer[
+            #     self.crop_box.top + self.active_deltaY  : self.crop_box.bottom + self.active_deltaY, 
+            #     self.crop_box.left : self.crop_box.right
+            # ]
             # SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"Char{self.index}_InGame.png"))
+        self.active_dist = dist
 
 
 class AllCharactersTask(TaskBase):
@@ -93,6 +93,11 @@ class AllCharactersTask(TaskBase):
 
     @override
     def Reset(self):
+        self.my_active = -1
+        self.op_active = -1
+        # Tune the parameters to make it trigger faster
+        self.my_active_filter = StreamFilter(null_val=-1, window_size=10, valid_count=1, window_min_count=6)
+        self.op_active_filter = StreamFilter(null_val=-1, window_size=10, valid_count=1, window_min_count=6)
         for i in range(6):
             self.tasks[i].Reset()
         self.SetRegionType(ERegionType.CharVS)
@@ -154,28 +159,16 @@ class AllCharactersTask(TaskBase):
                 )
 
             box           = REGIONS[ratio_type][ERegionType.CharCorner]
-            corner_left   = round(crop_box.width  * box[0])
-            corner_top    = round(crop_box.height * box[1])
-            corner_width  = round(crop_box.width  * box[2])
-            corner_height = round(crop_box.height * box[3])
-            if self.region == ERegionType.CharVS:
-                # TODO: change CharCorner fields to (scalex, scaley, width, height)
-                corner_width  = round(corner_width  * 1.1 * 1.0)
-                corner_height = round(corner_height * 1.1 * 1.0330)
-                corner_box = CropBox(
-                    crop_box.right - corner_width, 
-                    crop_box.top   + corner_offsetY,
-                    crop_box.right, 
-                    crop_box.top   + corner_height + corner_offsetY,
-                    )
-            else:
-                corner_box = CropBox(
-                    crop_box.left + corner_left, 
-                    crop_box.top  + corner_top  + corner_offsetY,
-                    crop_box.left + corner_left + corner_width, 
-                    crop_box.top  + corner_top  + corner_height + corner_offsetY,
-                    )
-            LogDebug(corner_box=f"{corner_box}")
+            corner_scaleX = box[0] if self.region == ERegionType.CharVS else 1.0
+            corner_scaleY = box[1] if self.region == ERegionType.CharVS else 1.0
+            corner_width  = round(crop_box.width  * box[2] * corner_scaleX)
+            corner_height = round(crop_box.height * box[3] * corner_scaleY)
+            corner_box = CropBox(
+                crop_box.right - corner_width, 
+                crop_box.top   + corner_offsetY,
+                crop_box.right, 
+                crop_box.top   + corner_height + corner_offsetY,
+                )
 
             self.tasks[i].crop_box = crop_box
             self.tasks[i].corner_box = corner_box
@@ -222,6 +215,47 @@ class AllCharactersTask(TaskBase):
                 )
             self.fm.op_characters = cards[3:]
 
+    def TickInGameForPlayer(self, active_filter : StreamFilter):
+        is_op = (active_filter == self.op_active_filter)
+        tasks = self.tasks[3:] if is_op else self.tasks[:3]
+
+        flag = 0
+        dist = 1000
+        for i in range(3):
+            task = tasks[i]
+            task.TickInGame()
+            if task.active_dist <= cfg.threshold:
+                dist = min(dist, task.active_dist)
+                flag |= (1 << i)
+
+        active = -1
+        for i in range(3):
+            if flag == (1 << i):
+                active = i
+                break
+        if is_op and active >= 0:
+            active += 3
+
+        active = active_filter.Filter(active, dist=dist)
+        return active
+
     def TickInGame(self):
-        for i in range(6):
-            self.tasks[i].TickInGame()
+        should_trigger = False
+        my_active = self.TickInGameForPlayer(self.my_active_filter)
+        if my_active >= 0 and self.my_active != my_active:
+            self.my_active = my_active
+            should_trigger = True
+        op_active = self.TickInGameForPlayer(self.op_active_filter)
+        if op_active >= 0 and self.op_active != op_active:
+            self.op_active = op_active
+            should_trigger = True
+
+        if should_trigger:
+            my_card_id = self.tasks[self.my_active].card_id if self.my_active >= 0 else -1
+            op_card_id = self.tasks[self.op_active].card_id if self.op_active >= 0 else -1
+            LogInfo(
+                type=f"{EGameEvent.ActiveIndices.name}",
+                my=self.my_active,
+                op=self.op_active,
+                names=[ChracterName(my_card_id, self.db), ChracterName(op_card_id, self.db)]
+                )
