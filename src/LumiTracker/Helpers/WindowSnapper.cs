@@ -331,7 +331,7 @@ namespace LumiTracker.Helpers
 
         // Set the window to be layered, so it can be captured by OBS with AllowsTransparency="True"
         // Note: OBS must use Windows Capture to capture this window
-        static public void SetLayeredWindow(IntPtr hwnd)
+        static public void SetLayeredWindow(IntPtr hwnd, bool allowClickThrough = false)
         {
             HwndSource.FromHwnd(hwnd).CompositionTarget.BackgroundColor = Colors.Transparent;
 
@@ -340,8 +340,11 @@ namespace LumiTracker.Helpers
 
             const int GWL_EXSTYLE = -20;
             const int WS_EX_LAYERED = 0x80000;
+            const int WS_EX_TRANSPARENT = 0x20;
             int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+            exStyle |= WS_EX_LAYERED;
+            if (allowClickThrough) exStyle |= WS_EX_TRANSPARENT;
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
         }
     }
 }

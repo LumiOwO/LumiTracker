@@ -5,14 +5,12 @@ from ..enums import EAnnType, ECtrlType, EGameEvent, ERegionType
 from ..config import cfg, override, LogDebug, LogInfo
 from ..regions import REGIONS, GetRatioType
 from ..feature import CropBox, CharacterCardHandler, ChracterName
-from ..feature import FeatureDistance, ExtractFeature_Control
 from ..database import SaveImage
 from ..stream_filter import StreamFilter
 
 import numpy as np
-import logging
 import os
-import enum
+import cv2
 
 class SingleCharacterTask(TaskBase):
     def __init__(self, frame_manager, parent : AllCharactersTask, index):
@@ -22,7 +20,7 @@ class SingleCharacterTask(TaskBase):
         self.handler       = CharacterCardHandler()
         # init when parent resize
         self.crop_box      = None   
-        self.corner_box    = None
+        self.border_box    = None
         self.active_deltaY = 0
         self.Reset()
 
@@ -31,7 +29,6 @@ class SingleCharacterTask(TaskBase):
         # VS
         self.card_id = -1
         self.filter  = StreamFilter(null_val=-1)
-        self.corner_feature = np.array([])
 
     @override
     def OnResize(self, client_width, client_height, ratio_type):
@@ -52,37 +49,30 @@ class SingleCharacterTask(TaskBase):
         card_id = self.filter.Filter(card_id, dist=dist)
         if card_id >= 0:
             self.card_id = card_id
-            corner = self.frame_buffer[
-                self.corner_box.top  : self.corner_box.bottom, 
-                self.corner_box.left : self.corner_box.right
-            ]
-            self.corner_feature = ExtractFeature_Control(corner)
-            # SaveImage(corner, os.path.join(cfg.debug_dir, "save", f"Corner{self.index}_VS.png"))
-            # SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"Char{self.index}_VS.png"))
 
     def TickInGame(self):
-        self.active_dist = 1000
-        if len(self.corner_feature) == 0:
-            # TODO: LogError
-            return
+        self.active_dist = 1000 # should be updated every frame
 
-        corner = self.frame_buffer[
-            self.corner_box.top  : self.corner_box.bottom, 
-            self.corner_box.left : self.corner_box.right
+        border = self.frame_buffer[
+            self.border_box.top  : self.border_box.bottom, 
+            self.border_box.left : self.border_box.right
         ]
-        feature = ExtractFeature_Control(corner)
-        dist = FeatureDistance(feature, self.corner_feature)
-        if dist <= cfg.threshold:
-            pass
-            # LogDebug(index=self.index, dist=dist)
-            # SaveImage(corner, os.path.join(cfg.debug_dir, "save", f"Corner{self.index}_InGame.png"))
+        if len(border) > 0:
+            gray = cv2.cvtColor(border, cv2.COLOR_BGRA2GRAY)
+            pixels_gray = gray.ravel() # Flatten the grayscale image into a 1D array of pixel intensities
+            mean = np.mean(pixels_gray)
+            variance = np.var(pixels_gray)
+            if mean > 180 and variance <= 600:
+                self.active_dist = cfg.threshold
+            # if self.index == 3:
+            #     LogDebug(index=self.index, mean=mean, variance=variance)
+                # SaveImage(border, os.path.join(cfg.debug_dir, "save", f"border{self.index}_InGame.png"))
 
-            # buffer = self.frame_buffer[
-            #     self.crop_box.top + self.active_deltaY  : self.crop_box.bottom + self.active_deltaY, 
-            #     self.crop_box.left : self.crop_box.right
-            # ]
-            # SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"Char{self.index}_InGame.png"))
-        self.active_dist = dist
+                # buffer = self.frame_buffer[
+                #     self.border_box.top - self.active_deltaY  : self.border_box.bottom - self.active_deltaY, 
+                #     self.border_box.left : self.border_box.right
+                # ]
+                # SaveImage(buffer, os.path.join(cfg.debug_dir, "save", f"Char{self.index}_InGame.png"))
 
 
 class AllCharactersTask(TaskBase):
@@ -123,7 +113,7 @@ class AllCharactersTask(TaskBase):
         width        = round(client_width  * box[2])
         height       = round(client_height * box[3])
 
-        box          = REGIONS[ratio_type][ERegionType.CharOffset]
+        box          = REGIONS[ratio_type][ERegionType.CharMargin]
         marginVS     = round(client_width  * box[0])
         marginInGame = round(client_width  * box[1])
         deltaY       = round(client_height * box[2])
@@ -132,7 +122,7 @@ class AllCharactersTask(TaskBase):
 
             offsetX = 0
             offsetY = 0
-            corner_offsetY = 0
+            border_offsetY = 0
             if self.region == ERegionType.CharVS:
                 if i < 3:
                     offsetX = i * (width + marginVS)
@@ -146,8 +136,8 @@ class AllCharactersTask(TaskBase):
                 if i >= 3:
                     op_top = client_height - (top + height)
                     offsetY = op_top - top
-                corner_offsetY = -deltaY if i < 3 else deltaY
-                self.tasks[i].active_deltaY = corner_offsetY
+                border_offsetY = -deltaY if i < 3 else deltaY
+                self.tasks[i].active_deltaY = border_offsetY
             else:
                 raise NotImplementedError()
 
@@ -158,20 +148,19 @@ class AllCharactersTask(TaskBase):
                 top  + offsetY + height
                 )
 
-            box           = REGIONS[ratio_type][ERegionType.CharCorner]
-            corner_scaleX = box[0] if self.region == ERegionType.CharVS else 1.0
-            corner_scaleY = box[1] if self.region == ERegionType.CharVS else 1.0
-            corner_width  = round(crop_box.width  * box[2] * corner_scaleX)
-            corner_height = round(crop_box.height * box[3] * corner_scaleY)
-            corner_box = CropBox(
-                crop_box.right - corner_width, 
-                crop_box.top   + corner_offsetY,
-                crop_box.right, 
-                crop_box.top   + corner_height + corner_offsetY,
+            box           = REGIONS[ratio_type][ERegionType.CharBorder]
+            border_left   = round(crop_box.width  * (1.0 - box[0]) * 0.5)
+            border_width  = round(crop_box.width  * box[0])
+            border_height = round(crop_box.height * box[1])
+            border_box = CropBox(
+                crop_box.left  + border_left, 
+                crop_box.top   + border_offsetY,
+                crop_box.left  + border_left   + border_width, 
+                crop_box.top   + border_height + border_offsetY,
                 )
 
             self.tasks[i].crop_box = crop_box
-            self.tasks[i].corner_box = corner_box
+            self.tasks[i].border_box = border_box
 
     @override
     def Tick(self):

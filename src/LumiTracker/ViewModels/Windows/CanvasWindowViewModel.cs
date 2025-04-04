@@ -63,10 +63,10 @@ namespace LumiTracker.ViewModels.Windows
             {
                 AddElement(new OverlayElement($"char{i}")
                 {
-                    Background = Brushes.Magenta,
-                    Opacity = 0.2,
-                    RegionType = ERegionType.CharInGame,
-                    CharacterIndex = i
+                   Background = Brushes.Magenta,
+                   Opacity = 0.2,
+                   RegionType = ERegionType.CharInGame,
+                   CharacterIndex = i
                 });
             }
         }
@@ -132,8 +132,8 @@ namespace LumiTracker.ViewModels.Windows
             {
                 ERegionType.CharVS     => ComputeRegionRectCharVS(element),
                 ERegionType.CharInGame => ComputeRegionRectCharInGame(element),
-                ERegionType.CharCorner => ComputeRegionRectCharCorner(element),
-                // Some regions are anchored by other detections (e.g., FlowAnchor, CharCorner, CharOffset)
+                ERegionType.CharBorder => ComputeRegionRectCharBorder(element),
+                // Some regions are anchored by other detections (e.g., FlowAnchor, CharBorder, CharMargin)
                 // Displaying these regions on screen may produce unexpected visual results
                 _ => ComputeRegionRectDefault(element),
             };
@@ -147,7 +147,7 @@ namespace LumiTracker.ViewModels.Windows
             double top    = Math.Round(Height * box.y) * dpiScaleInv;
             double width  = Math.Round(Width  * box.z) * dpiScaleInv;
             double height = Math.Round(Height * box.w) * dpiScaleInv;
-            box = RegionUtils.Get(RatioType, ERegionType.CharOffset);
+            box = RegionUtils.Get(RatioType, ERegionType.CharMargin);
             double margin = Math.Round(Width  * box.x) * dpiScaleInv;
 
             double offset;
@@ -173,7 +173,7 @@ namespace LumiTracker.ViewModels.Windows
             double top    = Math.Round(Height * box.y) * dpiScaleInv;
             double width  = Math.Round(Width  * box.z) * dpiScaleInv;
             double height = Math.Round(Height * box.w) * dpiScaleInv;
-            box = RegionUtils.Get(RatioType, ERegionType.CharOffset);
+            box = RegionUtils.Get(RatioType, ERegionType.CharMargin);
             double margin = Math.Round(Width  * box.y) * dpiScaleInv;
             double deltaY = Math.Round(Height * box.z) * dpiScaleInv;
 
@@ -192,13 +192,14 @@ namespace LumiTracker.ViewModels.Windows
             return new Rect(left + offsetX, top + offsetY, width, height);
         }
 
-        private Rect ComputeRegionRectCharCorner(OverlayElement element)
+        private Rect ComputeRegionRectCharBorder(OverlayElement element)
         {
             Rect rect = ComputeRegionRectCharInGame(element);
-            var box = RegionUtils.Get(RatioType, ERegionType.CharCorner);
-            double width  = Math.Round(rect.Width  * box.z);
-            double height = Math.Round(rect.Height * box.w);
-            return new Rect(rect.Right - width, rect.Top, width, height);
+            var box = RegionUtils.Get(RatioType, ERegionType.CharBorder);
+            double left   = Math.Round(rect.Width  * (1.0f - box.x) * 0.5);
+            double width  = Math.Round(rect.Width  * box.x);
+            double height = Math.Round(rect.Height * box.y);
+            return new Rect(rect.Left + left, rect.Top, width, height);
         }
 
         private Rect ComputeRegionRectDefault(OverlayElement element)

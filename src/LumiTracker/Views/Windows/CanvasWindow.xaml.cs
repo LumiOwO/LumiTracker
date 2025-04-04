@@ -35,7 +35,7 @@ namespace LumiTracker.Views.Windows
         private void CanvasWindow_Loaded(object sender, RoutedEventArgs e)
         {
             IntPtr hwnd = new WindowInteropHelper(this).Handle;
-            WindowSnapper.SetLayeredWindow(hwnd);
+            WindowSnapper.SetLayeredWindow(hwnd, true);
         }
 
         public void ShowWindow()

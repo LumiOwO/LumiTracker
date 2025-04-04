@@ -19,6 +19,7 @@
     ResizeMode="NoResize"
     SizeToContent="Manual"
     Topmost="True"
+    IsHitTestVisible="False"
     Height="600" Width="400">
 
     <Window.Template>

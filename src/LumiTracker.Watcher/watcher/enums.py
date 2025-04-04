@@ -115,8 +115,8 @@ class ERegionType(enum.Enum):
     History         = enum.auto()
     CharVS          = enum.auto()
     CharInGame      = enum.auto()
-    CharCorner      = enum.auto()
-    CharOffset      = enum.auto()  # (VS margin, in-game margin, active character height offset, equipment margin)
+    CharBorder      = enum.auto()
+    CharMargin      = enum.auto()  # (VS margin, in-game margin, active character height offset, equipment margin)
 
     NumRegionTypes  = enum.auto()
 
