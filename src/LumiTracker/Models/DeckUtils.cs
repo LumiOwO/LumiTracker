@@ -266,13 +266,13 @@ namespace LumiTracker.Models
             };
         }
 
-        private static void SortingTest()
+        public static void SortingTest()
         {
             // action cards
             {
                 // Step 1: Generate the range of integers
                 List<int> numbers = new List<int>();
-                for (int i = 0; i <= 310; i++)
+                for (int i = 0; i < (int)EActionCard.NumSharables; i++)
                 {
                     numbers.Add(i);
                 }
@@ -297,24 +297,16 @@ namespace LumiTracker.Models
                 var actions = Configuration.Database["actions"]!;
                 foreach (var number in numbers)
                 {
-                    JArray costs = (actions[number]!["costs"]! as JArray)!;
-                    string costVals = "[";
-                    foreach (var cost in costs)
-                    {
-                        costVals += $"{cost[0]!.ToObject<int>()}, ";
-                    }
-                    costVals += "]";
-                    string element = costs[0]![1]!.ToObject<ECostType>().ToString();
-                    output += $"{actions[number]!["type"]!}, {actions[number]!["zh-HANS"]!}, {element}, {costVals}\n";
+                    output += $"{number}, {actions[number]!["zh-HANS"]!}\n";
                 }
-                Configuration.Logger.LogDebug(output);
+                Configuration.Logger.LogError(output);
             }
 
             // characters
             {
                 // Step 1: Generate the range of integers
                 List<int> numbers = new List<int>();
-                for (int i = 0; i <= 94; i++)
+                for (int i = 0; i < (int)ECharacterCard.NumCharacters; i++)
                 {
                     numbers.Add(i);
                 }
@@ -339,9 +331,9 @@ namespace LumiTracker.Models
                 var characters = Configuration.Database["characters"]!;
                 foreach (var number in numbers)
                 {
-                    output += $"{characters[number]!["zh-HANS"]!}\n";
+                    output += $"{number}, {characters[number]!["zh-HANS"]!}\n";
                 }
-                Configuration.Logger.LogDebug(output);
+                Configuration.Logger.LogError(output);
             }
         }
 

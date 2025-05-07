@@ -167,7 +167,9 @@ class AllCharactersTask(TaskBase):
         if self.region == ERegionType.CharVS:
             self.TickVS()
         elif self.region == ERegionType.CharInGame:
-            self.TickInGame()
+            pass
+            # TODO: temporarily disable this
+            # self.TickInGame()
         else:
             raise NotImplementedError()
 

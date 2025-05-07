@@ -362,6 +362,12 @@ namespace LumiTracker.Config
         MastersOfTheNightWind,
         InTheNameOfTheExtreme,
         MystiqueSoup,
+        PylonOfTheSojourningSunTemple,
+        TourOfTepeilhuitl,
+        Tatankasaurus,
+        CollectiveOfPlenty,
+        ArtOfSleepyMeditation,
+        SingYourHeartOut,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -385,7 +391,7 @@ namespace LumiTracker.Config
         SmallBolsteringBubblebalm,
         
         NumActions,
-        NumSharables = 358,
+        NumSharables = 364,
         NumTokens = NumActions - NumSharables,
         NumExtraGoldens = 2,
         NumArcaneLegends = 10,
@@ -503,6 +509,8 @@ namespace LumiTracker.Config
         Kinich,
         Kachina,
         Emilie,
+        Sethos,
+        Xilonen,
         
         NumCharacters,
     }

@@ -489,6 +489,7 @@ namespace LumiTracker.ViewModels.Pages
 
         public DeckViewModel(ISnackbarService? snackbarService, StyledContentDialogService? contentDialogService)
         {
+            // DeckUtils.SortingTest();
             /////////////////////////
             // Services
             SnackbarService = snackbarService;

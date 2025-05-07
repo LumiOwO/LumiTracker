@@ -59,16 +59,16 @@ namespace LumiTracker.ViewModels.Windows
             _hook.ActiveIndices += OnActiveIndices;
 
             // Debug: display task region on client rect
-            for (int i = 0; i < 6; i++)
-            {
-                AddElement(new OverlayElement($"char{i}")
-                {
-                   Background = Brushes.Magenta,
-                   Opacity = 0.2,
-                   RegionType = ERegionType.CharInGame,
-                   CharacterIndex = i
-                });
-            }
+            // for (int i = 0; i < 6; i++)
+            // {
+            //     AddElement(new OverlayElement($"char{i}")
+            //     {
+            //        Background = Brushes.Magenta,
+            //        Opacity = 0.2,
+            //        RegionType = ERegionType.CharInGame,
+            //        CharacterIndex = i
+            //     });
+            // }
         }
 
         private void OnActiveIndices(int my_index, int op_index)

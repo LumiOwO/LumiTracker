@@ -1,3 +1,7 @@
+# \[[v1.3.1](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.3.1)\] - 2025.05.07
+### 新增内容
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了 5.6 版本的新卡牌
+
 # \[[v1.3.0](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.3.0)\] - 2025.03.27
 ### 新增功能
 - ${\color{#db3fff}{\textbf{[史诗]}}}$ 记牌窗口 UI 样式优化
