@@ -368,6 +368,18 @@ namespace LumiTracker.Config
         CollectiveOfPlenty,
         ArtOfSleepyMeditation,
         SingYourHeartOut,
+        MamaloacosFrigidRain,
+        HumanitysNameUnfettered,
+        BulletTrick,
+        TheDockhandsAssistant,
+        CrownOfTheSaints,
+        ScrollOfTheHeroOfCinderCity,
+        RawrRawr,
+        FightForDeath,
+        FlyingSquadAttack,
+        FireAndWar,
+        FruitsOfTraining,
+        HarvestsBoon,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -389,12 +401,16 @@ namespace LumiTracker.Config
         LargeBolsteringBubblebalm,
         MediumBolsteringBubblebalm,
         SmallBolsteringBubblebalm,
+        FlamestriderSoaringAscent,
+        FlamestriderBlazingTrail,
+        FlamestriderFullThrottle,
+        ShadowhuntShell,
         
         NumActions,
-        NumSharables = 364,
+        NumSharables = 376,
         NumTokens = NumActions - NumSharables,
         NumExtraGoldens = 2,
-        NumArcaneLegends = 10,
+        NumArcaneLegends = 11,
     }
     
     public enum ECharacterCard : int
@@ -511,6 +527,9 @@ namespace LumiTracker.Config
         Emilie,
         Sethos,
         Xilonen,
+        Citlali,
+        Mavuika,
+        Chasca,
         
         NumCharacters,
     }

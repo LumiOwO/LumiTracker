@@ -367,6 +367,18 @@ class EActionCard(enum.Enum):
     CollectiveOfPlenty = enum.auto()
     ArtOfSleepyMeditation = enum.auto()
     SingYourHeartOut = enum.auto()
+    MamaloacosFrigidRain = enum.auto()
+    HumanitysNameUnfettered = enum.auto()
+    BulletTrick = enum.auto()
+    TheDockhandsAssistant = enum.auto()
+    CrownOfTheSaints = enum.auto()
+    ScrollOfTheHeroOfCinderCity = enum.auto()
+    RawrRawr = enum.auto()
+    FightForDeath = enum.auto()
+    FlyingSquadAttack = enum.auto()
+    FireAndWar = enum.auto()
+    FruitsOfTraining = enum.auto()
+    HarvestsBoon = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -388,12 +400,16 @@ class EActionCard(enum.Enum):
     LargeBolsteringBubblebalm = enum.auto()
     MediumBolsteringBubblebalm = enum.auto()
     SmallBolsteringBubblebalm = enum.auto()
+    FlamestriderSoaringAscent = enum.auto()
+    FlamestriderBlazingTrail = enum.auto()
+    FlamestriderFullThrottle = enum.auto()
+    ShadowhuntShell = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 364
+    NumSharables = 376
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
-    NumArcaneLegends = 10
+    NumArcaneLegends = 11
 
 class ECharacterCard(enum.Enum):
     Ganyu = 0
@@ -508,6 +524,9 @@ class ECharacterCard(enum.Enum):
     Emilie = enum.auto()
     Sethos = enum.auto()
     Xilonen = enum.auto()
+    Citlali = enum.auto()
+    Mavuika = enum.auto()
+    Chasca = enum.auto()
     
     NumCharacters = enum.auto()
 
