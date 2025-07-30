@@ -379,6 +379,17 @@ class EActionCard(enum.Enum):
     FireAndWar = enum.auto()
     FruitsOfTraining = enum.auto()
     HarvestsBoon = enum.auto()
+    DanceVestmentsBillowLikeRainbowJade = enum.auto()
+    CuriousCasefiles = enum.auto()
+    TheAllDevourer = enum.auto()
+    CrownlessCrown = enum.auto()
+    WhimsicalDanceOfTheWithered = enum.auto()
+    CalligraphyTavern = enum.auto()
+    ConstellationMetropole = enum.auto()
+    ForestBlessing = enum.auto()
+    GiftOfTheGoddessOfProphecy = enum.auto()
+    HarvestTime = enum.auto()
+    AwesomeBro = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -404,9 +415,13 @@ class EActionCard(enum.Enum):
     FlamestriderBlazingTrail = enum.auto()
     FlamestriderFullThrottle = enum.auto()
     ShadowhuntShell = enum.auto()
+    ToyGuard = enum.auto()
+    OrigamiFlyingSquirrel = enum.auto()
+    PopUpPaperFrog = enum.auto()
+    OrigamiHamster = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 376
+    NumSharables = 387
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 11
@@ -527,6 +542,9 @@ class ECharacterCard(enum.Enum):
     Citlali = enum.auto()
     Mavuika = enum.auto()
     Chasca = enum.auto()
+    LanYan = enum.auto()
+    ShikanoinHeizou = enum.auto()
+    GluttonousYumkasaurMountainKing = enum.auto()
     
     NumCharacters = enum.auto()
 

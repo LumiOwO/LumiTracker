@@ -526,7 +526,7 @@ namespace LumiTracker.Services
             foreach (var meta in downloadMetas)
             {
                 string url = $"{bestUrl}/{meta.name}";
-
+                Configuration.Logger.LogWarning($"Downloading {url}...");
                 using (var downloadResponse = await mainClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
                 {
                     downloadResponse.EnsureSuccessStatusCode();
