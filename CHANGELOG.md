@@ -1,3 +1,7 @@
+# \[[v1.3.4](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.3.4)\] - 2025.09.10
+### 新增内容
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了「月之一」版本的新卡牌
+
 # \[[v1.3.3](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.3.3)\] - 2025.07.30
 ### 新增内容
 - ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了 5.8 版本的新卡牌

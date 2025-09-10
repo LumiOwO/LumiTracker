@@ -390,6 +390,18 @@ class EActionCard(enum.Enum):
     GiftOfTheGoddessOfProphecy = enum.auto()
     HarvestTime = enum.auto()
     AwesomeBro = enum.auto()
+    TeachingsOfTheCollectiveOfPlenty = enum.auto()
+    YourEchoIMeetInDreams = enum.auto()
+    UndyingFury = enum.auto()
+    RoyalMasque = enum.auto()
+    UnfinishedReverie = enum.auto()
+    FragmentOfHarmonicWhimsy = enum.auto()
+    FellDragonsAwakening = enum.auto()
+    NarrationFootnotes = enum.auto()
+    Unknown517 = enum.auto()
+    ABlessingFromM = enum.auto()
+    RevelrousBeats = enum.auto()
+    AquaSimulacra = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -419,9 +431,10 @@ class EActionCard(enum.Enum):
     OrigamiFlyingSquirrel = enum.auto()
     PopUpPaperFrog = enum.auto()
     OrigamiHamster = enum.auto()
+    YumemiStyleSpecialSnacks = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 387
+    NumSharables = 399
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 11
@@ -545,6 +558,9 @@ class ECharacterCard(enum.Enum):
     LanYan = enum.auto()
     ShikanoinHeizou = enum.auto()
     GluttonousYumkasaurMountainKing = enum.auto()
+    Iansan = enum.auto()
+    YumemizukiMizuki = enum.auto()
+    LordOfErodedPrimalFire = enum.auto()
     
     NumCharacters = enum.auto()
 
