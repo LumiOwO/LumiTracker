@@ -402,6 +402,15 @@ class EActionCard(enum.Enum):
     ABlessingFromM = enum.auto()
     RevelrousBeats = enum.auto()
     AquaSimulacra = enum.auto()
+    AHeroOfJusticesTriumph = enum.auto()
+    TacticalWarmCompressBandaging = enum.auto()
+    FlowConvergence = enum.auto()
+    EverlastingMoonglow = enum.auto()
+    FellDragonsMonocle = enum.auto()
+    NoblesseOblige = enum.auto()
+    AdventurersGuild = enum.auto()
+    AnAncientSacrificeOfSacredBrocade = enum.auto()
+    ChenyuBrew = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -434,7 +443,7 @@ class EActionCard(enum.Enum):
     YumemiStyleSpecialSnacks = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 399
+    NumSharables = 408
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 11
@@ -561,6 +570,9 @@ class ECharacterCard(enum.Enum):
     Iansan = enum.auto()
     YumemizukiMizuki = enum.auto()
     LordOfErodedPrimalFire = enum.auto()
+    Varesa = enum.auto()
+    Ifa = enum.auto()
+    HydroTulpa = enum.auto()
     
     NumCharacters = enum.auto()
 
