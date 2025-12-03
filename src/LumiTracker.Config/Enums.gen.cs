@@ -412,6 +412,14 @@ namespace LumiTracker.Config
         AdventurersGuild,
         AnAncientSacrificeOfSacredBrocade,
         ChenyuBrew,
+        TeaPartiesBurstingWithColor,
+        BringerOfBlessing,
+        OnceStoodAgainstTheTideOfDarkWatersLikeBedrock,
+        NymphsDream,
+        Seymour,
+        LostLegaciesInTheSand,
+        NarzissenkreuzAdventure,
+        PlanToSaveTheWorld,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -442,12 +450,18 @@ namespace LumiTracker.Config
         PopUpPaperFrog,
         OrigamiHamster,
         YumemiStyleSpecialSnacks,
+        GildedHall,
+        AutumnFrost,
+        WaveKissedSands,
+        VerdantGift,
+        WoodenToySword,
+        ReforgeTheHolyBlade,
         
         NumActions,
-        NumSharables = 408,
+        NumSharables = 416,
         NumTokens = NumActions - NumSharables,
         NumExtraGoldens = 2,
-        NumArcaneLegends = 11,
+        NumArcaneLegends = 12,
     }
     
     public enum ECharacterCard : int
@@ -576,6 +590,9 @@ namespace LumiTracker.Config
         Varesa,
         Ifa,
         HydroTulpa,
+        Escoffier,
+        Gaming,
+        BlackSerpentKnightRockbreakerAx,
         
         NumCharacters,
     }

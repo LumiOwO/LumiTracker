@@ -411,6 +411,14 @@ class EActionCard(enum.Enum):
     AdventurersGuild = enum.auto()
     AnAncientSacrificeOfSacredBrocade = enum.auto()
     ChenyuBrew = enum.auto()
+    TeaPartiesBurstingWithColor = enum.auto()
+    BringerOfBlessing = enum.auto()
+    OnceStoodAgainstTheTideOfDarkWatersLikeBedrock = enum.auto()
+    NymphsDream = enum.auto()
+    Seymour = enum.auto()
+    LostLegaciesInTheSand = enum.auto()
+    NarzissenkreuzAdventure = enum.auto()
+    PlanToSaveTheWorld = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -441,12 +449,18 @@ class EActionCard(enum.Enum):
     PopUpPaperFrog = enum.auto()
     OrigamiHamster = enum.auto()
     YumemiStyleSpecialSnacks = enum.auto()
+    GildedHall = enum.auto()
+    AutumnFrost = enum.auto()
+    WaveKissedSands = enum.auto()
+    VerdantGift = enum.auto()
+    WoodenToySword = enum.auto()
+    ReforgeTheHolyBlade = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 408
+    NumSharables = 416
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
-    NumArcaneLegends = 11
+    NumArcaneLegends = 12
 
 class ECharacterCard(enum.Enum):
     Ganyu = 0
@@ -573,6 +587,9 @@ class ECharacterCard(enum.Enum):
     Varesa = enum.auto()
     Ifa = enum.auto()
     HydroTulpa = enum.auto()
+    Escoffier = enum.auto()
+    Gaming = enum.auto()
+    BlackSerpentKnightRockbreakerAx = enum.auto()
     
     NumCharacters = enum.auto()
 
