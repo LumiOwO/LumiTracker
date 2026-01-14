@@ -398,7 +398,7 @@ class EActionCard(enum.Enum):
     FragmentOfHarmonicWhimsy = enum.auto()
     FellDragonsAwakening = enum.auto()
     NarrationFootnotes = enum.auto()
-    Unknown517 = enum.auto()
+    BrokenSea = enum.auto()
     ABlessingFromM = enum.auto()
     RevelrousBeats = enum.auto()
     AquaSimulacra = enum.auto()
@@ -419,6 +419,14 @@ class EActionCard(enum.Enum):
     LostLegaciesInTheSand = enum.auto()
     NarzissenkreuzAdventure = enum.auto()
     PlanToSaveTheWorld = enum.auto()
+    FarToFall = enum.auto()
+    TrailsAmidstTheForestFog = enum.auto()
+    DeathlyOverflow = enum.auto()
+    StarcallersWatch = enum.auto()
+    FlameForgedInsight = enum.auto()
+    DyedTassel = enum.auto()
+    BonaAndCocouik = enum.auto()
+    AnAdventureThroughTheMorningMist = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -455,9 +463,11 @@ class EActionCard(enum.Enum):
     VerdantGift = enum.auto()
     WoodenToySword = enum.auto()
     ReforgeTheHolyBlade = enum.auto()
+    VoidRift = enum.auto()
+    MutualWeaponsMentorship = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 416
+    NumSharables = 424
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 12
@@ -590,6 +600,9 @@ class ECharacterCard(enum.Enum):
     Escoffier = enum.auto()
     Gaming = enum.auto()
     BlackSerpentKnightRockbreakerAx = enum.auto()
+    Skirk = enum.auto()
+    Ororon = enum.auto()
+    ConsecratedHornedCrocodile = enum.auto()
     
     NumCharacters = enum.auto()
 
