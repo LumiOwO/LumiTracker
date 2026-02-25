@@ -54,6 +54,7 @@ namespace LumiTracker.Config
         Companion,
         Item,
         ArcaneLegend,
+        Transfiguration,
         Resonance,
         Event,
         Food,

@@ -225,6 +225,7 @@ class EActionCardType(enum.Enum):
     Companion    = enum.auto()
     Item         = enum.auto()
     ArcaneLegend = enum.auto()
+    Transfiguration = enum.auto()
     Resonance    = enum.auto()
     Event        = enum.auto()
     Food         = enum.auto()

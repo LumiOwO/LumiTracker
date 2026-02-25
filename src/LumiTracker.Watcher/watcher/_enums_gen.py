@@ -427,6 +427,18 @@ class EActionCard(enum.Enum):
     DyedTassel = enum.auto()
     BonaAndCocouik = enum.auto()
     AnAdventureThroughTheMorningMist = enum.auto()
+    CompanionsCounsel = enum.auto()
+    RectifyingProcessor = enum.auto()
+    FlamelordsBlessing = enum.auto()
+    SilvermoonHall = enum.auto()
+    TidesealStone = enum.auto()
+    FrostmoonEnclave = enum.auto()
+    NashaTown = enum.auto()
+    KuuvahkiExperimentalDesignBureau = enum.auto()
+    ElementalTransfigurationSuperconductBlessing = enum.auto()
+    ElementalTransfigurationVaporizeBlessing = enum.auto()
+    GeniussUpgradeTechnique = enum.auto()
+    ClinkClankLegion = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -465,9 +477,13 @@ class EActionCard(enum.Enum):
     ReforgeTheHolyBlade = enum.auto()
     VoidRift = enum.auto()
     MutualWeaponsMentorship = enum.auto()
+    SuperconductBlessingDeepFreeze = enum.auto()
+    SuperconductBlessingElectricSurge = enum.auto()
+    VaporizeBlessingWildWaves = enum.auto()
+    VaporizeBlessingSearingBurn = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 424
+    NumSharables = 436
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 12
@@ -603,6 +619,9 @@ class ECharacterCard(enum.Enum):
     Skirk = enum.auto()
     Ororon = enum.auto()
     ConsecratedHornedCrocodile = enum.auto()
+    Mika = enum.auto()
+    Ineffa = enum.auto()
+    GoldflameQucusaurTyrant = enum.auto()
     
     NumCharacters = enum.auto()
 
