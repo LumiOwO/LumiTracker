@@ -71,6 +71,7 @@ class DatabaseUpdateContext:
         self.num_arcane_legends     = 0
         self.num_artifacts          = 0
         self.num_characters         = 0
+        self.exclude_golden_cards   = False
 
 class Database:
     def __init__(self):
@@ -246,7 +247,11 @@ class Database:
 
         # extras
         extra_cards_dir = os.path.join(action_cards_dir, "extras")
-        extra_image_names = os.listdir(extra_cards_dir)
+        
+        extra_image_names = []
+        if os.path.exists(extra_cards_dir) and not getattr(ctx, 'exclude_golden_cards', False):
+            extra_image_names = os.listdir(extra_cards_dir)
+            
         num_extra_goldens = len(extra_image_names)
         num_arcane_legends = len(arcane_legends)
         num_extras = num_extra_goldens + num_arcane_legends * 2
@@ -601,7 +606,9 @@ class Database:
         self._UpdateActionCards(ctx)
         self._UpdateCharacters(ctx)
         self._UpdateExtraInfos(ctx)
-        self._UpdateGeneratedEnums(ctx)
+        
+        if not getattr(ctx, 'exclude_golden_cards', False):
+            self._UpdateGeneratedEnums(ctx)
 
         with open(os.path.join(cfg.database_dir, cfg.db_filename), 'w', encoding='utf-8') as f:
             json.dump(self.data, f, indent=None, ensure_ascii=False)

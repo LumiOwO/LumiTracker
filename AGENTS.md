@@ -4,10 +4,22 @@
 
 ## 1. Agent File Location Constraints
 
-- **OpenSpec Artifacts:** When managing specs or proposing changes, you MUST operate within the `./agent` directory and NOT the repository root. All OpenSpec files and changes are located in `./agent/openspec`.
-- **Temporary Files:** If you require a temporary workspace or scratchpad file, you MUST save those temporary files to `./agent/temp/`. Do NOT create temporary files in the repository root or anywhere else.
+All agent-generated files MUST be placed in their designated subdirectories under `./agent/`. **NEVER** create these files in the repository root or anywhere else.
 
-## 2. Code Generation Conventions
+- **`./agent/openspec/`** : OpenSpec artifacts, changes, and specs. (Always run `openspec` commands with `workdir: ./agent` or from within `./agent/`).
+- **`./agent/temp/`** : Temporary workspaces, scratchpads, intermediate test databases, and benchmark result outputs.
+- **`./agent/scripts/`** : Reusable utility or test scripts written for the agent's autonomous workflows.
+
+## 2. Project Structure
+
+All source code is located under `./src`:
+- **`LumiTracker`**: Main frontend app, C# .NET 8.0 WPF project.
+- **`LumiTracker.Config`**: C# frontend common library (configurations, enums, etc).
+- **`LumiTracker.Launcher`**: C++ launcher, performs environment checks.
+- **`LumiTracker.OB`**: Observer sub-application, C# WPF (lower priority for feature development).
+- **`LumiTracker.Watcher`**: Backend module. Contains C# API definitions and the Python computer vision backend logic (`src/LumiTracker.Watcher/watcher`).
+
+## 3. Code Generation Conventions
 
 You MUST adhere to the project's established multi-language coding conventions.
 
@@ -33,3 +45,7 @@ You MUST adhere to the project's established multi-language coding conventions.
   - `snake_case` for modules, files, standalone functions, variables, and parameters.
   - `PascalCase` for Classes and methods inside classes (to mirror the C# API design, e.g., `def Start(...)`).
 - **Logging/IPC:** Use `LogDebug`, `LogError`, or specific message wrappers provided in `config.py` rather than standard `print()` statements for IPC communication with C#.
+
+## 4. Python Executable Environment Rules
+- **System Python (Development):** Use the system Python executable (e.g. `python.exe` in PATH) for running development scripts, benchmarks, tests, and database generations. Third-party metric modules (like `scikit-learn`, `matplotlib`, etc.) can be installed and used freely in the system Python environment for benchmarking purposes.
+- **Integrated Python (Runtime):** The final application uses a bundled standalone Python environment (`./python`). The core feature extraction algorithm (`src/LumiTracker.Watcher/watcher/feature.py`) **MUST ONLY** use modules that already exist in this integrated runtime (e.g., `cv2`, `numpy`). Do NOT add new third-party module dependencies to the runtime feature extraction algorithm without explicit approval.
