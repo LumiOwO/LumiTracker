@@ -96,9 +96,22 @@ def main():
     en_items = en_data["data"]["items"] if en_data and "data" in en_data else {}
     jp_items = jp_data["data"]["items"] if jp_data and "data" in jp_data else {}
 
+    # Save raw api data for new cards
+    raw_api_data = {
+        "chs": new_cards_chs,
+        "en": {k: en_items.get(k) for k in new_cards_chs.keys()},
+        "jp": {k: jp_items.get(k) for k in new_cards_chs.keys()}
+    }
+    raw_json_path = os.path.join(output_dir, "raw_api_data.json")
+    with open(raw_json_path, "w", encoding="utf-8") as f:
+        json.dump(raw_api_data, f, ensure_ascii=False, indent=2)
+
     # 5. Extract relevant fields and download images
     print("Downloading images and processing data...")
-    merged_new_cards = []
+    
+    characters = []
+    actions = []
+    tokens = []
     
     for card_id, chs_info in new_cards_chs.items():
         en_info = en_items.get(card_id, {})
@@ -124,44 +137,83 @@ def main():
         else:
             card_category = raw_type
 
-        merged_card = {
-            "card_category": card_category,
-            "id": card_id,
-            "share_id": "",
-            "zh-HANS": chs_info.get("name", ""),
-            "zh-HANS_short": "",
-            "ja-JP": jp_info.get("name", ""),
-            "ja-JP_short": "",
-            "en-US": en_info.get("name", ""),
-            "en-US_short": "",
-            "type": "", # To be filled manually or extracted from tags
-            "element": "", # To be filled manually or extracted from tags
-            "cost": "",
-            "snapshot_top": "",
-            "is_monster": "",
-            "talent_id": "",
-            "icon_name": icon
-        }
-        merged_new_cards.append(merged_card)
+        if card_category == "Character":
+            characters.append({
+                "id": card_id,
+                "zh-HANS": chs_info.get("name", ""),
+                "zh-HANS_short": "",
+                "ja-JP": jp_info.get("name", ""),
+                "ja-JP_short": "",
+                "en-US": en_info.get("name", ""),
+                "en-US_short": "",
+                "element": "",
+                "is_monster": "",
+                "talent_id": "",
+                "share_id": "",
+                "icon_name": icon
+            })
+        elif card_category == "Action":
+            actions.append({
+                "id": card_id,
+                "zh-HANS": chs_info.get("name", ""),
+                "ja-JP": jp_info.get("name", ""),
+                "en-US": en_info.get("name", ""),
+                "type": "",
+                "element": "",
+                "cost": "",
+                "snapshot_top": "",
+                "share_id": "",
+                "icon_name": icon
+            })
+        else:
+            tokens.append({
+                "id": card_id,
+                "zh-HANS": chs_info.get("name", ""),
+                "ja-JP": jp_info.get("name", ""),
+                "en-US": en_info.get("name", ""),
+                "type": "",
+                "element": "",
+                "cost": "",
+                "snapshot_top": "",
+                "icon_name": icon
+            })
 
-    print(f"Successfully processed {len(merged_new_cards)} new cards.")
+    print(f"Successfully processed {len(characters)} characters, {len(actions)} actions, {len(tokens)} tokens.")
 
-    # 6. Export to CSV
-    csv_path = os.path.join(output_dir, "temp_cards.csv")
-    headers = [
-        "card_category", "id", "share_id", 
-        "zh-HANS", "zh-HANS_short", 
-        "ja-JP", "ja-JP_short", 
-        "en-US", "en-US_short", 
-        "type", "element", "cost", "snapshot_top", 
-        "is_monster", "talent_id", "icon_name"
-    ]
-    with open(csv_path, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=headers)
+    # 6. Export to separate CSVs
+    char_headers = ["id", "zh-HANS", "zh-HANS_short", "ja-JP", "ja-JP_short", "en-US", "en-US_short", "element", "is_monster", "talent_id", "share_id", "icon_name"]
+    action_headers = ["id", "zh-HANS", "ja-JP", "en-US", "type", "element", "cost", "snapshot_top", "share_id", "icon_name"]
+    token_headers = ["id", "zh-HANS", "ja-JP", "en-US", "type", "element", "cost", "snapshot_top", "icon_name"]
+
+    with open(os.path.join(output_dir, "characters.csv"), "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=char_headers)
         writer.writeheader()
-        writer.writerows(merged_new_cards)
-        
-    print(f"Generated {csv_path}")
+        writer.writerows(characters)
+
+    with open(os.path.join(output_dir, "actions.csv"), "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=action_headers)
+        writer.writeheader()
+        writer.writerows(actions)
+
+    with open(os.path.join(output_dir, "tokens.csv"), "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=token_headers)
+        writer.writeheader()
+        writer.writerows(tokens)
+
+    # Generate TODO list
+    todo_path = os.path.join(output_dir, "TODO-list.md")
+    with open(todo_path, "w", encoding="utf-8") as f:
+        f.write("# TODO List for manual review\n\n")
+        f.write("- [ ] 1. Fill in missing `share_id` in `characters.csv` and `actions.csv`.\n")
+        f.write("- [ ] 2. Fill in missing `element`, `type`, `cost`, `short_name`, and `snapshot_top` data.\n")
+        f.write("- [ ] 3. Review translations.\n")
+        f.write("- [ ] 4. Move any tokens misclassified as actions from `actions.csv` to `tokens.csv`.\n")
+        if characters:
+            f.write("- [ ] 5. Add avatar images for the following characters manually into the `images` folder:\n")
+            for c in characters:
+                f.write(f"    - Name: {c['zh-HANS']}, Expected file: `avatar_{c['icon_name']}.png`\n")
+
+    print(f"Generated CSVs and TODO list in {output_dir}")
 
 if __name__ == "__main__":
     main()
