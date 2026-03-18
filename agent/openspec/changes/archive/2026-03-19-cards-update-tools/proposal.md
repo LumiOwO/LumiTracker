@@ -4,11 +4,11 @@ Currently, updating the database with new cards is a manual and error-prone proc
 
 ## What Changes
 
-- Introduce a script to fetch new card data from `https://gi.yatta.moe/chs/changelog?v={version}`.
-- Automatically download uncompressed PNG card images (420x720 resolution).
-- Fetch localized data for Chinese (chs), English (en), and Japanese (jp).
-- Store fetched data into temporary CSV files in `./agent/temp/updates/{version}` with temporary IDs.
-- Introduce a second script to take the manually corrected temporary CSV data (which maps temporary IDs to real share IDs) and update the main `./cards` database.
+- Introduce a script to fetch new card data by diffing the bulk API against the local database.
+- Store fetched data into 3 separate temporary CSV files (`actions.csv`, `characters.csv`, `tokens.csv`) matching the local database format, and save the raw API data.
+- Download uncompressed PNG card images (420x720). Since avatar images cannot be reliably fetched programmatically, prompt the user via a generated `TODO-list.txt` to add them manually to the temporary folder.
+- Introduce a second script to validate the manually corrected CSVs, update the main `./cards` database (including `share_code.csv`), and migrate the images using the local sequential `internal_id`.
+- Notify the user if `artifacts.csv` requires manual updates for new artifact cards.
 
 ## Capabilities
 
