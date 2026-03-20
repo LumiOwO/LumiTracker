@@ -1,18 +1,38 @@
-## 1. Benchmark Pipeline Implementation
+## 1. Benchmark Pipeline Package Structure
 
-- [x] 1.1 Create `src/LumiTracker.Watcher/watcher/benchmark.py` script, ensuring it runs on the system Python executable and relies on libraries like `scikit-learn` for metrics.
-- [x] 1.2 Implement image augmentation utilities (e.g., adding blur, changing brightness/contrast) to simulate real-world noise in `benchmark.py`.
-- [x] 1.3 Build the evaluation logic to compute Precision, Recall, F1-Score, Top-K Accuracy, and Separation Margin.
-- [x] 1.4 Add an extensible Edge Case Test module, specifically integrating the "golden cards" (currently handled as extras in the database) to evaluate edge-case robustness.
-- [x] 1.5 Add execution time profiling within the benchmark to track hashing performance.
-- [x] 1.6 Ensure the benchmark outputs results in a machine-readable format (e.g., JSON) to facilitate agent parsing.
-- [x] 1.7 Test the agent auto-loop pipeline: Create a sub-agent to run the benchmark and parse the results, verifying that the AI agent can autonomously evaluate and iteratively optimize the algorithm.
-- [x] 1.8 Create a new batch script `dev_assets/[2.5] run_benchmark.bat` to easily execute the benchmark (ensuring it runs correctly under WSL1 environments by appropriately calling `cmd.exe /c` or the correct Windows python path).
+- [ ] 1.1 Refactor the existing `benchmark.py` into a package structure `src/LumiTracker.Watcher/watcher/benchmark/`.
+- [ ] 1.2 Move the core evaluation logic (Distance matching, JSON output saving) into `watcher/benchmark/pipeline.py`.
+- [ ] 1.3 Create `watcher/benchmark/__init__.py` to expose the pipeline entry point.
+- [ ] 1.4 Extract the default production feature extraction class wrapper into `watcher/benchmark/default_impl.py`.
 
-## 2. Feature Algorithm Optimization
+## 2. Advanced Augmentations
 
-- [ ] 2.1 Experiment with tuning the hash sizes and crop regions in `src/LumiTracker.Watcher/watcher/feature.py` against the benchmark. (Remember: `feature.py` MUST NOT import third-party modules outside the integrated runtime's environment like `cv2` or `numpy`).
-- [ ] 2.2 Explore adding lightweight preprocessing steps (such as adaptive histogram equalization or sharpening) before hashing.
-- [ ] 2.3 Iteratively run the benchmark to find the configuration that maximizes statistical accuracy and Separation Margin, while correctly classifying the golden cards without explicit database inclusion.
-- [ ] 2.4 Verify processing times remain within the < 10ms per frame real-time budget.
-- [ ] 2.5 Finalize the optimal configuration parameters in `feature.py` and optionally remove the hardcoded golden cards from the database if they are no longer needed.
+- [ ] 2.1 Create `watcher/benchmark/augmentor.py` and move existing brightness/blur/noise augmentations.
+- [ ] 2.2 Implement `Scale` augmentation to simulate runtime UI sizing (e.g. downscaling to 0.5x).
+- [ ] 2.3 Implement `Translation` augmentation to offset the image by a few pixels, simulating dynamic card effects.
+- [ ] 2.4 Implement `Local Glare` (Shining) augmentation to overlay angled bright gradients on portions of the card.
+- [ ] 2.5 Implement `Holographic Noise` augmentation to overlay high-frequency textures on the image.
+
+## 3. Agent Sandbox Setup
+
+- [ ] 3.1 Create `watcher/benchmark/sandbox_impl.py` containing an empty/pass-through `ExperimentalActionCardHandler` class.
+- [ ] 3.2 Modify `pipeline.py` to accept arguments to toggle between testing `default_impl.py` and `sandbox_impl.py`.
+- [ ] 3.3 Verify the `sandbox_impl` can be safely overwritten by an agent without breaking the pipeline execution.
+
+## 4. Edge Case Module
+
+- [ ] 4.1 Update `pipeline.py` to load the golden cards specifically as a separate test suite.
+- [ ] 4.2 Add logic to score the algorithm's ability to accurately identify golden cards against their base variations.
+- [ ] 4.3 Ensure the benchmark outputs a comprehensive JSON including `separation_margin` and `edge_case_accuracy`.
+
+## 5. Agent Auto-Loop Execution
+
+- [ ] 5.1 Document the instructions for the agent (metrics to maximize, file to edit, constraints to obey).
+- [ ] 5.2 Execute the agent Auto-Loop: Agent reads baseline JSON -> writes `sandbox_impl.py` -> runs pipeline -> repeats until `separation_margin` > 0 and golden cards pass.
+- [ ] 5.3 Review the winning configuration proposed by the agent.
+
+## 6. Finalization
+
+- [ ] 6.1 Copy the winning logic from `sandbox_impl.py` into the production `watcher/feature.py`.
+- [ ] 6.2 Ensure `feature.py` uses only integrated runtime modules (`cv2`, `numpy`).
+- [ ] 6.3 Run a final baseline test to ensure production performance < 5ms and no regressions.
