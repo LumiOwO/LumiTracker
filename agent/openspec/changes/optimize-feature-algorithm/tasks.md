@@ -29,8 +29,8 @@
 
 ## 5. Agent Auto-Loop Execution
 
-- [ ] 5.1 Document the instructions for the agent (metrics to maximize, file to edit, constraints to obey).
-- [ ] 5.2 Execute the agent Auto-Loop: Agent reads baseline JSON -> writes `sandbox_impl.py` -> runs pipeline -> repeats until `separation_margin` > 0 and golden cards pass.
+- [x] 5.1 Document the instructions for the agent (metrics to maximize, file to edit, constraints to obey).
+- [ ] 5.2 Execute the agent Auto-Loop via Sub-Agents: Launch independent tasks to modify `sandbox_impl.py`, evaluate metrics via `SUMMARY.md`, and iterate until Golden Cards = 100% and Separation Margin > 0.
 - [ ] 5.3 Review the winning configuration proposed by the agent.
 
 ## 6. Finalization
