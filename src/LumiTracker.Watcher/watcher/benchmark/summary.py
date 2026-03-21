@@ -46,47 +46,63 @@ def generate_summary(runs_dir="./agent/temp/runs"):
         print("No benchmark runs found.")
         return
 
-    output_lines = []
-    output_lines.append(f"\n{'='*100}")
-    output_lines.append(f"{'BENCHMARK SUMMARY REPORT':^100}")
-    output_lines.append(f"{'='*100}\n")
+    # For console output
+    console_lines = []
+    console_lines.append(f"\n{'='*100}")
+    console_lines.append(f"{'BENCHMARK SUMMARY REPORT':^100}")
+    console_lines.append(f"{'='*100}\n")
     
-    # Print Header
-    header = f"| {'Timestamp':<15} | {'Tag':<20} | {'Sep. Margin':<12} | {'Top-1 Acc %':<12} | {'F1 Score %':<12} | {'Edge Acc %':<12} | {'Avg Time (ms)':<12} |"
-    output_lines.append(header)
-    output_lines.append("-" * len(header))
+    header_console = f"| {'Timestamp':<15} | {'Tag':<20} | {'Sep. Margin':<12} | {'Top-1 Acc %':<12} | {'F1 Score %':<12} | {'Edge Acc %':<12} | {'Avg Time (ms)':<12} |"
+    console_lines.append(header_console)
+    console_lines.append("-" * len(header_console))
     
+    # For Markdown output
+    md_lines = []
+    md_lines.append("# Benchmark Summary Report\n")
+    md_lines.append("| Timestamp | Tag | Sep. Margin | Top-1 Acc % | F1 Score % | Edge Acc % | Avg Time (ms) |")
+    md_lines.append("|---|---|---|---|---|---|---|")
+
     for run in runs_data:
         sep_margin = run['sep_margin']
-        # Highlight positive separation margin
         sep_str = f"+{sep_margin}" if sep_margin > 0 else str(sep_margin)
         
-        row = f"| {run['timestamp']:<15} | {run['tag']:<20} | {sep_str:<12} | {run['top1_acc']:<12.2f} | {run['f1_score']:<12.2f} | {run['edge_acc']:<12.2f} | {run['time_ms']:<12.2f} |"
-        output_lines.append(row)
+        # Console row
+        row_console = f"| {run['timestamp']:<15} | {run['tag']:<20} | {sep_str:<12} | {run['top1_acc']:<12.2f} | {run['f1_score']:<12.2f} | {run['edge_acc']:<12.2f} | {run['time_ms']:<12.2f} |"
+        console_lines.append(row_console)
         
-    output_lines.append(f"\n{'='*100}")
+        # Markdown row
+        row_md = f"| {run['timestamp']} | {run['tag']} | {sep_str} | {run['top1_acc']:.2f} | {run['f1_score']:.2f} | {run['edge_acc']:.2f} | {run['time_ms']:.2f} |"
+        md_lines.append(row_md)
+        
+    console_lines.append(f"\n{'='*100}")
+    md_lines.append("\n## Analysis\n")
     
     # Identify the baseline
     baseline_runs = [r for r in runs_data if r['tag'] == 'baseline']
     if baseline_runs:
-        baseline = baseline_runs[-1] # latest baseline
-        output_lines.append(f"\nBaseline Run: {baseline['dir']}")
+        baseline = baseline_runs[-1]
         
         best_run = max(runs_data, key=lambda x: (x['sep_margin'], x['edge_acc']))
-        output_lines.append(f"Best Run:     {best_run['dir']}")
-        
         sep_diff = best_run['sep_margin'] - baseline['sep_margin']
-        output_lines.append(f"Improvement:  {sep_diff:+} Separation Margin points.")
+        
+        # Console summary
+        console_lines.append(f"\nBaseline Run: {baseline['dir']}")
+        console_lines.append(f"Best Run:     {best_run['dir']}")
+        console_lines.append(f"Improvement:  {sep_diff:+} Separation Margin points.")
+        
+        # Markdown summary
+        md_lines.append(f"- **Baseline Run:** `{baseline['dir']}`")
+        md_lines.append(f"- **Best Run:** `{best_run['dir']}`")
+        md_lines.append(f"- **Improvement:** `{sep_diff:+}` Separation Margin points.")
 
-    full_output = "\n".join(output_lines)
-    print(full_output)
+    full_console_output = "\n".join(console_lines)
+    print(full_console_output)
 
     # Save to a markdown file in the runs directory
     md_path = os.path.join(runs_dir, "SUMMARY.md")
     with open(md_path, 'w', encoding='utf-8') as f:
-        f.write("# Benchmark Summary Report\n\n```text\n")
-        f.write(full_output)
-        f.write("\n```\n")
+        f.write("\n".join(md_lines))
+        
     print(f"\nSummary successfully written to: {md_path}")
 
 if __name__ == "__main__":
