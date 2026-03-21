@@ -4,6 +4,8 @@ import time
 import json
 import os
 import argparse
+import sys
+import datetime
 from pathlib import Path
 from sklearn.metrics import precision_score, recall_score, f1_score
 
@@ -15,23 +17,45 @@ from ..feature import FeatureDistance
 from .augmentor import ImageAugmentor
 from .default_impl import DefaultActionCardHandler
 
+class Tee(object):
+    def __init__(self, name, mode):
+        self.file = open(name, mode, encoding='utf-8')
+        self.stdout = sys.stdout
+        sys.stdout = self
+    def __del__(self):
+        sys.stdout = self.stdout
+        self.file.close()
+    def write(self, data):
+        self.file.write(data)
+        self.stdout.write(data)
+    def flush(self):
+        self.file.flush()
+        self.stdout.flush()
+
 class Benchmark:
     def __init__(self, handler_class, output_dir="./agent/temp", tag="default"):
-        self.output_dir = output_dir
         self.tag = tag
-        os.makedirs(self.output_dir, exist_ok=True)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.run_dir = os.path.join(output_dir, "runs", f"{timestamp}_{self.tag}")
+        os.makedirs(self.run_dir, exist_ok=True)
+        self.output_dir = self.run_dir
         
-        # We need to build a pure database without golden cards for testing
-        print(f"Building pure testing database [{self.tag}] without golden cards...")
+        # Redirect stdout to a log file inside the run directory
+        self.tee = Tee(os.path.join(self.run_dir, "run.log"), "w")
+        
+        print(f"=== Starting Benchmark Run: {self.tag} ===")
+        print(f"Run directory: {self.run_dir}")
+        print(f"Building pure testing database without golden cards...")
+        
         # Temporarily override cfg.database_dir
         original_db_dir = cfg.database_dir
-        cfg.database_dir = self.output_dir
+        cfg.database_dir = self.run_dir
         
         ctx = DatabaseUpdateContext()
         ctx.exclude_golden_cards = True
         self.db = Database()
-        self.db._Update(ctx) # This builds the pure db in output_dir
-        self.db.Load() # Load the newly built db from output_dir
+        self.db._Update(ctx) # This builds the pure db in run_dir
+        self.db.Load() # Load the newly built db from run_dir
         
         # Restore original cfg
         cfg.database_dir = original_db_dir

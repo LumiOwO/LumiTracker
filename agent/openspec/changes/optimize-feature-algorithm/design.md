@@ -32,6 +32,11 @@ Currently, LumiTracker uses image hashing (AHash, DHash, PHash) via a Python bac
 - The sandbox must only use modules available in the bundled Python runtime (e.g., `cv2`, `numpy`). New third-party module dependencies (like `scipy` or `scikit-image`) are strictly forbidden.
 - **Rationale:** The runtime environment is constrained to keep the distributed application size small and execution fast.
 
+**Decision 5: Pipeline Persistence & Summarization**
+- We will update the pipeline to output results to unique subdirectories (e.g. `runs/<timestamp>_<tag>`), saving standard console output to `run.log` and saving the generated database and json evaluation report there.
+- We will introduce a `summary.py` script to generate a formatted table comparing Separation Margin, Top-1 accuracy, and processing times across multiple sandbox runs against the baseline run.
+- **Rationale:** The agent Auto-loop requires historical data tracking so developers can intercept, view the history, understand the progress compared to the `baseline`, and avoid overwriting the database/logs.
+
 ## Risks / Trade-offs
 
 - **Risk:** The agent might find an algorithm that perfectly overfits the augmentations but slows down extraction time significantly.

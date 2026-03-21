@@ -24,15 +24,17 @@
 - [x] 4.1 Update `pipeline.py` to load the golden cards specifically as a separate test suite.
 - [x] 4.2 Add logic to score the algorithm's ability to accurately identify golden cards against their base variations.
 - [x] 4.3 Ensure the benchmark outputs a comprehensive JSON including `separation_margin` and `edge_case_accuracy`.
+- [x] 4.4 Update the pipeline to save all DB, JSON, and `run.log` outputs to unique `runs/<timestamp>_<tag>` directories.
+- [x] 4.5 Create a `watcher/benchmark/summary.py` script to generate a markdown comparison table of all historical runs vs the baseline.
 
 ## 5. Agent Auto-Loop Execution
 
-- [x] 5.1 Document the instructions for the agent (metrics to maximize, file to edit, constraints to obey).
-- [x] 5.2 Execute the agent Auto-Loop: Agent reads baseline JSON -> writes `sandbox_impl.py` -> runs pipeline -> repeats until `separation_margin` > 0 and golden cards pass.
-- [x] 5.3 Review the winning configuration proposed by the agent.
+- [ ] 5.1 Document the instructions for the agent (metrics to maximize, file to edit, constraints to obey).
+- [ ] 5.2 Execute the agent Auto-Loop: Agent reads baseline JSON -> writes `sandbox_impl.py` -> runs pipeline -> repeats until `separation_margin` > 0 and golden cards pass.
+- [ ] 5.3 Review the winning configuration proposed by the agent.
 
 ## 6. Finalization
 
-- [x] 6.1 Copy the winning logic from `sandbox_impl.py` into the production `watcher/feature.py`.
-- [x] 6.2 Ensure `feature.py` uses only integrated runtime modules (`cv2`, `numpy`).
-- [x] 6.3 Run a final baseline test to ensure production performance < 5ms and no regressions.
+- [ ] 6.1 Copy the winning logic from `sandbox_impl.py` into the production `watcher/feature.py`.
+- [ ] 6.2 Ensure `feature.py` uses only integrated runtime modules (`cv2`, `numpy`).
+- [ ] 6.3 Run a final baseline test to ensure production performance < 5ms and no regressions.
