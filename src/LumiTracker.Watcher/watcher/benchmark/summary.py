@@ -46,14 +46,15 @@ def generate_summary(runs_dir="./agent/temp/runs"):
         print("No benchmark runs found.")
         return
 
-    print(f"\n{'='*100}")
-    print(f"{'BENCHMARK SUMMARY REPORT':^100}")
-    print(f"{'='*100}\n")
+    output_lines = []
+    output_lines.append(f"\n{'='*100}")
+    output_lines.append(f"{'BENCHMARK SUMMARY REPORT':^100}")
+    output_lines.append(f"{'='*100}\n")
     
     # Print Header
     header = f"| {'Timestamp':<15} | {'Tag':<20} | {'Sep. Margin':<12} | {'Top-1 Acc %':<12} | {'F1 Score %':<12} | {'Edge Acc %':<12} | {'Avg Time (ms)':<12} |"
-    print(header)
-    print("-" * len(header))
+    output_lines.append(header)
+    output_lines.append("-" * len(header))
     
     for run in runs_data:
         sep_margin = run['sep_margin']
@@ -61,21 +62,32 @@ def generate_summary(runs_dir="./agent/temp/runs"):
         sep_str = f"+{sep_margin}" if sep_margin > 0 else str(sep_margin)
         
         row = f"| {run['timestamp']:<15} | {run['tag']:<20} | {sep_str:<12} | {run['top1_acc']:<12.2f} | {run['f1_score']:<12.2f} | {run['edge_acc']:<12.2f} | {run['time_ms']:<12.2f} |"
-        print(row)
+        output_lines.append(row)
         
-    print(f"\n{'='*100}")
+    output_lines.append(f"\n{'='*100}")
     
     # Identify the baseline
     baseline_runs = [r for r in runs_data if r['tag'] == 'baseline']
     if baseline_runs:
         baseline = baseline_runs[-1] # latest baseline
-        print(f"\nBaseline Run: {baseline['dir']}")
+        output_lines.append(f"\nBaseline Run: {baseline['dir']}")
         
         best_run = max(runs_data, key=lambda x: (x['sep_margin'], x['edge_acc']))
-        print(f"Best Run:     {best_run['dir']}")
+        output_lines.append(f"Best Run:     {best_run['dir']}")
         
         sep_diff = best_run['sep_margin'] - baseline['sep_margin']
-        print(f"Improvement:  {sep_diff:+} Separation Margin points.")
+        output_lines.append(f"Improvement:  {sep_diff:+} Separation Margin points.")
+
+    full_output = "\n".join(output_lines)
+    print(full_output)
+
+    # Save to a markdown file in the runs directory
+    md_path = os.path.join(runs_dir, "SUMMARY.md")
+    with open(md_path, 'w', encoding='utf-8') as f:
+        f.write("# Benchmark Summary Report\n\n```text\n")
+        f.write(full_output)
+        f.write("\n```\n")
+    print(f"\nSummary successfully written to: {md_path}")
 
 if __name__ == "__main__":
     generate_summary()

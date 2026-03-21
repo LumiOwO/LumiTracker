@@ -1,1 +1,1 @@
-from .pipeline import Benchmark
+# Expose the benchmark module
