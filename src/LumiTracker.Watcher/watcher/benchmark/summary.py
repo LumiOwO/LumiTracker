@@ -8,7 +8,7 @@ def generate_summary(runs_dir="./agent/temp/runs"):
     runs_data = []
     
     for run_dir in run_dirs:
-        if not os.path.isdir(run_dir):
+        if not os.path.isdir(run_dir) or os.path.basename(run_dir) == "scripts":
             continue
             
         # Find the benchmark JSON in this directory
@@ -18,6 +18,13 @@ def generate_summary(runs_dir="./agent/temp/runs"):
             
         with open(json_files[0], 'r', encoding='utf-8') as f:
             data = json.load(f)
+            
+        # Check for hypothesis
+        hypothesis_path = os.path.join(run_dir, "hypothesis.txt")
+        hypothesis = ""
+        if os.path.exists(hypothesis_path):
+            with open(hypothesis_path, 'r', encoding='utf-8') as f:
+                hypothesis = f.read().strip()
             
         dir_name = os.path.basename(run_dir)
         # Extract timestamp and tag from dirname format: YYYYMMDD_HHMMSS_tag
@@ -39,7 +46,8 @@ def generate_summary(runs_dir="./agent/temp/runs"):
             "top1_acc": gen.get("top1_accuracy", 0) * 100,
             "f1_score": gen.get("f1_score", 0) * 100,
             "edge_acc": gen.get("edge_case_accuracy", 0) * 100,
-            "time_ms": gen.get("avg_extraction_time_ms", 0)
+            "time_ms": gen.get("avg_extraction_time_ms", 0),
+            "hypothesis": hypothesis
         })
 
     if not runs_data:
@@ -93,7 +101,19 @@ def generate_summary(runs_dir="./agent/temp/runs"):
         # Markdown summary
         md_lines.append(f"- **Baseline Run:** `{baseline['dir']}`")
         md_lines.append(f"- **Best Run:** `{best_run['dir']}`")
-        md_lines.append(f"- **Improvement:** `{sep_diff:+}` Separation Margin points.")
+        md_lines.append(f"- **Improvement:** `{sep_diff:+}` Separation Margin points.\n")
+
+    # Add Research Log (Hypotheses) to Markdown
+    md_lines.append("## Research Log\n")
+    for run in runs_data:
+        if run['tag'] != 'baseline':
+            md_lines.append(f"### {run['tag']} ({run['timestamp']})")
+            md_lines.append(f"- **Result:** Sep. Margin: {run['sep_margin']} | Edge Acc: {run['edge_acc']:.2f}%")
+            if run.get('hypothesis'):
+                md_lines.append(f"- **Hypothesis:** {run['hypothesis']}")
+            else:
+                md_lines.append("- **Hypothesis:** (No hypothesis recorded)")
+            md_lines.append("")
 
     full_console_output = "\n".join(console_lines)
     print(full_console_output)
