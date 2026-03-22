@@ -355,15 +355,37 @@ if __name__ == "__main__":
     parser.add_argument("--output-dir", type=str, default="./agent/temp", help="Directory to save the temp database and benchmark results")
     parser.add_argument("--tag", type=str, default="default", help="Tag for the benchmark run (used in output filename)")
     parser.add_argument("--use-sandbox", action="store_true", help="Use the ExperimentalActionCardHandler instead of the default production handler")
+    parser.add_argument("--sandbox-file", type=str, default=None, help="Path to a custom sandbox script to load ExperimentalActionCardHandler from")
+    parser.add_argument("--hypothesis", type=str, default="", help="Hypothesis for this benchmark run")
     args = parser.parse_args()
     
     if args.use_sandbox:
         print("Using SANDBOX implementation.")
-        from .sandbox_impl import ExperimentalActionCardHandler
-        handler_class = ExperimentalActionCardHandler
+        if args.sandbox_file:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("custom_sandbox", args.sandbox_file)
+            if spec is not None and spec.loader is not None:
+                custom_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(custom_module)
+                handler_class = custom_module.ExperimentalActionCardHandler
+            else:
+                raise ImportError(f"Could not load custom sandbox script from {args.sandbox_file}")
+        else:
+            from .sandbox_impl import ExperimentalActionCardHandler
+            handler_class = ExperimentalActionCardHandler
     else:
         print("Using DEFAULT implementation.")
         handler_class = DefaultActionCardHandler
 
     benchmark = Benchmark(handler_class=handler_class, output_dir=args.output_dir, tag=args.tag)
+    
+    if args.sandbox_file:
+        import shutil
+        dest = os.path.join(benchmark.run_dir, os.path.basename(args.sandbox_file))
+        shutil.copy(args.sandbox_file, dest)
+        
+    if args.hypothesis:
+        with open(os.path.join(benchmark.run_dir, "hypothesis.txt"), "w", encoding='utf-8') as f:
+            f.write(args.hypothesis)
+            
     benchmark.run_all(num_samples=args.samples)
