@@ -1,16 +1,15 @@
 ## MODIFIED Requirements
 
 ### Requirement: Independent Agent Auto-Loop Execution
-The self-loop optimization process SHALL be executable by independent sub-agents, ensuring that context limits are preserved in the main chat and the iteration history is cleanly tracked.
+The self-loop optimization process SHALL be executable exclusively by independent sub-agents. The MAIN agent MUST NOT perform the trial iterations itself, to ensure context limits are preserved in the main chat.
 
 #### Scenario: Launching a sub-agent for optimization
-- **WHEN** the main agent delegates the auto-loop task (Task 5.2)
-- **THEN** a fresh sub-agent is launched via the `Task` tool with a specific prompt outlining the optimization constraints, current metrics from `SUMMARY.md`, and strict instructions for execution. The instructions MUST dictate that the agent:
-  1. Creates a unique trial directory using `mkdir -p agent/temp/runs/<trial_name>`.
-  2. Writes its experimental feature extraction code into a custom python script within that specific directory (e.g., `agent/temp/runs/<trial_name>/script.py`).
-  3. Executes the benchmark by explicitly passing the custom script and run directory: `python.exe -m watcher.benchmark.pipeline --use-sandbox --sandbox-file agent/temp/runs/<trial_name>/script.py --run-dir agent/temp/runs/<trial_name> --tag <trial_name> --hypothesis "<text>"`.
-  4. Runs the summary tool `python.exe -m watcher.benchmark.summary` immediately after the benchmark finishes.
-  5. Reviews `SUMMARY.md` to determine if the iteration succeeded or failed.
+- **WHEN** the main agent executes the auto-loop task (Task 5.2)
+- **THEN** the main agent MUST use the `Task` tool to launch a fresh sub-agent, instructing it to run a batch of iterations (e.g., 3-5 trials). The prompt MUST dictate that for EACH trial in the batch, the sub-agent must:
+  1. Create a unique trial directory using `mkdir -p agent/temp/runs/<trial_name>`.
+  2. Write its experimental feature extraction code into a custom python script within that specific directory (e.g., `agent/temp/runs/<trial_name>/script.py`).
+  3. Execute the benchmark by explicitly passing the custom script and run directory: `python.exe -m watcher.benchmark.pipeline --use-sandbox --sandbox-file agent/temp/runs/<trial_name>/script.py --run-dir agent/temp/runs/<trial_name> --tag <trial_name> --hypothesis "<text>"`.
+- **AND THEN** only AFTER the entire batch of target iterations is complete (or if the loop is aborted), the agent MUST run the summary tool `python.exe -m watcher.benchmark.summary` ONCE to evaluate all metrics, and then review `SUMMARY.md` to report the findings.
 
 ### Requirement: Cross-Session State Recovery
 The agent auto-loop SHALL be recoverable from a fresh chat session without losing context of the optimization progress.
