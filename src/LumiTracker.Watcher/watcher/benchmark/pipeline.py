@@ -382,7 +382,7 @@ if __name__ == "__main__":
     if args.sandbox_file:
         import shutil
         dest = os.path.join(benchmark.run_dir, os.path.basename(args.sandbox_file))
-        shutil.copy(args.sandbox_file, dest)
+        shutil.move(args.sandbox_file, dest)
         
     if args.hypothesis:
         with open(os.path.join(benchmark.run_dir, "hypothesis.txt"), "w", encoding='utf-8') as f:
