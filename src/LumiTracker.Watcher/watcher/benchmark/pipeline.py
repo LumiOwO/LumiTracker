@@ -33,11 +33,16 @@ class Tee(object):
         self.stdout.flush()
 
 class Benchmark:
-    def __init__(self, handler_class, output_dir="./agent/temp", tag="default"):
+    def __init__(self, handler_class, output_dir="./agent/temp", tag="default", manual_run_dir=None):
         self.tag = tag
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.run_dir = os.path.join(output_dir, "runs", f"{timestamp}_{self.tag}")
-        os.makedirs(self.run_dir, exist_ok=True)
+        if manual_run_dir:
+            self.run_dir = manual_run_dir
+            os.makedirs(self.run_dir, exist_ok=True)
+        else:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            self.run_dir = os.path.join(output_dir, "runs", f"{timestamp}_{self.tag}")
+            os.makedirs(self.run_dir, exist_ok=True)
+            
         self.output_dir = self.run_dir
         
         # Redirect stdout to a log file inside the run directory
@@ -357,6 +362,7 @@ if __name__ == "__main__":
     parser.add_argument("--use-sandbox", action="store_true", help="Use the ExperimentalActionCardHandler instead of the default production handler")
     parser.add_argument("--sandbox-file", type=str, default=None, help="Path to a custom sandbox script to load ExperimentalActionCardHandler from")
     parser.add_argument("--hypothesis", type=str, default="", help="Hypothesis for this benchmark run")
+    parser.add_argument("--run-dir", type=str, default=None, help="Force a specific run directory instead of generating a timestamped one")
     args = parser.parse_args()
     
     if args.use_sandbox:
@@ -377,12 +383,14 @@ if __name__ == "__main__":
         print("Using DEFAULT implementation.")
         handler_class = DefaultActionCardHandler
 
-    benchmark = Benchmark(handler_class=handler_class, output_dir=args.output_dir, tag=args.tag)
+    benchmark = Benchmark(handler_class=handler_class, output_dir=args.output_dir, tag=args.tag, manual_run_dir=args.run_dir)
     
-    if args.sandbox_file:
+    # We no longer need to move the file if it's already in the target directory
+    # But if they passed a file from somewhere else, we should still copy it in for archiving
+    if args.sandbox_file and os.path.dirname(os.path.abspath(args.sandbox_file)) != os.path.abspath(benchmark.run_dir):
         import shutil
         dest = os.path.join(benchmark.run_dir, os.path.basename(args.sandbox_file))
-        shutil.move(args.sandbox_file, dest)
+        shutil.copy(args.sandbox_file, dest)
         
     if args.hypothesis:
         with open(os.path.join(benchmark.run_dir, "hypothesis.txt"), "w", encoding='utf-8') as f:
