@@ -30,12 +30,14 @@ Currently, LumiTracker uses image hashing (AHash, DHash, PHash) via a Python bac
 
 **Decision 4: Feature Optimization Constraints**
 - The sandbox must only use modules available in the bundled Python runtime (e.g., `cv2`, `numpy`). New third-party module dependencies (like `scipy` or `scikit-image`) are strictly forbidden.
-- **Rationale:** The runtime environment is constrained to keep the distributed application size small and execution fast.
+- **Trial-Specific Configuration:** All parameter tuning (thresholds, hash sizes, crop regions) MUST be implemented directly within the `ExperimentalActionCardHandler` class in the trial script. The agent MUST NOT modify the global `assets/config.json`.
+- **Rationale:** The runtime environment is constrained to keep the distributed application size small and execution fast. Forbidding global config changes ensures that trials remain independent and do not interfere with the production defaults or subsequent benchmark runs.
 
 **Decision 5: Pipeline Persistence & Summarization**
-- We will update the pipeline to output results to unique subdirectories (e.g. `runs/<timestamp>_<tag>`), saving standard console output to `run.log` and saving the generated database and json evaluation report there.
+- We will update the pipeline to output results to unique subdirectories (e.g. `runs/<trial_name>`), saving standard console output to `run.log` and saving the generated database and json evaluation report there.
+- Trials MUST be executed from the project root using `PYTHONPATH=src/LumiTracker.Watcher` to ensure correct resolution of relative paths for assets.
 - We will introduce a `summary.py` script to generate a formatted table comparing Separation Margin, Top-1 accuracy, and processing times across multiple sandbox runs against the baseline run.
-- **Rationale:** The agent Auto-loop requires historical data tracking so developers can intercept, view the history, understand the progress compared to the `baseline`, and avoid overwriting the database/logs.
+- **Rationale:** The agent Auto-loop requires historical data tracking so developers can intercept, view the history, understand the progress compared to the `baseline`, and avoid overwriting the database/logs. Mandatory root-level execution with PYTHONPATH prevents path resolution errors.
 
 ## Risks / Trade-offs
 

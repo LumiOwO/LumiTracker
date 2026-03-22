@@ -8,8 +8,14 @@ The self-loop optimization process SHALL be executable exclusively by independen
 - **THEN** the main agent MUST use the `Task` tool to launch a fresh sub-agent, instructing it to run a batch of iterations (e.g., 3-5 trials). The prompt MUST dictate that for EACH trial in the batch, the sub-agent must:
   1. Create a unique trial directory using `mkdir -p agent/temp/runs/<trial_name>`.
   2. Write its experimental feature extraction code into a custom python script within that specific directory (e.g., `agent/temp/runs/<trial_name>/script.py`).
-  3. Execute the benchmark by explicitly passing the custom script and run directory: `python.exe -m watcher.benchmark.pipeline --use-sandbox --sandbox-file agent/temp/runs/<trial_name>/script.py --run-dir agent/temp/runs/<trial_name> --tag <trial_name> --hypothesis "<text>"`.
-- **AND THEN** only AFTER the entire batch of target iterations is complete (or if the loop is aborted), the agent MUST run the summary tool `python.exe -m watcher.benchmark.summary` ONCE to evaluate all metrics, and then review `SUMMARY.md` to report the findings.
+  3. Execute the benchmark from the repository root directory by explicitly setting PYTHONPATH, and passing the custom script and run directory: `PYTHONPATH=src/LumiTracker.Watcher python.exe -m watcher.benchmark.pipeline --use-sandbox --sandbox-file agent/temp/runs/<trial_name>/script.py --run-dir agent/temp/runs/<trial_name> --tag <trial_name> --hypothesis "<text>"`.
+- **AND THEN** only AFTER the entire batch of target iterations is complete (or if the loop is aborted), the agent MUST run the summary tool `PYTHONPATH=src/LumiTracker.Watcher python.exe -m watcher.benchmark.summary` ONCE to evaluate all metrics, and then review `SUMMARY.md` to report the findings.
+
+#### Scenario: Execution Constraints
+- **WHEN** the sub-agent performs its task
+- **THEN** it MUST strictly obey these execution constraints:
+  1. It MUST NOT run exploratory commands (like `pipeline --help`) or single pre-tests before starting the requested batch of iterations. It must begin the iterations immediately.
+  2. It MUST NOT modify `assets/config.json` or any production configuration files. All parameter tuning (like thresholds, hash sizes) MUST be hardcoded directly into the custom trial Python script.
 
 ### Requirement: Cross-Session State Recovery
 The agent auto-loop SHALL be recoverable from a fresh chat session without losing context of the optimization progress.
