@@ -5,9 +5,9 @@ Currently, LumiTracker uses image hashing (AHash, DHash, PHash) via a Python bac
 ## Goals / Non-Goals
 
 **Goals:**
-- Create a `watcher/benchmark` package containing the benchmark pipeline, data augmentations, and a Strategy pattern Sandbox (`sandbox_impl.py`).
+- Create a `watcher/benchmark` package containing the benchmark pipeline, data augmentations, and a Strategy pattern Sandbox interface.
 - Implement rigorous augmentations in the benchmark: Scale, Translation, Local Glare (Shining), and Local Holographic Noise (Texture), to simulate game engine realities.
-- Establish an Agent Auto-Loop workflow where the AI reads benchmark metrics, modifies `sandbox_impl.py`, and iterates until positive separation margins are achieved and golden cards are correctly matched.
+- Establish an Agent Auto-Loop workflow where the AI writes custom trial scripts into unique subdirectories, reads benchmark metrics, and iterates until positive separation margins are achieved and golden cards are correctly matched.
 - Maintain real-time performance of the finalized feature algorithm.
 
 **Non-Goals:**
@@ -17,16 +17,16 @@ Currently, LumiTracker uses image hashing (AHash, DHash, PHash) via a Python bac
 ## Decisions
 
 **Decision 1: Benchmark Pipeline as a Package (`watcher/benchmark`)**
-- We will refactor the benchmark into a module package with `pipeline.py`, `augmentor.py`, `default_impl.py`, and `sandbox_impl.py`.
-- **Rationale:** Separating the augmentations and the sandbox implementation from the core pipeline makes the architecture clean and allows the agent to safely overwrite `sandbox_impl.py` without risk of breaking the pipeline.
+- We will refactor the benchmark into a module package with `pipeline.py`, `augmentor.py`, and `default_impl.py`.
+- **Rationale:** Separating the augmentations and the sandbox execution from the core pipeline makes the architecture clean and allows the agent to safely execute custom sandbox scripts without risk of breaking the pipeline.
 
 **Decision 2: Extensive Augmentations for Realistic Simulation**
 - The `ImageAugmentor` will simulate physical edge cases found in the game: Scale Down (for UI variations), Translation/Offset, Local Glare, and Holographic Texture Noise.
 - **Rationale:** The golden cards fail primarily due to these local, non-global artifacts. Simulating them explicitly forces the agent's algorithm to become invariant to them.
 
 **Decision 3: Agent Sandbox (Strategy Pattern)**
-- The benchmark will execute feature extraction through an interface. The default uses `feature.py`. The agent will write an `ExperimentalActionCardHandler` class in `sandbox_impl.py`.
-- **Rationale:** This creates a strict boundary. The agent is free to completely rewrite how crops are merged, what preprocessing is done (e.g. CLAHE, edge hashing), and what hash combinations are used, without touching production code until the solution is proven.
+- The benchmark will execute feature extraction through an interface. The default uses `feature.py`. The agent will write an `ExperimentalActionCardHandler` class in a new unique custom script for each trial (e.g., `agent/temp/runs/trial_XYZ/script.py`).
+- **Rationale:** This creates a strict boundary and historical record. The agent is free to completely rewrite how crops are merged, what preprocessing is done (e.g. CLAHE, edge hashing), and what hash combinations are used, without touching production code until the solution is proven. There is no central `sandbox_impl.py` to be overwritten, so multiple trials can be naturally tracked and isolated.
 
 **Decision 4: Feature Optimization Constraints**
 - The sandbox must only use modules available in the bundled Python runtime (e.g., `cv2`, `numpy`). New third-party module dependencies (like `scipy` or `scikit-image`) are strictly forbidden.

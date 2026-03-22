@@ -15,11 +15,11 @@ The benchmark pipeline SHALL apply geometric and lighting augmentations to the d
 - **THEN** it MUST test images scaled down (e.g., to 0.5x or 0.3x), slightly translated, and layered with local glare or holographic noise textures.
 
 ### Requirement: Agent Strategy Sandbox
-The benchmark pipeline SHALL support a Strategy pattern sandbox (`sandbox_impl.py`) allowing a separate extraction class to be loaded and tested without modifying the production `feature.py`.
+The benchmark pipeline SHALL support a Strategy pattern sandbox allowing a custom standalone python script to be loaded dynamically via the CLI, executed, and evaluated without modifying the production `feature.py`.
 
 #### Scenario: Testing an experimental algorithm
-- **WHEN** the benchmark is configured to use the sandbox implementation
-- **THEN** it redirects feature extraction requests through the `ExperimentalActionCardHandler` instead of the default production handler.
+- **WHEN** the benchmark is configured to use the sandbox implementation via `--sandbox-file`
+- **THEN** it dynamically loads the `ExperimentalActionCardHandler` class defined in the specified file, rather than using the default production handler.
 
 ### Requirement: Pipeline Logging and Persistence
 The benchmark pipeline SHALL save all results to a uniquely identifiable run directory to preserve historical iterations and prevent overwriting data.

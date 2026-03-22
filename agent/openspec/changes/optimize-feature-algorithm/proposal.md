@@ -5,8 +5,8 @@ The current image feature algorithm for card detection uses image hashing (PHash
 ## What Changes
 
 - Introduce a comprehensive benchmark pipeline module (`watcher.benchmark`) capable of simulating real-world game engine artifacts (scale, translation, glare, holographic noise).
-- Establish an isolated `sandbox_impl.py` where an AI agent can experiment with feature extraction logic without modifying the production code.
-- Implement an Auto-Loop Agent Workflow that iteratively modifies the sandbox, runs the benchmark, and optimizes the feature extraction algorithm based on quantitative metrics (e.g., maximizing separation margin).
+- Establish an isolated sandbox workflow where an AI agent can experiment with feature extraction logic without modifying the production code. The agent will write its experimental code to a standalone script within a unique run directory.
+- Implement an Auto-Loop Agent Workflow that iteratively creates custom trial folders, runs the benchmark using its custom script, evaluates the generated `SUMMARY.md`, and optimizes the feature extraction algorithm based on quantitative metrics (e.g., maximizing separation margin).
 - Improve the primary feature algorithm (`feature.py`) based on the final winning configuration found by the agent.
 
 ## Capabilities

@@ -15,9 +15,9 @@
 
 ## 3. Agent Sandbox Setup
 
-- [x] 3.1 Create `watcher/benchmark/sandbox_impl.py` containing an empty/pass-through `ExperimentalActionCardHandler` class.
-- [x] 3.2 Modify `pipeline.py` to accept arguments to toggle between testing `default_impl.py` and `sandbox_impl.py`.
-- [x] 3.3 Verify the `sandbox_impl` can be safely overwritten by an agent without breaking the pipeline execution.
+- [x] 3.1 Create `watcher/benchmark/pipeline.py` sandbox execution logic that accepts a custom standalone python script via `--sandbox-file`.
+- [x] 3.2 Modify `pipeline.py` to accept arguments to toggle between testing `default_impl.py` and the custom sandbox file.
+- [x] 3.3 Verify the custom sandbox script can be dynamically loaded and tested without breaking the pipeline execution or overwriting previous trials.
 
 ## 4. Edge Case Module
 
@@ -30,11 +30,11 @@
 ## 5. Agent Auto-Loop Execution
 
 - [x] 5.1 Document the instructions for the agent (metrics to maximize, file to edit, constraints to obey).
-- [ ] 5.2 Execute the agent Auto-Loop via Sub-Agents: Launch independent tasks to modify `sandbox_impl.py`, evaluate metrics via `SUMMARY.md`, and iterate until Golden Cards = 100% and Separation Margin > 0.
+- [ ] 5.2 Execute the agent Auto-Loop via Sub-Agents: For each trial, the sub-agent MUST create a unique directory `agent/temp/runs/<trial_name>`, write its script there, run the pipeline with `--use-sandbox --sandbox-file <path> --run-dir <path> --hypothesis "<text>"`, and finally run `watcher.benchmark.summary` to evaluate metrics. Iterate until Golden Cards = 100% and Separation Margin > 0.
 - [ ] 5.3 Review the winning configuration proposed by the agent.
 
 ## 6. Finalization
 
-- [ ] 6.1 Copy the winning logic from `sandbox_impl.py` into the production `watcher/feature.py`.
+- [ ] 6.1 Copy the winning logic from the best trial's custom script into the production `watcher/feature.py`.
 - [ ] 6.2 Ensure `feature.py` uses only integrated runtime modules (`cv2`, `numpy`).
 - [ ] 6.3 Run a final baseline test to ensure production performance < 5ms and no regressions.
