@@ -31,9 +31,9 @@ class ExperimentalActionCardHandler(ActionCardHandler):
         # to gray image
         gray_image = cv2.cvtColor(feature_buffer, cv2.COLOR_BGRA2GRAY)
 
-        # Do not use equalizeHist! It shifts the entire distribution when a local glare appears.
-        # Just normalize the pixel values safely to 0.0 - 1.0
-        gray_image = cv2.normalize(gray_image, np.zeros_like(gray_image), 0, 255, cv2.NORM_MINMAX)
+        # Apply CLAHE instead of global normalization
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        gray_image = clahe.apply(gray_image)
         gray_image = gray_image.astype(np.float32) / 255.0
 
         hash_size = GetHashSize(EAnnType.ACTIONS_A)
