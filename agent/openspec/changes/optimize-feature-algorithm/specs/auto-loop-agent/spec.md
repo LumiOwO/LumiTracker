@@ -5,7 +5,7 @@ The self-loop optimization process SHALL be executable exclusively by independen
 
 #### Scenario: Launching a sub-agent for optimization
 - **WHEN** the main agent executes the auto-loop task (Task 5.2)
-- **THEN** the main agent MUST use the `Task` tool to launch a fresh sub-agent, instructing it to run a batch of iterations (e.g., 3-5 trials). The prompt MUST dictate that for EACH trial in the batch, the sub-agent must:
+- **THEN** the main agent MUST use the `Task` tool to launch a fresh sub-agent, instructing it to run a batch of iterations (e.g., 3-5 trials). The prompt MUST explicitly state the prioritized optimization goals (Golden Cards = 100%, Sep Margin > 0, Time < 5ms, Accuracy > 99.5%). The prompt MUST dictate that for EACH trial in the batch, the sub-agent must:
   1. Create a unique trial directory using `mkdir -p agent/temp/runs/<trial_name>`.
   2. Write its experimental feature extraction code into a custom python script within that specific directory (e.g., `agent/temp/runs/<trial_name>/script.py`).
   3. Execute the benchmark from the repository root directory by explicitly setting PYTHONPATH, and passing the custom script and run directory: `PYTHONPATH=src/LumiTracker.Watcher python.exe -m watcher.benchmark.pipeline --use-sandbox --sandbox-file agent/temp/runs/<trial_name>/script.py --run-dir agent/temp/runs/<trial_name> --tag <trial_name> --hypothesis "<text>"`.
