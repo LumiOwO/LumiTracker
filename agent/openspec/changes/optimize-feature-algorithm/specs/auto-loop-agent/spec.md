@@ -16,6 +16,7 @@ The self-loop optimization process SHALL be executable exclusively by independen
 - **THEN** it MUST strictly obey these execution constraints:
   1. It MUST NOT run exploratory commands (like `pipeline --help`) or single pre-tests before starting the requested batch of iterations. It must begin the iterations immediately.
   2. It MUST NOT modify `assets/config.json` or any production configuration files. All parameter tuning (like thresholds, hash sizes) MUST be hardcoded directly into the custom trial Python script.
+  3. **HARD RULE**: The sub-agent MUST NOT stop optimizing until it achieves the priority optimization goals: Golden Cards = 100%, Sep Margin > 0, Time < 5ms, and Accuracy > 99.5%. It must continually iterate and run batches of trials until the goal is met.
 
 ### Requirement: Cross-Session State Recovery
 The agent auto-loop SHALL be recoverable from a fresh chat session without losing context of the optimization progress.

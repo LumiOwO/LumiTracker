@@ -7,7 +7,8 @@ Currently, LumiTracker uses image hashing (AHash, DHash, PHash) via a Python bac
 **Goals:**
 - Create a `watcher/benchmark` package containing the benchmark pipeline, data augmentations, and a Strategy pattern Sandbox interface.
 - Implement rigorous augmentations in the benchmark: Scale, Translation, Local Glare (Shining), and Local Holographic Noise (Texture), to simulate game engine realities.
-- Establish an Agent Auto-Loop workflow where the AI writes custom trial scripts into unique subdirectories, reads benchmark metrics, and iterates until positive separation margins are achieved and golden cards are correctly matched.
+- Run and record a strict Baseline execution to serve as a target to beat.
+- Establish an Agent Auto-Loop workflow where the AI writes custom trial scripts into unique subdirectories, reads benchmark metrics, and iterates until positive separation margins are achieved, 100% golden cards match, and execution is < 5ms.
 - Maintain real-time performance of the finalized feature algorithm.
 
 **Non-Goals:**
@@ -24,9 +25,10 @@ Currently, LumiTracker uses image hashing (AHash, DHash, PHash) via a Python bac
 - The `ImageAugmentor` will simulate physical edge cases found in the game: Scale Down (for UI variations), Translation/Offset, Local Glare, and Holographic Texture Noise.
 - **Rationale:** The golden cards fail primarily due to these local, non-global artifacts. Simulating them explicitly forces the agent's algorithm to become invariant to them.
 
-**Decision 3: Agent Sandbox (Strategy Pattern)**
-- The benchmark will execute feature extraction through an interface. The default uses `feature.py`. The agent will write an `ExperimentalActionCardHandler` class in a new unique custom script for each trial (e.g., `agent/temp/runs/trial_XYZ/script.py`).
-- **Rationale:** This creates a strict boundary and historical record. The agent is free to completely rewrite how crops are merged, what preprocessing is done (e.g. CLAHE, edge hashing), and what hash combinations are used, without touching production code until the solution is proven. There is no central `sandbox_impl.py` to be overwritten, so multiple trials can be naturally tracked and isolated.
+**Decision 3: Agent Sandbox (Strategy Pattern) & Deep System Analysis**
+- The benchmark will execute feature extraction through an interface. The default uses `feature.py`. The agent will write an `ExperimentalActionCardHandler` class in a new unique custom script for each trial.
+- The agent must consider the full architecture of `CardHandler` (e.g., overriding `ExtractCardFeatures` to apply filtering to the `region_buffer` *before* stitching occurs via `crop_cfgs`, or modifying `crop_cfgs` themselves to bypass dynamic frames entirely).
+- **Rationale:** Past naive attempts at editing the stitched `feature_buffer` caused pixel bleed across non-continuous seams. Treating the handler comprehensively unlocks structurally sound optimizations.
 
 **Decision 4: Feature Optimization Constraints**
 - The sandbox must only use modules available in the bundled Python runtime (e.g., `cv2`, `numpy`). New third-party module dependencies (like `scipy` or `scikit-image`) are strictly forbidden.
@@ -44,4 +46,4 @@ Currently, LumiTracker uses image hashing (AHash, DHash, PHash) via a Python bac
 - **Risk:** The agent might find an algorithm that perfectly overfits the augmentations but slows down extraction time significantly.
   → **Mitigation:** The benchmark pipeline tracks `avg_extraction_time_ms`. The agent is instructed to keep this under 5ms (or strictly < 10ms) and will penalize/reject solutions that take too long.
 - **Risk:** Agent looping can be slow and costly if the search space is undirected.
-  → **Mitigation:** Provide the agent with clear metrics (Separation Margin) and explicit tuning directions (e.g., ignoring DC component, CLAHE, edge detection) to accelerate the search.
+  → **Mitigation:** Enforce system understanding (how crops and `RemapCardId` interact) and establish a clear `baseline` score that must be beaten.

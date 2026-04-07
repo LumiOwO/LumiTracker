@@ -29,9 +29,10 @@
 
 ## 5. Agent Auto-Loop Execution
 
-- [x] 5.1 Document the instructions for the agent (metrics to maximize, file to edit, constraints to obey).
-- [ ] 5.2 Execute the agent Auto-Loop via Sub-Agents: The MAIN agent MUST NOT perform trials itself. Instead, use the `Task` tool to launch a sub-agent and instruct it to perform a batch of iterations (e.g., 3-5 trials). The prompt to the sub-agent MUST explicitly include the priority optimization goals (Golden Cards = 100%, Sep Margin > 0, Time < 5ms). For each trial, the sub-agent MUST create a unique directory `agent/temp/runs/<trial_name>`, write its custom script there, and run the pipeline from the project root using `PYTHONPATH=src/LumiTracker.Watcher python.exe -m watcher.benchmark.pipeline --use-sandbox --sandbox-file <path> --run-dir <path> --hypothesis "<text>"`. The sub-agent MUST NOT perform exploratory pre-tests or modify `assets/config.json`. The `watcher.benchmark.summary` tool MUST ONLY be run ONCE after the entire batch of iterations is complete. Repeat this sub-agent delegation process until the optimization goals are met.
-- [ ] 5.3 Review the winning configuration proposed by the agent.
+- [x] 5.1 Document the instructions for the agent (metrics to maximize, file to edit, constraints to obey). Ensure the agent understands the base `CardHandler` crops and `Update` matching constraints.
+- [x] 5.2 Execute an explicit Baseline run using the default implementation (`--tag BASELINE_OFFICIAL`) and save its metrics.
+- [ ] 5.3 Execute the agent Auto-Loop via Sub-Agents: The MAIN agent MUST NOT perform trials itself. Instead, use the `Task` tool to launch a sub-agent and instruct it to perform a batch of iterations (e.g., 3-5 trials). The prompt MUST require the sub-agent to BEAT the baseline score, achieving Golden Cards = 100%, Sep Margin > 0, Time < 5ms. The sub-agent must override `ExtractCardFeatures` or `crop_cfgs` to prevent preprocessing stitched seams, rather than just editing `ExtractFeatures`. Repeat this delegation process until the optimization goals are met.
+- [ ] 5.4 Review the winning configuration proposed by the agent.
 
 ## 6. Finalization
 
