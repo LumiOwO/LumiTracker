@@ -439,6 +439,17 @@ class EActionCard(enum.Enum):
     ElementalTransfigurationVaporizeBlessing = enum.auto()
     GeniussUpgradeTechnique = enum.auto()
     ClinkClankLegion = enum.auto()
+    YouShallGoOutWithJoy = enum.auto()
+    TheBurdenOfCreativeGenius = enum.auto()
+    WitheredReedsEclipseTheSun = enum.auto()
+    SnareHook = enum.auto()
+    Blubberbeast = enum.auto()
+    LepinePauline = enum.auto()
+    ElementalTransfigurationBloomBlessing = enum.auto()
+    ElementalTransfigurationLavaBlessing = enum.auto()
+    MoonsignAscendantGleam = enum.auto()
+    MoonAndHomeland = enum.auto()
+    CleaningTime = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -481,9 +492,13 @@ class EActionCard(enum.Enum):
     SuperconductBlessingElectricSurge = enum.auto()
     VaporizeBlessingWildWaves = enum.auto()
     VaporizeBlessingSearingBurn = enum.auto()
+    BloomBlessingAmrita = enum.auto()
+    BloomBlessingOvergrow = enum.auto()
+    LavaBlessingTurnfire = enum.auto()
+    LavaBlessingRemelting = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 436
+    NumSharables = 447
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 12
@@ -622,6 +637,9 @@ class ECharacterCard(enum.Enum):
     Mika = enum.auto()
     Ineffa = enum.auto()
     GoldflameQucusaurTyrant = enum.auto()
+    Dahlia = enum.auto()
+    Aino = enum.auto()
+    ConsecratedFangedBeast = enum.auto()
     
     NumCharacters = enum.auto()
 
