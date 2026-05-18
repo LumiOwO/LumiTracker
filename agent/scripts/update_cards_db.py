@@ -71,11 +71,30 @@ def main():
 
     print(f"Validating CSVs in {update_dir}...")
     
-    characters = validate_data(char_temp, ["share_id", "zh-HANS", "icon_name"])
+    characters = validate_data(char_temp, ["share_id", "zh-HANS", "icon_name", "avatar_name"])
     actions = validate_data(action_temp, ["share_id", "zh-HANS", "type", "icon_name"])
     tokens = validate_data(token_temp, ["zh-HANS", "type", "icon_name"], is_token=True)
 
     print(f"Validation passed. Found {len(characters)} characters, {len(actions)} actions, {len(tokens)} tokens.")
+
+    # Validation: Check share_id sequence
+    for card_list, list_name in [(characters, "Characters"), (actions, "Actions")]:
+        prev_share_id = -1
+        for i, row in enumerate(card_list):
+            sid_str = str(row.get("share_id", "")).strip()
+            if not sid_str:
+                print(f"Validation Error in {list_name} at row {i+2}: 'share_id' is missing or blank.")
+                sys.exit(1)
+            try:
+                sid = int(sid_str)
+            except ValueError:
+                print(f"Validation Error in {list_name} at row {i+2}: 'share_id' ({sid_str}) is not a valid integer.")
+                sys.exit(1)
+                
+            if sid <= prev_share_id:
+                print(f"Validation Error in {list_name} at row {i+2}: 'share_id' ({sid}) must be strictly greater than previous 'share_id' ({prev_share_id}). Please reorder the rows or fix the share_ids.")
+                sys.exit(1)
+            prev_share_id = sid
 
     share_code_csv = os.path.join(generated_dir, "share_code.csv")
     existing_share_ids = set()
@@ -120,7 +139,7 @@ def main():
                     shutil.copy2(src_img, dest_img)
                     print(f"  Migrated image to {dest_img}".encode('gbk', 'replace').decode('gbk'))
                 
-                src_avatar = os.path.join(images_dir, f"avatar_{icon}.png")
+                src_avatar = os.path.join(images_dir, f"{row.get('avatar_name')}.png")
                 if os.path.exists(src_avatar):
                     dest_avatar = os.path.join(repo_root, "cards", "avatars", f"avatar_{next_id}_{zh_name}.png")
                     shutil.copy2(src_avatar, dest_avatar)
