@@ -9,12 +9,15 @@ import concurrent.futures
 from tqdm import tqdm
 from yatta_mapping import ELEMENT_TAGS, TYPE_TAGS, COST_PROPS, MONSTER_TAGS
 
-def fetch_json(url, max_retries=3):
+def fetch_json(url, max_retries=3, delay_after=0.1):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     for attempt in range(max_retries):
         try:
             with urllib.request.urlopen(req, timeout=30) as response:
-                return json.loads(response.read().decode('utf-8'))
+                data = json.loads(response.read().decode('utf-8'))
+                if delay_after > 0:
+                    time.sleep(delay_after)
+                return data
         except Exception as e:
             print(f"Error fetching {url} (attempt {attempt+1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
@@ -31,7 +34,7 @@ def normalize_name(name):
     name = name.replace("·", "・")
     return name
 
-def download_image(url, output_path, max_retries=3):
+def download_image(url, output_path, max_retries=3, delay_after=0.1):
     if os.path.exists(output_path):
         return True
     
@@ -41,6 +44,8 @@ def download_image(url, output_path, max_retries=3):
             with urllib.request.urlopen(req, timeout=30) as response:
                 with open(output_path, "wb") as f:
                     f.write(response.read())
+            if delay_after > 0:
+                time.sleep(delay_after)
             return True
         except Exception as e:
             print(f"Error downloading {url} (attempt {attempt+1}/{max_retries}): {e}")
@@ -254,10 +259,8 @@ def main():
     if images_to_download:
         print(f"Downloading {len(images_to_download)} images...")
         def download_worker(item):
-            time.sleep(0.1) # Be polite to the server
             url, path = item
-            result = download_image(url, path)
-            return result
+            return download_image(url, path)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
             futures = [executor.submit(download_worker, item) for item in images_to_download]
