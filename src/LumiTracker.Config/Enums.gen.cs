@@ -451,6 +451,15 @@ namespace LumiTracker.Config
         MoonsignAscendantGleam,
         MoonAndHomeland,
         CleaningTime,
+        PartTheVeilOfSnow,
+        OLipsWeaveMeSongsAndPsalms,
+        GravityField,
+        GladiatorsFinale,
+        Netochka,
+        ElementalTransfigurationRimegrassBlessing,
+        ElementalTransfigurationStormgaleBlessing,
+        TheOtherSideOfTheFrostmoon,
+        RouletteSpecial,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -497,12 +506,16 @@ namespace LumiTracker.Config
         BloomBlessingOvergrow,
         LavaBlessingTurnfire,
         LavaBlessingRemelting,
+        RimegrassBlessingThornFrost,
+        RimegrassBlessingColdVine,
+        StormgaleBlessingSwiftBolt,
+        StormgaleBlessingWindForce,
         
         NumActions,
-        NumSharables = 447,
+        NumSharables = 456,
         NumTokens = NumActions - NumSharables,
         NumExtraGoldens = 2,
-        NumArcaneLegends = 12,
+        NumArcaneLegends = 13,
     }
     
     public enum ECharacterCard : int
@@ -643,6 +656,9 @@ namespace LumiTracker.Config
         Dahlia,
         Aino,
         ConsecratedFangedBeast,
+        Flins,
+        Lauma,
+        ExperimentalFieldGenerator,
         
         NumCharacters,
     }

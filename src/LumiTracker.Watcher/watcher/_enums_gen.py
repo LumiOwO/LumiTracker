@@ -450,6 +450,15 @@ class EActionCard(enum.Enum):
     MoonsignAscendantGleam = enum.auto()
     MoonAndHomeland = enum.auto()
     CleaningTime = enum.auto()
+    PartTheVeilOfSnow = enum.auto()
+    OLipsWeaveMeSongsAndPsalms = enum.auto()
+    GravityField = enum.auto()
+    GladiatorsFinale = enum.auto()
+    Netochka = enum.auto()
+    ElementalTransfigurationRimegrassBlessing = enum.auto()
+    ElementalTransfigurationStormgaleBlessing = enum.auto()
+    TheOtherSideOfTheFrostmoon = enum.auto()
+    RouletteSpecial = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -496,12 +505,16 @@ class EActionCard(enum.Enum):
     BloomBlessingOvergrow = enum.auto()
     LavaBlessingTurnfire = enum.auto()
     LavaBlessingRemelting = enum.auto()
+    RimegrassBlessingThornFrost = enum.auto()
+    RimegrassBlessingColdVine = enum.auto()
+    StormgaleBlessingSwiftBolt = enum.auto()
+    StormgaleBlessingWindForce = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 447
+    NumSharables = 456
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
-    NumArcaneLegends = 12
+    NumArcaneLegends = 13
 
 class ECharacterCard(enum.Enum):
     Ganyu = 0
@@ -640,6 +653,9 @@ class ECharacterCard(enum.Enum):
     Dahlia = enum.auto()
     Aino = enum.auto()
     ConsecratedFangedBeast = enum.auto()
+    Flins = enum.auto()
+    Lauma = enum.auto()
+    ExperimentalFieldGenerator = enum.auto()
     
     NumCharacters = enum.auto()
 
