@@ -459,6 +459,15 @@ class EActionCard(enum.Enum):
     ElementalTransfigurationStormgaleBlessing = enum.auto()
     TheOtherSideOfTheFrostmoon = enum.auto()
     RouletteSpecial = enum.auto()
+    VictoryFlowsFromTheTurningOfTides = enum.auto()
+    FlowOfForms = enum.auto()
+    OnceTheLoneWindThatKeptTheDarkCalamityAtBay = enum.auto()
+    NightmareOmen = enum.auto()
+    ElementalTransfigurationAquabreezeBlessing = enum.auto()
+    ElementalTransfigurationThunderbloomBlessing = enum.auto()
+    LilFungisFunTasticFiesta = enum.auto()
+    ThePowerOfResearch = enum.auto()
+    LakkaberryPie = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -509,9 +518,13 @@ class EActionCard(enum.Enum):
     RimegrassBlessingColdVine = enum.auto()
     StormgaleBlessingSwiftBolt = enum.auto()
     StormgaleBlessingWindForce = enum.auto()
+    AquabreezeBlessingWaterburst = enum.auto()
+    AquabreezeBlessingVortex = enum.auto()
+    ThunderbloomBlessingShatterbolt = enum.auto()
+    ThunderbloomBlessingNexus = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 456
+    NumSharables = 465
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 13
@@ -656,6 +669,9 @@ class ECharacterCard(enum.Enum):
     Flins = enum.auto()
     Lauma = enum.auto()
     ExperimentalFieldGenerator = enum.auto()
+    Nefer = enum.auto()
+    WaywardHermeticSpiritspeaker = enum.auto()
+    BlackSerpentKnightWindcutter = enum.auto()
     
     NumCharacters = enum.auto()
 
