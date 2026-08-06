@@ -2,12 +2,20 @@ import argparse
 import csv
 import json
 import os
+import re
 import urllib.request
 import urllib.error
 import time
 import concurrent.futures
 from tqdm import tqdm
 from yatta_mapping import ELEMENT_TAGS, TYPE_TAGS, COST_PROPS, MONSTER_TAGS
+
+# Sentinel so the middle-dot replacement never touches expanded ellipses
+ELLIPSIS_PLACEHOLDER = "\u0000"
+COLOR_TAG_RE = re.compile(r"</?color(?:=#[0-9A-Fa-f]{8})?>")
+
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+WEBP_MAGIC = b"RIFF"
 
 def fetch_json(url, max_retries=3, delay_after=0.1):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -25,14 +33,49 @@ def fetch_json(url, max_retries=3, delay_after=0.1):
     return None
 
 def normalize_name(name):
-    """Normalize names to account for punctuation differences between website and local DB."""
+    """Normalize names to account for punctuation differences between website and local DB.
+
+    Must be idempotent for both the API ellipsis (U+2026) and the DB-stored
+    three-dot form (U+00B7 x3): both canonicalize to U+00B7 x3, while single
+    middle dots (U+00B7) become U+30FB.
+    """
     if not name:
         return name
-    # Normalize ellipsis to three middle dots first
-    name = name.replace("…", "···")
-    # Then normalize all middle dots to the same character
+    # Strip rich-text color markup (present in single-card API dictionary names)
+    name = COLOR_TAG_RE.sub("", name)
+    # Hide ellipses first so the middle-dot replacement below cannot touch them
+    name = name.replace("…", ELLIPSIS_PLACEHOLDER)   # API form (U+2026)
+    name = name.replace("···", ELLIPSIS_PLACEHOLDER)  # DB form (U+00B7 x3)
+    # Then normalize single middle dots to the same character
     name = name.replace("·", "・")
+    # Finally expand the ellipsis to three middle dots (existing DB convention)
+    name = name.replace(ELLIPSIS_PLACEHOLDER, "···")
     return name
+
+def sanitize_image(output_path):
+    """Verify the downloaded file is a real PNG; convert WebP content to PNG; reject other formats."""
+    with open(output_path, "rb") as f:
+        magic = f.read(12)
+
+    if magic.startswith(PNG_MAGIC):
+        return True
+
+    if magic[:4] == WEBP_MAGIC and magic[8:12] == b"WEBP":
+        try:
+            from PIL import Image
+            with Image.open(output_path) as img:
+                img.save(output_path, "PNG")
+            print(f"Converted WebP to PNG: {output_path}")
+            return True
+        except Exception as e:
+            print(f"Error converting WebP to PNG ({output_path}): {e}")
+            os.remove(output_path)
+            return False
+
+    # Unknown format (e.g. an HTML error page): remove the invalid file so it cannot pollute the database
+    print(f"Error: {output_path} is not a valid PNG or WebP (magic={magic[:4]!r}). Removed the file.")
+    os.remove(output_path)
+    return False
 
 def download_image(url, output_path, max_retries=3, delay_after=0.1):
     if os.path.exists(output_path):
@@ -44,6 +87,9 @@ def download_image(url, output_path, max_retries=3, delay_after=0.1):
             with urllib.request.urlopen(req, timeout=30) as response:
                 with open(output_path, "wb") as f:
                     f.write(response.read())
+            if not sanitize_image(output_path):
+                print(f"Warning: invalid image content from {url}, file removed. Check the source manually.")
+                return False
             if delay_after > 0:
                 time.sleep(delay_after)
             return True
@@ -267,7 +313,77 @@ def main():
             for _ in tqdm(concurrent.futures.as_completed(futures), total=len(images_to_download), desc="Images", unit="img"):
                 pass
 
-    print(f"Successfully processed {len(characters)} characters, {len(actions)} actions, {len(tokens)} tokens.")
+    # 7. Fetch detail APIs to discover sub-card tokens (e.g. Transfiguration sub-cards)
+    # that are absent from the bulk API but present in each card's `dictionary` as C-entries
+    new_action_ids = [cid for cid, info in new_cards_chs.items()
+                      if "action" in str(info.get("type", "")).lower()]
+    token_candidates = []
+    if new_action_ids:
+        print(f"Fetching detail APIs for {len(new_action_ids)} new action cards to find sub-card tokens...")
+
+        def fetch_detail(args):
+            card_id, lang = args
+            return card_id, lang, fetch_json(f"{base_api_url}/{lang}/gcg/{card_id}")
+
+        detail_tasks = [(cid, lang) for cid in new_action_ids for lang in ["chs", "en", "jp"]]
+        detail_data = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [executor.submit(fetch_detail, t) for t in detail_tasks]
+            for _ in tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Detail APIs", unit="req"):
+                pass
+            for fut in futures:
+                card_id, lang, data = fut.result()
+                if data and "data" in data:
+                    detail_data[(card_id, lang)] = data["data"]
+
+        existing_token_names = set()
+        token_csv_path = os.path.join(cards_generated_dir, "tokens.csv")
+        if os.path.exists(token_csv_path):
+            with open(token_csv_path, "r", encoding="utf-8") as f:
+                for row in csv.DictReader(f):
+                    if "zh-HANS" in row:
+                        existing_token_names.add(normalize_name(row["zh-HANS"]))
+
+        for cid in new_action_ids:
+            chs_detail = detail_data.get((cid, "chs"))
+            if not chs_detail:
+                print(f"Warning: detail API failed for card {cid}, sub-card tokens will be missing.")
+                continue
+            dictionary = chs_detail.get("dictionary") or {}
+            token_keys = [k for k in dictionary if k.startswith("C")]
+            if not token_keys:
+                continue
+            parent_is_blessing = "GCG_TAG_CARD_BLESSING" in (chs_detail.get("tags") or {})
+            for tk in token_keys:
+                entry = dictionary[tk]
+                # Only NON_DISCOVERABLE C-entries are sub-card tokens; statuses/buffs
+                # (e.g. Shield, RES) use other tags and must be excluded
+                if "GCG_TAG_NON_DISCOVERABLE" not in (entry.get("tags") or {}):
+                    continue
+                element, cost_val = "", ""
+                for prop, val in (entry.get("cost") or {}).items():
+                    if prop in COST_PROPS:
+                        element = COST_PROPS[prop]
+                        cost_val = str(val)
+                        break
+                en_entry = ((detail_data.get((cid, "en")) or {}).get("dictionary") or {}).get(tk) or {}
+                jp_entry = ((detail_data.get((cid, "jp")) or {}).get("dictionary") or {}).get(tk) or {}
+                candidate = {
+                    "id": "",
+                    "zh-HANS": normalize_name(entry.get("name", "")),
+                    "ja-JP": normalize_name(jp_entry.get("name", "")),
+                    "en-US": en_entry.get("name", ""),
+                    "type": "Transfiguration" if parent_is_blessing else "Token",
+                    "element": element,
+                    "cost": cost_val,
+                    "snapshot_top": "",
+                    "icon_name": ""
+                }
+                if candidate["zh-HANS"] and candidate["zh-HANS"] not in existing_token_names:
+                    token_candidates.append(candidate)
+
+    print(f"Successfully processed {len(characters)} characters, {len(actions)} actions, {len(tokens)} tokens"
+          f" (+{len(token_candidates)} auto-extracted sub-card tokens).")
 
     # 6. Export to separate CSVs
     char_headers = ["id", "zh-HANS", "zh-HANS_short", "ja-JP", "ja-JP_short", "en-US", "en-US_short", "element", "is_monster", "talent_id", "share_id", "icon_name", "avatar_name"]
@@ -288,19 +404,27 @@ def main():
         writer = csv.DictWriter(f, fieldnames=token_headers)
         writer.writeheader()
         writer.writerows(tokens)
+        writer.writerows(token_candidates)
 
     # Generate TODO list
     todo_path = os.path.join(output_dir, "TODO-list.md")
+    todo_items = []
+    todo_items.append("1. Fill in missing `share_id` in `characters.csv` and `actions.csv`.")
+    todo_items.append("2. Fill in missing `element`, `type`, `cost`, `short_name`, and `snapshot_top` data.")
+    todo_items.append("3. Review translations.")
+    todo_items.append("4. Move any tokens misclassified as actions from `actions.csv` to `tokens.csv`.")
+    if token_candidates:
+        todo_items.append(
+            "5. Sub-card tokens were auto-extracted into `tokens.csv` (names/element/cost filled). "
+            "Fill in `icon_name` and `snapshot_top`, and add token card images to the `images` folder manually.")
+    if characters:
+        todo_items.append("6. Add avatar images for the following characters manually into the `images` folder:")
+        for c in characters:
+            todo_items.append(f"    - Name: {c['zh-HANS']}, Expected file: `{c['avatar_name']}.png`")
     with open(todo_path, "w", encoding="utf-8") as f:
         f.write("# TODO List for manual review\n\n")
-        f.write("- [ ] 1. Fill in missing `share_id` in `characters.csv` and `actions.csv`.\n")
-        f.write("- [ ] 2. Fill in missing `element`, `type`, `cost`, `short_name`, and `snapshot_top` data.\n")
-        f.write("- [ ] 3. Review translations.\n")
-        f.write("- [ ] 4. Move any tokens misclassified as actions from `actions.csv` to `tokens.csv`.\n")
-        if characters:
-            f.write("- [ ] 5. Add avatar images for the following characters manually into the `images` folder:\n")
-            for c in characters:
-                f.write(f"    - Name: {c['zh-HANS']}, Expected file: `{c['avatar_name']}.png`\n")
+        for i, item in enumerate(todo_items):
+            f.write(f"- [ ] {item}\n")
 
     print(f"Generated CSVs and TODO list in {output_dir}")
 
