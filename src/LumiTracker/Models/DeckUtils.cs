@@ -237,7 +237,15 @@ namespace LumiTracker.Models
             var talent_to_character = Configuration.Database["talent_to_character"]!;
             int a_character_id = talent_to_character[$"{a_card_id}"]!.ToObject<int>();
             int b_character_id = talent_to_character[$"{b_card_id}"]!.ToObject<int>();
-            return CharacterCompare(a_character_id, b_character_id, is_talent: true);
+            int result = CharacterCompare(a_character_id, b_character_id, is_talent: true);
+            if (result != 0)
+            {
+                return result;
+            }
+            else
+            {
+                return a_card_id.CompareTo(b_card_id);
+            }
         }
 
         public static int ArtifactCompare(int a_card_id, int b_card_id)

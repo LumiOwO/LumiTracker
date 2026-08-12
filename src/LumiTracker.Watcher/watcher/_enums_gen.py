@@ -468,6 +468,15 @@ class EActionCard(enum.Enum):
     LilFungisFunTasticFiesta = enum.auto()
     ThePowerOfResearch = enum.auto()
     LakkaberryPie = enum.auto()
+    GenesisOfStarsigns = enum.auto()
+    SparkborneMagic = enum.auto()
+    AdamahsRedemption = enum.auto()
+    PhantasmalNocturne = enum.auto()
+    TemporalWindsEulogy = enum.auto()
+    BackstreetGuile = enum.auto()
+    TreacherousTorrent = enum.auto()
+    WitchsHomework = enum.auto()
+    FeastingInASharedToast = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -522,9 +531,10 @@ class EActionCard(enum.Enum):
     AquabreezeBlessingVortex = enum.auto()
     ThunderbloomBlessingShatterbolt = enum.auto()
     ThunderbloomBlessingNexus = enum.auto()
+    PurrLoinedTreasureFlask = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 465
+    NumSharables = 474
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
     NumArcaneLegends = 13
@@ -672,6 +682,9 @@ class ECharacterCard(enum.Enum):
     Nefer = enum.auto()
     WaywardHermeticSpiritspeaker = enum.auto()
     BlackSerpentKnightWindcutter = enum.auto()
+    Durin = enum.auto()
+    Jahoda = enum.auto()
+    HydroHypostasis = enum.auto()
     
     NumCharacters = enum.auto()
 

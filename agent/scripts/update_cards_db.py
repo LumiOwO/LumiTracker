@@ -77,9 +77,9 @@ def main():
 
     print(f"Validation passed. Found {len(characters)} characters, {len(actions)} actions, {len(tokens)} tokens.")
 
-    # Validation: Check share_id sequence
+    # Validation: Check share_id sequence (added share_ids must be consecutive)
+    all_added_sids = []
     for card_list, list_name in [(characters, "Characters"), (actions, "Actions")]:
-        prev_share_id = -1
         for i, row in enumerate(card_list):
             sid_str = str(row.get("share_id", "")).strip()
             if not sid_str:
@@ -90,11 +90,13 @@ def main():
             except ValueError:
                 print(f"Validation Error in {list_name} at row {i+2}: 'share_id' ({sid_str}) is not a valid integer.")
                 sys.exit(1)
-                
-            if sid <= prev_share_id:
-                print(f"Validation Error in {list_name} at row {i+2}: 'share_id' ({sid}) must be strictly greater than previous 'share_id' ({prev_share_id}). Please reorder the rows or fix the share_ids.")
-                sys.exit(1)
-            prev_share_id = sid
+            all_added_sids.append(sid)
+
+    sorted_sids = sorted(all_added_sids)
+    if sorted_sids and sorted_sids != list(range(sorted_sids[0], sorted_sids[0] + len(sorted_sids))):
+        print(f"Validation Error: added share_ids must be consecutive ({sorted_sids[0]}..{sorted_sids[-1]}), "
+              f"found gaps or duplicates: {all_added_sids}.")
+        sys.exit(1)
 
     share_code_csv = os.path.join(generated_dir, "share_code.csv")
     existing_share_ids = set()
@@ -120,28 +122,75 @@ def main():
                 existing_share_ids.add(sid) # Prevent duplicates within the same batch
 
     # Update Characters
-    if characters:
-        char_csv = os.path.join(generated_dir, "characters.csv")
-        next_id = get_next_id(char_csv)
+    char_csv = os.path.join(generated_dir, "characters.csv")
+    action_csv = os.path.join(generated_dir, "actions.csv")
 
+    # Read existing characters so new talents can be appended to their talent_id
+    char_headers = ["id", "zh-HANS", "zh-HANS_short", "ja-JP", "ja-JP_short", "en-US", "en-US_short", "element", "is_monster", "talent_id", "share_id"]
+    existing_char_rows = []
+    if os.path.exists(char_csv):
+        with open(char_csv, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            existing_char_rows = list(reader)
+
+    known_character_share_ids = set()
+    for row in characters:
+        known_character_share_ids.add(str(row.get("share_id", "")).strip())
+    for row in existing_char_rows:
+        if row.get("share_id"):
+            known_character_share_ids.add(row["share_id"].strip())
+
+    # Pre-compute new action internal ids so character talent_id can reference them
+    next_action_id = get_next_id(action_csv)
+    talent_ids_by_character = {}
+    for idx, row in enumerate(actions):
+        if row.get("type") == "Talent":
+            csid = str(row.get("character_share_id", "")).strip()
+            if not csid:
+                print(f"Fatal Error: Talent card '{row.get('zh-HANS')}' is missing 'character_share_id'.")
+                print("Please fill in the character_share_id for every talent card and try again.")
+                sys.exit(1)
+            if csid not in known_character_share_ids:
+                print(f"Fatal Error: Talent card '{row.get('zh-HANS')}' has character_share_id '{csid}' "
+                      "which does not match any existing or newly added character.")
+                sys.exit(1)
+            talent_ids_by_character.setdefault(csid, []).append(next_action_id + idx)
+
+    next_char_id = get_next_id(char_csv)
+
+    # Append new talent ids to existing characters' talent_id
+    for row in existing_char_rows:
+        csid = str(row.get("share_id", "")).strip()
+        new_tids = talent_ids_by_character.get(csid)
+        if not new_tids:
+            continue
+        existing_tids = [t.strip() for t in str(row.get("talent_id", "")).split(",") if t.strip()]
+        for t in new_tids:
+            if str(t) not in existing_tids:
+                existing_tids.append(str(t))
+        row["talent_id"] = ",".join(existing_tids)
+
+    # Build new character rows
+    if characters:
         for row in characters:
             icon = row.get("icon_name")
             zh_name = row.get("zh-HANS")
             share_id = row.get("share_id")
             
-            row["id"] = next_id
+            row["id"] = next_char_id
+            row["talent_id"] = ",".join(str(t) for t in talent_ids_by_character.get(str(share_id), []))
             
             # Migrate Image
             if icon and zh_name:
                 src_img = os.path.join(images_dir, f"{icon}.png")
                 if os.path.exists(src_img):
-                    dest_img = os.path.join(repo_root, "cards", "characters", f"character_{next_id}_{zh_name}.png")
+                    dest_img = os.path.join(repo_root, "cards", "characters", f"character_{next_char_id}_{zh_name}.png")
                     shutil.copy2(src_img, dest_img)
                     print(f"  Migrated image to {dest_img}".encode('gbk', 'replace').decode('gbk'))
                 
                 src_avatar = os.path.join(images_dir, f"{row.get('avatar_name')}.png")
                 if os.path.exists(src_avatar):
-                    dest_avatar = os.path.join(repo_root, "cards", "avatars", f"avatar_{next_id}_{zh_name}.png")
+                    dest_avatar = os.path.join(repo_root, "cards", "avatars", f"avatar_{next_char_id}_{zh_name}.png")
                     shutil.copy2(src_avatar, dest_avatar)
                     print(f"  Migrated avatar image to {dest_avatar}".encode('gbk', 'replace').decode('gbk'))
 
@@ -149,12 +198,17 @@ def main():
                 "share_id": share_id,
                 "name": zh_name,
                 "is_character": 1,
-                "internal_id": next_id
+                "internal_id": next_char_id
             })
-            next_id += 1
-            
-        char_headers = ["id", "zh-HANS", "zh-HANS_short", "ja-JP", "ja-JP_short", "en-US", "en-US_short", "element", "is_monster", "talent_id", "share_id"]
-        append_to_csv(char_csv, characters, char_headers)
+            next_char_id += 1
+
+    # Write back all character rows (existing rows may have updated talent_id)
+    all_char_rows = existing_char_rows + characters
+    if all_char_rows:
+        with open(char_csv, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=char_headers, extrasaction='ignore')
+            writer.writeheader()
+            writer.writerows(all_char_rows)
 
     # Update Actions
     if actions:
@@ -216,6 +270,7 @@ def main():
         append_to_csv(token_csv, tokens, token_headers)
 
     if share_code_updates:
+        share_code_updates.sort(key=lambda r: int(r["share_id"]))
         append_share_code(share_code_csv, share_code_updates)
         print(f"Appended {len(share_code_updates)} entries to share_code.csv")
 

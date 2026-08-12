@@ -179,8 +179,36 @@ def main():
 
     print(f"Identified {len(new_cards_chs)} new cards.")
     
+    chs_items = chs_data["data"]["items"]
     en_items = en_data["data"]["items"] if en_data and "data" in en_data else {}
     jp_items = jp_data["data"]["items"] if jp_data and "data" in jp_data else {}
+
+    # The bulk API may lag for some languages. Fall back to per-card detail APIs
+    # so card data is still captured for cards missing from the bulk list.
+    def fetch_detail_item(card_id, lang):
+        data = fetch_json(f"{base_api_url}/{lang}/gcg/{card_id}")
+        if data and "data" in data:
+            return card_id, data["data"]
+        return card_id, None
+
+    for lang, items in [("chs", chs_items), ("en", en_items), ("jp", jp_items)]:
+        missing_ids = [cid for cid in new_cards_chs if cid not in items]
+        if not missing_ids:
+            continue
+        print(f"Bulk API missing {len(missing_ids)} cards for {lang}, fetching detail APIs...")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [executor.submit(fetch_detail_item, cid, lang) for cid in missing_ids]
+            for _ in tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc=f"{lang} detail", unit="req"):
+                pass
+            for fut in futures:
+                cid, item = fut.result()
+                if item:
+                    items[cid] = item
+
+    # Sync new cards from CHS items so later stages use the richest data available
+    for cid in new_cards_chs:
+        if cid in chs_items:
+            new_cards_chs[cid] = chs_items[cid]
 
     # # Save full api data for reference
     # with open(os.path.join(output_dir, "api_chs.json"), "w", encoding="utf-8") as f:
@@ -271,7 +299,6 @@ def main():
                 "en-US_short": "",
                 "element": parsed_element,
                 "is_monster": parsed_is_monster,
-                "talent_id": "",
                 "share_id": "",
                 "icon_name": icon,
                 "avatar_name": f"avatar_{icon}"
@@ -287,6 +314,7 @@ def main():
                 "cost": parsed_cost,
                 "snapshot_top": "",
                 "share_id": "",
+                "character_share_id": "",
                 "icon_name": icon
             })
         else:
@@ -312,6 +340,77 @@ def main():
             futures = [executor.submit(download_worker, item) for item in images_to_download]
             for _ in tqdm(concurrent.futures.as_completed(futures), total=len(images_to_download), desc="Images", unit="img"):
                 pass
+
+    # 5.5 Fill in share_id and character_share_id from the existing database
+    share_code_csv = os.path.join(cards_generated_dir, "share_code.csv")
+    next_share_id = 1
+    if os.path.exists(share_code_csv):
+        with open(share_code_csv, "r", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                if row.get("share_id"):
+                    next_share_id = max(next_share_id, int(row["share_id"]) + 1)
+
+    # share_ids continue from the DB sequence: characters first, then actions
+    for char in characters:
+        char["share_id"] = str(next_share_id)
+        next_share_id += 1
+    for action in actions:
+        action["share_id"] = str(next_share_id)
+        next_share_id += 1
+
+    # character_share_id maps each talent action to its owner character share_id,
+    # matched by the shared icon last segment (e.g. Modify_Talent_Modao_Mona <->
+    # Char_Avatar_Mona, Modify_Talent_EffigyWater <-> Char_Monster_EffigyWater),
+    # preferring an element match when the segment is ambiguous.
+    def icon_last_segment(icon):
+        return icon.rsplit("_", 1)[-1] if icon else ""
+
+    char_candidates = {}
+    # New characters in this batch (their share_ids are assigned above)
+    for char in characters:
+        seg = icon_last_segment(char.get("icon_name", ""))
+        if seg:
+            char_candidates.setdefault(seg, []).append((char["share_id"], char["element"]))
+    # Existing characters from the bulk API (share_id resolved via share_code.csv)
+    existing_share_by_name = {}
+    if os.path.exists(share_code_csv):
+        with open(share_code_csv, "r", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                if row.get("name"):
+                    existing_share_by_name[normalize_name(row["name"])] = row["share_id"]
+    for cid, info in chs_items.items():
+        if "character" not in str(info.get("type", "")).lower():
+            continue
+        seg = icon_last_segment(info.get("icon", ""))
+        share_id = existing_share_by_name.get(normalize_name(info.get("name", "")))
+        if not seg or not share_id:
+            continue
+        element = ""
+        for tag, val in (info.get("tags") or {}).items():
+            if tag in ELEMENT_TAGS:
+                element = ELEMENT_TAGS[tag]
+                break
+        char_candidates.setdefault(seg, []).append((share_id, element))
+
+    for action in actions:
+        if action["type"] != "Talent":
+            continue
+        seg = icon_last_segment(action.get("icon_name", ""))
+        candidates = char_candidates.get(seg, [])
+        if not candidates:
+            continue
+        # Prefer an element match; otherwise require a unique candidate
+        matched = [c for c in candidates if c[1] == action["element"]]
+        if len(matched) == 1:
+            action["character_share_id"] = matched[0][0]
+        elif not matched and len(candidates) == 1:
+            action["character_share_id"] = candidates[0][0]
+
+    num_talents = sum(1 for a in actions if a["type"] == "Talent")
+    num_matched = sum(1 for a in actions if a["character_share_id"])
+    print(f"Auto-filled share_ids (chars {characters[0]['share_id'] if characters else '-'}..{characters[-1]['share_id'] if characters else '-'}, "
+          f"actions {actions[0]['share_id'] if actions else '-'}..{actions[-1]['share_id'] if actions else '-'}) "
+          f"and character_share_id ({num_matched}/{num_talents} talents matched).")
 
     # 7. Fetch detail APIs to discover sub-card tokens (e.g. Transfiguration sub-cards)
     # that are absent from the bulk API but present in each card's `dictionary` as C-entries
@@ -386,8 +485,8 @@ def main():
           f" (+{len(token_candidates)} auto-extracted sub-card tokens).")
 
     # 6. Export to separate CSVs
-    char_headers = ["id", "zh-HANS", "zh-HANS_short", "ja-JP", "ja-JP_short", "en-US", "en-US_short", "element", "is_monster", "talent_id", "share_id", "icon_name", "avatar_name"]
-    action_headers = ["id", "zh-HANS", "ja-JP", "en-US", "type", "element", "cost", "snapshot_top", "share_id", "icon_name"]
+    char_headers = ["id", "zh-HANS", "zh-HANS_short", "ja-JP", "ja-JP_short", "en-US", "en-US_short", "element", "is_monster", "share_id", "icon_name", "avatar_name"]
+    action_headers = ["id", "zh-HANS", "ja-JP", "en-US", "type", "element", "cost", "snapshot_top", "share_id", "character_share_id", "icon_name"]
     token_headers = ["id", "zh-HANS", "ja-JP", "en-US", "type", "element", "cost", "snapshot_top", "icon_name"]
 
     with open(os.path.join(output_dir, "characters.csv"), "w", encoding="utf-8", newline="") as f:
@@ -409,16 +508,27 @@ def main():
     # Generate TODO list
     todo_path = os.path.join(output_dir, "TODO-list.md")
     todo_items = []
-    todo_items.append("1. Fill in missing `share_id` in `characters.csv` and `actions.csv`.")
-    todo_items.append("2. Fill in missing `element`, `type`, `cost`, `short_name`, and `snapshot_top` data.")
-    todo_items.append("3. Review translations.")
-    todo_items.append("4. Move any tokens misclassified as actions from `actions.csv` to `tokens.csv`.")
+    unmatched_talents = [a for a in actions if a["type"] == "Talent" and not a["character_share_id"]]
+    if unmatched_talents:
+        todo_items.append(
+            f"1. Fill in missing `character_share_id` in `actions.csv` for: "
+            f"{', '.join(a['zh-HANS'] for a in unmatched_talents)}.")
+        n = 2
+    else:
+        n = 1
+    todo_items.append(f"{n}. Fill in missing `element`, `type`, `cost`, `short_name`, and `snapshot_top` data.")
+    n += 1
+    todo_items.append(f"{n}. Review translations.")
+    n += 1
+    todo_items.append(f"{n}. Move any tokens misclassified as actions from `actions.csv` to `tokens.csv`.")
+    n += 1
     if token_candidates:
         todo_items.append(
-            "5. Sub-card tokens were auto-extracted into `tokens.csv` (names/element/cost filled). "
+            f"{n}. Sub-card tokens were auto-extracted into `tokens.csv` (names/element/cost filled). "
             "Fill in `icon_name` and `snapshot_top`, and add token card images to the `images` folder manually.")
+        n += 1
     if characters:
-        todo_items.append("6. Add avatar images for the following characters manually into the `images` folder:")
+        todo_items.append(f"{n}. Add avatar images for the following characters manually into the `images` folder:")
         for c in characters:
             todo_items.append(f"    - Name: {c['zh-HANS']}, Expected file: `{c['avatar_name']}.png`")
     with open(todo_path, "w", encoding="utf-8") as f:

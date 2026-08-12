@@ -409,8 +409,10 @@ class Database:
                 "is_monster" : True if row["is_monster"] == "1" else False,
             }
             characters[card_id] = character
-            talent_id = int(row["talent_id"])
-            talent_to_character[talent_id] = int(row["id"])
+            talent_ids = str(row["talent_id"]).split(",")
+            for talent_id in talent_ids:
+                if talent_id.strip():
+                    talent_to_character[int(talent_id.strip())] = int(row["id"])
 
             if ctx.save_image_assets:
                 src_file = os.path.join(
@@ -419,6 +421,7 @@ class Database:
                 dst_file = os.path.join(
                     cfg.assets_dir, "images", "avatars", f'{row["id"]}.png'
                     )
+                os.makedirs(os.path.dirname(dst_file), exist_ok=True)
                 shutil.copy(src_file, dst_file)
 
         print(f"Loaded {num_characters} images from {characters_dir}")
@@ -590,11 +593,13 @@ class Database:
                 dst_file = os.path.join(
                     cfg.assets_dir, "images", "costs", f'{name}.png'
                     )
+                os.makedirs(os.path.dirname(dst_file), exist_ok=True)
                 shutil.copy(src_file, dst_file)
 
             # empty image
-            shutil.copy(os.path.join(cfg.cards_dir, 'empty.png'), 
-                        os.path.join(cfg.assets_dir, "images", 'empty.png'))
+            dst_file = os.path.join(cfg.assets_dir, "images", 'empty.png')
+            os.makedirs(os.path.dirname(dst_file), exist_ok=True)
+            shutil.copy(os.path.join(cfg.cards_dir, 'empty.png'), dst_file)
 
     def _Update(self, ctx: DatabaseUpdateContext):
         self._UpdateControls(ctx)
