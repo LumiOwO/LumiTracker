@@ -478,6 +478,14 @@ namespace LumiTracker.Config
         TreacherousTorrent,
         WitchsHomework,
         FeastingInASharedToast,
+        RadianceOverBlossomsAndPeaks,
+        SurgeOfLightning,
+        SevenfoldTransmutation,
+        BookOfBlindingLight,
+        ElkWithFangedAntlers,
+        RecollectionOfDaysPast,
+        ElementalTransfigurationOverloadBlessing,
+        ReturnOfTheThreeMoons,
         LightningStiletto,
         TaroumarusSavings,
         CalledInForCleanup,
@@ -533,12 +541,15 @@ namespace LumiTracker.Config
         ThunderbloomBlessingShatterbolt,
         ThunderbloomBlessingNexus,
         PurrLoinedTreasureFlask,
+        Aedon,
+        OverloadedPursuingFire,
+        OverloadedThunderstrike,
         
         NumActions,
-        NumSharables = 474,
+        NumSharables = 482,
         NumTokens = NumActions - NumSharables,
         NumExtraGoldens = 2,
-        NumArcaneLegends = 13,
+        NumArcaneLegends = 14,
     }
     
     public enum ECharacterCard : int
@@ -688,6 +699,8 @@ namespace LumiTracker.Config
         Durin,
         Jahoda,
         HydroHypostasis,
+        Columbina,
+        Illuga,
         
         NumCharacters,
     }

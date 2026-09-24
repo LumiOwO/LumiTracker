@@ -1,3 +1,11 @@
+# \[[v1.3.13](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.3.13)\] - 2026.09.24
+### 新增内容
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了 7.1 版本的新卡牌
+
+# \[[v1.3.12](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.3.12)\] - 2026.08.12
+### 新增内容
+- ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了 7.0 版本的新卡牌
+
 # \[[v1.3.11](https://github.com/LumiOwO/LumiTracker/releases/tag/v1.3.11)\] - 2026.07.01
 ### 新增内容
 - ${\color{#2a75e4}{\textbf{[稀有]}}}$ 添加了「月之八」版本的新卡牌

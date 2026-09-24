@@ -477,6 +477,14 @@ class EActionCard(enum.Enum):
     TreacherousTorrent = enum.auto()
     WitchsHomework = enum.auto()
     FeastingInASharedToast = enum.auto()
+    RadianceOverBlossomsAndPeaks = enum.auto()
+    SurgeOfLightning = enum.auto()
+    SevenfoldTransmutation = enum.auto()
+    BookOfBlindingLight = enum.auto()
+    ElkWithFangedAntlers = enum.auto()
+    RecollectionOfDaysPast = enum.auto()
+    ElementalTransfigurationOverloadBlessing = enum.auto()
+    ReturnOfTheThreeMoons = enum.auto()
     LightningStiletto = enum.auto()
     TaroumarusSavings = enum.auto()
     CalledInForCleanup = enum.auto()
@@ -532,12 +540,15 @@ class EActionCard(enum.Enum):
     ThunderbloomBlessingShatterbolt = enum.auto()
     ThunderbloomBlessingNexus = enum.auto()
     PurrLoinedTreasureFlask = enum.auto()
+    Aedon = enum.auto()
+    OverloadedPursuingFire = enum.auto()
+    OverloadedThunderstrike = enum.auto()
     
     NumActions = enum.auto()
-    NumSharables = 474
+    NumSharables = 482
     NumTokens = NumActions - NumSharables
     NumExtraGoldens = 2
-    NumArcaneLegends = 13
+    NumArcaneLegends = 14
 
 class ECharacterCard(enum.Enum):
     Ganyu = 0
@@ -685,6 +696,8 @@ class ECharacterCard(enum.Enum):
     Durin = enum.auto()
     Jahoda = enum.auto()
     HydroHypostasis = enum.auto()
+    Columbina = enum.auto()
+    Illuga = enum.auto()
     
     NumCharacters = enum.auto()
 
